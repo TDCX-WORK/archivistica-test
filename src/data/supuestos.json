@@ -1,0 +1,1110 @@
+[
+  {
+    "id": "supuesto_1",
+    "title": "Ordenación, control y conservación de fondos",
+    "subtitle": "Transferencia urgente por riesgo de derrumbe de edificio",
+    "scenario": "preguntas tipo test. Corresponde al examen planteado en la convocatoria del año\n2017.\nORDENACIÓN, CONTROL Y CONSERVACIÓN DE FONDOS DOCUMENTALES\nAnte el inminente riesgo de derrumbe de un edificio declarado en ruina donde está\nubicado un archivo de oficina que el mes pasado trasladó la documentación más\nactual (2000-2019) a una nueva sede, se hace urgente trasferir la documentación que\naún queda allí al archivo central en el que usted trabaja como auxiliar de archivo.\nLa documentación que se recibe en el Archivo Central llega en cajas numeradas de la\n1 a la 36 y acompañada de un informe firmado por el jefe de la unidad de origen en el\nque se indica tal circunstancia y los datos siguientes:\n− Se envían 10 cajas de archivo de la serie “Correspondencia” de los años\n1990-1999, una caja por cada año, estando unas completas y otras medio vacías.\nEstas cajas están numeradas de la 1 a la 10.\n− Se remiten 20 cajas de la serie “expedientes de contabilidad”, de los años 1980\na 1999, con los documentos ordenados según número currens de expediente y\naño. La documentación está sin tratar, llega con fundas de plástico, clips, grapas,\ngomas para sujetar los expedientes más voluminosos y fotocopias. Las cajas están\nnumeradas de la 11 a la 30.\n− Se envían 5 cajas de archivo con los expedientes de la serie “Expedientes\npersonales”. La primera caja solo contiene 5 expedientes ordenados\nalfabéticamente y las otras 4 cajas los expedientes están ordenados por número\nde registro de personal. Se corresponde con las cajas de la 31 a la caja 35.\n− Se envía una caja de mudanza con material de oficina que se corresponde con la\ncaja 36.",
+    "questions": [
+      {
+        "question": "¿Cómo calificaría este ingreso según la definición archivística de ingresos en los archivos?",
+        "options": [
+          "Ingreso ordinario.",
+          "Ingreso por imperativo legal.",
+          "Ingreso extraordinario.",
+          "Ingreso por traslado."
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "Al no disponer de una relación de entrega detallada, sino únicamente el informe en el que se relaciona un contenido somero de las cajas, ¿cómo actuaría para el cotejo y control del ingreso?",
+        "options": [
+          "Se realizaría una descripción detallada de la documentación recibida, elaborando la relación de entrega correspondiente.",
+          "Se realizaría únicamente un cotejo somero del contenido de la documentación recibida.",
+          "Se aceptaría la transferencia, aunque no se realizaría ningún cotejo de la documentación, al recibirse de urgencia.",
+          "En ningún caso debería aceptarse una transferencia sin la"
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "¿Qué operaciones realizaría para la correcta instalación de los fondos en el archivo central?",
+        "options": [
+          "Mantener la documentación como se ha recibido, respetando su orden original.",
+          "Mantener la documentación como se ha recibido, respetando su orden original, aunque sustituyendo las cajas en las que ha llegado por las cajas normalizadas del archivo central.",
+          "Eliminar la documentación de apoyo informativo, manteniendo el resto de la documentación como se ha recibido.",
+          "Eliminar la documentación de apoyo informativo, instalar el resto"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "¿Mantendría el criterio cronológico de ordenación asignado a las 10 cajas de correspondencia por el archivo de oficina?",
+        "options": [
+          "Sí, mantendría el criterio cronológico.",
+          "No, modificaría el criterio, separando la documentación entre entradas y salidas.",
+          "No, modificaría el criterio, agrupando la información por los organismos a los que se emite / de los que se recibe la correspondencia.",
+          "No, modificaría el criterio, reinstalando cada documento de la"
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "¿Hay algún material que no aceptaría en esta transferencia?",
+        "options": [
+          "Al ser una transferencia urgente se aceptarían todas las cajas recibidas.",
+          "No aceptaría las cajas medio vacías.",
+          "No aceptaría las cajas de la serie “expedientes de contabilidad”, al encontrarse documentación sin tratar.",
+          "No aceptaría la caja con material de oficina, al no tratarse de"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "¿Cómo llevaría a cabo la ordenación de las cajas de archivo con los “Expedientes personales”, una parte de los cuales se ha recibido ordenada alfabéticamente y el resto ordenada por número de registro de personal?",
+        "options": [
+          "Se ordenaría toda la serie alfabéticamente, al ser la forma más sencilla de encontrar la documentación.",
+          "Se ordenaría toda la serie por número de registro, al ser la forma más sencilla de encontrar la documentación.",
+          "Se ordenaría toda la serie por un criterio cronológico.",
+          "Se mantendría el orden original en el que se han recibido."
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "Puesto que la documentación más reciente (2000-2019) generada por la misma unidad administrativa había sido trasladada a una nueva sede ¿considera que la documentación más antigua que ahora se ha entregado al archivo central debería haberse trasladado también a esa nueva sede?",
+        "options": [
+          "Sí, debería haberse trasladado a la nueva sede de la unidad, para que se conservara allí con el resto de la documentación.",
+          "Sí, debería haberse trasladado a la nueva sede de la unidad, pero para su posterior transferencia al archivo central, una vez correctamente organizada y descrita.",
+          "Al tratarse de una situación de urgencia, puede trasladarse directamente al archivo central, donde se dará el tratamiento archivístico correspondiente.",
+          "Al tratarse de una situación de urgencia, puede trasladarse directamente"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "En relación con la serie “expedientes de contabilidad”, cuya documentación está sin tratar, ¿qué debería hacerse?",
+        "options": [
+          "Eliminar las fundas de plástico, los clips, las grapas, las gomas para sujetar los expedientes más voluminosos, para evitar que puedan producir daño en la documentación, incluyendo la documentación de cada expediente en una camisa para que no se mezclen los expedientes.",
+          "Mantener las fundas de plástico, los clips, las grapas y las gomas para sujetar los expedientes más voluminosos, para mantener el orden original.",
+          "Mantener las fundas de plástico y las gomas que sujetan los expedientes más voluminosos, para evitar que los expedientes se mezclen, y eliminar los clips y las grapas.",
+          "Eliminar las fundas de plástico, los clips, las grapas y las gomas"
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "En relación con las fotocopias incluidas en los “expedientes de contabilidad”, ¿cómo actuaría?",
+        "options": [
+          "Las eliminaría, pues las fotocopias son en todo caso documentación de apoyo informativo.",
+          "Las eliminaría, comprobando previamente que todas las fotocopias son documentación de apoyo informativo.",
+          "Las mantendría, para respetar el orden original de los expedientes.",
+          "Las extraería de los expedientes, y las agruparía en una serie facticia de"
+        ],
+        "answer": 1,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "supuesto_2",
+    "title": "Atención e información a investigadores — Sala I",
+    "subtitle": "Archivo Histórico: gestión de la sala de investigadores",
+    "scenario": "preguntas tipo test. Corresponde al examen planteado en la convocatoria del año\n2017.\nATENCIÓN E INFORMACIÓN BÁSICA A INVESTIGADORES Y USUARIOS\nLa Sala de Investigadores del Archivo Histórico en el que usted trabaja tiene\ncapacidad para 50 puestos de lectura y se encuentra custodiada por un Jefe de\nReferencias, que gestiona la Sala, y usted como Técnico Auxiliar de Archivos. Además,\nles apoya un vigilante de seguridad que realiza rondas periódicas por la Sala. La\nfrecuencia diaria de investigadores suele rondar las 20 personas, de distintas\nnacionalidades, con una media de 12 peticiones de reprografía diarias.\nMientras el Jefe de Referencias se encuentra ausente, se le acumulan a usted una\nserie de circunstancias que tiene que resolver:\n− Viene un nuevo investigador extranjero por primera vez al Archivo, trae abrigo,\ncuaderno, bolígrafo y una botella de agua en la mano, y dice estar interesado en la\nconsulta de todos los códices medievales custodiados en el Archivo, a pesar de que\nhan sido digitalizados por el servicio de Reprografía y publicados en la página web del\nArchivo.\n− Una usuaria solicita una copia de un documento para presentarla en un juicio sobre\nlindes.\n− Otro investigador le solicita una caja de documentación que tiene parcialmente\nrestringido su acceso por problemas de consolidación de soportes. No va a solicitar\nreprografía, puesto que va a hacer fotos con su teléfono móvil.\n− Otra investigadora le indica que, en la caja que está consultando, no encuentra el\ndocumento que le interesa porque lo han robado. Además, solicita permiso para\npublicar otro documento de la misma caja.",
+    "questions": [
+      {
+        "question": "Siendo la primera vez que el investigador extranjero accede al archivo, ¿qué debería hacerse para permitir su entrada?",
+        "options": [
+          "Cualquier persona puede acceder a la sala del archivo sin mayores formalidades.",
+          "El investigador simplemente debe presentar una acreditación de su identidad.",
+          "El investigador debe acreditar su identidad y se le abrirá un expediente de usuario del archivo.",
+          "Los investigadores extranjeros únicamente pueden acceder a los archivos"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "¿Qué indicaciones daría al investigador extranjero respecto al material y pertenencias permitidos en la Sala de Lectura?",
+        "options": [
+          "El investigador extranjero puede entrar en la sala con todos sus objetos personales.",
+          "El investigador no puede entrar en la sala con el cuaderno ni el bolígrafo, pero sí con el abrigo si tiene frío.",
+          "El investigador únicamente puede acceder a la sala con el cuaderno y la botella de agua.",
+          "Únicamente puede accederse a la sala con cuartillas, ordenador portátil,"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "¿Puede consultar físicamente los códices custodiados en el Archivo aún a pesar de estar digitalizados?",
+        "options": [
+          "No, en ningún caso pueden consultarse físicamente los originales de documentos que ya estén digitalizados.",
+          "Sí, si presenta la carta de presentación de un centro de investigación de reconocido prestigio.",
+          "Sí, cuando la materia o circunstancias de la investigación lo justifiquen y el estado de conservación de los documentos lo permita.",
+          "Sí, al tratarse de un investigador que ha venido desde el extranjero."
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "En el caso de proceder a la consulta de un códice original, ¿cómo se realizaría?",
+        "options": [
+          "Como cualquier otro documento original del archivo.",
+          "Como cualquier otro documento original del archivo, pero usando guantes de algodón y únicamente por un tiempo limitado.",
+          "Sobre un atril y sin forzar su apertura, siguiendo siempre el criterio del personal de la sala.",
+          "El personal de la sala es quien manipularía en todo caso el códice"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "El volumen de documentación que puede consultarse por día y por usuario en el archivo será:",
+        "options": [
+          "En ningún caso puede haber límites en cuanto al volumen de documentación que puede consultarse en los archivos estatales.",
+          "Un máximo de diez unidades de instalación.",
+          "Un máximo de veinte unidades de instalación.",
+          "El establecido por las normas internas del Archivo."
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "¿Cómo procedería para facilitar la copia a la usuaria que quiere presentar la documentación en el juicio?",
+        "options": [
+          "La solicitud se tramitará con carácter preferente, al tener por objeto el acceso a documentos necesarios para el ejercicio de derechos.",
+          "La solicitud se tramitará con carácter preferente, pero ha de presentar un certificado notarial como persona interesada.",
+          "La solicitud no puede presentarse directamente en el archivo, ha de presentarlo al Ministerio correspondiente.",
+          "Su solicitud se tramitaría ordinariamente, en el orden en el que se"
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "¿Cómo actuaría en el caso del investigador que quiere consultar una caja con documentación en mal estado de conservación?",
+        "options": [
+          "Le permitiría la consulta, indicándole que tenga cuidado en la manipulación de los documentos.",
+          "Le permitiría la consulta únicamente en el caso de que se trate de un investigador debidamente acreditado.",
+          "No le permitiría la consulta, pero le ofrecería la posibilidad de solicitar reproducciones de la documentación en la medida en que pudiera realizarse.",
+          "No le permitiría la consulta, pues la documentación en mal estado no"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "¿Permitiría al investigador hacer fotos a la documentación con su teléfono móvil?",
+        "options": [
+          "Sí, siempre y cuando manipule con cuidado la documentación.",
+          "Sí, sin limitaciones, pero únicamente si la Dirección del Archivo así lo ha autorizado.",
+          "Sí, si la Dirección del Archivo lo ha autorizado, pero únicamente un número determinado de reproducciones y en ningún caso reproducciones facsimilares de calidad.",
+          "No, en ningún caso pueden realizarse fotos de la documentación con un"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "¿Cómo actuaría ante la investigadora que denuncia el robo de documentos?",
+        "options": [
+          "No prestaría atención a la denuncia, pero retiraría la documentación de la consulta.",
+          "Revisaría la documentación y agradecería a la investigadora la notificación de esta anomalía en la integridad y conservación de los documentos consultados.",
+          "Retiraría automática la documentación de la consulta e interrogaría a la investigadora para esclarecer los motivos del robo.",
+          "Invitaría a la investigadora a denunciar el robo ante las autoridades"
+        ],
+        "answer": 1,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "supuesto_3",
+    "title": "Apoyo a procesos técnicos archivísticos — I",
+    "subtitle": "Archivo Central de Ministerio: descripción e inventario",
+    "scenario": "preguntas tipo test. Corresponde al examen planteado en la convocatoria del año\n2017.\nAPOYO A PROCESOS TÉCNICOS\nEn el archivo en el que usted trabaja se está desarrollando un proyecto de descripción\nde documentación producida por la Junta de Obras y Bosques durante la segunda\nmitad del siglo XVI y primera del XVII para su posterior digitalización y difusión por\ninternet. Ha de tener en cuenta que:\n− La documentación sale del depósito plegada y enlegajada.\n− Las unidades documentales están desordenadas y pueden contener materiales\nespeciales (dibujos y planos de gran formato).\n− El soporte de todas las unidades es papel.\n− Parte de la documentación está cosida.\n− Parte de la documentación presenta problemas de conservación por actividad\nmicrobiológica, corrosión por tinta metaloácida y roturas y pliegues que pueden\nafectar a la preservación del soporte y a la lectura de la escritura.\nLos archiveros encargados de la descripción proceden a identificar, ordenar y describir\nlas unidades documentales en el sistema informático. Posteriormente se traslada la\ndocumentación al área en la que usted trabaja, en la que tendrá que dejarla lista para\nsu digitalización e instalación definitiva en el depósito.",
+    "questions": [
+      {
+        "question": "¿Qué tareas realizaría con la documentación para prepararla para la digitalización?",
+        "options": [
+          "Previamente a la digitalización habría que desplegar y descoser los documentos, foliarlos y separar los materiales especiales.",
+          "Habría que desplegar los documentos plegados, pudiendo procederse ya a su digitalización.",
+          "Una vez identificadas, ordenadas y descritas las unidades documentales por los archiveros encargados de la descripción, podría entregarse ya a los técnicos para su digitalización.",
+          "Se trata de una documentación que no debería digitalizarse, debido a su"
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "¿Considera que parte de la documentación exige un tratamiento específico?",
+        "options": [
+          "No, al tratarse de documentación en papel no es necesario ningún tratamiento específico.",
+          "Sí, la documentación cosida exige un tratamiento específico para digitalizarla sin forzarla mucho para colocarla en el escáner.",
+          "Sí, los materiales especiales (dibujos y planos de gran formato), que serán digitalizados con una mayor calidad y en escáneres o con cámaras especialmente adaptados.",
+          "Sí, hay que reintegrar las roturas de los documentos antes de proceder a"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "En el caso de los documentos cosidos, ¿cómo habría que actuar?",
+        "options": [
+          "La documentación cosida no necesita ningún tratamiento especial, digitalizándose en cosida en la forma en la que menos daño sufra.",
+          "Habría que foliar y descoser la documentación antes de su digitalización, volviéndola a coser toda ella posteriormente.",
+          "Habría que foliar y descoser la documentación antes de su digitalización, volviendo a coser posteriormente aquella que en otro caso pudiera perderse.",
+          "Habría que foliar y descoser la documentación antes de su digitalización,"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "En el caso de los documentos afectados por actividad microbiológica, ¿cómo habría que actuar?",
+        "options": [
+          "Los documentos afectados por actividad microbiológica no deben ser digitalizados.",
+          "Los documentos afectados por actividad microbiológica no necesitan ningún tratamiento específico, vayan o no a ser digitalizados.",
+          "Una vez digitalizados, debería controlarse especialmente la ventilación del depósito en el que vayan a ser instalados así como establecer un programa de control del biodeterioro de los materiales.",
+          "Una vez digitalizados, debería aumentarse la temperatura y la humedad"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "En el caso de los documentos afectados por corrosión por tinta metaloácida, ¿cómo habría que actuar?",
+        "options": [
+          "Hay que proceder a tratar la corrosión en todo caso, por mínima que sea, para evitar que siga extendiéndose.",
+          "La desacidificación del papel podría ser suficiente para neutralizar esta degradación con la posterior laminación o consolidación pertinente.",
+          "Hay que proceder a instalar la documentación afectada en un depósito especial, para evitar que la corrosión pueda extenderse a otros documentos.",
+          "No existen tratamientos que eviten la progresiva corrosión por tinta"
+        ],
+        "answer": 1,
+        "explanation": ""
+      },
+      {
+        "question": "En el caso de los documentos que presentan roturas, ¿cómo habría que actuar?",
+        "options": [
+          "Debería en todo caso procederse a la laminación o consolidación pertinente del documento.",
+          "Podría proponerse la laminación o consolidación de los documentos, en el caso de que las roturas pusiesen en riesgo la existencia misma de los mismos.",
+          "Al tratarse de documentación de escaso valor histórico no sería necesario realizar ninguna acción específica.",
+          "Los documentos que presentan roturas no deberían ser digitalizados."
+        ],
+        "answer": 1,
+        "explanation": ""
+      },
+      {
+        "question": "En el caso de los materiales especiales (dibujos y planos de gran formato) contenidos en la documentación, ¿cómo se procedería para su digitalización?",
+        "options": [
+          "En ningún caso pueden digitalizarse los materiales especiales.",
+          "Serán digitalizados como el resto de los documentos.",
+          "Serán digitalizados con una mayor calidad y en escáneres o con cámaras especialmente adaptados.",
+          "Se digitalizarán con menor calidad para evitar su posterior explotación"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "Una vez digitalizados los materiales especiales (dibujos y planos de gran formato), ¿cómo procedería a instalarlos de manera definitiva?",
+        "options": [
+          "Se volverían a plegar y a instalar junto a los documentos a los que acompañaban originalmente.",
+          "Se extraerían de los legajos originales y se formaría un nuevo legajo con todos ellos, que se colocaría al final de los legajos originales.",
+          "Se extraerían de los legajos originales y se crearía una sección facticia específica con ellos.",
+          "Se extraerían de los legajos originales, se instalarían junto al resto de"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "¿Sería necesaria alguna actuación posterior a la digitalización?",
+        "options": [
+          "Se procedería a volver a coser, plegar y enlegajar la documentación, para dejarla en la misma forma en la que había salido del depósito.",
+          "Se procedería a volver a plegar y enlegajar la documentación, pero sin coserla de nuevo para evitar su deterioro.",
+          "Se protegería con una carpetilla cada expediente, debidamente desplegado, y se volvería a enlegajar la documentación de la forma original.",
+          "La documentación se dejaría desplegada y descosida, se protegerían los"
+        ],
+        "answer": 3,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "supuesto_4",
+    "title": "Conservación, restauración y control de fondos",
+    "subtitle": "Fondo del siglo XVII en letra procesal con legajos deteriorados",
+    "scenario": "ORDENACIÓN, CONTROL Y CONSERVACIÓN DE FONDOS DOCUMENTALES\nUsted trabaja en el Departamento de Conservación, Restauración y Control de\nFondos de uno de los archivos históricos dependientes de la Subdirección General de\nlos Archivos Estatales. Este centro dispone de un laboratorio de Restauración con\nmedios económicos y humanos suficientes.\nRecientemente ha ingresado en su archivo un fondo documental compuesto por\n10 legajos de documentación en papel, manuscrita, de la segunda mitad del siglo XVII\ny en letra procesal.\nLos legajos consisten en simples atados con cuerda o bramante de varios\nexpedientes.\nLa documentación no se acompaña de un instrumento de descripción.\nLos expedientes son de tamaño folio, tiene las hojas cosidas con hilo y\npresentan grosores que van desde 1 cm (los más finos) hasta de 10 cm (los más\ngruesos). En cambio, uno de ellos es mucho más voluminoso: tiene un grosor de 34\ncm.\nEn general, los expedientes se hallan en buen estado de conservación; sin\nembargo, uno de los legajos se ha visto muy deteriorado a causa de la humedad, que\nafecta a un tercio de la parte superior de los expedientes que contiene. Como\nconsecuencia, dicha documentación es extremadamente frágil y quebradiza, habiendo\naparecido además una colonia de hongos.\nPor último, en otro de los legajos se encuentran varios expedientes que\ncontienen, a su vez, planos de gran formato, en soporte papel, sueltos y doblados al\nfinal de cada expediente.\nSu jefe/a de departamento le pide que realice los siguientes trabajos: el\nacondicionamiento de la documentación y su instalación en los depósitos del archivo.",
+    "questions": [
+      {
+        "question": "¿Podemos considerar que el formato de instalación original es el adecuado?",
+        "options": [
+          "Depende del estado de conservación de la documentación original.",
+          "Sí, porque asegura el respeto al principio de mantenimiento al orden original.",
+          "Sí, porque no tiene sentido cambiar el formato antes de abordar otras tareas como la descripción y la digitalización.",
+          "No, la instalación de origen no asegura la conservación y no es coherente"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "¿Cuál es el método correcto para la instalación de los expedientes?",
+        "options": [
+          "Mantener la documentación en su instalación original en legajo, sustituyendo las cartelas por planchas nuevas de PH neutro y balduque blanco.",
+          "Mantener la documentación en su instalación original en legajo, sustituyendo las cartelas por planchas nuevas de PH neutro y balduque blanco, además de instalar los expedientes de manera individualizada en camisas.",
+          "Instalar los expedientes de manera individualizada en camisas, y a su vez en cajas normalizadas de archivo, asegurándose de mantener la correspondencia con la instalación original.",
+          "Instalar los expedientes de manera individualizada en camisas, y a su"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "Si decidimos instalar los expedientes en caja normalizada, ¿sería necesario mantener la correspondencia entre legajo de origen y caja de destino, sin mezclar expedientes de varios legajos?",
+        "options": [
+          "No, se pueden mezclar expedientes de varios legajos, puesto que no hay ningún instrumento de descripción que nos sirva de referencia, y nada nos asegura que el orden en el que vienen responde a la lógica de tramitación y archivo.",
+          "No, se pueden mezclar expedientes de varios legajos, siempre y cuando se mantenga la referencia al legajo original.",
+          "Sí, hay que respetar el orden original de la documentación, y si fuera necesario, optar por mantener la instalación en legajo.",
+          "La pregunta no es pertinente, al ser obligado el mantenimiento de los"
+        ],
+        "answer": 1,
+        "explanation": ""
+      },
+      {
+        "question": "A la hora de instalar en caja normalizada, comprobamos que no es posible instalación en este formato el expediente de 34 centímetros de grosor, por superar el grosor máximo que permite la caja. ¿Cómo procederíamos?",
+        "options": [
+          "Mantendríamos instalado el expediente en formato legajo.",
+          "Se confeccionaría una caja de formato especial.",
+          "Se dividía el expediente, descosiéndolo, para adaptarlo a dos cajas normalizadas.",
+          "Se pediría al laboratorio de Restauración que descosa el expediente, lo"
+        ],
+        "answer": 1,
+        "explanation": ""
+      },
+      {
+        "question": "A la hora de instalar la documentación del legajo con problemas de conservación…",
+        "options": [
+          "Se procede a instalar cuidadosamente la documentación afectada en camisas de papel-barrera y en una caja forrada con poliéster de conservación para prevenir el contagio a la documentación adyacente.",
+          "Se estabiliza el legajo en un contenedor con atmósfera neutra previo paso por una cámara frigorífica durante 72 horas.",
+          "Se procede a la estabilización de los documentos mediante rociado con Paralax tras la esterilización de las colonias de hongos con una solución disolución de agua destilada en alcohol al 50%.",
+          "Se aísla el legajo afectado y se comunica al laboratorio de Restauración"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "A la hora de abordar la instalación del legado, que contiene expedientes con planos sueltos….",
+        "options": [
+          "Extraemos los planos dejando un testigo junto al expediente correspondiente, indicando la signatura topográfica de instalación de los planos.",
+          "Dejaremos los planos unidos al expediente.",
+          "Pediremos al laboratorio de Restauración que integre los planos en el cosido de los expedientes.",
+          "Sacaremos una copia de los planos en formato folio para unir al"
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "¿Cuál es la manera adecuada de instalación de los planos?",
+        "options": [
+          "En caja normalizada junto con el expediente.",
+          "En carpetas ubicadas en planeros.",
+          "En carpetas colgantes para los planos de tamaño máximo A3, y planeros para el resto.",
+          "Enmarcados y colgados en peines en un depósito especial para"
+        ],
+        "answer": 1,
+        "explanation": ""
+      },
+      {
+        "question": "¿Qué operaciones se realizarán durante la etapa de ingreso antes de la instalación definitiva en depósito?",
+        "options": [
+          "Limpieza, estabilización (si es preciso según estado de conservación), individualización en camisas, inventario somero e instalación en cajas.",
+          "Limpieza, descosido, estabilización (si es preciso según estado de conservación), individualización en camisas, inventario somero e instalación en cajas.",
+          "Limpieza, estabilización (si es preciso según estado de conservación), individualización en camisas, descripción minuciosa, digitalización de control e instalación en cajas.",
+          "Limpieza, desinfección por anoxia, descosido, descripción, digitalización"
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "A la hora de controlar la documentación de ingreso, se usará como elemento identificador principal:",
+        "options": [
+          "La signatura original.",
+          "Título formal del expediente.",
+          "Título atribuido.",
+          "La signatura de ingreso."
+        ],
+        "answer": 3,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "supuesto_5",
+    "title": "Atención e información a investigadores — Sala II",
+    "subtitle": "Gestión de sala: solicitudes, reprografía y acceso restringido",
+    "scenario": "ATENCIÓN E INFORMACIÓN BÁSICA A INVESTIGADORES Y USUARIOS\nUsted trabaja en la sala de investigadores de uno de los archivos estatales\ndependientes del Ministerio de Cultura y Deporte, y es la persona encargada de\nregistrar a todos aquellos usuarios que acuden al centro, de garantizar que se\ndesenvuelven de manera correcta con la documentación y de resolver las dudas más\ngenéricas que puedan tener sobre el funcionamiento del archivo.\nExplique y razone brevemente cuál sería su proceder en las siguientes\nsituaciones:\nSITUACIÓN 1. Un ciudadano acude para consultar un proyecto de una línea\nde ferrocarril que, en la actualidad, necesita una intervención de emergencia,\npues ha quedado destrozada tras un episodio de lluvia torrencial. Este\nusuario, sin embargo, no presenta ningún documento que acredite su\nidentidad.",
+    "questions": [
+      {
+        "question": "¿Es posible el acceso de este ciudadano a la documentación?",
+        "options": [
+          "No. El derecho de acceso está condicionado a la constancia de la identidad del solicitante, según el artículo 9 de la Ley 39/2015 de Procedimiento Administrativo.",
+          "Sí, desde la derogación en el año 2006 de Real Decreto 1969/1999, de 23 de diciembre, por el que se regula la expedición de la tarjeta nacional de investigador, no es necesario identificarse para acceder a una sala de usuarios de los archivos dependientes del Ministerio de Cultura.",
+          "No. Previamente deberá cursar una solicitud de acceso, en los términos establecidos en la Ley 30/1992, de 26 de noviembre, y en la Ley 11/2007, de 22 de junio, y se dirigirá al responsable del archivo que los custodia.",
+          "Sí, siempre y cuando no solicite copias del expediente, esté acompañado en"
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "Ese mismo día, acude al archivo un ingeniero que trabaja en la empresa responsable de la reparación de la línea. Cómo identificación sólo presenta el DNI, pero no acredita su vinculación con ADIF ni con la empresa responsable de la reparación. ¿Puede acceder a la documentación?",
+        "options": [
+          "No, necesita acreditar el interés en el procedimiento del que se trata, según artículo 4 de la Ley 39/2015 de Procedimiento Administrativo.",
+          "No, necesita la autorización de ADIF como parte interesada para el acceso a la documentación.",
+          "No, ya que toda la línea nacional de ferrocarriles está incluida en el Catálogo Nacional de Infraestructuras Críticas.",
+          "Sí, el DNI es acreditación suficiente para el acceso a la sala de"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "¿Puede acceder libremente a la documentación?",
+        "options": [
+          "Sí, porque es familiar directo.",
+          "Sí, los expedientes de depuración de empleados públicos son de libre acceso.",
+          "No, porque el expediente de depuración forma parte del expediente personal, que se cerró en el momento de la jubilación, no habiendo pasado los 50 años que marca la Ley de Patrimonio Histórico.",
+          "No, la persona afectada sigue viva, por lo que es de aplicación el"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "¿En qué condiciones se puede realizar el acceso a la documentación mencionada?",
+        "options": [
+          "Libremente por parte de los familiares directos.",
+          "Mediante una solicitud al Consejo de Transparencia, alegando la filiación y la condición de interesado.",
+          "Con autorización expresa de la persona afectada.",
+          "De ningún modo, deben transcurrir un plazo de veinticinco años desde su"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "¿Puede autorizarse la solicitud?",
+        "options": [
+          "Sí, según la Ley 20/2022 de Memoria Democrática, los expedientes de depuración se consideran nulos, y se deben devolver a los interesados.",
+          "No, los documentos de cualquier época generados, conservados o reunidos en el ejercicio de su función por cualquier organismo o entidad de carácter público, se consideran Patrimonio Histórico Documental, y su cesión a un particular se podría considerar expoliación.",
+          "No, pero sí tiene derecho a obtener copia del expediente, exenta de tasas, según la Ley 20/2022 de Memoria Democrática.",
+          "Las dos anteriores son ciertas."
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "¿Cómo procedemos?",
+        "options": [
+          "Se llama al personal de seguridad para que proceda a acompañar al usuario a la salida más cercana, por infracción grave de las normas de sala.",
+          "Se le indica amablemente la ubicación de las fotocopiadoras de uso público para copia rápida.",
+          "Se recuerda amablemente al usuario que no puede extraer documentación de la unidad de instalación, y deambular por la sala, debiendo realizar una petición formal de reprografía.",
+          "Se recuerda amablemente al usuario que no puede extraer"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "Otro usuario de la sala, que ha observado la situación, le pregunta al responsable de sala si sería posible obtener imágenes de la documentación con la cámara de su móvil.",
+        "options": [
+          "No, en ningún caso.",
+          "No, es necesaria la autorización previa de la Comisión Superior Calificadora de Documentos Administrativos.",
+          "No, y se recuerda al usuario que no puede acceder a la sala con dispositivos móviles.",
+          "Sí, desde octubre del 2022, se permite la autocopia de documentación"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "El usuario, para la planificación de su siguiente visita, solicita la autocopia completa de uno de los instrumentos de descripción de la sala, que no está publicado ni es accesible fuera de la sala.",
+        "options": [
+          "Sí, sin ningún problema, al no tratarse de documentación, y considerar los instrumentos de descripción de consulta pública.",
+          "Sí, aunque al tratarse de instrumentos de descripción propiedad del archivo, es necesaria la autorización del Subdirector General de Archivos Estatales.",
+          "No, puesto que la instrucción que autoriza la autocopia no permite la copia completa de instrumentos de descripción.",
+          "No, puesto que la instrucción que autoriza la autocopia no permite la"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "¿Cómo debe proceder el auxiliar de control de sala?",
+        "options": [
+          "Ofrecerse a hacer la foto para tener mejor ángulo.",
+          "Pide al usuario que remita copia de las imágenes para su uso en la web del archivo, y le solicita sus perfiles de las RRSS para seguirlo.",
+          "Le indica que previamente al ingreso en la sala se le ha informado de la restricción al uso de los móviles, y se le pide que proceda a borrar las imágenes.",
+          "Se llama al personal de seguridad, para que confisquen el dispositivo"
+        ],
+        "answer": 2,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "supuesto_6",
+    "title": "Apoyo a procesos técnicos — Digitalización",
+    "subtitle": "Convenio de digitalización con universidad pública",
+    "scenario": "APOYO A PROCESOS TÉCNICOS\nComo parte de un convenio de colaboración entre el Ministerio de Cultura y\nDeporte y la Universidad Complutense de Madrid, una empresa de digitalización acude\nal archivo en el que usted trabaja para digitalizar todos los expedientes de\ncatedráticos y profesores titulares que ejercieron la docencia en la mencionada\nuniversidad.\nComo parte del convenio, el centro en el que usted trabaja se compromete a\nrealizar todos los trabajos previos necesarios.\nLa serie documental se encuentra sin describir, contando sólo con varias\nrelaciones de entrega. Los expedientes más antiguos se encuentran instalados en\nlegajos, mientras que los más modernos, se encuentran en cajas no normalizadas.",
+    "questions": [
+      {
+        "question": "¿Qué trabajos hay que afrontar en primer lugar?",
+        "options": [
+          "Cotejo, reinstalación, descripción, signaturado y foliado.",
+          "Cotejo, descripción y signaturado.",
+          "Identificación, descripción, valoración.",
+          "Recepción, conservación y servicio."
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "Al existir relaciones de entrega previas…",
+        "options": [
+          "No es necesario el cotejo de la documentación con la relación de entrega.",
+          "Se recomienda un cotejo superficial para comprobar que la relación de entrega se corresponde con las unidades de instalación.",
+          "En caso encontrarse fallos en las relaciones de entrega, se procede a un cotejo sistemático.",
+          "Las dos anteriores son ciertas."
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "Ante la existencia de dos tipos de unidades de instalación, ¿cómo procedemos?",
+        "options": [
+          "Mantenemos las unidades originales.",
+          "Uniformizamos el formato en función de cuál sea el tipo de unidad de instalación más utilizado en la serie.",
+          "Reinstalamos toda la documentación en caja normalizada.",
+          "Instalamos la documentación en legajo en caja normalizada, y mantenemos las"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "Si optáramos por la instalación en caja normalizada, es posible que no todos los expedientes contenidos en un legajo encajasen en dentro de esta. ¿Cómo procederíamos en este caso con la signatura?",
+        "options": [
+          "Mantenemos la signatura de origen.",
+          "No es posible cambiar el expediente si no existe correspondencia exacta con la unidad de instalación original.",
+          "Creamos una nueva signatura topográfica, manteniendo la información sobre la correspondencia entre la nueva y la antigua signatura.",
+          "Procederemos según el criterio marcado para la asignación de signaturas del"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "Las carpetillas de los expedientes nos ofrecen dos datos: nº de expediente y nombre completo de la persona. ¿Qué orden físico considera que debería mantener esta serie documental?",
+        "options": [
+          "El ya existente.",
+          "Por orden alfabético de los apellidos.",
+          "Por número de expediente.",
+          "Localizamos las fechas de jubilación, y ordenamos los expedientes por orden"
+        ],
+        "answer": 1,
+        "explanation": ""
+      },
+      {
+        "question": "Los expedientes se encuentran identificados por número de expediente y por nombre y apellidos. ¿Qué otros elementos sería recomendable añadir a la descripción?",
+        "options": [
+          "Año de apertura y cierre del expediente.",
+          "Facultad en la que prestaron servicio.",
+          "Categoría profesional.",
+          "Todas las anteriores son ciertas."
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "La mayoría de estos expedientes tienen abundantes elementos metálicos. ¿Considera que deben suprimirse?",
+        "options": [
+          "No, esperaremos al momento de la digitalización para evitar la alteración del orden.",
+          "Sí, se eliminarán todos los elementos metálicos.",
+          "Sí, procederemos a una labor de limpieza, eliminando todos aquellos elementos ajenos, metálicos y no metálicos, siempre que supongan un riesgo para la conservación y que su retirada no implique un daño mayor que el que se quiere prevenir.",
+          "La retirada de elementos metálicos es tarea del análisis del laboratorio de"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "Las carpetillas originales se encuentran cosidas al expediente, y contienen datos identificativos y un breve resumen de los principales hitos académicos. Algunas se encuentran muy deterioradas. ¿Cuál es el procedimiento adecuado a seguir?",
+        "options": [
+          "Enviarlas al laboratorio de restauración para que las consoliden y reintegren.",
+          "Mantener la carpetilla original, añadiendo una camisa con los datos básicos de la identificación del expediente.",
+          "Descoserlas y sustituirlas por otras libres de ácido y reserva alcalina, al tiempo que se reproduce la información contenida en estas, de manera facsimilar.",
+          "Reparar las roturas con cinta adhesiva libre de ácido."
+        ],
+        "answer": 1,
+        "explanation": ""
+      },
+      {
+        "question": "Con frecuencia, en los expedientes encontramos otros materiales, principalmente fotografías, tanto positivos como negativos. ¿Considera que deben tratarse e instalarse por separado?",
+        "options": [
+          "Sí, en todos los casos.",
+          "Sí, siempre y cuando la fotografía se encuentre exenta, y no adherida a ningún documento.",
+          "No, las fotografías forman parte integral del expediente y deben instalarse al final de este, en un sobre especial.",
+          "No, las fotografías forman parte integral del expediente y su retirada supone"
+        ],
+        "answer": 1,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "supuesto_7",
+    "title": "Transferencia ordinaria con incidencias",
+    "subtitle": "Recepción de fondos administrativos con problemas de remesa",
+    "scenario": "(En relación con este supuesto, conviene revisar el manual de tratamiento de archivos\nadministra6vos, y la norma de entrada y salida de documentos en los archivos)\nEl archivo central en el que usted trabaja va a recibir una transferencia de\ndocumentación procedente de una unidad administrativa de su organización.",
+    "questions": [
+      {
+        "question": "¿Qué instrumento de control debe acompañar a la transferencia de la documentación?",
+        "options": [
+          "Relación de entrega.",
+          "Registro de entrada.",
+          "Repertorio de series documentales.",
+          "Registro de procedencia."
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "¿Cuántas copias se realizan de dicho instrumento?",
+        "options": [
+          "Una, para el registro de entrada.",
+          "Dos, una para el registro de entrada y para el repertorio de series documentales.",
+          "Tres, una para el registro de entrada, de organismos, y para la unidad remitente.",
+          "Cuatro, una para el registro de entrada, de organismos, de series"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "¿Cómo procedería con los archivadores que se observan en la balda superior?",
+        "options": [
+          "Los instalaría en caja normalizada.",
+          "Crearía una camisa identificativa con los datos del expediente, y la pondría cubriendo el archivador antes de instalarlo en la caja.",
+          "Sustituiría el archivador por una carpetilla.",
+          "Extraería la documentación, identificaría el o los expedientes que pudiera"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "Respecto a los expedientes que se encuentran instalados en carpetillas de papel Kraft, ¿cómo se debe proceder a la instalación?",
+        "options": [
+          "Se retiran y se sustituyen por carpetillas blancas, en las que se añade el número de orden del expediente.",
+          "Se retiran y se sustituyen por carpetillas blancas, en las que se añade el número de orden del expediente, así como los datos identificativos de este.",
+          "Deben mantenerse, puesto que el papel kraft tiene pH neutro y protege de la acidez.",
+          "Se conserva para mantener el expediente en su forma original, aunque"
+        ],
+        "answer": 1,
+        "explanation": ""
+      },
+      {
+        "question": "¿Cuál es el orden óptimo que debería seguirse para instalar la documentación en cajas?",
+        "options": [
+          "En el orden que tienen en la balda.",
+          "En el que mejor se ajuste a las cajas normalizadas, procurando que los expedientes no queden ni muy sueltos ni demasiado apretados en estas.",
+          "En orden alfabético, por el nombre de la empresa contratada.",
+          "En orden por número de expediente, asignado según se abre el mismo."
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "Una vez identificados todos los expedientes, al instalarlos en su unidad de instalación correspondiente….",
+        "options": [
+          "Se numeran por orden en cada caja, empezando por el nº 1 en todas ellas.",
+          "Se numeran por orden correlativo, desde el primero hasta el último, sin importar la caja en la que estén instalados.",
+          "Se numeran por el orden originario que tuvieran.",
+          "No hace falta numerarlos, porque ya vienen relacionados por caja en la"
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "Se les informa….",
+        "options": [
+          "…que deben extraer los planos dejando un testigo junto al expediente correspondiente, y transferirlos en una carpeta especial que se les suministra desde el archivo central.",
+          "…que mantengan los planos unidos al expediente, dejando constancia de la especial casuística en el campo de observaciones de la relación de entrega.",
+          "…que deben extraer los planos y conservarlos en la oficina, por si les fueran necesarios en un futuro.",
+          "…que no hagan nada, porque se verá durante el cotejo."
+        ],
+        "answer": 1,
+        "explanation": ""
+      },
+      {
+        "question": "Junto con los expedientes de contratación y los expedientes personales, se han encontrado en el último momento 5 ó 6 encuadernaciones con publicaciones de resoluciones de concursos del Boletín Oficial del Estado. ¿Cómo debe proceder el archivo de oficina?",
+        "options": [
+          "No se considera documentación de archivo, por lo que no debe transferirse.",
+          "Los añadirá en el envío, como anexo a la transferencia.",
+          "Los incluirá junto con los expedientes personales.",
+          "Preparará su remisión para la biblioteca central, y procederá de manera"
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "El personal administrativo de la oficina le pregunta qué debe hacer con el inventario.",
+        "options": [
+          "Les comento que lo conserven en la oficina para poder facilitar su identificación en caso de necesitar algún préstamo en el futuro.",
+          "Les comento que lo conserven y lo actualicen con la próxima fracción de serie que quieran remitir al archivo central.",
+          "Les comento que deben incluirlo dentro de la transferencia.",
+          "Les comento que pueden tirarlo, puesto que los datos identificativos de"
+        ],
+        "answer": 2,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "supuesto_8",
+    "title": "Fondo privado: Archivo Maumejean",
+    "subtitle": "Tratamiento de un fondo artístico depositado en la FCNPFE",
+    "scenario": "El Archivo Maumejean\nEl Archivo Maumejean, depositado en la Fundación Centro Nacional del Vidrio (FCNV)\nen La Granja de San Ildefonso (Segovia), proviene del último taller activo de esta\nfamilia de vidrieros de origen francés, que existía en Madrid. Adquirido en 1993 por el\nEstado a la Sociedad Maumejean Hnos. de Vidriería Artística, S.A. fue adscrito al\nMuseo de Artes Decorativas de Madrid.\nDe manera paralela a la adquisición por el Estado, la FCNV compró al mismo taller 28\nvidrieras. En su mayoría se trata de vidrieras de pequeño formato, pruebas de\nmaestría de los exámenes que se hacían a l",
+    "questions": [
+      {
+        "question": "Dadas las características de los materiales (bocetos, maquetas y fotografías), y su interrelación, es necesario llevar a cabo una detallada recopilación de los datos contenidos en cada uno de los formatos, con la finalidad de…",
+        "options": [
+          "…confeccionar un catálogo detallado de cara a su publicación.",
+          "…realizar un único inventario que incluya los diferentes soportes.",
+          "...realizar tres instrumentos de control diferentes, pero en donde indiquen las relaciones de unos ítems del Fondo con otros.",
+          "…la b y la c son válidas."
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "Teniendo en cuenta que el soporte de los bocetos es cartón, sobre el cual se han adherido según el caso piezas de cartulina o recortes de positivos fotográficos, y que pueden estar coloreados, ¿cómo procederíamos a la instalación?",
+        "options": [
+          "En caja normalizada, agrupados por tamaño y forma.",
+          "En caja normalizada, individualizado por carpetillas.",
+          "Individualizados por carpetillas, y en carpetas colgantes.",
+          "En planeros, separados por capas de papel libre de ácido con reserva"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "Las cajas se encuentran en muy mal estado y esto ha afectado a los rollos, que presentan desgarros y acumulación de polvo. ¿Cómo procedemos a su limpieza?",
+        "options": [
+          "Aspiramos la caja contenedora, el exterior de los rollos, desenrollamos y desplegamos con pesos para su limpieza.",
+          "Abrimos la caja, desplegamos los rollos, y procedemos a enrollarlos en sentido contrario al que tenían para su instalación en plano.",
+          "Sellamos el almacén en el que están los rollos, y contratamos los servicios de una empresa de desinsectación mediante el uso del vacío.",
+          "Adquirimos grandes bolsas de poliuretano susceptibles de sellado y con"
+        ],
+        "answer": 0,
+        "explanation": ""
+      },
+      {
+        "question": "Una vez estabilizadas las maquetas, procedemos a…",
+        "options": [
+          "…la toma de datos y ordenación de las maquetas contenidas en las cajas para su instalación en plano.",
+          "…la toma de datos y ordenación de las maquetas contenidas en las cajas para su instalación en rollo.",
+          "…la toma de datos y plegado de las maquetas si superan las dimensiones del planero, para su instalación en este.",
+          "…confeccionar una instalación en rollos sobre soportes verticales y fundas"
+        ],
+        "answer": 1,
+        "explanation": ""
+      },
+      {
+        "question": "Dentro del proceso de tratamiento del fondo, se plantea la opción de documentar gráficamente los bocetos y las maquetas. ¿En qué momento se debería abordar este paso?",
+        "options": [
+          "Para evitar la acumulación de materiales gráficos, sólo se fotografiarán una vez estén incluidos en el Plan de Digitalización del centro.",
+          "Dado lo heterogéneo del fondo, se documentarán en el momento de la toma de datos, aquellos materiales que se consideren de mayor valor, dejando la fotografía sistemática del fondo para el momento establecido por el Plan de Digitalización.",
+          "Se digitalizan, en el momento de la toma de datos, los bocetos en un escáner de cama, y se propone un orden en la toma de imágenes de las maquetas para la contratación de una empresa especializada en grandes formatos.",
+          "En el momento de la toma de datos y antes de la instalación, a efectos de"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "Dado que desconocemos si las fotografías contenidas en las cajas han sido mezcladas. ¿Son relevantes las inscripciones de las cajas?",
+        "options": [
+          "No, ya que, al no disponer de un instrumento de control original, no podemos saber si el contenido original se corresponde con el actual.",
+          "No, se pueden haber reutilizado cajas para reinstalar soportes fotográficos de la misma dimensión sin relación alguna.",
+          "Sí, siempre dentro de la identificación del fondo, las inscripciones suponen un dato relevante que aporta información a la historia archivística de este.",
+          "Sí, siempre y cuando un cotejo de las imágenes nos indique la relevancia"
+        ],
+        "answer": 2,
+        "explanation": ""
+      },
+      {
+        "question": "Dentro del proceso de inventariado e instalación de las placas fotográficas sobre vidrio, encontramos negativos rotos entre placas enteras. ¿Cómo debemos proceder?",
+        "options": [
+          "Instalamos todos los negativos, en sobres de papel de cuatro solapas, libres de ácido, sin importar si están enteros o rotos.",
+          "Instalamos todos los negativos, en sobres de poliéster de conservación y estabilizamos los rotos mediante sellado térmico del sobre.",
+          "Instalamos todos los negativos en sobres de papel de cuatro solapas, libres de ácido y estabilizamos los rotos, con el uso de tira adhesiva en la parte del cristal que no tenga emulsión.",
+          "Instalamos los negativos enteros en sobres de papel de cuatro solapas,"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "Teniendo en cuenta que las cajas originales de los negativos incluyen un máximo de 20 placas, mientras que la caja estándar que se ofrece por los suministradores de productos de conservación permite un máximo de 35 placas, ¿cómo procedemos a la instalación?",
+        "options": [
+          "No se puede romper la relación entre el número de placas y la caja que las contiene, por lo que las instalamos en caja nueva, pero respetando el mismo número de placas de vidrio que contuviera la caja original.",
+          "Pedimos que se adapten las cajas para contener el número de placas de vidrio igual al que tiene la caja original.",
+          "Forramos la caja original de poliéster de conservación para reutilizarla e instalamos en la caja los negativos separados a su vez por láminas de poliéster.",
+          "La instalación de los negativos se realizará aprovechando al máximo la"
+        ],
+        "answer": 3,
+        "explanation": ""
+      },
+      {
+        "question": "Teniendo en cuenta que los fondos no se hayan en un centro de archivo, sino en un museo, ¿se aplican las mismas normas de asistencia que aquellas vigentes para los centros de la SDG. de Archivos Estatales?",
+        "options": [
+          "Sí, ya que las disposiciones legales sobre archivos son de aplicación en todos los centros dependientes de la Administración General del Estado.",
+          "Sí, ya que las disposiciones legales sobre archivos son de aplicación en todos los centros dependientes de la Administración General del Estado, pero al no disponer de sala de consulta o personal fijo para atenderla, es necesario concertar cita previa.",
+          "Sí, aunque con la autorización previa del SDG. de Museos Estatales.",
+          "Sí, pero hay que disponer de un carnet de investigador de la SDG. de"
+        ],
+        "answer": 1,
+        "explanation": ""
+      }
+    ]
+  },
+  {
+    "id": "supuesto_9",
+    "title": "Elaboración de instrumentos de descripción",
+    "subtitle": "Inventario y catálogo de un fondo municipal",
+    "scenario": "Se trabaja en el Archivo Histórico Municipal de una ciudad de tamaño mediano. El archivo ha recibido recientemente una transferencia masiva de documentación procedente del Archivo Central del Ayuntamiento, correspondiente a expedientes de licencias de obra del período 1950-1980, sin descripción alguna y con una ordenación deficiente. El archivero jefe encomienda al auxiliar la elaboración de los instrumentos de descripción necesarios para hacer accesible esta documentación.\n\nLa documentación ocupa 47 cajas normalizadas. Tras un primer reconocimiento, se detectan expedientes incompletos, folios sueltos y algunos expedientes que no corresponden a la serie de licencias de obra sino a comunicaciones internas del Departamento de Obras. La signatura topográfica comienza en C-2340.\n\nPara la descripción, el archivo aplica la norma ISAD(G) adaptada al sistema de gestión documental municipal, con un esquema en tres niveles: fondo, serie y unidad documental compuesta (expediente).",
+    "questions": [
+      {
+        "question": "¿Cuál es el primer paso que debe realizarse antes de elaborar el inventario de la documentación recibida?",
+        "options": [
+          "Instalar los expedientes en las estanterías asignando signaturas definitivas.",
+          "Realizar la identificación del fondo: analizar el organismo productor, sus funciones y la tipología documental.",
+          "Digitalizar todos los documentos para facilitar su descripción.",
+          "Elaborar el cuadro de clasificación provisional y asignar códigos a cada expediente."
+        ],
+        "answer": 1,
+        "explanation": "La identificación es la fase previa imprescindible a cualquier intervención archivística. Consiste en investigar el organismo productor, su estructura orgánica y funcional, para poder interpretar correctamente la documentación y clasificarla adecuadamente antes de proceder a su instalación o descripción."
+      },
+      {
+        "question": "Los expedientes de comunicaciones internas encontrados entre las licencias de obra deben:",
+        "options": [
+          "Destruirse inmediatamente por ser documentación ajena a la serie.",
+          "Separarse y devolverse al archivo central con una nota de incidencia, o integrarse en la serie correcta si corresponde al mismo fondo.",
+          "Incluirse en el inventario de licencias de obra, añadiendo una nota de contenido.",
+          "Tratarse como documentación de la misma serie, pues provienen del mismo departamento."
+        ],
+        "answer": 1,
+        "explanation": "Los documentos que no corresponden a la serie objeto de descripción deben separarse. Si pertenecen al mismo fondo (Ayuntamiento), se integran en la serie correcta. Si provienen de otro productor, se devuelven. Nunca deben incluirse en una serie que no les corresponde, pues viola el principio de respeto al orden original y al de procedencia."
+      },
+      {
+        "question": "Para la descripción a nivel de unidad documental compuesta (expediente), ¿qué instrumento de descripción es el adecuado según la terminología archivística?",
+        "options": [
+          "La guía del archivo.",
+          "El inventario.",
+          "El catálogo.",
+          "El repertorio."
+        ],
+        "answer": 2,
+        "explanation": "El catálogo es el instrumento de descripción que desciende hasta el nivel de la unidad documental compuesta (expediente) o simple (documento). El inventario describe generalmente a nivel de serie o de fracción de serie. La guía ofrece información global del archivo. Para expedientes individuales, el nivel de descripción apropiado es el catálogo."
+      },
+      {
+        "question": "¿Qué elemento de descripción ISAD(G) recoge el período cronológico de los documentos del expediente?",
+        "options": [
+          "Zona de identificación, elemento 'Fechas'.",
+          "Zona de contexto, elemento 'Historia institucional'.",
+          "Zona de contenido y estructura, elemento 'Valoración'.",
+          "Zona de condiciones de acceso, elemento 'Reproducción'."
+        ],
+        "answer": 0,
+        "explanation": "Según la ISAD(G), la zona de identificación incluye el elemento 3.1.3 'Fechas', que recoge las fechas extremas (fecha más antigua y más moderna) de los documentos de la unidad de descripción. Es uno de los seis elementos obligatorios de la norma junto con: código de referencia, título, nivel de descripción, volumen y soporte, y nombre del productor."
+      },
+      {
+        "question": "La signatura topográfica de la primera caja es C-2340. ¿Qué información refleja este tipo de signatura?",
+        "options": [
+          "La clasificación temática de la documentación según el cuadro de clasificación.",
+          "La localización física exacta de la unidad de instalación en el depósito del archivo.",
+          "La referencia al organismo productor y el año de ingreso de la documentación.",
+          "El código de la serie documental según el sistema de gestión del archivo."
+        ],
+        "answer": 1,
+        "explanation": "La signatura topográfica es el código de localización física que permite encontrar una unidad de instalación (caja, legajo, libro) en el depósito del archivo. Refleja la ubicación real (sala, estantería, balda, número de caja). Es un instrumento de control interno diferente del código de referencia archivístico usado en la descripción."
+      }
+    ]
+  },
+  {
+    "id": "supuesto_10",
+    "title": "Conservación preventiva y siniestro",
+    "subtitle": "Plan de emergencia y actuación tras inundación",
+    "scenario": "El Archivo Provincial experimenta durante la madrugada una inundación en el depósito de la planta baja debida a una rotura en la instalación de fontanería del edificio. Al llegar por la mañana, el personal comprueba que aproximadamente 120 cajas de cartón normalizadas y una serie de legajos sin caja han sufrido daños por agua. La documentación afectada incluye expedientes administrativos del siglo XIX en papel ácido, algunos libros de actas encuadernados y un conjunto de fotografías en soporte de vidrio (placas de gelatina).\n\nEl director del archivo activa el Plan de Emergencia del archivo. Como auxiliar de archivo, recibes instrucciones de colaborar en la fase de rescate, estabilización y traslado de los documentos afectados a una zona segura para su posterior tratamiento de conservación-restauración.",
+    "questions": [
+      {
+        "question": "¿Cuál es la acción inmediata prioritaria al iniciar las operaciones de rescate de documentación mojada?",
+        "options": [
+          "Comenzar a secar los documentos con secadores de pelo para evitar el desarrollo de moho.",
+          "Fotografiar los daños, establecer el registro de las piezas afectadas y separar las categorías de daño.",
+          "Trasladar todas las cajas sin clasificar a una sala con mayor temperatura para acelerar el secado.",
+          "Abrir todas las cajas y extender los documentos en el suelo para que se sequen al aire."
+        ],
+        "answer": 1,
+        "explanation": "Ante cualquier siniestro con documentación, la primera acción es documentar los daños (fotografía, registro) y evaluar el estado para establecer prioridades de rescate. Solo entonces se puede actuar ordenadamente. El uso de secadores de pelo está contraindicado (riesgo de deformación y rotura), y el secado desordenado puede causar más daños que el agua misma."
+      },
+      {
+        "question": "Para la estabilización de documentos en papel empapados cuando no es posible su secado inmediato, ¿qué técnica se aplica para ganar tiempo?",
+        "options": [
+          "Congelación: los documentos se congelan para detener la degradación biológica y química.",
+          "Liofilización inmediata in situ usando equipos portátiles.",
+          "Inmersión en agua limpia para evitar las manchas de secado.",
+          "Aplicación de fungicidas directamente sobre los documentos mojados."
+        ],
+        "answer": 0,
+        "explanation": "La congelación es la técnica de estabilización de emergencia más utilizada cuando no es posible secar los documentos en las primeras 48 horas (plazo crítico antes de que aparezca el moho). Permite detener la degradación biológica y química, y postergar el tratamiento de restauración hasta disponer de medios adecuados. Se realiza a -18°C o menor."
+      },
+      {
+        "question": "Las fotografías en placas de vidrio de gelatina son especialmente delicadas. Al manipularlas mojadas, ¿cuál es el principal riesgo específico de este soporte?",
+        "options": [
+          "La oxidación irreversible de las sales de plata de la emulsión.",
+          "El desprendimiento de la emulsión fotográfica del soporte de vidrio al hincharse por el agua.",
+          "La corrosión del marco metálico que mantiene unidas las placas.",
+          "La decoloración permanente causada por el cloro presente en el agua de la tubería."
+        ],
+        "answer": 1,
+        "explanation": "En las placas de gelatina de vidrio, la emulsión fotográfica está adherida al soporte vítreo mediante una capa de gelatina. Al mojarse, la gelatina se hincha y puede desprenderse del vidrio, destruyendo la imagen de forma irreversible. Por ello, estas piezas deben manipularse con extremo cuidado, siempre horizontalmente, y su tratamiento debe realizarse por un restaurador especializado."
+      },
+      {
+        "question": "El papel ácido del siglo XIX es especialmente vulnerable a los daños por agua. ¿Por qué es esto así desde el punto de vista de la conservación?",
+        "options": [
+          "Porque contiene más pigmentos metálicos que reaccionan con el agua formando óxidos.",
+          "Porque el papel ácido tiene mayor degradación previa de las fibras de celulosa, lo que lo hace más frágil y propenso a la rotura y a la proliferación de hongos.",
+          "Porque las tintas del siglo XIX son hidrosolubles y desaparecen al contacto con el agua.",
+          "Porque la acidez del papel reacciona con el agua creando ácido sulfúrico adicional."
+        ],
+        "answer": 1,
+        "explanation": "El papel ácido fabricado desde mediados del siglo XIX tiene las fibras de celulosa muy degradadas por la hidrólisis ácida continuada (slow fire). Esto lo hace extremadamente frágil cuando se moja: pierde resistencia mecánica, se desgarra con facilidad y es muy susceptible al ataque de hongos y bacterias. Requiere un tratamiento de secado mucho más delicado que el papel neutro."
+      },
+      {
+        "question": "Tras el siniestro, ¿qué documento debe elaborarse para hacer el seguimiento de los fondos afectados y los tratamientos aplicados?",
+        "options": [
+          "Un nuevo cuadro de clasificación para la documentación recuperada.",
+          "Un registro o informe de daños que documente el estado inicial, los tratamientos aplicados y el estado final de cada unidad.",
+          "Una nueva relación de entrega de la documentación afectada al laboratorio de restauración.",
+          "Una propuesta de eliminación de la documentación que no pueda recuperarse."
+        ],
+        "answer": 1,
+        "explanation": "Ante cualquier siniestro que afecte a documentos de archivo, es imprescindible elaborar un informe de daños detallado que incluya: inventario de las piezas afectadas, descripción del estado de cada una, fotografías, tratamientos aplicados (congelación, secado, restauración), y estado final. Este documento es necesario para la gestión del siniestro, para el seguro del archivo y para el historial de conservación de los fondos."
+      }
+    ]
+  },
+  {
+    "id": "supuesto_11",
+    "title": "Digitalización y Archivo Electrónico",
+    "subtitle": "Proyecto de digitalización con valor legal",
+    "scenario": "El Archivo Central de un Ministerio recibe el encargo de liderar un proyecto de digitalización de los expedientes de personal en activo, con el objetivo de facilitar su consulta telemática y, a largo plazo, eliminar los originales en papel una vez comprobada la calidad de las digitalizaciones. El proyecto se enmarca en el cumplimiento de la Ley 39/2015 del Procedimiento Administrativo Común y el Real Decreto 4/2010 del Esquema Nacional de Interoperabilidad (ENI).\n\nEl corpus documental comprende 85.000 expedientes de personal, con una media de 40 páginas por expediente. Los documentos son en su mayoría en papel (DIN A4), aunque algunos expedientes incluyen fotografías en color y documentos en formato A3 (diplomas, títulos universitarios compulsados). El plazo de ejecución es de 18 meses.",
+    "questions": [
+      {
+        "question": "Según el ENI (RD 4/2010), ¿qué resolución mínima se recomienda para la digitalización de documentos de texto en papel tamaño A4 cuando la copia digital pretende tener valor legal sustitutivo del original?",
+        "options": [
+          "72 ppp",
+          "150 ppp",
+          "300 ppp",
+          "600 ppp o más"
+        ],
+        "answer": 2,
+        "explanation": "La NTI de Digitalización de Documentos (desarrollada al amparo del ENI) establece 300 ppp como resolución mínima recomendada para documentos de texto en papel que vayan a utilizarse como copias auténticas con valor legal. Para documentos con detalles finos (firmas, sellos, fotografías) se recomienda mayor resolución (400-600 ppp). 72 ppp es solo para visualización en pantalla."
+      },
+      {
+        "question": "¿Qué formato de archivo es el más adecuado para las copias digitales auténticas de expedientes de personal, según las normas técnicas de interoperabilidad?",
+        "options": [
+          "JPEG, por su alta compresión y reducido tamaño.",
+          "PDF/A (ISO 19005), por ser un formato de preservación a largo plazo sin dependencias externas.",
+          "DOCX, para permitir la edición posterior del documento.",
+          "GIF, por su buena relación calidad/peso en imágenes de texto."
+        ],
+        "answer": 1,
+        "explanation": "PDF/A (específicamente PDF/A-1 o PDF/A-2 según ISO 19005) es el formato estándar para la conservación a largo plazo de documentos digitales con valor legal. A diferencia del PDF convencional, PDF/A incorpora todos los recursos necesarios (fuentes, perfiles de color) dentro del propio archivo, garantizando su reproducción fiel en el futuro. Es el formato recomendado por la NTI de Catálogo de Estándares del ENI."
+      },
+      {
+        "question": "Para que una copia digital tenga valor legal como copia auténtica de un documento en papel, ¿qué requisito técnico es imprescindible según la Ley 39/2015?",
+        "options": [
+          "Que la copia lleve un sello de agua con el escudo del organismo.",
+          "Que el documento electrónico lleve asociada una firma o sello electrónico del órgano competente que acredita su autenticidad.",
+          "Que la resolución sea de al menos 600 ppp para garantizar la legibilidad.",
+          "Que la copia sea validada por el Director del Archivo mediante firma manuscrita."
+        ],
+        "answer": 1,
+        "explanation": "El artículo 27 de la Ley 39/2015 establece que las copias auténticas de documentos en papel son aquellas que llevan asociada una firma o sello electrónico del órgano competente para su expedición. Sin este requisito, la digitalización no tiene valor legal sustitutivo y los originales en papel no pueden eliminarse. La resolución y el formato son importantes pero no suficientes por sí solos."
+      },
+      {
+        "question": "El proyecto prevé la eliminación de los originales en papel tras la digitalización. ¿Qué condición debe cumplirse previamente, además de la calidad técnica de las copias digitales?",
+        "options": [
+          "Autorización del Consejo de Ministros para eliminar documentación pública.",
+          "La documentación debe haber superado el período de retención previsto en el calendario de conservación y haber sido valorada por la Comisión Superior Calificadora de Documentos Administrativos.",
+          "Basta con la autorización del Director del Ministerio y del Archivero jefe.",
+          "Los documentos deben tener más de 25 años para poder eliminarse."
+        ],
+        "answer": 1,
+        "explanation": "La eliminación de documentos originales no puede realizarse por el mero hecho de haber sido digitalizados. Deben cumplirse los trámites de valoración previstos en la legislación archivística: propuesta de la Comisión Calificadora del organismo, dictamen de la Comisión Superior Calificadora de Documentos Administrativos y autorización del Ministerio de Cultura. Solo entonces, y con las copias digitales auténticas custodiadas, puede procederse a la destrucción certificada de los originales."
+      },
+      {
+        "question": "Los títulos universitarios y diplomas en formato A3 presentan un problema técnico específico en el proyecto. ¿Cuál es la solución más adecuada?",
+        "options": [
+          "Doblar los documentos para escanearlos en A4 y recomponer la imagen digitalmente.",
+          "Digitalizarlos con escáneres de gran formato (A3 o superior) o mediante fotografía de alta resolución con cámara cenital.",
+          "Excluirlos del proyecto de digitalización por ser documentos de valor histórico.",
+          "Reducirlos fotográficamente a tamaño A4 antes de digitalizarlos."
+        ],
+        "answer": 1,
+        "explanation": "Los documentos en formato A3 o mayor requieren equipos de digitalización de gran formato: escáneres A3, escáneres planetarios o fotografía cenital de alta resolución. Doblarlos o reducirlos antes de digitalizar conllevaría pérdida de información y posibles daños físicos. La digitalización debe recoger el documento en su totalidad y a la resolución adecuada, independientemente del formato del soporte."
+      }
+    ]
+  },
+  {
+    "id": "supuesto_12",
+    "title": "Valoración y Expurgo de documentación",
+    "subtitle": "Propuesta de eliminación de series de un archivo central",
+    "scenario": "En el Archivo Central de un organismo autónomo del Ministerio de Cultura, se ha detectado que varios depósitos documentales están saturados al 95% de su capacidad. Para resolver el problema, el director del organismo encarga al archivero la elaboración de una propuesta de valoración y expurgo de varias series documentales que llevan años sin consulta y cuyo valor administrativo ha prescrito.\n\nLas series objeto de estudio son las siguientes:\n- Serie A: Solicitudes de información turística atendidas por teléfono (1998-2010). 12 años de antigüedad mínima.\n- Serie B: Expedientes de contratación administrativa menores (2005-2015). Importe inferior a 15.000 euros.\n- Serie C: Nóminas mensuales del personal (1975-1990). Documentación de personal con valor histórico potencial.\n- Serie D: Correspondencia ordinaria interna entre departamentos (1990-2005).\n\nPara cada serie se debe elaborar una propuesta razonada de valoración que será elevada a la Comisión Superior Calificadora de Documentos Administrativos.",
+    "questions": [
+      {
+        "question": "¿Qué organismo tiene competencia para autorizar la eliminación de series documentales de organismos de la Administración General del Estado?",
+        "options": [
+          "El propio Archivero Central del organismo, con el visto bueno del Director.",
+          "La Comisión Superior Calificadora de Documentos Administrativos, con la aprobación del Ministerio de Cultura.",
+          "El Tribunal de Cuentas, por ser documentación con valor contable-económico.",
+          "La Intervención General de la Administración del Estado."
+        ],
+        "answer": 1,
+        "explanation": "Según el RD 1401/2007 y la Ley 16/1985, la Comisión Superior Calificadora de Documentos Administrativos (CSCDA) es el órgano colegiado competente para dictaminar sobre la valoración, selección y eliminación de documentos de la AGE y sus organismos. Sus propuestas se elevan para aprobación al Ministerio de Cultura. Ningún archivero puede autorizar eliminaciones por su cuenta."
+      },
+      {
+        "question": "Respecto a la Serie C (nóminas 1975-1990), ¿qué criterio archivístico determinaría su conservación permanente frente a su eliminación?",
+        "options": [
+          "El gran volumen de la serie hace inviable su eliminación desde el punto de vista logístico.",
+          "Su valor secundario o histórico: las nóminas son fuente primaria para la historia social, económica y de la función pública, por lo que tienen valor de evidencia e informativo a largo plazo.",
+          "La prescripción del plazo de conservación mínimo de 50 años para documentación de personal.",
+          "Las nóminas deben conservarse permanentemente por mandato expreso del Código Civil."
+        ],
+        "answer": 1,
+        "explanation": "La valoración documental distingue entre el valor primario (administrativo, legal, fiscal, contable) y el valor secundario (histórico, informativo, de evidencia). Las nóminas del personal, una vez prescrito su valor primario (por lo general a los 5 años en materia fiscal), pueden conservar un importante valor secundario como fuente para la historia de la Administración, la historia económica y los estudios de función pública. Este valor secundario justifica su conservación permanente o un muestreo estadístico."
+      },
+      {
+        "question": "Para la Serie A (solicitudes de información turística 1998-2010), ¿qué tipo de muestreo sería más adecuado si se decide no conservar la totalidad de la serie?",
+        "options": [
+          "Muestreo cronológico: conservar el primer y último expediente de cada año.",
+          "Muestreo estadístico aleatorio: conservar un porcentaje representativo (por ejemplo, el 5-10%) para testimoniar la actividad.",
+          "Muestreo temático: conservar solo las solicitudes sobre monumentos de interés especial.",
+          "No es posible ningún tipo de muestreo; o se conserva toda la serie o se elimina completamente."
+        ],
+        "answer": 1,
+        "explanation": "El muestreo estadístico aleatorio permite conservar una muestra representativa de la serie que ofrezca valor testimonial de la actividad, sin necesidad de conservar la totalidad de los documentos. Es la solución habitual para series masivas y repetitivas de bajo valor histórico individual (solicitudes, formularios). El porcentaje depende del volumen y de los criterios de la Comisión Calificadora."
+      },
+      {
+        "question": "Una vez aprobada la eliminación de la Serie B (expedientes de contratación), ¿cómo debe ejecutarse el expurgo?",
+        "options": [
+          "Los documentos pueden tirarse al contenedor de papel reciclaje ordinario del edificio.",
+          "Mediante destrucción certificada que garantice la confidencialidad: destrucción in situ o entrega a empresa especializada con acta de destrucción.",
+          "Basta con trasladarlos al sótano del edificio y marcarlos como eliminados.",
+          "Pueden donarse a instituciones culturales o educativas al ser documentación de interés público."
+        ],
+        "answer": 1,
+        "explanation": "La eliminación de documentos de archivo, una vez autorizada, debe realizarse mediante destrucción certificada que garantice la confidencialidad de los datos y la imposibilidad de recuperación. Se puede utilizar una destructora industrial in situ o contratar una empresa especializada, que emitirá un acta o certificado de destrucción. Este certificado debe archivarse como parte del historial de gestión del fondo. Tirar documentos al reciclaje ordinario violaría la Ley Orgánica de Protección de Datos."
+      },
+      {
+        "question": "¿Qué instrumento de gestión documental recoge de forma sistemática los criterios de valoración y los plazos de conservación de las series de un organismo?",
+        "options": [
+          "El cuadro de clasificación del organismo.",
+          "El calendario de conservación o tabla de valoración documental.",
+          "El registro de entradas y salidas del archivo.",
+          "La guía del archivo."
+        ],
+        "answer": 1,
+        "explanation": "El calendario de conservación (también llamado tabla de valoración o retention schedule) es el instrumento técnico que sistematiza, para cada serie documental de un organismo, los plazos de retención en cada fase del ciclo vital (archivo de gestión, central e intermedio) y la disposición final (conservación permanente, eliminación o muestreo). Es el resultado del proceso de valoración y la base para la gestión eficaz de los fondos."
+      }
+    ]
+  }
+]

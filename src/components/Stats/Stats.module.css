@@ -1,0 +1,61 @@
+.wrapper { max-width: 820px; margin: 0 auto; padding: 1.5rem 1.25rem 5rem; display: flex; flex-direction: column; gap: 1rem; }
+.title   { font-size: 1.5rem; font-weight: 800; color: var(--ink); letter-spacing: -0.05em; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* KPI */
+.kpiGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+.kpi {
+  border: 1px solid var(--line-strong); border-radius: var(--r-xl);
+  padding: 1.1rem 1rem;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.65rem;
+  animation: fadeUp 0.3s var(--ease) both;
+}
+.kpi_primary { background: var(--tint-green); border-color: var(--primary-dim); }
+.kpi_amber   { background: var(--tint-amber); border-color: var(--amber-dim); }
+.kpi_orange  { background: #fff2ea; border-color: #f0cca8; }
+.kpi_dark    { background: var(--dark); border-color: var(--dark); }
+
+.kpiIcon { width: 32px; height: 32px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; }
+.kpi_primary .kpiIcon { background: var(--primary); color: #fff; }
+.kpi_amber   .kpiIcon { background: var(--amber);   color: #fff; }
+.kpi_orange  .kpiIcon { background: #b85820;        color: #fff; }
+.kpi_dark    .kpiIcon { background: rgba(255,255,255,0.12); color: #fff; }
+
+.kpiVal   { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.05em; line-height: 1; }
+.kpi_primary .kpiVal, .kpi_amber .kpiVal, .kpi_orange .kpiVal { color: var(--ink); }
+.kpi_dark    .kpiVal { color: #fff; }
+
+.kpiLabel { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; }
+.kpi_primary .kpiLabel, .kpi_amber .kpiLabel, .kpi_orange .kpiLabel { color: var(--ink-muted); }
+.kpi_dark    .kpiLabel { color: rgba(255,255,255,0.4); }
+
+/* CHART */
+.chartCard {
+  background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--r-xl); padding: 1.35rem;
+  box-shadow: var(--shadow-sm);
+  animation: fadeUp 0.3s var(--ease) 0.04s both;
+}
+.chartTitle {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.82rem; font-weight: 800; color: var(--ink);
+  letter-spacing: -0.02em; margin-bottom: 1rem;
+}
+
+.empty {
+  padding: 3rem; text-align: center; color: var(--ink-subtle);
+  display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+  border: 1.5px dashed var(--line-strong); border-radius: var(--r-xl);
+}
+.empty p { font-size: 0.85rem; }
+
+/* DONUT */
+.donutRow    { display: flex; align-items: center; gap: 1.75rem; }
+.donutWrap   { position: relative; width: 84px; height: 84px; flex-shrink: 0; }
+.donut       { width: 84px; height: 84px; }
+.donutPct    { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 0.92rem; font-weight: 600; color: var(--ink); }
+.donutLegend { display: flex; flex-direction: column; gap: 0.4rem; }
+.legendRow   { display: flex; align-items: center; gap: 0.45rem; font-size: 0.82rem; color: var(--ink-muted); font-weight: 600; }
+.legendDot   { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+@media (max-width: 640px) { .wrapper{padding:1.25rem 1rem 5rem} .kpiGrid{grid-template-columns:repeat(2,1fr)} }

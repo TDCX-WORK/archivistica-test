@@ -1,0 +1,178 @@
+{
+  "blocks": {
+    "fundamentos": {
+      "label": "Fundamentos Archivísticos",
+      "color": "sage"
+    },
+    "tipos_archivos": {
+      "label": "Tipos de Archivos",
+      "color": "sage"
+    },
+    "descripcion": {
+      "label": "Descripción Archivística",
+      "color": "sage"
+    },
+    "gestion": {
+      "label": "Gestión Documental",
+      "color": "sage"
+    },
+    "legislacion": {
+      "label": "Legislación",
+      "color": "terracotta"
+    },
+    "conservacion": {
+      "label": "Conservación y Restauración",
+      "color": "terracotta"
+    },
+    "digitalizacion": {
+      "label": "Digitalización y Doc. Electrónico",
+      "color": "terracotta"
+    },
+    "constitucion": {
+      "label": "Constitución y Admin. Pública",
+      "color": "ink"
+    },
+    "historia": {
+      "label": "Historia de los Archivos",
+      "color": "ink"
+    },
+    "normas": {
+      "label": "Normas y Sistemas",
+      "color": "ink"
+    }
+  },
+  "modes": {
+    "beginner": {
+      "id": "beginner",
+      "label": "Test Rápido",
+      "questions": 20,
+      "timeMinutes": 25,
+      "description": "20 preguntas · 25 min",
+      "color": "sage"
+    },
+    "advanced": {
+      "id": "advanced",
+      "label": "Test Avanzado",
+      "questions": 50,
+      "timeMinutes": 60,
+      "description": "50 preguntas · 60 min",
+      "color": "terracotta"
+    },
+    "exam": {
+      "id": "exam",
+      "label": "Simulacro Oficial",
+      "questions": 100,
+      "timeMinutes": 120,
+      "description": "100 preguntas · 120 min · Formato examen real",
+      "color": "ink"
+    },
+    "supuesto_1": {
+      "id": "supuesto_1",
+      "label": "Ordenación, control y conservación de fondos",
+      "questions": 9,
+      "timeMinutes": 30,
+      "description": "Transferencia urgente por riesgo de derrumbe de edificio",
+      "color": "blue",
+      "practical": true
+    },
+    "supuesto_2": {
+      "id": "supuesto_2",
+      "label": "Atención e información a investigadores — Sala I",
+      "questions": 9,
+      "timeMinutes": 30,
+      "description": "Archivo Histórico: gestión de la sala de investigadores",
+      "color": "blue",
+      "practical": true
+    },
+    "supuesto_3": {
+      "id": "supuesto_3",
+      "label": "Apoyo a procesos técnicos archivísticos — I",
+      "questions": 9,
+      "timeMinutes": 30,
+      "description": "Archivo Central de Ministerio: descripción e inventario",
+      "color": "blue",
+      "practical": true
+    },
+    "supuesto_4": {
+      "id": "supuesto_4",
+      "label": "Conservación, restauración y control de fondos",
+      "questions": 9,
+      "timeMinutes": 30,
+      "description": "Fondo del siglo XVII en letra procesal con legajos deteriorados",
+      "color": "blue",
+      "practical": true
+    },
+    "supuesto_5": {
+      "id": "supuesto_5",
+      "label": "Atención e información a investigadores — Sala II",
+      "questions": 9,
+      "timeMinutes": 30,
+      "description": "Gestión de sala: solicitudes, reprografía y acceso restringido",
+      "color": "blue",
+      "practical": true
+    },
+    "supuesto_6": {
+      "id": "supuesto_6",
+      "label": "Apoyo a procesos técnicos — Digitalización",
+      "questions": 9,
+      "timeMinutes": 30,
+      "description": "Convenio de digitalización con universidad pública",
+      "color": "blue",
+      "practical": true
+    },
+    "supuesto_7": {
+      "id": "supuesto_7",
+      "label": "Transferencia ordinaria con incidencias",
+      "questions": 9,
+      "timeMinutes": 30,
+      "description": "Recepción de fondos administrativos con problemas de remesa",
+      "color": "blue",
+      "practical": true
+    },
+    "supuesto_8": {
+      "id": "supuesto_8",
+      "label": "Fondo privado: Archivo Maumejean",
+      "questions": 9,
+      "timeMinutes": 30,
+      "description": "Tratamiento de un fondo artístico depositado en la FCNPFE",
+      "color": "blue",
+      "practical": true
+    },
+    "supuesto_9": {
+      "id": "supuesto_9",
+      "label": "Elaboración de instrumentos de descripción",
+      "questions": 5,
+      "timeMinutes": 30,
+      "description": "Inventario y catálogo de un fondo municipal",
+      "color": "blue",
+      "practical": true
+    },
+    "supuesto_10": {
+      "id": "supuesto_10",
+      "label": "Conservación preventiva y siniestro",
+      "questions": 5,
+      "timeMinutes": 30,
+      "description": "Plan de emergencia y actuación tras inundación",
+      "color": "blue",
+      "practical": true
+    },
+    "supuesto_11": {
+      "id": "supuesto_11",
+      "label": "Digitalización y Archivo Electrónico",
+      "questions": 5,
+      "timeMinutes": 30,
+      "description": "Proyecto de digitalización con valor legal",
+      "color": "blue",
+      "practical": true
+    },
+    "supuesto_12": {
+      "id": "supuesto_12",
+      "label": "Valoración y Expurgo de documentación",
+      "questions": 5,
+      "timeMinutes": 30,
+      "description": "Propuesta de eliminación de series de un archivo central",
+      "color": "blue",
+      "practical": true
+    }
+  }
+}
