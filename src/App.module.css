@@ -1,61 +1,48 @@
-.app {
+.loadingScreen {
   min-height: 100dvh;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+.loadingSpinner {
+  width: 28px; height: 28px;
+  border: 2.5px solid var(--line-strong);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg) } }
+
+/* Shell */
+.shell {
+  display: flex;
+  min-height: 100dvh;
+  background: var(--bg);
+}
+
+/* Main area (right of sidebar) */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
   flex-direction: column;
+  min-height: 100dvh;
+  min-width: 0;
+}
+.mainFull {
+  margin-left: 0;
 }
 
 .content {
   flex: 1;
+  overflow-y: auto;
 }
 
-/* COUNTDOWN BAR */
-.countdown {
-  background: linear-gradient(90deg, var(--green) 0%, #3d8c46 100%);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  padding: 0.65rem 1.5rem;
-  flex-wrap: wrap;
-}
-
-.cdLabel {
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  opacity: 0.9;
-}
-
-.cdUnits {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.cdUnit {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  min-width: 36px;
-}
-
-.cdNum {
-  font-family: var(--font-mono);
-  font-size: 1.1rem;
-  font-weight: 800;
-  line-height: 1.1;
-}
-
-.cdSub {
-  font-size: 0.58rem;
-  font-weight: 600;
-  opacity: 0.75;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-@media (max-width: 480px) {
-  .countdown { gap: 0.75rem; }
-  .cdLabel { font-size: 0.7rem; }
+/* Mobile */
+@media (max-width: 768px) {
+  .main {
+    margin-left: 0;
+    margin-bottom: 60px;
+  }
 }

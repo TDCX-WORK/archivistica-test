@@ -1,0 +1,123 @@
+.sidebar {
+  width: var(--sidebar-w);
+  min-height: 100dvh;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+/* Logo */
+.logo {
+  width: 100%;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.logoIcon {
+  width: 36px; height: 36px;
+  background: var(--primary);
+  border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+}
+
+/* Nav */
+.nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 1rem 0;
+}
+
+.navItem {
+  width: 42px; height: 42px;
+  border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-muted);
+  transition: all var(--t) var(--ease);
+  position: relative;
+}
+.navItem:hover {
+  background: var(--surface-dim);
+  color: var(--ink);
+}
+.navActive {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+
+/* Footer */
+.footer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 1rem 0 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.avatarWrap {}
+.avatar {
+  width: 32px; height: 32px;
+  background: var(--surface-dim);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700;
+  color: var(--ink-soft);
+  border: 1.5px solid var(--line-strong);
+}
+
+.logoutBtn {
+  width: 32px; height: 32px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-subtle);
+  transition: all var(--t) var(--ease);
+  min-height: unset;
+}
+.logoutBtn:hover {
+  color: var(--danger);
+  background: var(--danger-lt);
+}
+
+/* Mobile: sidebar se convierte en bottom nav */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: 60px;
+    min-height: unset;
+    top: auto; bottom: 0; left: 0; right: 0;
+    flex-direction: row;
+    border-right: none;
+    border-top: 1px solid var(--line);
+    padding: 0 1rem;
+    justify-content: space-between;
+  }
+  .logo { display: none; }
+  .nav {
+    flex-direction: row;
+    flex: 1;
+    justify-content: center;
+    gap: 8px;
+    padding: 0;
+  }
+  .footer {
+    flex-direction: row;
+    border-top: none;
+    padding: 0;
+    gap: 4px;
+  }
+}

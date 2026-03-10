@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Clock, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react'
+import { Clock, ChevronLeft, ChevronRight, CheckCircle, AlertTriangle } from 'lucide-react'
 import allQuestions from '../../data/questions.json'
 import config       from '../../data/config.json'
 import QuestionCard from '../Question/QuestionCard'
@@ -9,39 +9,82 @@ import styles       from './TestRunner.module.css'
 
 function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5) }
 
-export default function TestRunner({ modeId, onGoHome, onRecordSession }) {
-  const mode      = config.modes[modeId]
-  const totalSecs = (mode?.timeMinutes || 25) * 60
-  const qCount    = mode?.questions || 20
+// Obtener preguntas según el modo
+function getQuestions(modeId, wrongAnswers = []) {
+  // Modo: repasar preguntas pendientes hoy (spaced repetition)
+  if (modeId === 'review_due') {
+    const today = new Date().toISOString().slice(0, 10)
+    const due   = wrongAnswers.filter(w => w.next_review <= today)
+    const ids   = new Set(due.map(w => w.question_id))
+    return shuffle(allQuestions.filter(q => ids.has(q.id)))
+  }
+
+  // Modo: todos los fallos
+  if (modeId === 'all_fails') {
+    const ids = new Set(wrongAnswers.map(w => w.question_id))
+    return shuffle(allQuestions.filter(q => ids.has(q.id)))
+  }
+
+  // Modos normales
+  const mode = config.modes[modeId]
+  if (!mode) return []
+  return shuffle(allQuestions).slice(0, mode.questions)
+}
+
+function getModeLabel(modeId) {
+  if (modeId === 'review_due') return 'Repasar hoy'
+  if (modeId === 'all_fails')  return 'Todos mis fallos'
+  return config.modes[modeId]?.label || modeId
+}
+
+function getModeTime(modeId) {
+  if (modeId === 'review_due' || modeId === 'all_fails') return null // sin límite de tiempo
+  return (config.modes[modeId]?.timeMinutes || 25) * 60
+}
+
+export default function TestRunner({ modeId, onGoHome, onRecordSession, onRecordWrong, onRecordCorrectReview, wrongAnswers = [] }) {
+  const totalSecs = getModeTime(modeId)
+  const isFailMode = modeId === 'review_due' || modeId === 'all_fails'
 
   const [phase,     setPhase]     = useState('intro')
-  const [questions]               = useState(() => shuffle(allQuestions).slice(0, qCount))
+  const [questions]               = useState(() => getQuestions(modeId, wrongAnswers))
   const [index,     setIndex]     = useState(0)
   const [answers,   setAnswers]   = useState({})
   const [secsLeft,  setSecsLeft]  = useState(totalSecs)
   const startTimeRef              = useRef(Date.now())
+  const answersRef                = useRef(answers)
 
-  // FIX 4: keep answers in a ref so finishTest always sees latest value
-  const answersRef = useRef(answers)
   useEffect(() => { answersRef.current = answers }, [answers])
 
-  // Timer
+  // Timer (solo en modos con tiempo)
   useEffect(() => {
-    if (phase !== 'running') return
+    if (phase !== 'running' || !totalSecs) return
     if (secsLeft <= 0) { handleFinish(); return }
     const id = setInterval(() => setSecsLeft(s => s - 1), 1000)
     return () => clearInterval(id)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, secsLeft])
+  }, [phase, secsLeft, totalSecs])
 
+  const qCount   = questions.length
   const current  = questions[index]
   const answered = index in answers
 
   const handleAnswer = useCallback((optIdx) => {
     setAnswers(prev => ({ ...prev, [index]: optIdx }))
-  }, [index])
 
-  // FIX 4: read from ref — never stale
+    const q         = questions[index]
+    const isCorrect = optIdx === q.answer
+    const isInWrong = wrongAnswers.some(w => w.question_id === q.id)
+
+    if (!isCorrect) {
+      // Registrar fallo
+      onRecordWrong?.(q.id, q.block)
+    } else if (isCorrect && isInWrong) {
+      // Acertó una pregunta que tenía en fallos → actualizar spaced repetition
+      onRecordCorrectReview?.(q.id)
+    }
+  }, [index, questions, wrongAnswers, onRecordWrong, onRecordCorrectReview])
+
   const handleFinish = useCallback(() => {
     const snap    = answersRef.current
     const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000)
@@ -50,7 +93,6 @@ export default function TestRunner({ modeId, onGoHome, onRecordSession }) {
     setPhase('finished')
   }, [questions, modeId, onRecordSession])
 
-  // FIX 5: repeat resets internal state instead of reload
   const handleRepeat = useCallback(() => {
     setPhase('intro')
     setIndex(0)
@@ -59,22 +101,47 @@ export default function TestRunner({ modeId, onGoHome, onRecordSession }) {
     startTimeRef.current = Date.now()
   }, [totalSecs])
 
+  // Sin preguntas disponibles en modo fallos
+  if (phase === 'intro' && isFailMode && qCount === 0) return (
+    <div className={styles.intro}>
+      <div className={styles.introCard}>
+        <div className={styles.introIcon}><AlertTriangle size={28} strokeWidth={1.5} /></div>
+        <h2 className={styles.introTitle}>Sin preguntas pendientes</h2>
+        <p className={styles.introDesc}>
+          {modeId === 'review_due'
+            ? 'No tienes preguntas pendientes de repaso hoy. ¡Vuelve mañana!'
+            : 'Aún no tienes fallos registrados. Completa un test primero.'}
+        </p>
+        <button className={styles.startBtn} onClick={onGoHome}>Volver al inicio</button>
+      </div>
+    </div>
+  )
+
   if (phase === 'intro') return (
     <div className={styles.intro}>
       <div className={styles.introCard}>
-        <div className={styles.introIcon}><CheckCircle size={28} strokeWidth={1.5} /></div>
-        <h2 className={styles.introTitle}>{mode?.label}</h2>
-        <p className={styles.introDesc}>{mode?.description}</p>
+        <div className={styles.introIcon}>
+          {isFailMode
+            ? <AlertTriangle size={28} strokeWidth={1.5} style={{ color: 'var(--danger)' }} />
+            : <CheckCircle   size={28} strokeWidth={1.5} />}
+        </div>
+        <h2 className={styles.introTitle}>{getModeLabel(modeId)}</h2>
+        <p className={styles.introDesc}>
+          {modeId === 'review_due' && 'Preguntas que necesitas repasar según tu ritmo de aprendizaje.'}
+          {modeId === 'all_fails'  && 'Practica con todas las preguntas que has fallado anteriormente.'}
+          {!isFailMode && config.modes[modeId]?.description}
+        </p>
         <div className={styles.introMeta}>
-          <span><Clock size={14} /> {mode?.timeMinutes} minutos</span>
-          <span>·</span>
-          <span>{qCount} preguntas</span>
+          {totalSecs && <span><Clock size={14} /> {config.modes[modeId]?.timeMinutes} minutos</span>}
+          {totalSecs && <span>·</span>}
+          <span>{qCount} pregunta{qCount !== 1 ? 's' : ''}</span>
+          {isFailMode && <span>· Sin límite de tiempo</span>}
         </div>
         <button className={styles.startBtn} onClick={() => {
           startTimeRef.current = Date.now()
           setPhase('running')
         }}>
-          Comenzar test
+          Comenzar
         </button>
       </div>
     </div>
@@ -90,9 +157,9 @@ export default function TestRunner({ modeId, onGoHome, onRecordSession }) {
     />
   )
 
-  const mm     = String(Math.floor(secsLeft / 60)).padStart(2, '0')
-  const ss     = String(secsLeft % 60).padStart(2, '0')
-  const urgent = secsLeft < 120
+  const mm     = totalSecs ? String(Math.floor(secsLeft / 60)).padStart(2, '0') : null
+  const ss     = totalSecs ? String(secsLeft % 60).padStart(2, '0') : null
+  const urgent = totalSecs && secsLeft < 120
 
   return (
     <div className={styles.wrapper}>
@@ -103,10 +170,17 @@ export default function TestRunner({ modeId, onGoHome, onRecordSession }) {
           <span className={styles.progressTotal}>{qCount}</span>
         </div>
         <ProgressBar current={index + 1} total={qCount} secsLeft={secsLeft} totalSecs={totalSecs} />
-        <div className={[styles.timer, urgent ? styles.timerUrgent : ''].join(' ')}>
-          <Clock size={14} strokeWidth={1.8} />
-          <span className={styles.timerText}>{mm}:{ss}</span>
-        </div>
+        {totalSecs ? (
+          <div className={[styles.timer, urgent ? styles.timerUrgent : ''].join(' ')}>
+            <Clock size={14} strokeWidth={1.8} />
+            <span className={styles.timerText}>{mm}:{ss}</span>
+          </div>
+        ) : (
+          <div className={styles.timer}>
+            <AlertTriangle size={13} strokeWidth={1.8} style={{ color: 'var(--danger)' }} />
+            <span className={styles.timerText} style={{ color: 'var(--danger)', fontSize: '0.72rem' }}>Fallos</span>
+          </div>
+        )}
       </div>
 
       <div className={styles.main}>

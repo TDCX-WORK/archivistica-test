@@ -1,72 +1,113 @@
-import { useState, useCallback } from 'react'
-
-const USERS_KEY  = 'arch_users'
-const SESSION_KEY = 'arch_session'
-
-function hashPassword(pw) {
-  // Simple reversible obfuscation (no backend = no real crypto needed)
-  return btoa(encodeURIComponent(pw))
-}
-
-function getUsers() {
-  try { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]') } catch { return [] }
-}
-
-function saveUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users))
-}
-
-function getSession() {
-  try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null') } catch { return null }
-}
+import { useState, useEffect, useCallback } from 'react'
+import { supabase } from '../lib/supabase'
 
 export function useAuth() {
-  const [currentUser, setCurrentUser] = useState(() => getSession())
-  const [error, setError] = useState('')
+  const [currentUser, setCurrentUser] = useState(null)
+  const [loading,     setLoading]     = useState(true)
+  const [error,       setError]       = useState('')
 
-  const login = useCallback((username, password) => {
+  // Escucha cambios de sesión (refresco, logout, etc.)
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        loadProfile(session.user)
+      } else {
+        setCurrentUser(null)
+        setLoading(false)
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        loadProfile(session.user)
+      } else {
+        setCurrentUser(null)
+        setLoading(false)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function loadProfile(user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', user.id)
+      .single()
+
+    setCurrentUser({
+      id:          user.id,
+      username:    profile?.username ?? user.email?.split('@')[0] ?? 'usuario',
+      displayName: profile?.username ?? user.email?.split('@')[0] ?? 'usuario',
+    })
+    setLoading(false)
+  }
+
+  // Registro: usuario + contraseña (usamos email falso internamente)
+  const register = useCallback(async (displayName, username, password) => {
     setError('')
-    const users = getUsers()
-    const user  = users.find(u => u.username.toLowerCase() === username.trim().toLowerCase())
-    if (!user) { setError('Usuario no encontrado'); return false }
-    if (user.passwordHash !== hashPassword(password)) { setError('Contraseña incorrecta'); return false }
-    const session = { id: user.id, username: user.username, displayName: user.displayName }
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session))
-    setCurrentUser(session)
+    if (!displayName.trim() || !username.trim() || !password) {
+      setError('Rellena todos los campos'); return false
+    }
+    if (password.length < 4) {
+      setError('La contraseña debe tener al menos 4 caracteres'); return false
+    }
+
+    const fakeEmail = `${username.trim().toLowerCase()}@archivistica.app`
+
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email:    fakeEmail,
+      password,
+    })
+
+    if (signUpError) {
+      if (signUpError.message.includes('already registered')) {
+        setError('Ese nombre de usuario ya existe')
+      } else {
+        setError(signUpError.message)
+      }
+      return false
+    }
+
+    // Guardar el username en profiles
+    if (data.user) {
+      await supabase.from('profiles').insert({
+        id:       data.user.id,
+        username: username.trim().toLowerCase(),
+      })
+    }
+
     return true
   }, [])
 
-  const register = useCallback((displayName, username, password) => {
+  // Login: usuario + contraseña
+  const login = useCallback(async (username, password) => {
     setError('')
-    if (!displayName.trim() || !username.trim() || !password) { setError('Rellena todos los campos'); return false }
-    if (password.length < 4) { setError('La contraseña debe tener al menos 4 caracteres'); return false }
-    const users = getUsers()
-    if (users.find(u => u.username.toLowerCase() === username.trim().toLowerCase())) {
-      setError('Ese nombre de usuario ya existe'); return false
+    const fakeEmail = `${username.trim().toLowerCase()}@archivistica.app`
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email:    fakeEmail,
+      password,
+    })
+
+    if (signInError) {
+      setError('Usuario o contraseña incorrectos')
+      return false
     }
-    const newUser = {
-      id: `u_${Date.now()}`,
-      displayName: displayName.trim(),
-      username: username.trim().toLowerCase(),
-      passwordHash: hashPassword(password),
-      createdAt: new Date().toISOString()
-    }
-    saveUsers([...users, newUser])
-    const session = { id: newUser.id, username: newUser.username, displayName: newUser.displayName }
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session))
-    setCurrentUser(session)
+
     return true
   }, [])
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(SESSION_KEY)
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut()
     setCurrentUser(null)
     setError('')
   }, [])
 
   const clearError = useCallback(() => setError(''), [])
 
-  return { currentUser, login, register, logout, error, clearError }
+  return { currentUser, loading, login, register, logout, error, clearError }
 }
 
 export default useAuth

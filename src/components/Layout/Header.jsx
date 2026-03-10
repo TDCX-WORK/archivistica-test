@@ -1,73 +1,99 @@
-import { BookOpen, BarChart2, Home, X, LogOut, User, ChevronDown } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
+import { Search, Bell, X, LogOut, User, Settings } from 'lucide-react'
 import styles from './Header.module.css'
 
-export default function Header({ onGoHome, inTest, modeName, activeTab, onTabChange, currentUser, onLogout }) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef(null)
+function UserMenu({ currentUser, onLogout, onClose }) {
+  return (
+    <div className={styles.userMenuOverlay} onClick={onClose}>
+      <div className={styles.userMenu} onClick={e => e.stopPropagation()}>
+        <div className={styles.userMenuTop}>
+          <div className={styles.userMenuAvatar}>
+            {currentUser?.displayName?.[0]?.toUpperCase() || '?'}
+          </div>
+          <div>
+            <p className={styles.userMenuName}>{currentUser?.displayName}</p>
+            <p className={styles.userMenuSub}>Opositor/a · Archivística</p>
+          </div>
+        </div>
+        <div className={styles.userMenuDivider} />
+        <button className={styles.userMenuItem} onClick={onClose}>
+          <User size={14} /> Mi perfil
+        </button>
+        <button className={styles.userMenuItem} onClick={onClose}>
+          <Settings size={14} /> Ajustes
+        </button>
+        <div className={styles.userMenuDivider} />
+        <button className={[styles.userMenuItem, styles.userMenuLogout].join(' ')} onClick={onLogout}>
+          <LogOut size={14} /> Cerrar sesión
+        </button>
+      </div>
+    </div>
+  )
+}
 
-  useEffect(() => {
-    const handler = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false) }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [])
+export default function Header({ currentUser, inTest, modeName, onGoHome, pageTitle, onLogout }) {
+  const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <header className={styles.header}>
-      <div className={styles.inner}>
+    <>
+      <header className={styles.header}>
+        {/* Left */}
         <div className={styles.left}>
-          <button className={styles.logo} onClick={onGoHome} aria-label="Inicio">
-            <div className={styles.logoIcon}><BookOpen size={18} strokeWidth={1.6} /></div>
-            <span className={styles.logoText}>Archivística</span>
-          </button>
+          {inTest ? (
+            <div className={styles.testLabel}>
+              <span className={styles.testDot} />
+              <span className={styles.testName}>{modeName}</span>
+            </div>
+          ) : (
+            <div className={styles.pageTitle}>{pageTitle || 'Inicio'}</div>
+          )}
         </div>
 
+        {/* Center — solo en home */}
         {!inTest && (
-          <nav className={styles.nav}>
-            <button className={[styles.navBtn, activeTab === 'inicio' ? styles.navActive : ''].join(' ')} onClick={() => onTabChange('inicio')}>
-              <Home size={15} strokeWidth={1.8} /><span>Inicio</span>
-            </button>
-            <button className={[styles.navBtn, activeTab === 'estadisticas' ? styles.navActive : ''].join(' ')} onClick={() => onTabChange('estadisticas')}>
-              <BarChart2 size={15} strokeWidth={1.8} /><span>Estadísticas</span>
-            </button>
-          </nav>
-        )}
-
-        {inTest && modeName && (
-          <div className={styles.testLabel}>
-            <span className={styles.testDot} />
-            <span className={styles.testName}>{modeName}</span>
+          <div className={styles.center}>
+            <span className={styles.centerTitle}>Oposiciones Archivística</span>
+            <span className={styles.centerSub}>Ministerio de Cultura · Sección Archivos</span>
           </div>
         )}
 
+        {/* Right */}
         <div className={styles.right}>
           {inTest ? (
             <button className={styles.exitBtn} onClick={onGoHome}>
-              <X size={17} strokeWidth={2} /><span>Salir</span>
+              <X size={15} strokeWidth={2} /> Salir
             </button>
-          ) : currentUser ? (
-            <div className={styles.userMenu} ref={menuRef}>
-              <button className={styles.userBtn} onClick={() => setMenuOpen(v => !v)}>
-                <div className={styles.avatar}>{currentUser.displayName?.[0]?.toUpperCase() || '?'}</div>
-                <span className={styles.userName}>{currentUser.displayName}</span>
-                <ChevronDown size={13} className={[styles.chevron, menuOpen ? styles.chevronOpen : ''].join(' ')} />
+          ) : (
+            <>
+              <div className={styles.searchWrap}>
+                <Search size={13} className={styles.searchIcon} />
+                <input className={styles.searchInput} placeholder="Buscar tema…" readOnly />
+              </div>
+              <button className={styles.iconBtn} title="Notificaciones">
+                <Bell size={16} strokeWidth={1.8} />
               </button>
-              {menuOpen && (
-                <div className={styles.dropdown}>
-                  <div className={styles.dropUser}>
-                    <span className={styles.dropName}>{currentUser.displayName}</span>
-                    <span className={styles.dropUname}>@{currentUser.username}</span>
-                  </div>
-                  <div className={styles.dropDivider} />
-                  <button className={styles.dropBtn} onClick={() => { setMenuOpen(false); onLogout() }}>
-                    <LogOut size={14} />Cerrar sesión
-                  </button>
+              <button
+                className={styles.avatarPill}
+                onClick={() => setMenuOpen(v => !v)}
+                title="Mi cuenta"
+              >
+                <div className={styles.avatar}>
+                  {currentUser?.displayName?.[0]?.toUpperCase() || '?'}
                 </div>
-              )}
-            </div>
-          ) : null}
+                <span className={styles.avatarName}>{currentUser?.displayName}</span>
+              </button>
+            </>
+          )}
         </div>
-      </div>
-    </header>
+      </header>
+
+      {menuOpen && (
+        <UserMenu
+          currentUser={currentUser}
+          onLogout={onLogout}
+          onClose={() => setMenuOpen(false)}
+        />
+      )}
+    </>
   )
 }
