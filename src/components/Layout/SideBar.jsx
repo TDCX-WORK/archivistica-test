@@ -1,9 +1,10 @@
-import { Home, BarChart2, BookOpen, LogOut, ChevronRight } from 'lucide-react'
+import { Home, BarChart2, BookOpen, LogOut } from 'lucide-react'
 import styles from './Sidebar.module.css'
 
 const NAV_ITEMS = [
-  { id: 'inicio',        icon: Home,      label: 'Inicio' },
-  { id: 'estadisticas',  icon: BarChart2, label: 'Estadísticas' },
+  { id: 'inicio',       icon: Home,      label: 'Inicio' },
+  { id: 'estudio',      icon: BookOpen,  label: 'Estudio' },
+  { id: 'estadisticas', icon: BarChart2, label: 'Estadísticas' },
 ]
 
 export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout }) {
@@ -30,7 +31,7 @@ export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout 
         ))}
       </nav>
 
-      {/* Footer — avatar + logout */}
+      {/* Footer */}
       <div className={styles.footer}>
         <div className={styles.avatarWrap} title={currentUser?.displayName}>
           <div className={styles.avatar}>

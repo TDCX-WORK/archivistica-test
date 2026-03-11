@@ -6,6 +6,7 @@ import Sidebar        from './components/Layout/Sidebar'
 import Header         from './components/Layout/Header'
 import Home           from './components/Home/Home'
 import Stats          from './components/Stats/Stats'
+import StudyView      from './components/Study/StudyView'
 import TestRunner     from './components/TestRunner/TestRunner'
 import Flashcard      from './components/Flashcard/Flashcard'
 import SupuestoRunner from './components/Supuesto/SupuestoRunner'
@@ -20,13 +21,16 @@ export default function App() {
   const [tab,  setTab]  = useState('inicio')
 
   useEffect(() => {
-    if (view.type === 'home')  setTab('inicio')
-    if (view.type === 'stats') setTab('estadisticas')
+    if (view.type === 'home')   setTab('inicio')
+    if (view.type === 'stats')  setTab('estadisticas')
+    if (view.type === 'study')  setTab('estudio')
   }, [view.type])
 
   const handleTabChange = (t) => {
     setTab(t)
-    setView({ type: t === 'estadisticas' ? 'stats' : 'home' })
+    if (t === 'estadisticas') setView({ type: 'stats' })
+    else if (t === 'estudio') setView({ type: 'study' })
+    else setView({ type: 'home' })
   }
 
   const goHome = () => setView({ type: 'home' })
@@ -38,12 +42,7 @@ export default function App() {
   )
 
   if (!currentUser) return (
-    <AuthPage
-      onLogin={login}
-      onRegister={register}
-      error={error}
-      clearError={clearError}
-    />
+    <AuthPage onLogin={login} onRegister={register} error={error} clearError={clearError} />
   )
 
   const isTestActive = view.type === 'test' || view.type === 'supuesto' || view.type === 'flashcards'
@@ -60,7 +59,9 @@ export default function App() {
     view.type === 'supuesto'   ? view.supuesto?.title :
     view.type === 'flashcards' ? 'Flashcards' : ''
 
-  const pageTitle = view.type === 'stats' ? 'Estadísticas' : 'Inicio'
+  const pageTitle =
+    view.type === 'stats' ? 'Estadísticas' :
+    view.type === 'study' ? 'Estudio' : 'Inicio'
 
   return (
     <div className={styles.shell}>
@@ -86,6 +87,9 @@ export default function App() {
         <div className={styles.content}>
           {view.type === 'home' && (
             <Home onSelectMode={handleSelectMode} progress={progress} />
+          )}
+          {view.type === 'study' && (
+            <StudyView currentUser={currentUser} onSelectMode={handleSelectMode} />
           )}
           {view.type === 'stats' && (
             <Stats progress={progress} />
