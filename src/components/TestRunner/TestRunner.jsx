@@ -9,6 +9,9 @@ import styles       from './TestRunner.module.css'
 
 function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5) }
 
+// Bloques temáticos válidos (para detectar si modeId es un bloque)
+const BLOCK_IDS = new Set(Object.keys(config.blocks))
+
 // Obtener preguntas según el modo
 function getQuestions(modeId, wrongAnswers = []) {
   // Modo: repasar preguntas pendientes hoy (spaced repetition)
@@ -25,6 +28,12 @@ function getQuestions(modeId, wrongAnswers = []) {
     return shuffle(allQuestions.filter(q => ids.has(q.id)))
   }
 
+  // Modo: practicar un bloque temático (viene desde StudyView)
+  if (BLOCK_IDS.has(modeId)) {
+    const blockQuestions = allQuestions.filter(q => q.block === modeId)
+    return shuffle(blockQuestions).slice(0, Math.min(20, blockQuestions.length))
+  }
+
   // Modos normales
   const mode = config.modes[modeId]
   if (!mode) return []
@@ -34,11 +43,13 @@ function getQuestions(modeId, wrongAnswers = []) {
 function getModeLabel(modeId) {
   if (modeId === 'review_due') return 'Repasar hoy'
   if (modeId === 'all_fails')  return 'Todos mis fallos'
+  if (BLOCK_IDS.has(modeId))   return config.blocks[modeId]?.label || modeId
   return config.modes[modeId]?.label || modeId
 }
 
 function getModeTime(modeId) {
-  if (modeId === 'review_due' || modeId === 'all_fails') return null // sin límite de tiempo
+  if (modeId === 'review_due' || modeId === 'all_fails') return null
+  if (BLOCK_IDS.has(modeId)) return 25 * 60
   return (config.modes[modeId]?.timeMinutes || 25) * 60
 }
 
@@ -129,7 +140,8 @@ export default function TestRunner({ modeId, onGoHome, onRecordSession, onRecord
         <p className={styles.introDesc}>
           {modeId === 'review_due' && 'Preguntas que necesitas repasar según tu ritmo de aprendizaje.'}
           {modeId === 'all_fails'  && 'Practica con todas las preguntas que has fallado anteriormente.'}
-          {!isFailMode && config.modes[modeId]?.description}
+          {BLOCK_IDS.has(modeId)   && `Practica con preguntas del bloque: ${config.blocks[modeId]?.label}.`}
+          {!isFailMode && !BLOCK_IDS.has(modeId) && config.modes[modeId]?.description}
         </p>
         <div className={styles.introMeta}>
           {totalSecs && <span><Clock size={14} /> {config.modes[modeId]?.timeMinutes} minutos</span>}

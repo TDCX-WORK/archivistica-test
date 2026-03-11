@@ -1,14 +1,35 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
-  BookOpen, Clock, ChevronRight, ChevronDown, CheckCircle,
-  Bookmark, BookmarkCheck, Zap, Tag, Calendar,
-  Scale, LayoutGrid, Loader2
+  BookOpen, Clock, CheckCircle, Bookmark, BookmarkCheck,
+  Zap, ArrowLeft, ChevronRight, ChevronLeft, Scale, LayoutGrid,
+  Loader2, Tag, Calendar
 } from 'lucide-react'
 import STUDY_BLOCKS from '../../data/study-content'
 import useStudyProgress from '../../hooks/useStudyProgress'
 import styles from './StudyView.module.css'
 
-const ICONS = { BookOpen, FileText: BookOpen, Archive: BookOpen, Layers: BookOpen, Shield: BookOpen, History: BookOpen, Scale, LayoutGrid }
+function Donut({ pct, color, size = 56, stroke = 6 }) {
+  const r = (size - stroke) / 2
+  const circ = 2 * Math.PI * r
+  const dash = (pct / 100) * circ
+  return (
+    <svg width={size} height={size} className={styles.donutSvg}>
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--line-strong)" strokeWidth={stroke} />
+      <circle
+        cx={size/2} cy={size/2} r={r} fill="none"
+        stroke={color} strokeWidth={stroke}
+        strokeDasharray={`${dash} ${circ - dash}`}
+        strokeDashoffset={circ / 4}
+        strokeLinecap="round"
+        className={styles.donutArc}
+      />
+      <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle"
+        fontSize={size * 0.22} fontWeight="800" fill="var(--ink)" fontFamily="var(--font-body)">
+        {pct}%
+      </text>
+    </svg>
+  )
+}
 
 function HighlightedText({ text, keywords = [], laws = [], dates = [] }) {
   if (!text) return null
@@ -17,7 +38,6 @@ function HighlightedText({ text, keywords = [], laws = [], dates = [] }) {
     ...laws.map(l => ({ term: l, type: 'law' })),
     ...dates.map(d => ({ term: d, type: 'date' })),
   ].sort((a, b) => b.term.length - a.term.length)
-
   const parts = text.split(/(\*\*[^*]+\*\*)/)
   return (
     <p className={styles.paragraph}>
@@ -78,84 +98,97 @@ function ContentRenderer({ content, keywords, laws, dates }) {
   )
 }
 
-function TopicCard({ topic, blockId, blockColor, isRead, isBookmarked, isCompact, onToggleRead, onToggleBookmark, onTest }) {
-  const [open, setOpen] = useState(false)
+function ReadMode({ block, topicIndex, onClose, onToggleRead, onToggleBookmark, readTopics, bookmarks, onTest }) {
+  const [idx, setIdx] = useState(topicIndex)
+  const scrollRef = useRef(null)
+  const topic = block.topics[idx]
+  const isRead = readTopics.has(topic.id)
+  const isBookmarked = bookmarks.has(topic.id)
+  const totalTopics = block.topics.length
+  const readCount = block.topics.filter(t => readTopics.has(t.id)).length
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [idx])
+
+  useEffect(() => {
+    if (!isRead) onToggleRead(topic.id, block.id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx])
+
   return (
-    <div className={[styles.topicCard, isRead ? styles.topicRead : ''].join(' ')}>
-      <div className={styles.topicHeader} onClick={() => setOpen(v => !v)}>
-        <div className={styles.topicLeft}>
-          <div
-            className={[styles.topicReadDot, isRead ? styles.dotRead : ''].join(' ')}
-            style={{ '--bc': blockColor }}
-            onClick={e => { e.stopPropagation(); onToggleRead(topic.id, blockId) }}
-            title={isRead ? 'Marcar como no leído' : 'Marcar como leído'}
-          >
-            {isRead && <CheckCircle size={11} />}
-          </div>
-          <div>
-            <h3 className={styles.topicTitle}>{topic.title}</h3>
-            {isCompact && <p className={styles.topicSummary}>{topic.summary}</p>}
-          </div>
+    <div className={styles.readOverlay}>
+      <div className={styles.readTopBar}>
+        <button className={styles.readBackBtn} onClick={onClose}>
+          <ArrowLeft size={16} /> <span>Volver</span>
+        </button>
+        <div className={styles.readProgressDots}>
+          {block.topics.map((t, i) => (
+            <button
+              key={t.id}
+              className={[styles.readDot, i === idx ? styles.readDotActive : '', readTopics.has(t.id) ? styles.readDotDone : ''].join(' ')}
+              style={(i === idx || readTopics.has(t.id)) ? { '--bc': block.color } : {}}
+              onClick={() => setIdx(i)}
+              title={t.title}
+            />
+          ))}
         </div>
-        <div className={styles.topicRight}>
+        <div className={styles.readTopRight}>
           <button
-            className={[styles.bookmarkBtn, isBookmarked ? styles.bookmarked : ''].join(' ')}
-            onClick={e => { e.stopPropagation(); onToggleBookmark(topic.id, blockId) }}
-            title={isBookmarked ? 'Quitar marcador' : 'Añadir marcador'}
+            className={[styles.readActionBtn, isBookmarked ? styles.readActionActive : ''].join(' ')}
+            style={isBookmarked ? { color: block.color } : {}}
+            onClick={() => onToggleBookmark(topic.id, block.id)}
+            title={isBookmarked ? 'Quitar marcador' : 'Marcar'}
           >
-            {isBookmarked ? <BookmarkCheck size={15} /> : <Bookmark size={15} />}
+            {isBookmarked ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
           </button>
-          <ChevronDown size={16} className={[styles.chevron, open ? styles.chevronOpen : ''].join(' ')} />
+          <span className={styles.readCounter}>{readCount}/{totalTopics}</span>
         </div>
       </div>
 
-      {!isCompact && !open && (
-        <p className={styles.topicSummaryBelow}>{topic.summary}</p>
-      )}
-
-      {open && (
-        <div className={styles.topicContent}>
+      <div className={styles.readScroll} ref={scrollRef}>
+        <div className={styles.readContent}>
+          <div className={styles.readBlockBadge} style={{ background: block.bg, color: block.color }}>
+            <BookOpen size={12} strokeWidth={2} />
+            {block.label}
+          </div>
+          <h1 className={styles.readTitle}>{topic.title}</h1>
           {(topic.laws.length > 0 || topic.dates.length > 0) && (
-            <div className={styles.tagsRow}>
+            <div className={styles.readTags}>
               {topic.laws.map(l => <span key={l} className={styles.tagLaw}><Scale size={10} /> {l}</span>)}
               {topic.dates.map(d => <span key={d} className={styles.tagDate}><Calendar size={10} /> {d}</span>)}
             </div>
           )}
           <ContentRenderer content={topic.content} keywords={topic.keywords} laws={topic.laws} dates={topic.dates} />
           {topic.keywords.length > 0 && (
-            <div className={styles.keywordsRow}>
-              <Tag size={11} className={styles.keywordsIcon} />
+            <div className={styles.readKeywords}>
+              <Tag size={12} />
               {topic.keywords.map(k => <span key={k} className={styles.keyword}>{k}</span>)}
             </div>
           )}
-          <div className={styles.topicActions}>
-            <button className={styles.actionBtn} onClick={() => onToggleRead(topic.id, blockId)}>
-              <CheckCircle size={14} />
-              {isRead ? 'Marcar como no leído' : 'Marcar como leído'}
-            </button>
-            <button className={styles.actionBtnPrimary} onClick={onTest}>
-              <Zap size={14} /> Practicar este tema
+          <div className={styles.readCTA}>
+            <button className={styles.readCTABtn} onClick={() => onTest(block.id)}>
+              <Zap size={15} /> Practicar este bloque
             </button>
           </div>
         </div>
-      )}
-    </div>
-  )
-}
-
-function BlockProgressRow({ block, readCount, totalCount }) {
-  const pct = totalCount > 0 ? Math.round((readCount / totalCount) * 100) : 0
-  const Icon = ICONS[block.icon] || BookOpen
-  return (
-    <div className={styles.blockProgress} style={{ '--bc': block.color, '--bb': block.bg }}>
-      <div className={styles.blockProgressIcon}><Icon size={13} strokeWidth={2} /></div>
-      <div className={styles.blockProgressInfo}>
-        <span className={styles.blockProgressLabel}>{block.label}</span>
-        <div className={styles.blockProgressBar}>
-          <div className={styles.blockProgressFill} style={{ width: `${pct}%` }} />
-        </div>
       </div>
-      <span className={styles.blockProgressPct}>{pct}%</span>
+
+      <div className={styles.readBottomNav}>
+        <button className={styles.readNavBtn} onClick={() => setIdx(i => i - 1)} disabled={idx === 0}>
+          <ChevronLeft size={16} /> <span>Anterior</span>
+        </button>
+        <span className={styles.readNavLabel}>{idx + 1} / {totalTopics}</span>
+        {idx < totalTopics - 1 ? (
+          <button className={styles.readNavBtn} onClick={() => setIdx(i => i + 1)}>
+            <span>Siguiente</span> <ChevronRight size={16} />
+          </button>
+        ) : (
+          <button className={[styles.readNavBtn, styles.readNavBtnFinish].join(' ')} onClick={onClose}>
+            <CheckCircle size={15} /> <span>Completado</span>
+          </button>
+        )}
+      </div>
     </div>
   )
 }
@@ -163,19 +196,10 @@ function BlockProgressRow({ block, readCount, totalCount }) {
 export default function StudyView({ currentUser, onSelectMode }) {
   const { readTopics, bookmarks, loading, toggleRead, toggleBookmark } =
     useStudyProgress(currentUser?.id)
+  const [readMode, setReadMode] = useState(null)
 
-  const [activeBlock, setActiveBlock] = useState(STUDY_BLOCKS[0].id)
-  const [isCompact,   setIsCompact]   = useState(false)
-  const [tab,         setTab]         = useState('temario')
-
-  const currentBlock  = STUDY_BLOCKS.find(b => b.id === activeBlock)
-  const totalTopics   = STUDY_BLOCKS.reduce((s, b) => s + b.topics.length, 0)
-  const globalPct     = Math.round((readTopics.size / totalTopics) * 100)
-
-  const bookmarkedTopics = STUDY_BLOCKS.flatMap(b =>
-    b.topics.filter(t => bookmarks.has(t.id))
-      .map(t => ({ ...t, blockLabel: b.label, blockColor: b.color, blockId: b.id }))
-  )
+  const totalTopics = STUDY_BLOCKS.reduce((s, b) => s + b.topics.length, 0)
+  const globalPct   = Math.round((readTopics.size / totalTopics) * 100)
 
   if (loading) return (
     <div className={styles.loadingState}>
@@ -184,152 +208,95 @@ export default function StudyView({ currentUser, onSelectMode }) {
     </div>
   )
 
+  if (readMode) return (
+    <ReadMode
+      block={readMode.block}
+      topicIndex={readMode.topicIndex}
+      onClose={() => setReadMode(null)}
+      onToggleRead={toggleRead}
+      onToggleBookmark={toggleBookmark}
+      readTopics={readTopics}
+      bookmarks={bookmarks}
+      onTest={onSelectMode}
+    />
+  )
+
   return (
     <div className={styles.page}>
-
       <div className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Temario</h1>
           <p className={styles.pageSubtitle}>Cuerpo Facultativo de Archiveros · Ministerio de Cultura</p>
         </div>
-        <button
-          className={[styles.toggleBtn, isCompact ? styles.toggleActive : ''].join(' ')}
-          onClick={() => setIsCompact(v => !v)}
-        >
-          <LayoutGrid size={14} />
-          {isCompact ? 'Expandido' : 'Compacto'}
-        </button>
       </div>
 
-      <div className={styles.globalProgress}>
-        <div className={styles.globalProgressTop}>
-          <span className={styles.globalProgressLabel}>Progreso total del temario</span>
-          <span className={styles.globalProgressPct}>{globalPct}% — {readTopics.size}/{totalTopics} temas leídos</span>
-        </div>
-        <div className={styles.globalProgressBar}>
-          <div className={styles.globalProgressFill} style={{ width: `${globalPct}%` }} />
-        </div>
-        <div className={styles.blockProgressList}>
-          {STUDY_BLOCKS.map(b => (
-            <BlockProgressRow key={b.id} block={b}
-              readCount={b.topics.filter(t => readTopics.has(t.id)).length}
-              totalCount={b.topics.length}
-            />
-          ))}
+      {/* Global progress */}
+      <div className={styles.globalCard}>
+        <Donut pct={globalPct} color="var(--primary)" size={72} stroke={7} />
+        <div className={styles.globalRight}>
+          <p className={styles.globalLabel}>Progreso total del temario</p>
+          <p className={styles.globalStat}>{readTopics.size} <span>/ {totalTopics} temas leídos</span></p>
+          <div className={styles.globalBar}>
+            <div className={styles.globalBarFill} style={{ width: `${globalPct}%` }} />
+          </div>
         </div>
       </div>
 
-      <div className={styles.tabs}>
-        <button className={[styles.tab, tab === 'temario' ? styles.tabActive : ''].join(' ')} onClick={() => setTab('temario')}>
-          <BookOpen size={14} /> Temario
-        </button>
-        <button className={[styles.tab, tab === 'marcadores' ? styles.tabActive : ''].join(' ')} onClick={() => setTab('marcadores')}>
-          <Bookmark size={14} /> Marcadores
-          {bookmarks.size > 0 && <span className={styles.tabBadge}>{bookmarks.size}</span>}
-        </button>
-      </div>
-
-      {tab === 'marcadores' && (
-        <div className={styles.bookmarksList}>
-          {bookmarkedTopics.length === 0 ? (
-            <div className={styles.emptyState}>
-              <Bookmark size={28} strokeWidth={1.4} />
-              <p>Sin marcadores aún. Pulsa el 🔖 en cualquier tema para guardarlo aquí.</p>
-            </div>
-          ) : (
-            bookmarkedTopics.map(t => (
-              <div key={t.id} className={styles.bookmarkItem}
-                onClick={() => { setTab('temario'); setActiveBlock(t.blockId) }}>
-                <div className={styles.bookmarkDot} style={{ background: t.blockColor }} />
-                <div>
-                  <p className={styles.bookmarkTitle}>{t.title}</p>
-                  <p className={styles.bookmarkBlock}>{t.blockLabel}</p>
+      {/* Blocks grid */}
+      <div className={styles.blocksGrid}>
+        {STUDY_BLOCKS.map(block => {
+          const read  = block.topics.filter(t => readTopics.has(t.id)).length
+          const total = block.topics.length
+          const pct   = Math.round((read / total) * 100)
+          return (
+            <div key={block.id} className={styles.blockCard}>
+              <div className={styles.blockCardTop}>
+                <div className={styles.blockCardIcon} style={{ background: block.bg, color: block.color }}>
+                  <BookOpen size={18} strokeWidth={1.8} />
                 </div>
-                <ChevronRight size={14} className={styles.bookmarkArrow} />
+                <Donut pct={pct} color={block.color} size={52} stroke={5} />
               </div>
-            ))
-          )}
-        </div>
-      )}
-
-      {tab === 'temario' && (
-        <div className={styles.studyLayout}>
-          <nav className={styles.blockNav}>
-            {STUDY_BLOCKS.map(block => {
-              const Icon   = ICONS[block.icon] || BookOpen
-              const read   = block.topics.filter(t => readTopics.has(t.id)).length
-              const total  = block.topics.length
-              const pct    = Math.round((read / total) * 100)
-              const active = activeBlock === block.id
-              return (
-                <button key={block.id}
-                  className={[styles.blockNavItem, active ? styles.blockNavActive : ''].join(' ')}
-                  style={active ? { '--bc': block.color, '--bb': block.bg } : {}}
-                  onClick={() => setActiveBlock(block.id)}
-                >
-                  <div className={styles.blockNavIcon}
-                    style={{ background: active ? block.color : block.bg, color: active ? '#fff' : block.color }}>
-                    <Icon size={14} strokeWidth={2} />
-                  </div>
-                  <div className={styles.blockNavBody}>
-                    <span className={styles.blockNavLabel}>{block.label}</span>
-                    <div className={styles.blockNavMeta}>
-                      <Clock size={10} /> {block.estimatedMinutes} min
-                      <span className={styles.blockNavDot}>·</span>
-                      {total} temas
-                    </div>
-                  </div>
-                  <div className={styles.blockNavPct} style={{ color: pct === 100 ? '#059669' : '#9CA3AF' }}>
-                    {pct === 100 ? <CheckCircle size={14} /> : `${pct}%`}
-                  </div>
-                </button>
-              )
-            })}
-          </nav>
-
-          {currentBlock && (
-            <div className={styles.blockContent}>
-              <div className={styles.blockContentHeader}>
-                <div className={styles.blockContentMeta}>
-                  <span className={styles.blockContentTag}
-                    style={{ background: currentBlock.bg, color: currentBlock.color }}>
-                    {(() => { const I = ICONS[currentBlock.icon] || BookOpen; return <I size={11} strokeWidth={2} /> })()}
-                    {currentBlock.label}
-                  </span>
-                  <span className={styles.blockContentTime}>
-                    <Clock size={12} /> ~{currentBlock.estimatedMinutes} min
-                  </span>
-                </div>
-                <div className={styles.blockContentStats}>
-                  {currentBlock.topics.filter(t => readTopics.has(t.id)).length}/{currentBlock.topics.length} leídos
-                </div>
+              <h3 className={styles.blockCardTitle}>{block.label}</h3>
+              <div className={styles.blockCardMeta}>
+                <span><Clock size={11} /> {block.estimatedMinutes} min</span>
+                <span><LayoutGrid size={11} /> {total} temas</span>
               </div>
-
               <div className={styles.topicsList}>
-                {currentBlock.topics.map(topic => (
-                  <TopicCard key={topic.id}
-                    topic={topic} blockId={currentBlock.id} blockColor={currentBlock.color}
-                    isRead={readTopics.has(topic.id)} isBookmarked={bookmarks.has(topic.id)}
-                    isCompact={isCompact}
-                    onToggleRead={toggleRead} onToggleBookmark={toggleBookmark}
-                    onTest={() => onSelectMode && onSelectMode(currentBlock.id)}
-                  />
-                ))}
+                {block.topics.map((topic, i) => {
+                  const isRead = readTopics.has(topic.id)
+                  const isBookmarked = bookmarks.has(topic.id)
+                  return (
+                    <button
+                      key={topic.id}
+                      className={[styles.topicRow, isRead ? styles.topicRowRead : ''].join(' ')}
+                      style={{ '--bc': block.color }}
+                      onClick={() => setReadMode({ block, topicIndex: i })}
+                    >
+                      <span className={[styles.topicRowDot, isRead ? styles.topicRowDotRead : ''].join(' ')}>
+                        {isRead && <CheckCircle size={9} />}
+                      </span>
+                      <span className={styles.topicRowTitle}>{topic.title}</span>
+                      <div className={styles.topicRowRight}>
+                        {isBookmarked && <BookmarkCheck size={12} style={{ color: block.color, flexShrink: 0 }} />}
+                        <ChevronRight size={13} className={styles.topicRowArrow} />
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
-
-              <div className={styles.blockCTA}>
-                <div>
-                  <p className={styles.blockCTATitle}>¿Listo para practicar?</p>
-                  <p className={styles.blockCTADesc}>Refuerza lo aprendido con preguntas de {currentBlock.label}.</p>
-                </div>
-                <button className={styles.blockCTABtn} onClick={() => onSelectMode && onSelectMode(currentBlock.id)}>
-                  <Zap size={15} /> Practicar este bloque
+              <div className={styles.blockCardFooter}>
+                <button
+                  className={styles.practiceBtn}
+                  style={{ '--bc': block.color, '--bb': block.bg }}
+                  onClick={() => onSelectMode && onSelectMode(block.id)}
+                >
+                  <Zap size={13} /> Practicar
                 </button>
               </div>
             </div>
-          )}
-        </div>
-      )}
+          )
+        })}
+      </div>
     </div>
   )
 }

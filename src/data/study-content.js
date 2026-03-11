@@ -1419,3 +1419,985 @@ La digitalización no crea nuevos derechos de autor sobre los documentos de domi
 ]
 
 export default STUDY_BLOCKS
+
+// ═══════════════════════════════════════════════════════════════════
+// TEMAS ADICIONALES (extraídos del temario oficial de preparadores)
+// Se inyectan automáticamente sin duplicar los existentes
+// ═══════════════════════════════════════════════════════════════════
+
+const EXTRA_TOPICS = [
+  // ── CONSTITUCIÓN ──────────────────────────────────────────────
+  {
+    id: 'c5',
+    title: 'Las Cortes Generales: Congreso, Senado y función legislativa',
+    summary: 'Composición bicameral. 350 diputados. Senado como cámara territorial. Funciones legislativa, presupuestaria y de control. Procedimiento de investidura y formación del Gobierno.',
+    content: `Las Cortes Generales representan al pueblo español (art. 66.1 CE) y ejercen la potestad legislativa del Estado, aprueban los Presupuestos Generales y controlan la acción del Gobierno (art. 66.2 CE).
+
+**El Congreso de los Diputados**
+Compuesto por un mínimo de 300 y máximo de 400 diputados (en la práctica, 350). Elegidos por sufragio universal, libre, igual, directo y secreto en circunscripciones provinciales mediante sistema proporcional (Ley D'Hondt). Mandato: 4 años.
+
+Funciones exclusivas del Congreso: investidura del Presidente del Gobierno (art. 99 CE), moción de censura (art. 113 CE), cuestión de confianza (art. 112 CE), autorización del estado de alarma, excepción y sitio.
+
+**El Senado**
+Cámara de representación territorial (art. 69.1 CE). Compuesto por senadores elegidos directamente (4 por provincia peninsular, 3 por Gran Canaria, Mallorca, Tenerife, 1 por Ceuta y Melilla, etc.) y senadores designados por las CCAA (1 por comunidad + 1 más por cada millón de habitantes). Total aproximado: 265 senadores.
+
+**El Gobierno**
+Art. 97 CE: dirige la política interior y exterior, la Administración civil y militar y la defensa del Estado. Ejerce la función ejecutiva y la potestad reglamentaria.
+
+Composición: Presidente, Vicepresidentes, Ministros y demás miembros establecidos por ley (art. 98 CE). El Consejo de Ministros es el órgano colegiado de gobierno.
+
+**Procedimiento de investidura (art. 99 CE)**
+1. El Rey propone candidato a Presidente (previa consulta con grupos parlamentarios)
+2. El candidato expone su programa político ante el Congreso
+3. Votación: mayoría absoluta en 1ª vuelta; mayoría simple 48h después
+4. Si no hay investidura en 2 meses desde las elecciones → disolución automática de las Cámaras
+
+**Moción de censura (art. 113 CE)**
+Constructiva: debe incluir candidato alternativo. Debe ser aprobada por mayoría absoluta del Congreso. Si prospera, el candidato propuesto queda investido automáticamente.`,
+    keywords: ['Cortes Generales', 'Congreso de los Diputados', '350 diputados', 'Senado', 'cámara territorial', 'Ley D\'Hondt', 'investidura', 'mayoría absoluta', 'mayoría simple', 'moción de censura constructiva', 'cuestión de confianza', 'Consejo de Ministros', 'art. 66', 'art. 69', 'art. 97', 'art. 99', 'art. 113', 'Presupuestos Generales', 'potestad legislativa', 'potestad reglamentaria'],
+    laws: ['CE art. 66', 'CE art. 69', 'CE art. 97', 'CE art. 98', 'CE art. 99', 'CE art. 112', 'CE art. 113'],
+    dates: [],
+  },
+  {
+    id: 'c6',
+    title: 'Organización territorial: CCAA, Estatutos y Administración Local',
+    summary: 'Estado de las Autonomías. Vías del art. 143 y 151 CE. Competencias exclusivas del Estado (art. 149) y de las CCAA (art. 148). Administración Local: municipios y provincias.',
+    content: `El Título VIII CE (arts. 137-158) establece la organización territorial del Estado. El art. 2 CE vincula unidad nacional con autonomía de nacionalidades y regiones.
+
+**El Estado de las Autonomías**
+España se organiza en municipios, provincias y Comunidades Autónomas (art. 137 CE). Actualmente: 17 CCAA y 2 Ciudades Autónomas (Ceuta y Melilla).
+
+**Vías de acceso a la autonomía**
+- **Vía lenta (art. 143 CE)**: iniciativa de Diputaciones o 2/3 de municipios. Competencias limitadas, ampliables tras 5 años.
+- **Vía rápida (art. 151 CE)**: para territorios con referéndum histórico de autonomía o con iniciativa del 75% de municipios y referéndum positivo. Autonomía plena desde el inicio: País Vasco, Cataluña, Galicia y Andalucía.
+
+Los Estatutos de Autonomía son la norma institucional básica de cada CCAA, aprobados como Ley Orgánica.
+
+**Distribución de competencias**
+Art. 149 CE — competencias exclusivas del Estado: defensa, relaciones exteriores, legislación mercantil/penal/laboral, marina mercante, ferrocarriles interestatales, correos, bases del régimen de las AAPP, hacienda general; **museos, bibliotecas y archivos de titularidad estatal** (art. 149.1.28).
+
+Art. 148 CE — competencias posibles de las CCAA: urbanismo, agricultura, turismo; **museos, bibliotecas y conservatorios de interés para la Comunidad Autónoma** (art. 148.1.15).
+
+**Administración Local**
+- **Municipio**: entidad básica. Órganos: Pleno (concejales elegidos), Alcalde (elegido por el Pleno), Junta de Gobierno Local. Competencias: urbanismo, servicios sociales, tráfico, protección civil.
+- **Provincia**: entidad local con personalidad jurídica. Diputación Provincial. Función: cooperación económica a municipios. Circunscripción electoral para el Congreso y el Senado.`,
+    keywords: ['Estado de las Autonomías', '17 CCAA', 'art. 143 vía lenta', 'art. 151 vía rápida', 'Estatutos de Autonomía', 'Ley Orgánica', 'art. 148', 'art. 149', 'art. 149.1.28', 'competencias exclusivas Estado', 'municipio', 'provincia', 'Diputación Provincial', 'Alcalde', 'Pleno', 'museos bibliotecas archivos estatales'],
+    laws: ['CE art. 2', 'CE art. 137', 'CE art. 143', 'CE art. 148', 'CE art. 149', 'CE art. 151'],
+    dates: [],
+  },
+  {
+    id: 'c7',
+    title: 'Procedimiento administrativo, actos administrativos y recursos',
+    summary: 'Ley 39/2015 LPACAP. Concepto y clasificación del acto administrativo. Fases del procedimiento. Silencio administrativo. Recursos de alzada, reposición y extraordinario de revisión.',
+    content: `La Ley 39/2015, de 1 de octubre, del Procedimiento Administrativo Común de las Administraciones Públicas (LPACAP) regula el procedimiento administrativo. Derogó la Ley 30/1992.
+
+**El acto administrativo**
+Declaración de voluntad, juicio, conocimiento o deseo de una Administración Pública en ejercicio de potestades administrativas. Debe ser motivado (art. 35 LPACAP) cuando limite derechos, sea desfavorable o se separe del criterio de informes previos.
+
+Elementos: subjetivos (órgano competente), objetivos (presupuesto de hecho, causa, fin) y formales (procedimiento, forma de exteriorización).
+
+**Fases del procedimiento administrativo**
+1. **Iniciación**: de oficio o a instancia de parte. Registro de la solicitud mediante registro electrónico. El órgano debe comunicar plazo máximo de resolución y efectos del silencio.
+2. **Instrucción**: impulso de oficio, prueba, informes (preceptivos o facultativos, vinculantes o no). **Trámite de audiencia**: esencial, 10-15 días hábiles para que el interesado alegue.
+3. **Terminación**: resolución motivada, desistimiento, renuncia, caducidad o terminación convencional. Plazo máximo general: **3 meses** (silencio positivo para procedimientos de parte, salvo excepciones).
+
+**Silencio administrativo**
+- Positivo: estimación por falta de resolución en plazo (regla general, procedimientos iniciados a instancia de parte).
+- Negativo: desestimación (procedimientos de impugnación, revisión de actos, ejercicio del derecho de petición).
+
+**Recursos administrativos**
+- **Recurso de alzada** (arts. 121-122): contra actos que no agotan la vía administrativa. Plazo: **1 mes** (acto expreso) o **3 meses** (silencio). Resuelve el órgano superior jerárquico.
+- **Recurso de reposición** (arts. 123-124): potestativo, contra actos que agotan la vía administrativa. Plazo: **1 mes**. Resuelve el mismo órgano.
+- **Recurso extraordinario de revisión** (art. 125): contra actos firmes, supuestos tasados (error de hecho, documentos aparecidos, sentencia penal).
+
+**Revisión de oficio** (art. 106): la Administración puede declarar nulos sus propios actos nulos de pleno derecho en cualquier momento, previa audiencia al interesado y dictamen del Consejo de Estado u órgano consultivo de la CCAA.`,
+    keywords: ['Ley 39/2015', 'LPACAP', 'acto administrativo', 'motivación', 'audiencia al interesado', '10-15 días', 'silencio administrativo positivo', 'silencio negativo', '3 meses', 'recurso de alzada', '1 mes', 'recurso de reposición', 'recurso extraordinario de revisión', 'revisión de oficio', 'Consejo de Estado', 'nulidad de pleno derecho', 'caducidad', 'desistimiento'],
+    laws: ['Ley 39/2015 LPACAP', 'CE art. 103', 'CE art. 9.3'],
+    dates: ['2015 — Ley 39/2015 LPACAP (deroga Ley 30/1992)'],
+  },
+  {
+    id: 'c8',
+    title: 'Función pública: TREBEP, situaciones administrativas y régimen disciplinario',
+    summary: 'RDL 5/2015 TREBEP. Clases de personal. Adquisición de la condición de funcionario. Situaciones administrativas. Derechos, deberes, incompatibilidades. Faltas y sanciones.',
+    content: `El Real Decreto Legislativo 5/2015, de 30 de octubre, aprueba el texto refundido de la Ley del Estatuto Básico del Empleado Público (TREBEP). Es la norma básica de la función pública española.
+
+**Clases de personal al servicio de las AAPP**
+- **Funcionarios de carrera**: vinculación permanente, nombramiento legal. Ejercen funciones que implican participación en el ejercicio de potestades públicas.
+- **Funcionarios interinos**: por razones de urgencia o necesidad, para plazas vacantes, sustitución, exceso de tareas.
+- **Personal laboral**: vinculación contractual. Fijo, indefinido no fijo, temporal.
+- **Personal eventual**: confianza o asesoramiento especial. Libre nombramiento y cese.
+
+**Adquisición de la condición de funcionario**
+Requisitos: nacionalidad española (con excepciones UE para ciertos puestos), capacidad funcional, mayoría de edad, titulación exigida, no haber sido separado del servicio por expediente disciplinario.
+
+Proceso: convocatoria pública → oposición, concurso-oposición o concurso → nombramiento → toma de posesión. Principios constitucionales: igualdad, mérito, capacidad y publicidad (art. 103.3 CE).
+
+**Situaciones administrativas**
+- **Servicio activo**: presta servicios en la Administración de origen.
+- **Servicios especiales**: cargo político, misión internacional, funciones sindicales relevantes. Computa a efectos de trienios, carrera y derechos pasivos.
+- **Excedencia voluntaria**: mínimo 2 años, máximo sin límite. No devenga retribuciones.
+- **Excedencia por cuidado de familiares**: hasta **3 años** por hijo (reserva del mismo puesto el primer año) o hasta **2 años** por familiar dependiente.
+- **Suspensión de funciones**: sanción disciplinaria firme o prisión preventiva.
+
+**Régimen disciplinario**
+- Faltas **muy graves** (prescripción **3 años**): abandono del servicio, incumplimiento de la obligación de resolver, conductas discriminatorias, acoso laboral o sexual, condena penal firme.
+- Faltas **graves** (prescripción **2 años**): incumplimiento injustificado de la jornada, falta grave de rendimiento, desobediencia.
+- Faltas **leves** (prescripción **6 meses**): incorrección con ciudadanos, retraso leve.
+
+Sanciones: separación del servicio (solo faltas muy graves) → suspensión de funciones hasta 6 años → traslado forzoso → demérito → apercibimiento.`,
+    keywords: ['TREBEP', 'RDL 5/2015', 'funcionario de carrera', 'funcionario interino', 'personal laboral', 'personal eventual', 'oposición', 'concurso-oposición', 'mérito y capacidad', 'servicio activo', 'servicios especiales', 'excedencia voluntaria 2 años', 'excedencia cuidado 3 años', 'falta muy grave 3 años', 'falta grave 2 años', 'falta leve 6 meses', 'separación del servicio', 'suspensión de funciones 6 años'],
+    laws: ['RDL 5/2015 TREBEP', 'CE art. 103.3', 'CE art. 149.1.18'],
+    dates: ['2015 — RDL 5/2015 TREBEP'],
+  },
+  {
+    id: 'c9',
+    title: 'Igualdad de género, transparencia y Ministerio de Cultura',
+    summary: 'LO 3/2007 igualdad efectiva. Plan de Igualdad: empresas >250 trabajadores. Ley 19/2013 LTAIBG: transparencia activa y pasiva. CTBG. Ministerio de Cultura RD 323/2024.',
+    content: `**La Ley Orgánica 3/2007, de 22 de marzo, para la igualdad efectiva de mujeres y hombres**
+Transpone la Directiva 2002/73/CE. Objetivo: hacer efectivo el principio de igualdad de trato y oportunidades. Ámbito: empleo público y privado, educación, bienes y servicios, medios de comunicación.
+
+Medidas principales:
+- **Plan de Igualdad**: obligatorio en empresas de más de **250 trabajadores** y en todas las AAPP. Incluye diagnóstico, objetivos, medidas y sistema de seguimiento y evaluación.
+- **Representación equilibrada**: mínimo **40%** de cada sexo en listas electorales y órganos colegiados de selección y nombramiento.
+- **Permiso de paternidad**: ampliado progresivamente hasta igualar al de maternidad (actualmente 16 semanas).
+- **Comisión Interministerial de Igualdad**: coordinación de políticas entre departamentos ministeriales.
+
+**La Ley 19/2013 de Transparencia, Acceso a la Información Pública y Buen Gobierno (LTAIBG)**
+Objeto (art. 1): ampliar la transparencia, garantizar el derecho de acceso a la información pública y establecer obligaciones de buen gobierno.
+
+Dos grandes ejes:
+1. **Transparencia activa**: publicación proactiva en el Portal de Transparencia de información sobre organización, normas, contratos, subvenciones, presupuestos y retribuciones de altos cargos.
+2. **Transparencia pasiva**: derecho de cualquier persona a solicitar información pública sin necesidad de justificar la petición. Plazo de respuesta: **1 mes** (prorrogable otros 30 días).
+
+**Límites al derecho de acceso** (art. 14 LTAIBG): seguridad nacional, defensa, relaciones exteriores, seguridad pública, función inspectora, intereses económicos, propiedad intelectual, protección del medio ambiente, datos personales.
+
+**El Consejo de Transparencia y Buen Gobierno (CTBG)**: organismo independiente adscrito al Ministerio de Hacienda. Funciones: promover la cultura de transparencia, controlar el cumplimiento de las obligaciones de publicidad activa, resolver reclamaciones.
+
+**Ministerio de Cultura — RD 323/2024**
+Estructura básica: Secretaría de Estado de Cultura → Dirección General de Bellas Artes (incluye **Subdirección General de Archivos Estatales**). Organismos autónomos: INAEM, IPCE (Instituto del Patrimonio Cultural de España).
+
+La Subdirección General de Archivos Estatales gestiona el Sistema Español de Archivos, coordina los archivos estatales, el portal PARES y el CIDA (Centro de Información Documental de Archivos).`,
+    keywords: ['LO 3/2007', 'igualdad efectiva', 'Plan de Igualdad', '250 trabajadores', '40% representación equilibrada', '16 semanas permiso paternidad', 'Ley 19/2013', 'LTAIBG', 'transparencia activa', 'Portal de Transparencia', 'transparencia pasiva', '1 mes', 'CTBG', 'Consejo de Transparencia', 'art. 14 LTAIBG', 'Ministerio de Cultura', 'RD 323/2024', 'Subdirección General de Archivos Estatales', 'CIDA', 'IPCE', 'INAEM'],
+    laws: ['LO 3/2007', 'Ley 19/2013 LTAIBG', 'RD 323/2024'],
+    dates: ['2007 — LO 3/2007 Igualdad', '2013 — Ley 19/2013 LTAIBG', '2024 — RD 323/2024 organización Ministerio Cultura'],
+  },
+  // ── LEGISLACIÓN ───────────────────────────────────────────────
+  {
+    id: 'l5',
+    title: 'Ley 16/1985 del Patrimonio Histórico Español: Patrimonio Documental',
+    summary: 'Estructura de la LPHE (9 Títulos). Patrimonio Documental: titulares, plazos de 40 y 100 años. Obligaciones de los poseedores. Junta de Calificación. RD 111/1986.',
+    content: `La Ley 16/1985, de 25 de junio, del Patrimonio Histórico Español (LPHE) es la norma fundamental de protección del patrimonio cultural. Consta de 9 Títulos, 76 artículos, disposiciones adicionales, transitorias y final. Desarrollada por el RD 111/1986.
+
+**Estructura de la LPHE**
+- Título I: disposiciones generales
+- Título II: Bienes de Interés Cultural (BIC)
+- Título III: bienes muebles
+- Título IV: Patrimonio Arqueológico
+- Título V: Patrimonio Etnográfico
+- Título **VI**: del Patrimonio Documental y Bibliográfico (arts. 48-53)
+- Título **VII**: de los Archivos, Bibliotecas y Museos (arts. 59-66)
+- Título VIII: medidas de fomento
+- Título IX: infracciones y sanciones
+
+**Patrimonio Documental (art. 49 LPHE)**
+Integran el Patrimonio Documental los documentos de cualquier época generados por:
+- Órganos de gobierno y Administración del Estado, CCAA y Administración Local
+- Entidades y asociaciones políticas, sindicales o religiosas
+- Personas privadas gestoras de servicios públicos
+- Personas físicas cuya trayectoria lo justifique
+
+Antigüedad mínima que determina automáticamente su pertenencia al Patrimonio Documental:
+- Documentos generados por personas **jurídicas privadas**: **más de 40 años**
+- Documentos generados por personas **físicas**: **más de 100 años**
+
+**Obligaciones de titulares y poseedores** (art. 52 LPHE): conservar, proteger, destinar a un uso que no impida su conservación, facilitar la inspección de la Administración y el acceso de los investigadores.
+
+**La Junta de Calificación, Valoración y Exportación de Bienes del Patrimonio Histórico**: órgano asesor del Ministerio de Cultura. Informa sobre exportación de bienes y su adquisición por el Estado. El Estado tiene derecho de tanteo y retracto en subastas de bienes del Patrimonio Documental (art. 38 LPHE).
+
+**RD 111/1986, de 10 de enero**: desarrolla parcialmente la LPHE. Regula el Registro General de BIC, las Juntas de Calificación y los procedimientos de declaración.`,
+    keywords: ['LPHE', 'Ley 16/1985', 'Patrimonio Documental', 'BIC', 'Título VI', 'Título VII', 'art. 49', '40 años personas jurídicas', '100 años personas físicas', 'Junta de Calificación', 'tanteo y retracto', 'art. 38', 'art. 52', 'obligaciones poseedores', 'RD 111/1986', 'CE art. 46', '76 artículos', '9 Títulos'],
+    laws: ['Ley 16/1985 LPHE', 'RD 111/1986', 'CE art. 46'],
+    dates: ['1985 — Ley 16/1985 LPHE', '1986 — RD 111/1986 desarrollo LPHE'],
+  },
+  {
+    id: 'l6',
+    title: 'RD 1708/2011: Sistema Español de Archivos y transferencias',
+    summary: 'Estructura del Sistema Español de Archivos. Consejo de Cooperación Archivística: composición y funciones. Sistema de Archivos de la AGE: 4 tipos. Transferencias reglamentarias y relación de entrega.',
+    content: `El Real Decreto 1708/2011, de 18 de noviembre, establece el Sistema Español de Archivos y regula el Sistema de Archivos de la Administración General del Estado y de sus Organismos Públicos. Desarrolla la Ley 16/1985 en materia archivística.
+
+**El Sistema Español de Archivos**
+Conjunto articulado de archivos, órganos y medios al servicio de la gestión documental y conservación del Patrimonio Documental. Integrado por:
+- Archivos de la AGE y sus organismos públicos
+- Archivos de las CCAA y Entidades Locales (por acuerdo)
+- Archivos de la Iglesia Católica y otras confesiones (por acuerdo)
+- Archivos de partidos políticos, sindicatos y organizaciones empresariales que reciban subvenciones públicas
+- Archivos privados que formen parte del Patrimonio Documental
+
+**El Consejo de Cooperación Archivística** (art. 12 RD 1708/2011)
+Órgano colegiado de cooperación entre la AGE y las CCAA. Adscrito al Ministerio de Cultura. Funciones: coordinar el Sistema Español de Archivos, impulsar la cooperación y proponer normas y estándares.
+
+**El Sistema de Archivos de la AGE — 4 tipos**
+1. **Archivos de oficina o de gestión**: documentación en trámite o de consulta frecuente. Sin plazo fijo (aprox. 5 años).
+2. **Archivos centrales**: fondos transferidos por los archivos de oficina de cada ministerio u organismo. Aprox. 5-15 años.
+3. **Archivo Intermedio** (AGA — Decreto 914/1969): documentación administrativa con escasa consulta. Aprox. 15-30 años.
+4. **Archivos históricos**: conservación permanente (AHN, AGS, AGI, ACA, AHP).
+
+**Transferencias reglamentarias**
+Procedimiento normalizado de traslado de documentos entre tipos de archivo. Instrumento: la **relación de entrega** (anteriormente llamada "hoja de remesa"). Debe incluir: descripción de las series, fechas extremas, número de unidades de instalación, estado de conservación, nivel de acceso.
+
+Ciclo de transferencia tipo:
+- Oficina → Archivo Central: aprox. **5 años** tras el cierre del expediente
+- Archivo Central → AGA: aprox. **15 años**
+- AGA → Archivo Histórico: aprox. **30 años**`,
+    keywords: ['RD 1708/2011', 'Sistema Español de Archivos', 'Consejo de Cooperación Archivística', 'archivo de oficina', 'archivo central', 'archivo intermedio', 'AGA', 'archivo histórico', 'transferencia reglamentaria', 'relación de entrega', 'hoja de remesa', '5 años', '15 años', '30 años', 'Decreto 914/1969', 'ciclo vital', 'Patrimonio Documental'],
+    laws: ['RD 1708/2011', 'Ley 16/1985 LPHE', 'Decreto 914/1969'],
+    dates: ['1969 — Decreto 914/1969 crea el AGA', '2011 — RD 1708/2011 Sistema Español de Archivos'],
+  },
+  // ── HISTORIA ──────────────────────────────────────────────────
+  {
+    id: 'h4',
+    title: 'ACA y Archivo de la Real Chancillería de Valladolid',
+    summary: 'Archivo de la Corona de Aragón: fundación 1318 por Jaime II. Pedro el Ceremonioso. Fondos: Real Cancillería, Real Patrimonio, Consejo de Aragón. Chancillería de Valladolid: Enrique II (1371), Registro de Ejecutorias.',
+    content: `**Archivo de la Corona de Aragón (ACA)**
+Fundado en **1318** por el rey **Jaime II**, quien destinó dos cámaras del Palacio Real de Barcelona al depósito de la documentación de la Casa Real y los archivos incautados a los Templarios. Jaime II instituyó la copia íntegra de los documentos expedidos por la Cancillería en series de registros, y cuidó el ingreso de toda la documentación de su Casa Real.
+
+Con **Pedro el Ceremonioso** (siglo XIV) el archivo se transforma progresivamente en archivo de la Administración Real.
+
+Según Jaime Riera i Sans, el archivo pasa por etapas: archivo público → archivo cerrado → archivo de investigación.
+
+Sede actual: **Palau dels Lloctinents**, Barcelona (desde 1856; el archivo está en el Palacio Real Mayor desde 1770).
+
+**Fondos principales del ACA:**
+- Real Cancillería: registros desde el siglo XIII (la serie más voluminosa). Registros de Cancillería son la fuente primaria para la historia medieval de la Corona de Aragón.
+- Real Patrimonio: administración económica de la Corona
+- Consejo de Aragón: organismo de gobierno de la Corona de Aragón (siglos XVI-XVIII)
+- Generalitat de Catalunya: fondos medievales y modernos
+- Órdenes militares: documentación de las Órdenes en los territorios de la Corona
+
+**Archivo de la Real Chancillería de Valladolid**
+La Chancillería de Valladolid fue creada definitivamente en **1371** por **Enrique II** como tribunal superior de justicia de Castilla. Suprimida en **1834**. El archivo recoge su documentación judicial.
+
+Fondos principales:
+- **Registro de ejecutorias**: resoluciones y sentencias del tribunal. La serie más consultada, esencial para la historia jurídica y social de Castilla.
+- Pleitos civiles y criminales
+- Pergaminos reales: privilegios rodados y cartas reales
+- **Sala de Hijosdalgo**: expedientes de hidalguía y pruebas de nobleza
+- Planos y mapas históricos de Castilla`,
+    keywords: ['ACA', 'Archivo Corona de Aragón', 'Jaime II', '1318', 'Pedro el Ceremonioso', 'Palau dels Lloctinents', 'Real Cancillería', 'Registros de Cancillería', 'Real Patrimonio', 'Consejo de Aragón', 'Chancillería Valladolid', 'Enrique II', '1371', '1834', 'Registro de ejecutorias', 'Sala de Hijosdalgo', 'pruebas de hidalguía'],
+    laws: [],
+    dates: ['1318 — fundación ACA por Jaime II', '1371 — Chancillería de Valladolid por Enrique II', '1770 — ACA en Palacio Real Mayor', '1834 — supresión Chancillería de Valladolid', '1856 — ACA en Palau dels Lloctinents'],
+  },
+  {
+    id: 'h5',
+    title: 'AHN, Archivo de la Nobleza, AGA y archivos del siglo XX',
+    summary: 'AHN (1866): desamortización, fondos de Clero, Órdenes Militares, Inquisición. Archivo Histórico de la Nobleza (Toledo, 1993). AGA (1969, Alcalá de Henares). CDMH/Archivo Guerra Civil. Archivos Históricos Provinciales.',
+    content: `**Archivo Histórico Nacional (AHN)**
+Creado por Real Decreto de **28 de marzo de 1866** como consecuencia directa de los procesos desamortizadores del siglo XIX (Desamortización de Mendizábal 1836-37 y Madoz 1855). La disolución de las órdenes religiosas generó un enorme volumen documental que el Estado asumió.
+
+Sede actual: calle Serrano, Madrid (desde los años 50). Antes, en la Biblioteca Nacional.
+
+**Fondos principales del AHN:**
+- **Clero**: documentación de monasterios y conventos desamortizados. La serie más voluminosa del AHN.
+- **Órdenes Militares**: Santiago, Calatrava, Alcántara y Montesa. Incluye expedientes de pruebas de nobleza para el ingreso en las órdenes.
+- **Consejos Suprimidos**: Consejo de Castilla, Inquisición, Hacienda, Guerra, etc.
+- **Inquisición**: fondo de proyección internacional con procesos del Tribunal del Santo Oficio.
+- **Ultramar**: administración colonial americana y filipina.
+- **Estado**: relaciones exteriores desde el siglo XV.
+
+**Archivo Histórico de la Nobleza**
+Creado en **1993**, sede en **Toledo** (Palacio Fuensalida). Reúne en depósito voluntario los archivos de la grandeza y nobleza española. Fondos: Casa de Osuna, Casa de Alba, Frías, Bornos y muchos otros.
+
+**Archivo General de la Administración (AGA)**
+Creado por **Decreto 914/1969**, sede en **Alcalá de Henares**. Archivo intermedio de la AGE. Heredero del Archivo General Central (destruido en el incendio de **1939**). Conserva documentación ministerial desde el siglo XIX hasta los años 80-90.
+
+**Centro Documental de la Memoria Histórica (CDMH)**
+Creado por **RD 426/1999**, sede en **Salamanca**. Reúne documentación del bando nacional de la Guerra Civil (incautaciones de la DNAE y OIPA). Actualizado por la **Ley 52/2007** de Memoria Histórica.
+
+**Archivos Históricos Provinciales (AHP)**
+Red de 52 archivos (uno por provincia). Creados desde **1931**. Custodian principalmente protocolos notariales, registros históricos y fondos de la Administración periférica del Estado.`,
+    keywords: ['AHN', '1866', 'desamortización', 'Mendizábal', 'Clero', 'Órdenes Militares', 'Santiago Calatrava Alcántara Montesa', 'Inquisición', 'Consejos Suprimidos', 'Ultramar', 'Archivo Histórico de la Nobleza', 'Toledo', '1993', 'Casa de Osuna', 'AGA', 'Decreto 914/1969', 'Alcalá de Henares', '1939 incendio', 'CDMH', 'RD 426/1999', 'Salamanca', 'Ley 52/2007', 'Archivos Históricos Provinciales', '1931', 'protocolos notariales'],
+    laws: ['RD 28 marzo 1866', 'Decreto 914/1969', 'RD 426/1999', 'Ley 52/2007'],
+    dates: ['1836-37 — Desamortización Mendizábal', '1866 — creación AHN', '1939 — incendio Archivo General Central', '1969 — creación AGA', '1993 — creación Archivo de la Nobleza', '1999 — RD 426/1999 CDMH', '2007 — Ley 52/2007 Memoria Histórica'],
+  },
+  {
+    id: 'h6',
+    title: 'AGS, AGI y sistema archivístico de Defensa',
+    summary: 'AGS: Carlos I en 1540, Felipe II y Juan de Herrera 1572. Instrucción de 1588: primer reglamento de archivos del mundo. AGI: Carlos III en 1785, Casa Lonja Sevilla, Patrimonio UNESCO 1987. Archivos militares.',
+    content: `**Archivo General de Simancas (AGS)**
+En **1540**, **Carlos I** decide utilizar el Castillo de Simancas (requisado a los Enríquez) para concentrar documentación en desuso. El verdadero artífice del archivo fue **Felipe II**, quien encargó en **1572** la reforma del castillo a su arquitecto **Juan de Herrera**, con el objeto de guardar la documentación de la Corona y el Real Patrimonio.
+
+En **1588**, Felipe II publica una **Instrucción** que ordena la transferencia periódica de documentos de los órganos de gobierno al archivo: considerado el **primer reglamento de archivos del mundo**. Este sistema se mantuvo hasta mediados del siglo XIX.
+
+Sede: Castillo de Simancas, Valladolid. Dependiente del Ministerio de Cultura.
+
+Fondos: documentación de la monarquía hispánica (siglos XV-XIX). Secretarías de Estado, Guerra, Hacienda, Patronato Real, Consejo de Estado, relaciones con el Papado.
+
+**Archivo General de Indias (AGI)**
+Creado en **1785** por Real Cédula de **Carlos III**, con sede en la **Casa Lonja de Sevilla** (obra de Juan de Herrera). Objetivo: centralizar la documentación dispersa sobre la administración de las Indias que estaba repartida entre Simancas, la Casa de la Contratación y el Consejo de Indias en Madrid.
+
+Declarado **Patrimonio de la Humanidad** por la UNESCO en **1987** (junto con el Centro Histórico de Sevilla y la Catedral).
+
+Fondos: administración colonial americana y filipina (siglos XV-XIX). Secciones: Patronato (descubrimiento y conquista), Contratación, Indiferente General, Audiencias (por territorios americanos), Consulados, Estado, Mapas y Planos.
+
+**Sistema Archivístico de la Defensa**
+Archivos principales:
+- **Archivo General Militar de Segovia**: Ejército de Tierra, siglo XVIII en adelante. Expedientes personales de militares.
+- **Archivo General Militar de Madrid** (Alcalá de Henares): fondos siglos XIX-XX.
+- **Archivo General Militar de Ávila**: documentación de la Guerra Civil (bando nacional).
+- **Archivo General de la Marina "Álvaro de Bazán"** (El Viso del Marqués, Ciudad Real): fondos de la Armada desde el siglo XVI.
+- **Archivo General del Aire** (Villaviciosa de Odón, Madrid): Ejército del Aire.`,
+    keywords: ['AGS', 'Simancas', 'Carlos I', '1540', 'Felipe II', 'Juan de Herrera', '1572', 'Instrucción 1588', 'primer reglamento de archivos', 'AGI', 'Archivo General de Indias', 'Carlos III', '1785', 'Casa Lonja Sevilla', 'Patrimonio de la Humanidad', '1987', 'UNESCO', 'Patronato', 'Contratación', 'Defensa', 'Álvaro de Bazán', 'El Viso del Marqués', 'Segovia'],
+    laws: ['Real Cédula 1785 Carlos III', 'Instrucción 1588 Felipe II'],
+    dates: ['1540 — Carlos I en Simancas', '1572 — Felipe II reforma castillo (Juan de Herrera)', '1588 — Instrucción Felipe II (primer reglamento de archivos)', '1785 — creación AGI por Carlos III', '1987 — AGI Patrimonio de la Humanidad UNESCO'],
+  },
+  // ── GESTIÓN ───────────────────────────────────────────────────
+  {
+    id: 'g5',
+    title: 'Ingresos, transferencias y préstamos de documentos',
+    summary: 'Sistemas ordinarios (transferencias) y extraordinarios (donación, depósito, compra) de ingreso. Procedimiento de transferencia y relación de entrega. Salidas: préstamos y reproducciones.',
+    content: `Los documentos ingresan en los archivos mediante sistemas **ordinarios** (transferencias) y **extraordinarios** (donación, compra, depósito, etc.).
+
+**Ingresos ordinarios: las transferencias**
+La transferencia es el sistema reglamentario de traspaso de documentos entre tipos de archivo del mismo sistema.
+
+- **Transferencia ordinaria**: periódica y reglamentada según los plazos del ciclo vital.
+- **Transferencia extraordinaria**: fuera del calendario habitual, por saturación, cierre de oficina o reorganización.
+
+**Procedimiento de transferencia**
+1. Identificación y ordenación en la oficina cedente
+2. Elaboración de la **relación de entrega** (antes llamada "hoja de remesa"): series documentales, fechas extremas, número de cajas/legajos, estado de conservación, nivel de acceso
+3. Revisión y conformidad del archivo receptor
+4. El archivo asigna signatura definitiva
+5. La oficina cedente conserva copia de la relación
+
+**Ingresos extraordinarios**
+- **Donación**: transmisión gratuita. Requiere escritura pública o documento equivalente.
+- **Legado**: por disposición testamentaria.
+- **Compra o adquisición**: el Estado ejerce derecho de **tanteo y retracto** en subastas de bienes del Patrimonio Documental (art. 38 LPHE).
+- **Depósito**: custodia temporal sin transmisión de propiedad. El depositante puede recuperar los documentos.
+- **Incautación**: medida excepcional cuando peligra la conservación del Patrimonio Documental.
+
+**Salidas de documentos**
+- **Préstamo interarchivístico**: salida temporal para exposiciones, consultas en otro archivo o procesos judiciales. Requiere acuerdo entre archivos, seguro y control de plazos.
+- **Reproducciones**: no implican salida del original. Se generan copias para el solicitante.
+- **Devoluciones**: retorno de fondos al archivo custodio legítimo.`,
+    keywords: ['transferencia ordinaria', 'transferencia extraordinaria', 'relación de entrega', 'hoja de remesa', 'donación', 'legado', 'compra', 'depósito', 'incautación', 'tanteo y retracto', 'art. 38 LPHE', 'préstamo interarchivístico', 'ciclo vital', 'ingresos ordinarios', 'ingresos extraordinarios', 'escritura pública'],
+    laws: ['Ley 16/1985 art. 38', 'RD 1708/2011'],
+    dates: [],
+  },
+  {
+    id: 'g6',
+    title: 'Ordenación documental e instalación física',
+    summary: 'Concepto de ordenación vs. clasificación. Sistemas: cronológico, alfabético (onomástico, geográfico), numérico, alfanumérico. Principio de orden originario. Instalación: unidades, signaturas, topográfico.',
+    content: `La ordenación es la operación de relacionar entre sí los elementos de una serie o expediente de acuerdo con un criterio establecido. Es posterior e independiente de la clasificación: la clasificación es intelectual (determina a qué serie pertenece un documento); la ordenación es física e intelectual (determina el lugar que ocupa dentro de esa serie).
+
+**Sistemas de ordenación**
+
+**Cronológica**: por fecha del documento (año → mes → día). La más habitual en series con actividad continua: correspondencia, actas, expedientes de procedimientos.
+
+**Alfabética**: por la letra inicial del elemento de referencia. Variantes:
+- Onomástica: por apellidos y nombre. Usada en expedientes personales.
+- Geográfica: por topónimos.
+- Por materias o conceptos.
+
+**Numérica**: por número correlativo. Ágil para localización si se dispone de índice o base de datos. Usada en expedientes con numeración propia (contratos, patentes, registros).
+
+**Alfanumérica**: combinación de letras y números. Habitual en signaturas de archivo (leg. A-234 / carp. 3).
+
+**Principio del orden originario**
+Una vez los documentos ingresan en un archivo central, intermedio o histórico, debe respetarse el orden dado por el organismo productor. Si ese orden se ha perdido, se intenta reconstruir mediante estudio previo (análisis de inventarios, registros, etc.).
+
+**Instalación física**
+Colocar las unidades de instalación en el depósito de forma ordenada y con control topográfico.
+
+Unidades de instalación:
+- **Caja de archivo**: la más común para papel. Cartón neutro libre de ácido (pH ≥ 8).
+- **Legajo**: conjunto de documentos unidos por una cubierta. Uso en archivos históricos.
+- **Carpeta**: subdivisión dentro de caja o legajo.
+- **Planero**: para cartografía y documentos de gran formato.
+- **Rollo de microfilm**.
+
+**Signatura**: código alfanumérico único que identifica la ubicación física de cada unidad de instalación. Compuesta de: código de archivo + código de fondo/sección + número correlativo.
+
+**Topográfico**: instrumento que relaciona la signatura con la ubicación exacta en el depósito (número de cuerpo, estante, balda).`,
+    keywords: ['ordenación', 'clasificación', 'ordenación cronológica', 'ordenación alfabética onomástica', 'ordenación geográfica', 'ordenación numérica', 'ordenación alfanumérica', 'orden originario', 'instalación', 'unidades de instalación', 'caja de archivo', 'cartón neutro pH≥8', 'legajo', 'planero', 'signatura', 'topográfico'],
+    laws: [],
+    dates: [],
+  },
+  // ── DESCRIPCIÓN ───────────────────────────────────────────────
+  {
+    id: 'd4',
+    title: 'Agrupaciones documentales: fondo, sección, serie y unidad documental',
+    summary: 'Jerarquía archivística: grupo de fondos → fondo → subfondo → sección → serie → expediente → documento simple. Correspondencia con los 6 niveles ISAD(G). Principio de procedencia.',
+    content: `Las agrupaciones documentales son los conjuntos de documentos que, por su origen o función, constituyen unidades diferenciadas dentro del archivo. Se organizan jerárquicamente de mayor a menor, en una estructura que reflejan los niveles de descripción.
+
+**Jerarquía de agrupaciones (de mayor a menor)**
+
+**Grupo de fondos**: conjunto de fondos de instituciones con vínculos históricos, territoriales o funcionales. Uso opcional; no siempre se aplica.
+
+**Fondo**: conjunto orgánico de documentos producidos o recibidos en el ejercicio de sus actividades por una persona física o jurídica (productor). El fondo es la **unidad básica de la archivística**. El principio de procedencia exige que los documentos de distintos fondos no se mezclen.
+
+**Subfondo**: subdivisión del fondo correspondiente a subdivisiones administrativas del productor con cierta autonomía funcional.
+
+**Sección de fondo**: división funcional del fondo basada en las competencias o actividades del productor.
+
+**Serie documental**: conjunto de documentos producidos de forma continuada en el ejercicio de una misma función, con la misma tipología documental. Ejemplos: "Expedientes de personal", "Actas de Junta de Gobierno", "Correspondencia oficial saliente".
+
+**Unidad archivística compuesta — Expediente**: conjunto de documentos relacionados por tramitación del mismo asunto o procedimiento. Unidad mínima de gestión archivística práctica.
+
+**Unidad documental simple**: el documento individual (acta, carta, decreto, plano, fotografía). La unidad mínima indivisible de la descripción archivística.
+
+**Correspondencia con ISAD(G)**
+La norma ISAD(G) establece **6 niveles de descripción**:
+1. Fondo
+2. Subfondo
+3. Sección
+4. Serie
+5. Unidad documental compuesta (expediente)
+6. Unidad documental simple
+
+La descripción multinivel parte siempre del nivel superior al inferior, sin saltar niveles. La información del nivel superior no se repite en los niveles inferiores (herencia contextual).`,
+    keywords: ['grupo de fondos', 'fondo', 'subfondo', 'sección de fondo', 'serie documental', 'expediente', 'unidad documental simple', 'principio de procedencia', 'unidad archivística compuesta', 'ISAD(G) 6 niveles', 'descripción multinivel', 'productor', 'herencia contextual'],
+    laws: [],
+    dates: [],
+  },
+  {
+    id: 'd5',
+    title: 'Instrumentos de descripción: guía, inventario, catálogo e índice',
+    summary: 'Definición y tipos. Guía: visión de conjunto. Inventario somero y analítico. Catálogo: nivel de documento simple. Índices auxiliares. EAD y bases de datos. Correspondencia con niveles ISAD(G).',
+    content: `Los instrumentos de descripción son los documentos de trabajo producidos por el archivo para facilitar el acceso a los fondos. Se organizan según el nivel de descripción y la profundidad del análisis.
+
+**La Guía**
+Proporciona una visión de conjunto del archivo o de un fondo. Nivel de descripción: fondo / grupo de fondos. Contenido: historia del archivo, historia institucional del productor, descripción somera de fondos, condiciones de acceso y servicios.
+
+**El Inventario**
+Describe las series de un fondo o las unidades de instalación de una serie. Dos modalidades:
+- **Inventario somero**: descripción mínima por unidades de instalación (caja, legajo). Datos esenciales: signatura, serie, fechas extremas, contenido resumido.
+- **Inventario analítico**: descripción de cada unidad archivística compuesta (expediente). Mayor detalle; requiere más recursos.
+
+El inventario es el instrumento de descripción por excelencia de los archivos españoles.
+
+**El Catálogo**
+Describe individualizadamente cada unidad documental **simple** (el documento). El nivel de análisis más profundo y costoso. Se reserva para documentos de especial valor: incunables, pergaminos medievales, cartografía histórica, fotografías singulares.
+
+**El Índice**
+Instrumento auxiliar de localización rápida. Tipos: onomástico (personas), geográfico (lugares), cronológico, de materias. Acompaña a guías, inventarios o catálogos.
+
+**Otros instrumentos**
+- **Registro de transferencias / de ingresos**: control de las entradas de fondos.
+- **Registro de préstamos**: control de salidas de documentos.
+
+**Modernamente: bases de datos y EAD**
+Las bases de datos relacionales han sustituido a los instrumentos en papel. El estándar internacional para codificación de instrumentos de descripción en formato digital es **EAD** (Encoded Archival Description), basado en **XML**. Permite publicación en línea e interoperabilidad entre sistemas. PARES utiliza EAD para sus descripciones.`,
+    keywords: ['guía de archivos', 'inventario somero', 'inventario analítico', 'catálogo', 'índice onomástico', 'índice geográfico', 'instrumento de descripción', 'EAD', 'Encoded Archival Description', 'XML', 'PARES', 'unidad de instalación', 'registro de transferencias', 'registro de préstamos', 'nivel de descripción'],
+    laws: [],
+    dates: [],
+  },
+  // ── NORMAS ────────────────────────────────────────────────────
+  {
+    id: 'n4',
+    title: 'Normas internacionales: ISAD(G), ISAAR(CPF), ISDF, ISDIAH y RiC',
+    summary: 'Familia de normas del ICA. ISAD(G): 7 áreas y 26 elementos, 6 obligatorios. ISAAR(CPF): registros de autoridad de productores. ISDF: funciones. ISDIAH: instituciones custodias. RiC (2021): ontología integradora.',
+    content: `El Consejo Internacional de Archivos (CIA/ICA) ha desarrollado una familia de 4 normas de descripción archivística, unificadas en 2021 en el modelo conceptual RiC.
+
+**ISAD(G) — 2ª edición (2000)**
+Norma general de descripción archivística multinivel. Estructura en **7 áreas** y **26 elementos**:
+
+1. **Área de identificación**: código de referencia, título, fecha(s), nivel de descripción, volumen y soporte de la unidad
+2. **Área de contexto**: nombre del productor, historia institucional/biográfica, historia archivística, forma de ingreso
+3. **Área de contenido y estructura**: alcance y contenido, valoración/selección/eliminación, nuevos ingresos, sistema de organización
+4. **Área de condiciones de acceso y uso**: condiciones de acceso, reproducción, lengua/escritura, características físicas, instrumentos de descripción
+5. **Área de documentación asociada**: existencia/localización de originales y copias, documentación relacionada, notas de publicación
+6. **Área de notas**: notas del archivero
+7. **Área de control de la descripción**: reglas/convenciones utilizadas, fecha(s) de las descripciones
+
+**Elementos obligatorios de ISAD(G)** (6): código de referencia, título, productor, fecha(s), nivel de descripción, volumen y soporte.
+
+**ISAAR(CPF) — 2ª edición (2004)**
+Norma para describir los productores de documentos: entidades colectivas (Corporate bodies), personas (Persons) y familias (Families). Genera registros de autoridad vinculables a múltiples descripciones de fondos. 4 áreas: identificación, descripción, relaciones, control.
+
+**ISDF — 2007**
+Norma para describir las funciones de las entidades que producen documentos. Permite vincular funciones con fondos y con productores.
+
+**ISDIAH — 2008**
+Norma para describir las instituciones que custodian fondos archivísticos. 6 áreas: identificación, contacto, descripción, acceso, servicios, control.
+
+**RiC — Records in Contexts (ICA, 2021)**
+Modelo conceptual (ontología) que unifica y sustituye las 4 normas anteriores. Basado en Linked Data y web semántica. Permite representar relaciones complejas entre documentos, productores, funciones y contextos a lo largo del tiempo. Consta de un modelo conceptual (RiC-CM) y una ontología OWL (RiC-O).`,
+    keywords: ['ISAD(G)', '2ª edición 2000', '7 áreas', '26 elementos', '6 elementos obligatorios', 'código de referencia', 'nivel de descripción', 'ISAAR(CPF)', '2ª edición 2004', 'registro de autoridad', 'entidades colectivas', 'ISDF 2007', 'ISDIAH 2008', 'RiC 2021', 'Records in Contexts', 'ICA', 'Linked Data', 'ontología OWL', 'RiC-CM', 'RiC-O', 'descripción multinivel'],
+    laws: [],
+    dates: ['2000 — ISAD(G) 2ª edición', '2004 — ISAAR(CPF) 2ª edición', '2007 — ISDF', '2008 — ISDIAH', '2021 — RiC Records in Contexts'],
+  },
+  {
+    id: 'n5',
+    title: 'ENI, NEDA y normas técnicas de interoperabilidad',
+    summary: 'ENI (RD 4/2010): principios de interoperabilidad. NTI de documento electrónico, expediente electrónico y digitalización (200 ppp mínimo). NEDA (Resolución 28/06/2012): norma española elaborada por CNEDA.',
+    content: `**El Esquema Nacional de Interoperabilidad (ENI) — RD 4/2010**
+Aprobado por Real Decreto 4/2010, de 8 de enero, en desarrollo de la Ley 11/2007 de acceso electrónico de los ciudadanos. Define principios y directrices para las relaciones electrónicas entre AAPP y con los ciudadanos.
+
+Principios del ENI: interoperabilidad organizativa, semántica y técnica; reutilización y transferencia de tecnología; neutralidad tecnológica y adaptabilidad; uso de estándares abiertos.
+
+**Normas Técnicas de Interoperabilidad (NTI) clave para archivos:**
+
+**NTI de Documento Electrónico**: define la estructura del documento electrónico = contenido + metadatos + firma. Metadatos mínimos obligatorios: identificador, órgano, fecha de captura, origen, estado de elaboración, nombre del formato, tipo documental, tipo de firma.
+
+**NTI de Expediente Electrónico**: conjunto de documentos electrónicos + índice del expediente (firmado electrónicamente) + metadatos del expediente. El índice garantiza la integridad del expediente.
+
+**NTI de Digitalización de documentos**: requisitos técnicos del proceso de digitalización de documentos en papel. Resolución mínima: **200 ppp** para documentos textuales. Formatos admitidos: **PDF/A, JPEG2000, TIFF, PNG**. Incluye captura de metadatos y firma del resultado de digitalización.
+
+**NTI de Política de Gestión de Documentos Electrónicos**: establece el marco para la gestión del ciclo de vida de los documentos electrónicos en la AGE.
+
+**ENS — Esquema Nacional de Seguridad (RD 3/2010)**: complementario al ENI. Establece requisitos mínimos de seguridad. Categorías: alta, media, básica.
+
+**NEDA — Norma Española de Descripción Archivística**
+Aprobada por Resolución de **28 de junio de 2012** de la Secretaría de Estado de Cultura. Elaborada por la **CNEDA** (Comisión de Normas Españolas de Descripción Archivística). Adapta al contexto español las normas del ICA (ISAD(G), ISAAR(CPF), ISDF, ISDIAH).
+
+La NEDA define un modelo conceptual en 5 entidades: Agente, Función, Documento de archivo, Descripción y Relación. Compatible con RiC y con los requisitos de la administración electrónica.`,
+    keywords: ['ENI', 'RD 4/2010', 'NTI', 'Normas Técnicas de Interoperabilidad', 'documento electrónico', 'expediente electrónico', 'índice firmado', 'digitalización', '200 ppp mínimo', 'PDF/A', 'JPEG2000', 'TIFF', 'PNG', 'metadatos mínimos', 'ENS', 'RD 3/2010', 'NEDA', 'Resolución 28 junio 2012', 'CNEDA', 'Ley 11/2007', 'neutralidad tecnológica', 'estándares abiertos', 'interoperabilidad semántica'],
+    laws: ['RD 4/2010 ENI', 'RD 3/2010 ENS', 'Ley 11/2007', 'Resolución 28 junio 2012 NEDA'],
+    dates: ['2007 — Ley 11/2007 acceso electrónico', '2010 — RD 4/2010 ENI', '2010 — RD 3/2010 ENS', '2012 — Resolución NEDA 28 junio 2012'],
+  },
+  // ── CONSERVACIÓN ──────────────────────────────────────────────
+  {
+    id: 'con4',
+    title: 'Edificios de archivo: depósitos, condiciones ambientales y planes de emergencia',
+    summary: 'Teoría de los círculos concéntricos. Condiciones ambientales: T 18-20°C, HR 45-55%. Luz UV. Estanterías compactas. Extinciones por gas inerte. Plan de emergencia y prioridades de salvamento.',
+    content: `La archivística exige a la arquitectura protección, neutralidad en materiales y condiciones óptimas para la conservación de los documentos. Partiendo de que no existe el edificio perfecto, se analizan las características que debe tener un edificio de archivos.
+
+**Edificio ex novo vs. rehabilitación**
+Nueva construcción: permite condiciones ideales de ubicación, materiales y distribución. Problema: en ciudades, espacio y coste obligan a la periferia, lejos de centros administrativos.
+Rehabilitación: aprovecha edificios existentes (conventos, palacios), pero impone limitaciones estructurales. Los depósitos pueden alcanzar **1.200 kg/m²** de carga; los forjados deben soportarlo.
+
+**Teoría de los círculos concéntricos de conservación**
+Modelo de protección en capas desde el exterior hacia el documento:
+1. Entorno urbanístico: alejado de industrias, inundaciones, aeropuertos
+2. Edificio: materiales inertes, resistencia al fuego, impermeabilidad
+3. Depósito: cámara con control ambiental estricto
+4. Unidad de instalación: caja, envoltorio protector
+5. Soporte documental: el propio documento
+
+**Condiciones ambientales en depósitos**
+- **Temperatura**: **18-20°C** para papel; **12-15°C** para fotografías, microfilm y soportes audiovisuales. Variaciones máximas: ±2°C.
+- **Humedad relativa**: **45-55% HR** para papel; 30-40% HR para soportes fotográficos. Variaciones máximas: ±5%.
+- **Iluminación**: ausencia de luz natural en depósitos (la luz **UV** deteriora papel y tintas). Fluorescentes con filtros UV o LED. Máximo: 50-100 lux en depósitos, 300 lux en sala de investigadores.
+- **Calidad del aire**: filtros HEPA, control de SO₂ y NO₂, ventilación controlada.
+
+**Zonas del edificio**
+- Zona pública: recepción, sala de consulta, reproducción, exposiciones.
+- Zona de trabajo: tratamiento técnico, restauración, digitalización.
+- Zona de depósitos: acceso restringido; circuito independiente del público.
+- Zona administrativa.
+
+**Mobiliario**
+- **Estanterías compactas (móviles)**: optimizan el espacio hasta un 45% respecto a estanterías fijas. No recomendadas para documentos muy pesados.
+- Estanterías fijas metálicas: acero pintado al horno, sin zinc ni plomo. Separación del suelo: mínimo **15 cm**.
+- Planeros para cartografía y formatos especiales.
+
+**Planes de emergencia**
+Deben contemplar: evacuación de personas, lista de prioridades de salvamento de documentos, protocolos contra incendio (extintores de **gas inerte** —argón, FM-200, Novec— en depósitos, **NO sprinklers de agua**), inundación, actos vandálicos.`,
+    keywords: ['depósito', 'temperatura 18-20°C', 'fotografías 12-15°C', 'humedad relativa 45-55%', 'luz UV', '50-100 lux depósito', '300 lux sala', 'estanterías compactas', 'estanterías fijas 15cm', 'planero', 'círculos concéntricos', 'gas inerte', 'argón', 'FM-200', 'Novec', 'NO sprinklers', 'filtros HEPA', 'plan de emergencia', 'prioridades salvamento', '1200 kg/m²'],
+    laws: [],
+    dates: [],
+  },
+  {
+    id: 'con5',
+    title: 'Función social, difusión y cartas de servicios de los archivos',
+    summary: 'Plan de difusión archivística. Tipología de usuarios. Condiciones de acceso (art. 57 LPHE): libre y gratuito. Restricciones por datos personales (25/50 años). Reproducciones. Cartas de Servicios (RD 951/2005). PARES y redes sociales.',
+    content: `Los archivos no son solo centros de custodia: tienen una función social y cultural activa. La difusión es la función que pone en valor los fondos y los acerca a la sociedad.
+
+**Plan de difusión archivística**
+Documento que establece objetivos, actividades, recursos y sistema de evaluación de las acciones de difusión. Análisis del público objetivo → canales de comunicación → calendario → presupuesto → indicadores.
+
+**Tipología de usuarios**
+- **Usuarios administrativos**: personal de la propia administración que consulta antecedentes para la gestión.
+- **Investigadores**: académicos y estudiantes de historia, genealogía, ciencias jurídicas.
+- **Ciudadanos en general**: personas que buscan información sobre derechos, historia familiar, certificaciones.
+
+**Condiciones de acceso y consulta** (art. 57 LPHE y RD 1708/2011)
+Los archivos estatales son de acceso **libre y gratuito**. Restricciones:
+- Documentos con **datos de carácter personal**: inaccesibles si el afectado vive, o durante **25 años** tras su muerte. Si no se conoce la fecha de fallecimiento: **50 años** desde la fecha del documento.
+- Documentos **clasificados** (secreto, reservado): según la Ley de Secretos Oficiales.
+- Documentos cuyo estado de **conservación** no permite la consulta.
+
+**El Departamento de Referencias**
+Gestiona las peticiones de documentos, orienta a investigadores, tramita reproducciones. Normas de sala: prohibido sacar documentos, usar bolígrafos, doblar páginas; uso de guantes para documentos frágiles.
+
+**Reproducciones**
+Por medios digitales (escáner, fotografía digital). Sujetas a **precios públicos** fijados por Orden Ministerial. Limitaciones: documentos frágiles, en restauración, sin autorización del titular de derechos de autor.
+
+**Cartas de Servicios**
+Documentos formales en los que el archivo se compromete públicamente con estándares de calidad. Reguladas por **RD 951/2005**, de 29 de julio, sobre mejora de la calidad en la AGE. Incluyen: compromisos de calidad, indicadores de evaluación y vías de reclamación.
+
+**Difusión online y PARES**
+PARES (Portal de Archivos Españoles) como principal herramienta de difusión online. Redes sociales institucionales: comunicar actividades, compartir documentos curiosos. Exposiciones virtuales, micrositios temáticos.`,
+    keywords: ['difusión archivística', 'plan de difusión', 'usuarios administrativos', 'investigadores', 'acceso libre y gratuito', 'art. 57 LPHE', '25 años muerte', '50 años fecha documento', 'documentos clasificados', 'datos personales', 'Departamento de Referencias', 'normas de sala', 'reproducciones', 'precios públicos', 'Cartas de Servicios', 'RD 951/2005', 'PARES', 'redes sociales', 'exposiciones virtuales'],
+    laws: ['Ley 16/1985 art. 57', 'RD 1708/2011', 'RD 951/2005'],
+    dates: ['2005 — RD 951/2005 calidad AGE'],
+  },
+]
+
+// ── Inyección automática (sin duplicados) ────────────────────────
+const EXTRA_BY_BLOCK = {
+  constitucion: ['c5','c6','c7','c8','c9'],
+  legislacion:  ['l5','l6'],
+  historia:     ['h4','h5','h6','h7','h8','h9','h10'],
+  gestion:      ['g5','g6','g7','g8'],
+  descripcion:  ['d4','d5','d6'],
+  normas:       ['n4','n5','n6'],
+  conservacion: ['con4','con5','con6'],
+}
+
+// ─── NUEVOS TEMAS — extraídos de los ZIPs de temario (Bloque 1, 2 y 3) ───────
+// Añadidos sin duplicar lo existente. IDs: h7-h10, g7-g8, d6, n6, con6
+
+const NEW_TOPICS = [
+
+  // ══ HISTORIA — Archivo Guerra Civil, AHP, SAD, Sistema Archivístico ══════
+
+  {
+    id: 'h7',
+    title: 'El Archivo de la Guerra Civil y el Centro Documental de la Memoria Histórica',
+    summary: 'Origen, fondos y evolución del Archivo General de la Guerra Civil Española y su integración en el CDMH, creado por RD 426/1999 y ampliado por la Ley de Memoria Histórica de 2007.',
+    content: `El Archivo General de la Guerra Civil Española fue creado por **RD 426/1999, de 12 de marzo**, con sede en Salamanca, tomando como núcleo el fondo existente en la sección de Guerra Civil del Archivo Histórico Nacional (AHN).
+
+**Origen histórico**
+Los documentos que lo forman proceden de las incautaciones realizadas por el bando nacional durante la Guerra Civil. En 1937 se crearon en el Cuartel General de Franco en Salamanca dos organismos:
+- Oficina de Investigación y Propaganda Anticomunista (OIPA): para confiscar material republicano
+- Delegación Nacional de Asuntos Especiales (DNAE): incautación de documentos de masones, republicanos y organizaciones afines
+
+En 1938 se crea la **Delegación del Estado para la Recuperación de Documentos (DERD)**, que centralizó toda la documentación en Salamanca y la usó como fuente del Tribunal Especial para la Represión de la Masonería y el Comunismo (1940-1963).
+
+**Evolución institucional**
+- 1977: supresión de los Servicios Documentales; sus fondos se adscriben al AHN
+- 1979: creación de la Sección de Guerra Civil del AHN (con sede en Salamanca)
+- 1999: el RD 426/1999 le da entidad propia como Archivo General de la Guerra Civil Española
+- 2007: la **Ley 52/2007 de Memoria Histórica** integra el archivo en el nuevo **Centro Documental de la Memoria Histórica (CDMH)**, también con sede en Salamanca
+
+**Fondos documentales principales**
+- Documentación del bando nacional: Gobierno del Estado franquista durante la guerra
+- Fondo Masonería: el más importante a nivel mundial para el estudio de la masonería española
+- Fondos de partidos políticos y sindicatos republicanos incautados
+- Documentación de exiliados republicanos repatriada desde otros países
+- Fondos del Tribunal de Represión de la Masonería y el Comunismo`,
+    keywords: ['Guerra Civil', 'CDMH', 'Memoria Histórica', 'RD 426/1999', 'Ley 52/2007', 'Salamanca', 'DERD', 'DNAE', 'masonería', 'fondos incautados'],
+    laws: ['RD 426/1999', 'Ley 52/2007'],
+    dates: ['1937 — creación OIPA y DNAE', '1938 — creación DERD', '1977 — supresión Servicios Documentales', '1979 — Sección Guerra Civil AHN', '1999 — Archivo General Guerra Civil', '2007 — Centro Documental Memoria Histórica'],
+  },
+
+  {
+    id: 'h8',
+    title: 'Los Archivos Históricos Provinciales: historia, normativa y competencias',
+    summary: 'Creación y evolución de los Archivos Históricos Provinciales desde 1931, su normativa reguladora, fondos notariales y distribución competencial entre Estado y Comunidades Autónomas.',
+    content: `Los Archivos Históricos Provinciales (AHP) son centros del Sistema Archivístico Español gestionados en muchas comunidades autónomas por las propias CCAA, aunque de titularidad mixta o estatal.
+
+**Marco constitucional y competencial**
+El art. 149.1.28 CE reserva al Estado la "defensa del patrimonio cultural contra la exportación y la expoliación; museos, bibliotecas y archivos de titularidad estatal, sin perjuicio de su gestión por las CCAA". El art. 148.1.15 CE permite a las CCAA asumir competencias sobre museos, bibliotecas y conservatorios de música de interés autonómico. Aunque la CE no menciona expresamente los archivos, todas las CCAA los han incluido en sus Estatutos.
+
+**Legislación autonómica**
+Las bases legales son los RR.DD. 111/1986 y 64/1994. Andalucía (1984) y Cataluña (1985) fueron las primeras CCAA en desarrollar legislación específica de archivos. Cada autonomía ha ido aprobando su propia Ley de Patrimonio Documental y Archivos.
+
+**Etapas de creación y consolidación**
+- 1931-1945 — Etapa de creación: Decreto de 12 de noviembre de 1931 crea los primeros AHP como archivos de distrito notarial
+- 1945-1969 — Etapa de formación: se completa la red y se define su organización
+- 1969-1980 — Etapa de consolidación: el Decreto 914/1969 y el RD 1708/2011 refuerzan el sistema
+- 1980-actualidad — Adaptación al Estado de las Autonomías: transferencia de la gestión a las CCAA
+
+**Fondos documentales principales**
+- Fondos notariales: el más característico de estos archivos; concentran los protocolos notariales de la provincia
+- Fondos del Registro de la Propiedad y Mercantil
+- Fondos de organismos de la Administración periférica del Estado
+- Fondos de la Administración de Justicia (audiencias provinciales, juzgados)
+- Fondos de instituciones religiosas desamortizadas
+- Fondos de organismos y entidades de la provincia`,
+    keywords: ['Archivos Históricos Provinciales', 'fondos notariales', 'competencias CCAA', 'RD 111/1986', 'RD 64/1994', 'legislación autonómica', 'desamortización', 'titularidad estatal'],
+    laws: ['CE art. 149.1.28', 'CE art. 148.1.15', 'RD 111/1986', 'RD 64/1994'],
+    dates: ['1931 — Decreto creación AHP', '1969 — Decreto 914/1969 AGA', '1984 — Ley Archivos Andalucía (primera CCAA)', '1985 — Ley Archivos Cataluña'],
+  },
+
+  {
+    id: 'h9',
+    title: 'El Sistema Archivístico de la Defensa (SAD)',
+    summary: 'Organización, normativa y tipos de archivo del Sistema Archivístico de la Defensa, regulado por el RD 2598/1998 y sus archivos históricos militares.',
+    content: `El **Sistema Archivístico de la Defensa (SAD)** se rige por su propia normativa conforme al RD 1708/2011, excepto en las cuestiones relativas al acceso, que siguen el régimen general.
+
+**Normativa reguladora**
+- **RD 2598/1998, de 4 de diciembre**, que aprueba el **Reglamento de Archivos Militares (RAM)**: establece la organización y funcionamiento del SAD
+- El art. 149.1.4ª CE reserva al Estado competencias exclusivas en Defensa y Fuerzas Armadas, lo que justifica la autonomía del sistema militar respecto al civil
+
+**Organización del SAD**
+El SAD se estructura en cuatro subsistemas, correspondientes a:
+- Subsistema del Ejército de Tierra
+- Subsistema de la Armada
+- Subsistema del Ejército del Aire y del Espacio
+- Subsistema conjunto (Ministerio de Defensa)
+
+**Archivos Históricos del Ejército de Tierra**
+- Archivo General Militar de Segovia (personal militar)
+- Archivo General Militar de Madrid (organismos centrales)
+- Archivo General Militar de Guadalajara (asuntos civiles de la guerra)
+- Archivo General Militar de Ávila (documentación de la Guerra Civil)
+- Archivo Cartográfico y de Estudios Geográficos (Servicio Geográfico)
+
+**Archivos Históricos de la Armada**
+- Archivo Histórico de la Armada "Juan Sebastián Elcano"
+- Archivo General de Marina "Álvaro de Bazán" (en Viso del Marqués, Ciudad Real): fondos de la Armada desde el siglo XVI
+- Archivo Histórico del Instituto Hidrográfico de la Marina
+- Real Instituto y Observatorio de la Armada (San Fernando, Cádiz)
+
+**Otros archivos históricos del SAD**
+- Archivo Histórico del Ejército del Aire y del Espacio
+- Archivo General e Histórico de la Defensa
+- Archivos Judiciales Militares`,
+    keywords: ['SAD', 'Sistema Archivístico Defensa', 'RD 2598/1998', 'Reglamento Archivos Militares', 'Álvaro de Bazán', 'Archivo Segovia', 'subsistemas', 'archivos militares'],
+    laws: ['RD 2598/1998', 'RD 1708/2011', 'CE art. 149.1.4'],
+    dates: ['1998 — RD 2598/1998 Reglamento Archivos Militares', '2011 — RD 1708/2011 Sistema Español de Archivos'],
+  },
+
+  {
+    id: 'h10',
+    title: 'El Sistema Español de Archivos y el Consejo de Cooperación Archivística',
+    summary: 'Evolución histórica del sistema archivístico español desde el siglo XIX, su configuración constitucional y el Consejo de Cooperación Archivística: composición, funciones y comisiones.',
+    content: `El sistema archivístico español es fruto de la transformación de un Estado centralista en un Estado autonómico que ha repercutido en la organización del patrimonio documental.
+
+**Evolución histórica**
+La estructura básica arranca con el Archivo Real de Barcelona (fin s. XII, origen del ACA). Las reformas de los Reyes Católicos configuran un modelo tripartito: gobierno, justicia y organización territorial. La Chancillería de Valladolid (Ordenanzas de 1485) y el Archivo General de Simancas (s. XVI) son hitos clave.
+
+En el s. XIX, el proceso desamortizador y la creación del AHN (1866) marcan la entrada en la modernidad. El Cuerpo Facultativo de Archiveros, Bibliotecarios y Arqueólogos se crea en 1858.
+
+**Configuración constitucional (desde 1978)**
+El RD 1708/2011, de 18 de noviembre, establece el **Sistema Archivístico Español** vigente, articulado en:
+- Sistema de Archivos de la Administración General del Estado
+- Sistema Archivístico de la Defensa
+- Sistemas archivísticos de las CCAA
+- Sistemas archivísticos de las Entidades Locales
+- Archivos de otras instituciones públicas (Cortes, TC, CGPJ, etc.)
+- Archivos privados de interés público
+
+**El Consejo de Cooperación Archivística**
+Creado por el RD 1708/2011 como órgano consultivo y de cooperación entre la AGE y las CCAA.
+
+Funciones principales:
+- Asesorar en la planificación de la política archivística española
+- Impulsar la cooperación entre administraciones
+- Emitir informes sobre normas de descripción y acceso
+- Velar por la coherencia del sistema
+
+Composición: presidido por el titular de la Subdirección General de Archivos Estatales; integrado por representantes de todas las CCAA, la FEMP y expertos del sector.
+
+Se organiza en comisiones técnicas especializadas en: descripción, conservación, acceso y administración electrónica.`,
+    keywords: ['Sistema Español de Archivos', 'Consejo de Cooperación Archivística', 'RD 1708/2011', 'Cuerpo Facultativo', '1858', 'FEMP', 'sistemas autonómicos', 'cooperación'],
+    laws: ['RD 1708/2011', 'CE art. 149.1.28'],
+    dates: ['1485 — Ordenanzas Chancillería Valladolid', '1858 — Cuerpo Facultativo Archiveros', '1866 — AHN', '1978 — Constitución', '2011 — RD 1708/2011'],
+  },
+
+  // ══ GESTIÓN — Difusión, atención a usuarios y cartas de servicios ════════
+
+  {
+    id: 'g7',
+    title: 'Función social y cultural de los archivos: difusión y comunicación',
+    summary: 'La difusión como función archivística fundamental: definición, planes de difusión, Internet y redes sociales, exposiciones, publicaciones y actividades educativas.',
+    content: `La difusión es una función archivística fundamental cuya finalidad es hacer accesible el patrimonio documental a la sociedad en sentido amplio.
+
+**Definición**
+El Diccionario de Terminología Archivística del Ministerio de Cultura define la difusión como la "función archivística fundamental cuya finalidad es, por una parte, hacer accesibles los fondos del archivo y, por otra, fomentar su utilización y conocimiento". La CE recoge en su art. 44 la obligación de los poderes públicos de promover y tutelar el acceso a la cultura.
+
+**Plan de difusión**
+Un plan de difusión archivística debe contemplar:
+- Diagnóstico: análisis de usuarios, fondos y recursos
+- Objetivos: qué se quiere comunicar y a quién
+- Canales y acciones: online y presenciales
+- Presupuesto y evaluación de resultados
+
+**Difusión online**
+- Portales web del archivo (descripción, búsquedas, descarga de imágenes)
+- **PARES** (Portal de Archivos Españoles): acceso libre a fondos de los archivos estatales
+- Redes sociales: Twitter/X, Instagram, Facebook, YouTube para conectar con nuevos públicos
+- Exposiciones virtuales y micrositios temáticos
+- Juegos de descubrimiento y autoaprendizaje
+- Experiencias internacionales: Discovery (Archivos Nacionales del Reino Unido)
+
+**Actividades presenciales tradicionales**
+- Exposiciones físicas con catálogos
+- Publicaciones científicas y divulgativas
+- Visitas guiadas y talleres escolares (servicios educativos)
+- Jornadas de puertas abiertas
+- Colaboración con universidades e institutos de investigación
+
+**Cooperación internacional**
+Organismos de referencia: ICA (Consejo Internacional de Archivos), EURBICA (rama europea), DLM Forum (documentos electrónicos).`,
+    keywords: ['difusión', 'función social', 'PARES', 'redes sociales', 'exposiciones', 'plan de difusión', 'servicios educativos', 'ICA', 'art. 44 CE'],
+    laws: ['CE art. 44'],
+    dates: [],
+  },
+
+  {
+    id: 'g8',
+    title: 'Atención a usuarios, acceso a documentos y cartas de servicios',
+    summary: 'Condiciones de acceso a los archivos, sala de investigadores, reproducción de documentos, perfil del usuario moderno y las cartas de servicios como instrumento de calidad.',
+    content: `La atención a los usuarios es una de las funciones más visibles de los archivos, y ha experimentado una profunda transformación con la llegada de Internet y la apertura de los archivos a nuevos públicos.
+
+**Evolución del perfil del usuario**
+El usuario tradicional de los archivos era el investigador histórico especializado. Hoy conviven:
+- Investigadores profesionales (historiadores, juristas)
+- Ciudadanos que buscan antecedentes administrativos o genealógicos
+- Estudiantes universitarios
+- Profesionales de distintas disciplinas
+- Usuarios online que acceden de forma remota
+
+**El acceso a los documentos**
+El derecho de acceso está regulado por:
+- **Ley 19/2013 de Transparencia** y la Ley 16/1985 (LPHE) para el patrimonio histórico
+- Las normas de sala establecen las condiciones de consulta presencial
+- Documentos con restricciones: datos personales (RGPD), secreto oficial, derechos de autor
+
+**Departamento de Referencias y sala de investigadores**
+Funciones del departamento de referencias:
+- Orientación y asesoramiento al investigador
+- Gestión de solicitudes de documentos (boletines de petición)
+- Control de acceso a originales y reproductografía
+
+**Reproducción de documentos**
+- Digitalización bajo demanda, microfilm, fotocopia (según estado de conservación)
+- Precios públicos establecidos por normativa
+- Limitaciones: documentos frágiles, con restricciones legales o derechos de autor
+
+**Cartas de servicios**
+Las cartas de servicios son documentos que informan a los ciudadanos sobre los servicios que presta el archivo, los compromisos de calidad y los derechos de los usuarios. Se regulan por el **RD 951/2005, de 29 de julio**, sobre mejora de la calidad en la AGE. Incluyen:
+- Identificación de los servicios prestados
+- Compromisos de calidad medibles (plazos de respuesta, disponibilidad)
+- Mecanismos de sugerencias y quejas
+- Indicadores de seguimiento`,
+    keywords: ['atención usuarios', 'sala de investigadores', 'cartas de servicios', 'RD 951/2005', 'reproducción documentos', 'acceso documentos', 'departamento referencias', 'precios públicos'],
+    laws: ['Ley 19/2013', 'Ley 16/1985', 'RD 951/2005'],
+    dates: ['2005 — RD 951/2005 mejora calidad AGE'],
+  },
+
+  // ══ DESCRIPCIÓN — Instrumentos y agrupaciones (complemento a d4 y d5) ════
+
+  {
+    id: 'd6',
+    title: 'Planificación descriptiva: normalización e intercambio de información',
+    summary: 'La descripción multinivel, la normalización como base del intercambio automatizado, los estándares EAD y EAC, y el proyecto NEDA-MC como modelo conceptual español.',
+    content: `La planificación descriptiva tiene como objetivo garantizar la sistematización de las descripciones archivísticas para facilitar el intercambio automatizado de información entre instituciones.
+
+**Normalización y sus finalidades**
+La normalización persigue:
+- Sistematizar y optimizar los procesos descriptivos
+- Permitir el intercambio automatizado de información entre archivos de distintos países
+- Facilitar el acceso del usuario mediante estructuras de datos coherentes
+
+Sin una norma comúnmente aceptada, la información solo puede circular mediante equivalencias personalizadas o traducción manual, lo que ralentiza enormemente la difusión.
+
+**Estándares internacionales de codificación**
+- **EAD (Encoded Archival Description)**: estándar XML para codificar instrumentos de descripción conforme a ISAD(G). Permite la publicación y el intercambio electrónico de inventarios y catálogos.
+- **EAC-CPF (Encoded Archival Context – Corporate Bodies, Persons and Families)**: para codificar registros de autoridad conforme a ISAAR(CPF)
+- **Schema AED3**: nuevo esquema de datos para los archivos europeos; su cambio afecta al intercambio entre archivos nacionales
+
+**NEDA-MC — Modelo Conceptual de Descripción Archivística**
+Elaborado por la **CNEDA (Comisión de Normas Españolas de Descripción Archivística)**, el NEDA-MC define:
+- Entidades: documento, agente, función, lugar, concepto/objeto/acontecimiento
+- Relaciones entre entidades (muchos a muchos)
+- Atributos de cada entidad alineados con las normas internacionales
+
+**Informatización de los Archivos Estatales**
+Proceso en varias fases:
+1. AER (Archivos Españoles en Red): primera plataforma de descripción compartida
+2. PARES: evolución hacia un portal público de acceso libre con visor integrado
+El sistema PARES permite búsqueda simple, avanzada y en árbol de fondos, visualización de imágenes y descarga, geolocalización y conexión con Europeana vía OAI-PMH.`,
+    keywords: ['EAD', 'EAC-CPF', 'NEDA-MC', 'CNEDA', 'normalización', 'intercambio automatizado', 'AER', 'PARES', 'schema AED3', 'descripción multinivel'],
+    laws: [],
+    dates: ['2006 — propuesta NEDA publicada por SGAE'],
+  },
+
+  // ══ NORMAS — Normas internacionales (complemento a n4) ═══════════════════
+
+  {
+    id: 'n6',
+    title: 'Normas de sala y reglamentos de acceso a archivos estatales',
+    summary: 'Las normas generales de acceso y consulta en los archivos estatales españoles: solicitud de documentos, identificación del investigador, uso de sala y reproducciones.',
+    content: `Los archivos estatales españoles aplican unas **Normas Generales para el Acceso y Consulta de Documentos**, aprobadas por la Subdirección General de los Archivos Estatales del Ministerio de Cultura.
+
+**Requisitos de acceso**
+- Identificación obligatoria del investigador (DNI, pasaporte o documento equivalente)
+- Cumplimentación de la hoja de registro del investigador en su primera visita
+- Firma del reglamento de la sala y compromiso de respeto a las normas
+
+**Solicitud de documentos**
+- Las peticiones se realizan mediante boletines de solicitud normalizados
+- Cada archivo establece un número máximo de unidades entregadas por sesión
+- Los documentos se entregan en la sala de investigadores y no pueden salir de ella
+
+**Uso de sala**
+- Prohibición de introducir bolígrafos, comida o bebida (se permiten lápices)
+- Uso de guantes para documentos especialmente frágiles
+- Prohibición de ordenar o manipular los documentos
+- Posibilidad de usar cámaras fotográficas sin flash (según reglamento del archivo)
+
+**Reproducciones**
+- Solicitud mediante impreso normalizado
+- Precios públicos aprobados por Orden Ministerial
+- Limitaciones por estado de conservación, restricciones legales o derechos de autor
+- Los archivos pueden negar la reproducción si supone riesgo para el documento
+
+**Restricciones de acceso**
+- Documentos clasificados (Ley de Secretos Oficiales)
+- Datos de carácter personal (RGPD y legislación de protección de datos)
+- Documentos con derechos de autor vigentes
+- Documentos en mal estado de conservación que requieren restauración previa`,
+    keywords: ['normas de sala', 'acceso archivos', 'investigadores', 'boletín solicitud', 'reproducciones', 'restricciones acceso', 'SGAE', 'precios públicos', 'RGPD'],
+    laws: ['Ley 16/1985', 'Ley 19/2013', 'RGPD'],
+    dates: [],
+  },
+
+  // ══ CONSERVACIÓN — Edificio y función social (complemento a con4 y con5) ══
+
+  {
+    id: 'con6',
+    title: 'Soportes fotográficos, magnéticos y ópticos: deterioro y conservación',
+    summary: 'Características y patologías de los soportes fotográficos (plata, color), magnéticos (cintas, discos) y ópticos (CD, DVD), y sus condiciones específicas de conservación.',
+    content: `Además del papel y el pergamino, los archivos custodian importantes volúmenes de documentación en soportes especiales que requieren condiciones de conservación específicas.
+
+**Soportes fotográficos**
+- Daguerrotipo (1839): soporte de plata sobre cobre; extremadamente sensible a la humedad y los sulfuros
+- Fotografía en blanco y negro sobre gelatina de plata: soporte plástico (nitratos hasta 1950, acetatos y poliéster después); los nitratos son altamente inflamables
+- Fotografía en color (cromogénica): mayor inestabilidad que el B/N; pérdida de densidad y desvanecimiento de colorantes con el tiempo
+- Condiciones de conservación: temperatura baja (idealmente ≤10°C), humedad relativa 30-40%
+
+**Soportes magnéticos**
+- Cintas magnéticas de audio y vídeo: deterioro por hidrólisis del aglutinante (síndrome del aglutinante pegajoso o "sticky shed syndrome")
+- Discos magnéticos (diskettes, discos duros): obsolescencia tecnológica como principal amenaza
+- Condiciones de conservación: temperatura 8-18°C, HR 20-40%, alejados de campos magnéticos
+
+**Soportes ópticos**
+- CD y DVD: deterioro por delaminación, oxidación de la capa reflectante y roturas en el lacado
+- Vida útil estimada muy variable (50-200 años según fabricación y condiciones)
+- CD-R y DVD-R (grabables): más vulnerables que los prensados industrialmente
+- El principal riesgo es la **obsolescencia tecnológica**: pérdida de lectores y software capaces de acceder al contenido
+
+**Estrategias de preservación digital**
+La OAIS (ISO 14721) recomienda:
+- Migración: transferir el contenido a nuevos formatos y soportes periódicamente
+- Emulación: recrear entornos tecnológicos obsoletos
+- Refreshing: copiar el contenido bit a bit a nuevos soportes antes de la degradación`,
+    keywords: ['soportes fotográficos', 'nitratos', 'soportes magnéticos', 'sticky shed syndrome', 'soportes ópticos', 'obsolescencia tecnológica', 'daguerrotipo', 'migración', 'emulación', 'OAIS'],
+    laws: ['ISO 14721'],
+    dates: ['1839 — invención del daguerrotipo', '1950 — sustitución nitratos por acetatos'],
+  },
+]
+
+// Registrar los nuevos tópicos en EXTRA_TOPICS para que el sistema los procese
+;(function() {
+  NEW_TOPICS.forEach(t => EXTRA_TOPICS.push(t))
+})()
+
+;(function() {
+  const byId = {}
+  EXTRA_TOPICS.forEach(t => { byId[t.id] = t })
+  STUDY_BLOCKS.forEach(block => {
+    const ids = EXTRA_BY_BLOCK[block.id] || []
+    const existing = new Set(block.topics.map(t => t.id))
+    ids.forEach(id => {
+      if (!existing.has(id) && byId[id]) block.topics.push(byId[id])
+    })
+  })
+})()
