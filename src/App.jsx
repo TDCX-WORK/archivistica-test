@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react'
-import useAuth        from './hooks/useAuth'
-import useProgress    from './hooks/useProgress'
-import AuthPage       from './components/Auth/Auth'
-import Sidebar        from './components/Layout/Sidebar'
-import Header         from './components/Layout/Header'
-import Home           from './components/Home/Home'
-import Stats          from './components/Stats/Stats'
-import StudyView      from './components/Study/StudyView'
-import TestRunner     from './components/TestRunner/TestRunner'
-import Flashcard      from './components/Flashcard/Flashcard'
-import SupuestoRunner from './components/Supuesto/SupuestoRunner'
-import supuestos      from './data/supuestos.json'
-import styles         from './App.module.css'
+import useAuth           from './hooks/useAuth'
+import useProgress       from './hooks/useProgress'
+import useStudyProgress  from './hooks/useStudyProgress'
+import AuthPage          from './components/Auth/Auth'
+import Sidebar           from './components/Layout/Sidebar'
+import Header            from './components/Layout/Header'
+import Home              from './components/Home/Home'
+import Stats             from './components/Stats/Stats'
+import StudyView         from './components/Study/StudyView'
+import TestRunner        from './components/TestRunner/TestRunner'
+import Flashcard         from './components/Flashcard/Flashcard'
+import SupuestoRunner    from './components/Supuesto/SupuestoRunner'
+import supuestos         from './data/supuestos.json'
+import styles            from './App.module.css'
 
 export default function App() {
   const { currentUser, loading, login, register, logout, error, clearError } = useAuth()
-  const progress = useProgress(currentUser?.id)
+  const progress      = useProgress(currentUser?.id)
+  const studyProgress = useStudyProgress(currentUser?.id)
 
   const [view, setView] = useState({ type: 'home' })
   const [tab,  setTab]  = useState('inicio')
@@ -28,9 +30,9 @@ export default function App() {
 
   const handleTabChange = (t) => {
     setTab(t)
-    if (t === 'estadisticas') setView({ type: 'stats' })
-    else if (t === 'estudio') setView({ type: 'study' })
-    else setView({ type: 'home' })
+    if      (t === 'estadisticas') setView({ type: 'stats' })
+    else if (t === 'estudio')      setView({ type: 'study' })
+    else                           setView({ type: 'home' })
   }
 
   const goHome = () => setView({ type: 'home' })
@@ -45,7 +47,7 @@ export default function App() {
     <AuthPage onLogin={login} onRegister={register} error={error} clearError={clearError} />
   )
 
-  const isTestActive = view.type === 'test' || view.type === 'supuesto' || view.type === 'flashcards'
+  const isTestActive = ['test','supuesto','flashcards'].includes(view.type)
 
   const handleSelectMode = (modeId) => {
     const sup = supuestos.find(s => s.id === modeId)
@@ -89,10 +91,17 @@ export default function App() {
             <Home onSelectMode={handleSelectMode} progress={progress} />
           )}
           {view.type === 'study' && (
-            <StudyView currentUser={currentUser} onSelectMode={handleSelectMode} />
+            <StudyView
+              currentUser={currentUser}
+              onSelectMode={handleSelectMode}
+            />
           )}
           {view.type === 'stats' && (
-            <Stats progress={progress} />
+            <Stats
+              progress={progress}
+              studyReadTopics={studyProgress.readTopics}
+              studyBookmarks={studyProgress.bookmarks}
+            />
           )}
           {view.type === 'test' && (
             <TestRunner
