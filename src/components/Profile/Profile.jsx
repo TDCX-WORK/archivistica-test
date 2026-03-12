@@ -1,0 +1,501 @@
+import { useMemo, useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
+import { Flame, BookOpen, Star, Lock, CheckCircle, TrendingUp, Calendar, Target, Zap, Trophy, User, Settings, Sun, ChevronRight, Save, ClipboardList, Layers, Award, GraduationCap, Bookmark, Clock, Shield, Hash, Gem, FileText, BarChart2, Medal } from 'lucide-react'
+import { STUDY_BLOCKS } from '../../data/study-content'
+import allQuestions from '../../data/questions.json'
+import config from '../../data/config.json'
+import { useSettings } from '../../hooks/useSettings'
+import styles from './Profile.module.css'
+
+// ── NIVELES ────────────────────────────────────────────────────────────────
+const LEVELS = [
+  { level: 1,  title: 'Aspirante',       subtitle: 'Acabas de llegar al archivo',           xpRequired: 0    },
+  { level: 2,  title: 'Curioso',         subtitle: 'Empiezas a explorar los fondos',         xpRequired: 100  },
+  { level: 3,  title: 'Iniciado',        subtitle: 'Ya conoces los pasillos',                xpRequired: 250  },
+  { level: 4,  title: 'Auxiliar',        subtitle: 'Manejas los instrumentos básicos',       xpRequired: 500  },
+  { level: 5,  title: 'Técnico',         subtitle: 'Clasificas con criterio',                xpRequired: 900  },
+  { level: 6,  title: 'Archivero',       subtitle: 'Dominas el principio de procedencia',   xpRequired: 1400 },
+  { level: 7,  title: 'Documentalista',  subtitle: 'Las series no tienen secretos para ti', xpRequired: 2000 },
+  { level: 8,  title: 'Conservador',     subtitle: 'Proteges el patrimonio documental',     xpRequired: 2800 },
+  { level: 9,  title: 'Experto',         subtitle: 'El temario es tu territorio',            xpRequired: 3800 },
+  { level: 10, title: 'Maestro del Archivo', subtitle: '¡Estás listo para las oposiciones!', xpRequired: 5000 },
+]
+
+// ── MISIONES ───────────────────────────────────────────────────────────────
+function buildMissions(sessions, wrongAnswers, studyReadTopics, studyBookmarks) {
+  const totalSessions   = sessions.length
+  const totalAnswered   = sessions.reduce((s, x) => s + x.total, 0)
+  const avgScore        = totalSessions ? Math.round(sessions.reduce((s,x)=>s+(x.score||0),0)/totalSessions) : 0
+  const totalTopics     = STUDY_BLOCKS.reduce((s,b) => s + b.topics.length, 0)
+  const readCount       = studyReadTopics?.size || 0
+  const bookmarkCount   = studyBookmarks?.size  || 0
+  const examSessions    = sessions.filter(s => s.mode_id === 'exam')
+  const examAvg         = examSessions.length ? Math.round(examSessions.reduce((s,x)=>s+(x.score||0),0)/examSessions.length) : 0
+  const streakDays      = (() => {
+    const days = [...new Set(sessions.map(s => s.played_at))].sort().reverse()
+    if (!days.length) return 0
+    let streak = 1
+    for (let i = 1; i < days.length; i++) {
+      const prev = new Date(days[i-1]), curr = new Date(days[i])
+      if ((prev - curr) / 86400000 === 1) streak++
+      else break
+    }
+    return streak
+  })()
+
+  return [
+    { id: 'first_test',    category: 'Tests',       title: 'Primer paso',           desc: 'Completa tu primer test',                     icon: '📋', current: Math.min(totalSessions, 1),   target: 1,   unlocked: totalSessions >= 1 },
+    { id: 'ten_tests',     category: 'Tests',       title: 'En racha',              desc: 'Completa 10 tests',                           icon: '🔥', current: Math.min(totalSessions, 10),  target: 10,  unlocked: totalSessions >= 10 },
+    { id: 'fifty_tests',   category: 'Tests',       title: 'Incansable',            desc: 'Completa 50 tests',                           icon: '⚡', current: Math.min(totalSessions, 50),  target: 50,  unlocked: totalSessions >= 50 },
+    { id: 'score_60',      category: 'Rendimiento', title: 'Por encima de la media',desc: 'Alcanza una nota media del 60%',              icon: '📈', current: Math.min(avgScore, 60),       target: 60,  unlocked: avgScore >= 60,  unit: '%' },
+    { id: 'score_75',      category: 'Rendimiento', title: 'Buen archivero',        desc: 'Alcanza una nota media del 75%',              icon: '🎯', current: Math.min(avgScore, 75),       target: 75,  unlocked: avgScore >= 75,  unit: '%' },
+    { id: 'score_90',      category: 'Rendimiento', title: 'Maestro de los tests',  desc: 'Alcanza una nota media del 90%',              icon: '🏆', current: Math.min(avgScore, 90),       target: 90,  unlocked: avgScore >= 90,  unit: '%' },
+    { id: 'exam_first',    category: 'Simulacros',  title: 'Cara al examen',        desc: 'Completa tu primer simulacro oficial',        icon: '📄', current: Math.min(examSessions.length,1), target: 1, unlocked: examSessions.length >= 1 },
+    { id: 'exam_pass',     category: 'Simulacros',  title: 'Aprobado',              desc: 'Supera el 50% en un simulacro oficial',       icon: '✅', current: Math.min(examAvg, 50),       target: 50,  unlocked: examAvg >= 50,   unit: '%' },
+    { id: 'exam_master',   category: 'Simulacros',  title: 'Nota de corte',         desc: 'Supera el 75% en un simulacro oficial',       icon: '🥇', current: Math.min(examAvg, 75),       target: 75,  unlocked: examAvg >= 75,   unit: '%' },
+    { id: 'study_first',   category: 'Estudio',     title: 'Primera lectura',       desc: 'Lee tu primer tema del temario',              icon: '📖', current: Math.min(readCount, 1),       target: 1,   unlocked: readCount >= 1 },
+    { id: 'study_25',      category: 'Estudio',     title: 'Buen comienzo',         desc: `Lee el 25% del temario`,                      icon: '📚', current: readCount, target: Math.round(totalTopics * 0.25), unlocked: readCount >= Math.round(totalTopics * 0.25) },
+    { id: 'study_50',      category: 'Estudio',     title: 'A mitad de camino',     desc: `Lee el 50% del temario`,                      icon: '📚', current: readCount, target: Math.round(totalTopics * 0.5),  unlocked: readCount >= Math.round(totalTopics * 0.5) },
+    { id: 'study_100',     category: 'Estudio',     title: 'Temario completado',    desc: 'Lee todos los temas del temario',             icon: '🎓', current: readCount, target: totalTopics, unlocked: readCount >= totalTopics },
+    { id: 'bookmark_5',    category: 'Estudio',     title: 'Lector selectivo',      desc: 'Guarda 5 temas como favoritos',               icon: '🔖', current: Math.min(bookmarkCount, 5),   target: 5,   unlocked: bookmarkCount >= 5 },
+    { id: 'streak_3',      category: 'Constancia',  title: 'Tres días seguidos',    desc: 'Mantén una racha de 3 días',                  icon: '🔥', current: Math.min(streakDays, 3),      target: 3,   unlocked: streakDays >= 3 },
+    { id: 'streak_7',      category: 'Constancia',  title: 'Una semana entera',     desc: 'Mantén una racha de 7 días',                  icon: '🔥', current: Math.min(streakDays, 7),      target: 7,   unlocked: streakDays >= 7 },
+    { id: 'streak_30',     category: 'Constancia',  title: 'Un mes sin parar',      desc: 'Mantén una racha de 30 días',                 icon: '🌟', current: Math.min(streakDays, 30),     target: 30,  unlocked: streakDays >= 30 },
+    { id: 'no_fails',      category: 'Dominio',     title: 'Sin deudas pendientes', desc: 'Elimina todos tus fallos del repaso',         icon: '🛡️', current: wrongAnswers.length === 0 ? 1 : 0, target: 1, unlocked: wrongAnswers.length === 0 },
+    { id: 'answered_200',  category: 'Dominio',     title: 'Doscientas respondidas',desc: 'Responde 200 preguntas en total',             icon: '💪', current: Math.min(totalAnswered, 200), target: 200, unlocked: totalAnswered >= 200 },
+    { id: 'answered_500',  category: 'Dominio',     title: 'Medio millar',          desc: 'Responde 500 preguntas en total',             icon: '💎', current: Math.min(totalAnswered, 500), target: 500, unlocked: totalAnswered >= 500 },
+  ]
+}
+
+function calcXP(sessions, studyReadTopics, wrongAnswers) {
+  const totalTopics   = STUDY_BLOCKS.reduce((s,b) => s + b.topics.length, 0)
+  const readCount     = studyReadTopics?.size || 0
+  const avgScore      = sessions.length ? Math.round(sessions.reduce((s,x)=>s+(x.score||0),0)/sessions.length) : 0
+  const totalAnswered = sessions.reduce((s,x) => s + x.total, 0)
+  return Math.min(sessions.length * 15, 600)
+    + Math.round(avgScore * 8)
+    + Math.round((readCount / Math.max(totalTopics,1)) * 1500)
+    + Math.min(Math.round(totalAnswered * 0.5), 800)
+    + (wrongAnswers.length === 0 && sessions.length > 0 ? 300 : 0)
+}
+
+function BookIcon({ color, opacity = 1, x = 0, y = 0, rotate = 0 }) {
+  return (
+    <g transform={`translate(${x},${y}) rotate(${rotate})`} opacity={opacity}>
+      <rect x="-11" y="-15" width="22" height="30" rx="2.5" fill={color} fillOpacity=".18" stroke={color} strokeWidth="1.5"/>
+      <rect x="-7" y="-10" width="14" height="2.5" rx="1" fill={color} fillOpacity=".5"/>
+      <rect x="-7" y="-5" width="10" height="2" rx="1" fill={color} fillOpacity=".4"/>
+      <rect x="-7" y="0" width="12" height="2" rx="1" fill={color} fillOpacity=".3"/>
+    </g>
+  )
+}
+
+const CAT_COLORS = {
+  'Tests':       '#2563EB',
+  'Rendimiento': '#059669',
+  'Simulacros':  '#7C3AED',
+  'Estudio':     '#D97706',
+  'Constancia':  '#DC2626',
+  'Dominio':     '#0891B2',
+}
+
+const MISSION_ICONS = {
+  first_test:    ClipboardList,
+  ten_tests:     Layers,
+  fifty_tests:   Zap,
+  score_60:      TrendingUp,
+  score_75:      Target,
+  score_90:      Award,
+  exam_first:    FileText,
+  exam_pass:     BarChart2,
+  exam_master:   Medal,
+  study_first:   BookOpen,
+  study_25:      BookOpen,
+  study_50:      GraduationCap,
+  study_100:     GraduationCap,
+  bookmark_5:    Bookmark,
+  streak_3:      Flame,
+  streak_7:      Flame,
+  streak_30:     Star,
+  no_fails:      Shield,
+  answered_200:  Hash,
+  answered_500:  Gem,
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+const TABS = [
+  { id: 'logros',   label: 'Logros',   icon: Trophy },
+  { id: 'ajustes',  label: 'Ajustes',  icon: Settings },
+]
+
+// ── TOGGLE COMPONENT ──────────────────────────────────────────────────────
+function Toggle({ checked, onChange, disabled }) {
+  return (
+    <button
+      className={[styles.toggle, checked ? styles.toggleOn : '', disabled ? styles.toggleDisabled : ''].join(' ')}
+      onClick={() => !disabled && onChange(!checked)}
+      role="switch"
+      aria-checked={checked}
+    >
+      <span className={styles.toggleKnob} />
+    </button>
+  )
+}
+
+// ── SETTINGS TAB ─────────────────────────────────────────────────────────
+function SettingsTab({ currentUser, settings, updateSetting }) {
+  const [saved, setSaved] = useState(false)
+  const [displayName, setDisplayName] = useState(currentUser?.displayName || '')
+
+  const handleSaveName = () => {
+    // En una app real aquí llamaríamos a Supabase para actualizar el displayName
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  const preguntasOptions = [10, 20, 30, 50]
+
+  return (
+    <div className={styles.settingsPage}>
+
+      {/* ── CUENTA ── */}
+      <div className={styles.settingsSection}>
+        <div className={styles.settingsSectionHeader}>
+          <User size={15} />
+          <span>Cuenta</span>
+        </div>
+
+        <div className={styles.settingsCard}>
+          <div className={styles.settingsRow}>
+            <div className={styles.settingsRowInfo}>
+              <span className={styles.settingsRowLabel}>Nombre de usuario</span>
+              <span className={styles.settingsRowDesc}>Se muestra en tu perfil y ranking</span>
+            </div>
+            <div className={styles.settingsRowControl}>
+              <input
+                className={styles.settingsInput}
+                value={displayName}
+                onChange={e => setDisplayName(e.target.value)}
+                placeholder="Tu nombre"
+                maxLength={32}
+              />
+              <button
+                className={[styles.settingsSaveBtn, saved ? styles.settingsSaved : ''].join(' ')}
+                onClick={handleSaveName}
+              >
+                {saved ? '✓ Guardado' : 'Guardar'}
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.settingsDivider} />
+
+          <div className={styles.settingsRow}>
+            <div className={styles.settingsRowInfo}>
+              <span className={styles.settingsRowLabel}>Correo electrónico</span>
+              <span className={styles.settingsRowDesc}>{currentUser?.email || '—'}</span>
+            </div>
+            <span className={styles.settingsBadge}>Verificado</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── PREFERENCIAS DE ESTUDIO ── */}
+      <div className={styles.settingsSection}>
+        <div className={styles.settingsSectionHeader}>
+          <BookOpen size={15} />
+          <span>Preferencias de estudio</span>
+        </div>
+
+        <div className={styles.settingsCard}>
+
+          {/* Penalización */}
+          <div className={styles.settingsRow}>
+            <div className={styles.settingsRowInfo}>
+              <span className={styles.settingsRowLabel}>Modo penalización</span>
+              <span className={styles.settingsRowDesc}>
+                Cada respuesta incorrecta resta 0,25 puntos. Como en el examen real.
+              </span>
+            </div>
+            <Toggle
+              checked={settings.penalizacion}
+              onChange={v => updateSetting('penalizacion', v)}
+            />
+          </div>
+
+          <div className={styles.settingsDivider} />
+
+          {/* Preguntas test rápido */}
+          <div className={styles.settingsRow}>
+            <div className={styles.settingsRowInfo}>
+              <span className={styles.settingsRowLabel}>Preguntas en Test Rápido</span>
+              <span className={styles.settingsRowDesc}>
+                Número de preguntas por defecto al iniciar un test rápido
+              </span>
+            </div>
+            <div className={styles.settingsSegmented}>
+              {preguntasOptions.map(n => (
+                <button
+                  key={n}
+                  className={[styles.segmentBtn, settings.preguntasRapido === n ? styles.segmentActive : ''].join(' ')}
+                  onClick={() => updateSetting('preguntasRapido', n)}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ── APARIENCIA ── */}
+      <div className={styles.settingsSection}>
+        <div className={styles.settingsSectionHeader}>
+          <Sun size={15} />
+          <span>Apariencia</span>
+        </div>
+
+        <div className={styles.themeRow}>
+          {[
+            { id: 'claro',  label: 'Claro',  icon: '☀️' },
+            { id: 'oscuro', label: 'Oscuro', icon: '🌙' },
+            { id: 'calido', label: 'Cálido', icon: '🌅' },
+          ].map(t => (
+            <button
+              key={t.id}
+              className={[styles.themeCircleBtn, settings.tema === t.id ? styles.themeCircleActive : ''].join(' ')}
+              onClick={() => updateSetting('tema', t.id)}
+              title={t.label}
+            >
+              <span className={styles.themeCircleIcon}>{t.icon}</span>
+              <span className={styles.themeCircleLabel}>{t.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
+// ── MAIN COMPONENT ────────────────────────────────────────────────────────
+export default function Profile({ currentUser, progress, studyReadTopics, studyBookmarks }) {
+  const { sessions = [], wrongAnswers = [], streakDays = 0 } = progress
+  const { settings, updateSetting } = useSettings()
+  const location = useLocation()
+  const [activeTab, setActiveTab] = useState(() =>
+    new URLSearchParams(location.search).get('tab') || 'logros'
+  )
+  // Sincronizar tab cuando cambia la URL (ej: Mi Perfil → Ajustes desde el header)
+  useEffect(() => {
+    const tab = new URLSearchParams(location.search).get('tab') || 'logros'
+    setActiveTab(tab)
+  }, [location.search])
+
+  const xp       = useMemo(() => calcXP(sessions, studyReadTopics, wrongAnswers), [sessions, studyReadTopics, wrongAnswers])
+  const missions = useMemo(() => buildMissions(sessions, wrongAnswers, studyReadTopics, studyBookmarks), [sessions, wrongAnswers, studyReadTopics, studyBookmarks])
+
+  const currentLevelData = [...LEVELS].reverse().find(l => xp >= l.xpRequired) || LEVELS[0]
+  const nextLevelData    = LEVELS.find(l => l.level === currentLevelData.level + 1)
+  const xpInLevel        = xp - currentLevelData.xpRequired
+  const xpNeeded         = nextLevelData ? nextLevelData.xpRequired - currentLevelData.xpRequired : 1
+  const levelPct         = nextLevelData ? Math.min(100, Math.round((xpInLevel / xpNeeded) * 100)) : 100
+
+  const totalAnswered  = sessions.reduce((s,x) => s + x.total, 0)
+  const totalTopics    = STUDY_BLOCKS.reduce((s,b) => s + b.topics.length, 0)
+  const readCount      = studyReadTopics?.size || 0
+  const unlockedCount  = missions.filter(m => m.unlocked).length
+  const nextMission    = missions.find(m => !m.unlocked && m.current > 0) || missions.find(m => !m.unlocked)
+  const categories     = [...new Set(missions.map(m => m.category))]
+
+  const bookLevel = currentLevelData.level <= 2 ? 1 : currentLevelData.level <= 5 ? 2 : currentLevelData.level <= 7 ? 3 : currentLevelData.level <= 9 ? 4 : 5
+  const bookColor = currentLevelData.level <= 3 ? '#059669' : currentLevelData.level <= 6 ? '#2563EB' : currentLevelData.level <= 8 ? '#7C3AED' : '#D97706'
+
+  return (
+    <div className={styles.page}>
+
+      {/* ── HERO CARD — solo en logros ── */}
+      {activeTab === 'logros' && <div className={styles.heroCard}>
+        <div className={styles.heroLeft}>
+          <div className={styles.avatarRing} style={{ '--ring-color': bookColor }}>
+            <div className={styles.avatarInner}>
+              {currentUser?.displayName?.[0]?.toUpperCase() || '?'}
+            </div>
+          </div>
+          <div className={styles.heroInfo}>
+            <h1 className={styles.heroName}>{currentUser?.displayName || 'Usuario'}</h1>
+            <div className={styles.heroLevel} style={{ color: bookColor }}>
+              Nivel {currentLevelData.level} · {currentLevelData.title}
+            </div>
+            <p className={styles.heroSubtitle}>{currentLevelData.subtitle}</p>
+          </div>
+        </div>
+        <div className={styles.heroBook}>
+          <svg width="90" height="90" viewBox="-45 -45 90 90">
+            {bookLevel >= 1 && <BookIcon color={bookColor} x={bookLevel >= 2 ? -10 : 0} y={bookLevel >= 2 ? 8 : 0} rotate={bookLevel >= 2 ? -8 : 0} opacity={0.5}/>}
+            {bookLevel >= 2 && <BookIcon color={bookColor} x={6} y={0} rotate={5} opacity={0.75}/>}
+            {bookLevel >= 3 && <BookIcon color={bookColor} x={-4} y={-10} rotate={-3} opacity={1}/>}
+            {bookLevel >= 4 && <BookIcon color={bookColor} x={14} y={-8} rotate={8} opacity={0.85}/>}
+            {bookLevel >= 5 && <BookIcon color={bookColor} x={-14} y={-6} rotate={-10} opacity={0.9}/>}
+          </svg>
+        </div>
+      </div>}
+
+      {activeTab === 'logros' && <div className={styles.xpCard}>
+        <div className={styles.xpTop}>
+          <span className={styles.xpLabel}><Star size={13}/> {xp} XP</span>
+          {nextLevelData
+            ? <span className={styles.xpNext}>Siguiente: <strong>{nextLevelData.title}</strong> — faltan {nextLevelData.xpRequired - xp} XP</span>
+            : <span className={styles.xpNext}>🎉 ¡Nivel máximo alcanzado!</span>
+          }
+        </div>
+        <div className={styles.xpBarWrap}>
+          <div className={styles.xpBarFill} style={{ width: `${levelPct}%`, background: bookColor }}/>
+        </div>
+        <div className={styles.xpLevels}>
+          {LEVELS.map(l => (
+            <div key={l.level} className={[styles.xpDot, l.level <= currentLevelData.level ? styles.xpDotDone : ''].join(' ')}
+              style={l.level <= currentLevelData.level ? { background: bookColor } : {}}
+              title={`Nivel ${l.level}: ${l.title}`}
+            />
+          ))}
+        </div>
+      </div>}
+
+      {activeTab === 'logros' && <div className={styles.quickStats}>
+        {[
+          { icon: Target,     label: 'Tests',        value: sessions.length,              color: '#2563EB' },
+          { icon: TrendingUp, label: 'Respondidas',  value: totalAnswered,                color: '#059669' },
+          { icon: BookOpen,   label: 'Temas leídos', value: `${readCount}/${totalTopics}`, color: '#D97706' },
+          { icon: Flame,      label: 'Racha',        value: `${streakDays}d`,             color: '#DC2626' },
+          { icon: Trophy,     label: 'Logros',       value: `${unlockedCount}/${missions.length}`, color: '#7C3AED' },
+        ].map(({ icon: Icon, label, value, color }) => (
+          <div key={label} className={styles.quickStat}>
+            <div className={styles.quickStatIcon} style={{ background: `${color}18`, color }}>
+              <Icon size={15}/>
+            </div>
+            <span className={styles.quickStatVal}>{value}</span>
+            <span className={styles.quickStatLabel}>{label}</span>
+          </div>
+        ))}
+      </div>}
+
+      {/* ── TABS ── */}
+      <div className={styles.tabs}>
+        {TABS.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            className={[styles.tab, activeTab === id ? styles.tabActive : ''].join(' ')}
+            onClick={() => setActiveTab(id)}
+          >
+            <Icon size={14} />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── TAB: LOGROS ── */}
+      {activeTab === 'logros' && (
+        <>
+          {nextMission && (
+            <div className={styles.nextMissionCard}>
+              <div className={styles.nextMissionIcon}>{nextMission.icon}</div>
+              <div className={styles.nextMissionBody}>
+                <span className={styles.nextMissionTag}>Próximo logro</span>
+                <p className={styles.nextMissionTitle}>{nextMission.title}</p>
+                <p className={styles.nextMissionDesc}>{nextMission.desc}</p>
+                <div className={styles.nextMissionBar}>
+                  <div className={styles.nextMissionFill} style={{ width: `${Math.round((nextMission.current / nextMission.target) * 100)}%` }} />
+                </div>
+                <span className={styles.nextMissionPct}>{nextMission.current}{nextMission.unit || ''} / {nextMission.target}{nextMission.unit || ''}</span>
+              </div>
+            </div>
+          )}
+
+          {categories.map(cat => (
+            <div key={cat} className={styles.missionSection}>
+              <h3 className={styles.missionCatTitle}>
+                <span className={styles.missionCatDot} style={{ background: CAT_COLORS[cat] || '#6B7280' }}/>
+                {cat}
+              </h3>
+              <div className={styles.missionList}>
+                {missions.filter(m => m.category === cat).map((m, idx, arr) => {
+                  const MIcon = MISSION_ICONS[m.id] || Star
+                  const color = CAT_COLORS[cat] || '#6B7280'
+                  const isLast = idx === arr.length - 1
+                  const pct = Math.min(100, Math.round((m.current / m.target) * 100))
+                  return (
+                    <div key={m.id} className={styles.missionRow}>
+                      {/* Línea vertical + dot */}
+                      <div className={styles.missionTrack}>
+                        <div
+                          className={[styles.missionDot, m.unlocked ? styles.missionDotDone : ''].join(' ')}
+                          style={m.unlocked ? { background: color, boxShadow: `0 0 0 4px ${color}22` } : {}}
+                        >
+                          {m.unlocked
+                            ? <CheckCircle size={10} color="#fff" strokeWidth={3}/>
+                            : <Lock size={8} color="var(--ink-subtle)" strokeWidth={2.5}/>
+                          }
+                        </div>
+                        {!isLast && (
+                          <div className={styles.missionLine}>
+                            <div
+                              className={styles.missionLineFill}
+                              style={{ background: color, height: m.unlocked ? '100%' : `${pct}%` }}
+                            />
+                            {!m.unlocked && pct > 0 && pct < 100 && (
+                              <div className={styles.missionLineDot} style={{ background: color, top: `${pct}%` }}/>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {/* Contenido */}
+                      <div className={[styles.missionCard, m.unlocked ? styles.missionUnlocked : '', m.unlocked ? 'cardDone' : ''].join(' ')}
+                        style={m.unlocked ? { '--m-color': color, '--done-color': color } : {}}>
+                        <div className={styles.missionCardTop}>
+                          <div className={styles.missionIconWrap} style={m.unlocked
+                            ? { background: `${color}18`, color }
+                            : { background: 'var(--surface-dim)', color: 'var(--ink-subtle)' }}>
+                            <MIcon size={14} strokeWidth={m.unlocked ? 2 : 1.5}/>
+                          </div>
+                          <div className={styles.missionCardMeta}>
+                            <p className={styles.missionTitle}>{m.title}</p>
+                            <p className={styles.missionDesc}>{m.desc}</p>
+                          </div>
+                          {m.unlocked && (
+                            <div className={styles.missionBadgeDone} style={{ background: `${color}18`, color }}>
+                              ✓
+                            </div>
+                          )}
+                        </div>
+                        {!m.unlocked && (
+                          <div className={styles.missionBarWrap}>
+                            <div className={styles.missionBar}>
+                              <div className={styles.missionBarFill} style={{ width: `${pct}%`, background: color }}/>
+                            </div>
+                            <span className={styles.missionProgress}>{m.current}{m.unit||''} / {m.target}{m.unit||''}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {/* ── TAB: AJUSTES ── */}
+      {activeTab === 'ajustes' && (
+        <SettingsTab
+          currentUser={currentUser}
+          settings={settings}
+          updateSetting={updateSetting}
+        />
+      )}
+
+    </div>
+  )
+}

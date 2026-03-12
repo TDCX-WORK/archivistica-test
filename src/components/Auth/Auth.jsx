@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { BookOpen, User, Lock, ArrowRight, UserPlus, ChevronLeft, Eye, EyeOff, AlertCircle } from 'lucide-react'
+import GobiernoLogo from '../ui/GobiernoLogo'
 import styles from './Auth.module.css'
 
 export default function AuthPage({ onLogin, onRegister, error, clearError }) {
@@ -23,15 +24,7 @@ export default function AuthPage({ onLogin, onRegister, error, clearError }) {
 
   return (
     <div className={styles.page}>
-      <div className={styles.brand}>
-        <div className={styles.brandIcon}>
-          <BookOpen size={22} strokeWidth={1.5} />
-        </div>
-        <div>
-          <span className={styles.brandName}>Archivística</span>
-          <span className={styles.brandSub}>Oposiciones · Ministerio de Cultura</span>
-        </div>
-      </div>
+      <GobiernoLogo size="md" className={styles.brand} />
 
       <div className={styles.card}>
         <div className={styles.cardHeader}>

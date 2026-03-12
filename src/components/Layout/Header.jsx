@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Search, Bell, X, LogOut, User, Settings } from 'lucide-react'
 import styles from './Header.module.css'
 
-function UserMenu({ currentUser, onLogout, onClose }) {
+function UserMenu({ currentUser, onLogout, onClose, onGoProfile, onGoSettings }) {
   return (
     <div className={styles.userMenuOverlay} onClick={onClose}>
       <div className={styles.userMenu} onClick={e => e.stopPropagation()}>
@@ -16,10 +16,10 @@ function UserMenu({ currentUser, onLogout, onClose }) {
           </div>
         </div>
         <div className={styles.userMenuDivider} />
-        <button className={styles.userMenuItem} onClick={onClose}>
+        <button className={styles.userMenuItem} onClick={() => { onGoProfile(); onClose() }}>
           <User size={14} /> Mi perfil
         </button>
-        <button className={styles.userMenuItem} onClick={onClose}>
+        <button className={styles.userMenuItem} onClick={() => { onGoSettings(); onClose() }}>
           <Settings size={14} /> Ajustes
         </button>
         <div className={styles.userMenuDivider} />
@@ -31,7 +31,7 @@ function UserMenu({ currentUser, onLogout, onClose }) {
   )
 }
 
-export default function Header({ currentUser, inTest, modeName, onGoHome, pageTitle, onLogout }) {
+export default function Header({ currentUser, inTest, modeName, onGoHome, pageTitle, onLogout, onGoProfile, onGoSettings }) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -45,7 +45,12 @@ export default function Header({ currentUser, inTest, modeName, onGoHome, pageTi
               <span className={styles.testName}>{modeName}</span>
             </div>
           ) : (
-            <div className={styles.pageTitle}>{pageTitle || 'Inicio'}</div>
+            <>
+              <div className={styles.pageTitle}>{pageTitle || 'Inicio'}</div>
+              <div className={styles.pageTitleInstitutional}>
+                Oposiciones Archivística · Ministerio de Cultura
+              </div>
+            </>
           )}
         </div>
 
@@ -92,6 +97,8 @@ export default function Header({ currentUser, inTest, modeName, onGoHome, pageTi
           currentUser={currentUser}
           onLogout={onLogout}
           onClose={() => setMenuOpen(false)}
+          onGoProfile={onGoProfile}
+          onGoSettings={onGoSettings}
         />
       )}
     </>

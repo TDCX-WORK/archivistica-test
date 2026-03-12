@@ -19,6 +19,8 @@
   display: flex;
   min-height: 100dvh;
   background: var(--bg);
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Main area (right of sidebar) */
@@ -37,12 +39,26 @@
 .content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 /* Mobile */
 @media (max-width: 768px) {
+  .shell {
+    width: 100vw;
+    overflow-x: hidden;
+  }
   .main {
-    margin-left: 0;
-    margin-bottom: 60px;
+    margin-left: 0 !important;
+    margin-bottom: 96px;
+    width: 100vw;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  .content {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 }

@@ -4,7 +4,7 @@ import {
   Zap, ArrowLeft, ChevronRight, ChevronLeft, Scale, LayoutGrid,
   Loader2, Tag, Calendar
 } from 'lucide-react'
-import STUDY_BLOCKS from '../../data/study-content'
+import { STUDY_BLOCKS } from '../../data/study-content'
 import useStudyProgress from '../../hooks/useStudyProgress'
 import styles from './StudyView.module.css'
 
@@ -197,9 +197,12 @@ export default function StudyView({ currentUser, onSelectMode }) {
   const { readTopics, bookmarks, loading, toggleRead, toggleBookmark } =
     useStudyProgress(currentUser?.id)
   const [readMode, setReadMode] = useState(null)
+  const [expanded, setExpanded] = useState({})
 
   const totalTopics = STUDY_BLOCKS.reduce((s, b) => s + b.topics.length, 0)
   const globalPct   = Math.round((readTopics.size / totalTopics) * 100)
+
+  const toggleExpand = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
 
   if (loading) return (
     <div className={styles.loadingState}>
@@ -231,7 +234,7 @@ export default function StudyView({ currentUser, onSelectMode }) {
       </div>
 
       {/* Global progress */}
-      <div className={styles.globalCard}>
+      <div className={styles.globalCard} ref={el => { if (el) el.style.setProperty('--global-w', el.offsetWidth + 'px') }}>
         <Donut pct={globalPct} color="var(--primary)" size={72} stroke={7} />
         <div className={styles.globalRight}>
           <p className={styles.globalLabel}>Progreso total del temario</p>
@@ -242,57 +245,86 @@ export default function StudyView({ currentUser, onSelectMode }) {
         </div>
       </div>
 
-      {/* Blocks grid */}
-      <div className={styles.blocksGrid}>
+      {/* Blocks — vertical expandable */}
+      <div className={styles.blocksList}>
         {STUDY_BLOCKS.map(block => {
           const read  = block.topics.filter(t => readTopics.has(t.id)).length
           const total = block.topics.length
           const pct   = Math.round((read / total) * 100)
+          const isOpen = !!expanded[block.id]
           return (
-            <div key={block.id} className={styles.blockCard}>
-              <div className={styles.blockCardTop}>
-                <div className={styles.blockCardIcon} style={{ background: block.bg, color: block.color }}>
-                  <BookOpen size={18} strokeWidth={1.8} />
+            <div key={block.id}
+                className={[styles.blockRow, isOpen ? styles.blockRowOpen : '', pct === 100 ? 'cardDone' : ''].join(' ')}
+                style={pct === 100 ? { '--done-color': block.color } : {}}>
+              {/* Header — siempre visible */}
+              <button
+                className={styles.blockRowHeader}
+                onClick={() => toggleExpand(block.id)}
+                style={{ '--bc': block.color }}
+              >
+                <div className={styles.blockRowLeft}>
+                  <div className={styles.blockRowIcon} style={{ background: block.bg, color: block.color }}>
+                    <BookOpen size={16} strokeWidth={1.8} />
+                  </div>
+                  <div className={styles.blockRowInfo}>
+                    <span className={styles.blockRowTitle}>{block.label}</span>
+                    <div className={styles.blockRowMeta}>
+                      <span><Clock size={10} /> {block.estimatedMinutes} min</span>
+                      <span><LayoutGrid size={10} /> {total} temas</span>
+                      <span style={{ color: block.color, fontWeight: 700 }}>{read}/{total} leídos</span>
+                    </div>
+                  </div>
                 </div>
-                <Donut pct={pct} color={block.color} size={52} stroke={5} />
+                <div className={styles.blockRowRight}>
+                  <Donut pct={pct} color={block.color} size={44} stroke={4} />
+                  <ChevronRight
+                    size={16}
+                    className={styles.blockRowChevron}
+                    style={{ transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                  />
+                </div>
+              </button>
+
+              {/* Barra de progreso alineada con la global */}
+              <div className={styles.blockRowBar}>
+                <div className={styles.blockRowBarFill} style={{ width: `${pct}%`, background: block.color }} />
               </div>
-              <h3 className={styles.blockCardTitle}>{block.label}</h3>
-              <div className={styles.blockCardMeta}>
-                <span><Clock size={11} /> {block.estimatedMinutes} min</span>
-                <span><LayoutGrid size={11} /> {total} temas</span>
-              </div>
-              <div className={styles.topicsList}>
-                {block.topics.map((topic, i) => {
-                  const isRead = readTopics.has(topic.id)
-                  const isBookmarked = bookmarks.has(topic.id)
-                  return (
+
+              {/* Topics — expandible */}
+              {isOpen && (
+                <div className={styles.blockTopics}>
+                  {block.topics.map((topic, i) => {
+                    const isRead = readTopics.has(topic.id)
+                    const isBookmarked = bookmarks.has(topic.id)
+                    return (
+                      <button
+                        key={topic.id}
+                        className={[styles.topicRow, isRead ? styles.topicRowRead : '', isRead ? 'cardDone' : ''].join(' ')}
+                        style={isRead ? { '--bc': block.color, '--done-color': block.color } : { '--bc': block.color }}
+                        onClick={() => setReadMode({ block, topicIndex: i })}
+                      >
+                        <span className={[styles.topicRowDot, isRead ? styles.topicRowDotRead : ''].join(' ')}>
+                          {isRead && <CheckCircle size={9} />}
+                        </span>
+                        <span className={styles.topicRowTitle}>{topic.title}</span>
+                        <div className={styles.topicRowRight}>
+                          {isBookmarked && <BookmarkCheck size={12} style={{ color: block.color, flexShrink: 0 }} />}
+                          <ChevronRight size={13} className={styles.topicRowArrow} />
+                        </div>
+                      </button>
+                    )
+                  })}
+                  <div className={styles.blockTopicsFooter}>
                     <button
-                      key={topic.id}
-                      className={[styles.topicRow, isRead ? styles.topicRowRead : ''].join(' ')}
-                      style={{ '--bc': block.color }}
-                      onClick={() => setReadMode({ block, topicIndex: i })}
+                      className={styles.practiceBtn}
+                      style={{ '--bc': block.color, '--bb': block.bg }}
+                      onClick={() => onSelectMode && onSelectMode(block.id)}
                     >
-                      <span className={[styles.topicRowDot, isRead ? styles.topicRowDotRead : ''].join(' ')}>
-                        {isRead && <CheckCircle size={9} />}
-                      </span>
-                      <span className={styles.topicRowTitle}>{topic.title}</span>
-                      <div className={styles.topicRowRight}>
-                        {isBookmarked && <BookmarkCheck size={12} style={{ color: block.color, flexShrink: 0 }} />}
-                        <ChevronRight size={13} className={styles.topicRowArrow} />
-                      </div>
+                      <Zap size={13} /> Practicar este bloque
                     </button>
-                  )
-                })}
-              </div>
-              <div className={styles.blockCardFooter}>
-                <button
-                  className={styles.practiceBtn}
-                  style={{ '--bc': block.color, '--bb': block.bg }}
-                  onClick={() => onSelectMode && onSelectMode(block.id)}
-                >
-                  <Zap size={13} /> Practicar
-                </button>
-              </div>
+                  </div>
+                </div>
+              )}
             </div>
           )
         })}

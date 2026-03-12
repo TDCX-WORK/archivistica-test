@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import {
   BarChart2, TrendingUp, Award, Flame, BookOpen, CheckCircle,
   Target, Clock, Bookmark, Brain, ArrowUp, ArrowDown, Minus
 } from 'lucide-react'
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, CartesianGrid, Cell, PieChart, Pie
+  AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, CartesianGrid
 } from 'recharts'
 import config from '../../data/config.json'
 import allQuestions from '../../data/questions.json'
@@ -60,6 +60,72 @@ function CustomTooltip({ active, payload, label }) {
   )
 }
 
+// ── CHOWCHOW ──────────────────────────────────────────────────────────────
+function ChowchowCard({ modeData, avgScore, sessions }) {
+  const totalSessions = sessions.length
+  const videoRef = useRef(null)
+
+  const handleTimeUpdate = () => {
+    const video = videoRef.current
+    if (!video) return
+    if (video.duration && video.currentTime >= video.duration - 0.1) {
+      video.currentTime = 0
+    }
+  }
+
+  const speech = totalSessions === 0
+    ? '¡Woof! Aún no has empezado... ¿a qué esperas? 🐾'
+    : avgScore >= 80
+    ? '¡Woof! Estás en racha, campeón! 🏆'
+    : avgScore >= 60
+    ? '¡Guau! Vas muy bien, sigue así 💪'
+    : avgScore >= 40
+    ? 'Woof... ¿cómo vas? Puedes mejorar 📚'
+    : '¡Woof! Hay que estudiar más... yo te ayudo 🐶'
+
+  const modeLabel = n =>
+    n === 'beginner' ? 'Test Rápido' : n === 'advanced' ? 'Test Avanzado' :
+    n === 'exam' ? 'Simulacro' : n === 'review_due' ? 'Repasar' :
+    n === 'all_fails' ? 'Fallos' : n
+
+  const colors = ['#2563EB','#059669','#D97706','#9333EA','#DC2626','#0891B2']
+  const sorted = [...modeData].sort((a,b) => b.value - a.value)
+
+  return (
+    <div className={styles.chowWrap}>
+      <div className={styles.chowBubble}>
+        <span>{speech}</span>
+        <div className={styles.chowBubbleTail}/>
+      </div>
+
+      {/* Video chowchow */}
+      <video
+        ref={videoRef}
+        className={styles.chowVideo}
+        src="/chowchow.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+        onTimeUpdate={handleTimeUpdate}
+      />
+
+      {sorted.length > 0 && (
+        <div className={styles.chowModes}>
+          {sorted.map((d, i) => (
+            <div key={d.name} className={styles.chowModeChip} style={{'--mc': colors[i % colors.length]}}>
+              <span className={styles.chowModeDot}/>
+              <span className={styles.chowModeName}>{modeLabel(d.name)}</span>
+              <span className={styles.chowModeVal}>{d.value}x</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+
 export default function Stats({ progress, studyReadTopics, studyBookmarks }) {
   const [activeTab, setActiveTab] = useState('test')
 
@@ -111,15 +177,17 @@ export default function Stats({ progress, studyReadTopics, studyBookmarks }) {
   const modeCount = {}
   sessions.forEach(s => { modeCount[s.mode_id] = (modeCount[s.mode_id]||0)+1 })
   const modeData = Object.entries(modeCount).map(([name,value]) => ({ name, value }))
-  const modeColors = ['#2563EB','#059669','#DC2626','#B45309','#9333EA','#0891B2']
 
   // ── Stats de ESTUDIO ───────────────────────────────────────────────────
-  const totalTopics    = STUDY_BLOCKS.reduce((s,b) => s+b.topics.length, 0)
+  // Solo bloques raiz (los que tienen topics propios y estimatedMinutes)
+  const ROOT_BLOCKS = STUDY_BLOCKS.filter(b => b.topics?.length > 0 && b.estimatedMinutes)
+
+  const totalTopics    = ROOT_BLOCKS.reduce((s,b) => s+b.topics.length, 0)
   const readCount      = studyReadTopics?.size || 0
   const bookmarkCount  = studyBookmarks?.size  || 0
-  const readPct        = Math.round((readCount/totalTopics)*100)
+  const readPct        = totalTopics > 0 ? Math.round((readCount/totalTopics)*100) : 0
 
-  const studyBlockData = STUDY_BLOCKS.map(b => {
+  const studyBlockData = ROOT_BLOCKS.map(b => {
     const read  = b.topics.filter(t => studyReadTopics?.has(t.id)).length
     const total = b.topics.length
     const pct   = Math.round((read/total)*100)
@@ -127,10 +195,10 @@ export default function Stats({ progress, studyReadTopics, studyBookmarks }) {
   })
 
   // Tiempo estimado restante
-  const totalMinutes = STUDY_BLOCKS.reduce((s,b)=>s+b.estimatedMinutes,0)
-  const readMinutes  = STUDY_BLOCKS.reduce((s,b) => {
+  const totalMinutes = ROOT_BLOCKS.reduce((s,b)=>s+(b.estimatedMinutes||0),0)
+  const readMinutes  = ROOT_BLOCKS.reduce((s,b) => {
     const readFrac = b.topics.filter(t=>studyReadTopics?.has(t.id)).length / b.topics.length
-    return s + Math.round(b.estimatedMinutes * readFrac)
+    return s + Math.round((b.estimatedMinutes||0) * readFrac)
   }, 0)
   const remainMins = totalMinutes - readMinutes
 
@@ -182,24 +250,24 @@ export default function Stats({ progress, studyReadTopics, studyBookmarks }) {
           <div className={styles.row2}>
             <div className={styles.card}>
               <h3 className={styles.cardTitle}>Resultado global</h3>
-              <div className={styles.donutRow}>
-                <Donut pct={globalPct} color="#059669" size={140} label="Correctas" sublabel={`${totalCorrect}/${totalQuestions}`}/>
-                <div className={styles.donutLegend}>
-                  <div className={styles.legendItem}>
-                    <span className={styles.legendDot} style={{background:'#059669'}}/>
-                    <span>Correctas: <strong>{totalCorrect}</strong></span>
+              <div className={styles.donutCentered}>
+                <Donut pct={globalPct} color="#059669" size={150} sublabel={`${totalCorrect}/${totalQuestions}`}/>
+                <div className={styles.donutStatsGrid}>
+                  <div className={styles.donutStat}>
+                    <span className={styles.donutStatDot} style={{background:'#059669'}}/>
+                    <span className={styles.donutStatLabel}>Correctas — <strong>{totalCorrect}</strong></span>
                   </div>
-                  <div className={styles.legendItem}>
-                    <span className={styles.legendDot} style={{background:'#DC2626'}}/>
-                    <span>Incorrectas: <strong>{totalWrong}</strong></span>
+                  <div className={styles.donutStat}>
+                    <span className={styles.donutStatDot} style={{background:'#DC2626'}}/>
+                    <span className={styles.donutStatLabel}>Incorrectas — <strong>{totalWrong}</strong></span>
                   </div>
-                  <div className={styles.legendItem}>
-                    <span className={styles.legendDot} style={{background:'#F3F4F6'}}/>
-                    <span>Total: <strong>{totalQuestions}</strong></span>
+                  <div className={styles.donutStat}>
+                    <span className={styles.donutStatDot} style={{background:'#CBD5E1'}}/>
+                    <span className={styles.donutStatLabel}>Total — <strong>{totalQuestions}</strong></span>
                   </div>
-                  <div className={styles.streakBox}>
-                    <Flame size={14} style={{color:'#DC2626'}}/>
-                    <span>Mejor racha: <strong>{bestStreak} días</strong></span>
+                  <div className={styles.donutStat}>
+                    <Flame size={9} style={{color:'#DC2626', flexShrink:0}}/>
+                    <span className={styles.donutStatLabel}>Mejor racha — <strong>{bestStreak}d</strong></span>
                   </div>
                 </div>
               </div>
@@ -234,29 +302,7 @@ export default function Stats({ progress, studyReadTopics, studyBookmarks }) {
           <div className={styles.row2}>
             <div className={styles.card}>
               <h3 className={styles.cardTitle}>Modos de práctica</h3>
-              {modeData.length === 0 ? (
-                <div className={styles.emptyChart}>Sin datos todavía</div>
-              ) : (
-                <div className={styles.pieRow}>
-                  <ResponsiveContainer width="50%" height={160}>
-                    <PieChart>
-                      <Pie data={modeData} dataKey="value" cx="50%" cy="50%"
-                        innerRadius={40} outerRadius={65} paddingAngle={3}>
-                        {modeData.map((_,i) => <Cell key={i} fill={modeColors[i%modeColors.length]}/>)}
-                      </Pie>
-                      <Tooltip/>
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className={styles.pieLegend}>
-                    {modeData.map((d,i) => (
-                      <div key={d.name} className={styles.legendItem}>
-                        <span className={styles.legendDot} style={{background:modeColors[i%modeColors.length]}}/>
-                        <span className={styles.legendText}>{d.name}: <strong>{d.value}</strong></span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <ChowchowCard modeData={modeData} avgScore={globalPct} sessions={sessions}/>
             </div>
 
             <div className={styles.card}>
@@ -318,7 +364,7 @@ export default function Stats({ progress, studyReadTopics, studyBookmarks }) {
               { icon: Bookmark,    label: 'Marcadores',      value: bookmarkCount, color:'#D97706' },
               { icon: Clock,       label: 'Tiempo leído',    value: `${readMinutes}min`, color:'#9333EA' },
               { icon: Clock,       label: 'Tiempo restante', value: `${remainMins}min`, color:'#DC2626' },
-              { icon: CheckCircle, label: 'Bloques completos',value: STUDY_BLOCKS.filter(b=>b.topics.every(t=>studyReadTopics?.has(t.id))).length, color:'#0891B2'},
+              { icon: CheckCircle, label: 'Bloques completos',value: ROOT_BLOCKS.filter(b=>b.topics.every(t=>studyReadTopics?.has(t.id))).length, color:'#0891B2'},
             ].map(({icon:Icon,label,value,color}) => (
               <div key={label} className={styles.kpiCard}>
                 <div className={styles.kpiIcon} style={{background:`${color}18`,color}}>
@@ -380,7 +426,7 @@ export default function Stats({ progress, studyReadTopics, studyBookmarks }) {
           <div className={styles.card}>
             <h3 className={styles.cardTitle}>Detalle por bloque</h3>
             <div className={styles.studyDonutGrid}>
-              {STUDY_BLOCKS.map(b => {
+              {ROOT_BLOCKS.map(b => {
                 const read  = b.topics.filter(t=>studyReadTopics?.has(t.id)).length
                 const total = b.topics.length
                 const pct   = Math.round((read/total)*100)
@@ -400,7 +446,7 @@ export default function Stats({ progress, studyReadTopics, studyBookmarks }) {
             <div className={styles.card}>
               <h3 className={styles.cardTitle}>Temas marcados como favoritos</h3>
               <div className={styles.bookmarkStatList}>
-                {STUDY_BLOCKS.flatMap(b =>
+                {ROOT_BLOCKS.flatMap(b =>
                   b.topics.filter(t=>studyBookmarks?.has(t.id)).map(t=>(
                     <div key={t.id} className={styles.bookmarkStatItem}>
                       <span className={styles.bookmarkStatDot} style={{background:b.color}}/>

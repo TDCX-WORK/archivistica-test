@@ -21,6 +21,16 @@
   color: var(--ink-muted);
   letter-spacing: -0.01em;
 }
+.pageTitleInstitutional {
+  display: none;
+  font-size: 0.62rem;
+  color: var(--ink-subtle);
+  font-weight: 400;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .testLabel {
   display: flex; align-items: center; gap: 0.5rem;
@@ -219,9 +229,15 @@
 
 /* Mobile */
 @media (max-width: 768px) {
-  .header { padding: 0 1rem; }
+  .header { 
+    padding: 0 1rem; 
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
   .searchWrap { display: none; }
   .avatarName { display: none; }
   .center { display: none; }
-  .userMenu { right: 1rem; }
+  .pageTitleInstitutional { display: block; }
+  .userMenu { right: 1rem; width: calc(100vw - 2rem); max-width: 260px; }
 }

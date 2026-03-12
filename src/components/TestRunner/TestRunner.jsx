@@ -53,7 +53,7 @@ function getModeTime(modeId) {
   return (config.modes[modeId]?.timeMinutes || 25) * 60
 }
 
-export default function TestRunner({ modeId, onGoHome, onRecordSession, onRecordWrong, onRecordCorrectReview, wrongAnswers = [] }) {
+export default function TestRunner({ modeId, onGoHome, onRecordSession, onRecordWrong, onRecordCorrectReview, wrongAnswers = [], penalizacion = false }) {
   const totalSecs = getModeTime(modeId)
   const isFailMode = modeId === 'review_due' || modeId === 'all_fails'
 
@@ -99,8 +99,13 @@ export default function TestRunner({ modeId, onGoHome, onRecordSession, onRecord
   const handleFinish = useCallback(() => {
     const snap    = answersRef.current
     const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000)
-    const correct = Object.entries(snap).filter(([i, a]) => questions[Number(i)]?.answer === a).length
-    onRecordSession(modeId, correct, Object.keys(snap).length, elapsed)
+    const correct  = Object.entries(snap).filter(([i, a]) => questions[Number(i)]?.answer === a).length
+    const wrong    = Object.entries(snap).filter(([i, a]) => questions[Number(i)]?.answer !== a).length
+    const answered = Object.keys(snap).length
+    const effectiveCorrect = penalizacion
+      ? Math.max(0, correct - wrong * 0.25)
+      : correct
+    onRecordSession(modeId, effectiveCorrect, answered, elapsed)
     setPhase('finished')
   }, [questions, modeId, onRecordSession])
 
@@ -148,6 +153,7 @@ export default function TestRunner({ modeId, onGoHome, onRecordSession, onRecord
           {totalSecs && <span>·</span>}
           <span>{qCount} pregunta{qCount !== 1 ? 's' : ''}</span>
           {isFailMode && <span>· Sin límite de tiempo</span>}
+          {penalizacion && <span>· <span style={{color:'var(--danger)',fontWeight:700}}>−0.25 por fallo</span></span>}
         </div>
         <button className={styles.startBtn} onClick={() => {
           startTimeRef.current = Date.now()
