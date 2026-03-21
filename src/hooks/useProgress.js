@@ -16,7 +16,7 @@ function calcStreak(sessions) {
   return streak
 }
 
-export function useProgress(userId) {
+export function useProgress(userId, academyId, subjectId) {
   const [sessions, setSessions]           = useState([])
   const [wrongAnswers, setWrongAnswers]   = useState([])
   const [loadingData, setLoadingData]     = useState(false)
@@ -41,6 +41,8 @@ export function useProgress(userId) {
     const score = total > 0 ? Math.round((correct / total) * 100) : 0
     const newSession = {
       user_id:       userId,
+      academy_id:    academyId,
+      subject_id:    subjectId,
       mode_id:       modeId,
       correct,
       total,
@@ -48,7 +50,7 @@ export function useProgress(userId) {
       duration_secs: durationSecs,
       played_at:     new Date().toISOString().slice(0, 10),
     }
-    const { data } = await supabase.from('sessions').insert(newSession).select().single()
+    const { data } = await supabase.from('sessions').insert(newSession).select().maybeSingle()
     if (data) setSessions(prev => [data, ...prev])
   }, [userId])
 
@@ -68,12 +70,14 @@ export function useProgress(userId) {
         last_seen:      today,
       }
       const { data } = await supabase
-        .from('wrong_answers').update(updated).eq('id', existing.id).select().single()
+        .from('wrong_answers').update(updated).eq('id', existing.id).select().maybeSingle()
       if (data) setWrongAnswers(prev => prev.map(w => w.id === data.id ? data : w))
     } else {
       // Primera vez que falla esta pregunta
       const newWrong = {
         user_id:        userId,
+        academy_id:     academyId,
+        subject_id:     subjectId,
         question_id:    questionId,
         block,
         fail_count:     1,
@@ -81,7 +85,7 @@ export function useProgress(userId) {
         next_review:    new Date(Date.now() + 86400000).toISOString().slice(0, 10),
         last_seen:      today,
       }
-      const { data } = await supabase.from('wrong_answers').insert(newWrong).select().single()
+      const { data } = await supabase.from('wrong_answers').insert(newWrong).select().maybeSingle()
       if (data) setWrongAnswers(prev => [...prev, data])
     }
   }, [userId, wrongAnswers])
@@ -112,7 +116,7 @@ export function useProgress(userId) {
       last_seen:      today,
     }
     const { data } = await supabase
-      .from('wrong_answers').update(updated).eq('id', existing.id).select().single()
+      .from('wrong_answers').update(updated).eq('id', existing.id).select().maybeSingle()
     if (data) setWrongAnswers(prev => prev.map(w => w.id === data.id ? data : w))
   }, [userId, wrongAnswers])
 

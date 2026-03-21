@@ -1,141 +1,222 @@
-import { useEffect } from 'react'
-import { useSettings } from './hooks/useSettings'
+import { useSettings }    from './hooks/useSettings'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
-import useAuth           from './hooks/useAuth'
-import useProgress       from './hooks/useProgress'
-import useStudyProgress  from './hooks/useStudyProgress'
-import AuthPage          from './components/Auth/Auth'
-import Sidebar           from './components/Layout/SideBar'
-import Header            from './components/Layout/Header'
-import Home              from './components/Home/Home'
-import Stats             from './components/Stats/Stats'
-import StudyView         from './components/Study/StudyView'
-import TestRunner        from './components/TestRunner/TestRunner'
-import Flashcard         from './components/Flashcard/Flashcard'
-import SupuestoRunner    from './components/Supuesto/SupuestoRunner'
-import Profile           from './components/Profile/Profile'
-import supuestos         from './data/supuestos.json'
-import styles            from './App.module.css'
-import { useState } from 'react'
+import { useState }       from 'react'
+import { ShieldOff, LogOut } from 'lucide-react'
+import useAuth            from './hooks/useAuth'
+import useProgress        from './hooks/useProgress'
+import useStudyProgress   from './hooks/useStudyProgress'
+import AuthPage           from './components/Auth/Auth'
+import ForcePasswordChange from './components/Auth/ForcePasswordChange'
+import Sidebar            from './components/Layout/SideBar'
+import Header             from './components/Layout/Header'
+import Home               from './components/Home/Home'
+import Stats              from './components/Stats/Stats'
+import StudyView          from './components/Study/StudyView'
+import TestRunner         from './components/TestRunner/TestRunner'
+import Flashcard          from './components/Flashcard/Flashcard'
+import SupuestoRunner     from './components/Supuesto/SupuestoRunner'
+import Profile            from './components/Profile/Profile'
+import ProfesorPanel      from './components/Profesor/ProfesorPanel/ProfesorPanel'
+import StatsClase         from './components/Profesor/StatsClase/StatsClase'
+import ProfesorProfile    from './components/Profesor/ProfesorProfile/ProfesorProfile'
+import DirectorPanel      from './components/Profesor/DirectorPanel/DirectorPanel'
+import SuperadminPanel    from './components/Superadmin/SuperadminPanel'
+import supuestos          from './data/supuestos.json'
+import styles             from './App.module.css'
 
-// ── Rutas de tabs ──────────────────────────────────────────
-const TAB_ROUTES = {
-  inicio:       '/',
-  estudio:      '/estudio',
-  estadisticas: '/estadisticas',
-  perfil:       '/perfil',
+const homeRoute = (user) => {
+  const role = user?.role
+  if (role === 'superadmin') return '/admin'
+  if (role === 'director')   return '/direccion'
+  if (role === 'profesor')   return '/profesor'
+  return '/'
+}
+
+function AcademiaSuspendidaPage({ username, onLogout }) {
+  return (
+    <div style={{
+      minHeight:'100vh', display:'flex', flexDirection:'column',
+      alignItems:'center', justifyContent:'center',
+      padding:'2rem', background:'var(--surface-off)', textAlign:'center',
+    }}>
+      <div style={{ fontSize:'3rem', marginBottom:'1rem' }}>🔒</div>
+      <h1 style={{ fontSize:'1.4rem', fontWeight:800, color:'var(--ink)', margin:'0 0 0.5rem' }}>
+        Academia suspendida
+      </h1>
+      <p style={{ fontSize:'0.9rem', color:'var(--ink-muted)', maxWidth:360, margin:'0 0 0.5rem' }}>
+        Hola <strong>{username}</strong>, el acceso a tu academia está temporalmente suspendido.
+      </p>
+      <p style={{ fontSize:'0.85rem', color:'var(--ink-muted)', maxWidth:360, margin:'0 0 2rem' }}>
+        Contacta con tu academia para más información.
+      </p>
+      <button onClick={onLogout} style={{
+        display:'flex', alignItems:'center', gap:'0.5rem',
+        padding:'0.65rem 1.25rem', background:'var(--ink)', color:'white',
+        border:'none', borderRadius:'8px', fontSize:'0.88rem', fontWeight:700, cursor:'pointer',
+      }}>Cerrar sesión</button>
+    </div>
+  )
+}
+
+function AccesoExpiradoPage({ username, onLogout }) {
+  return (
+    <div style={{
+      minHeight:'100vh', display:'flex', flexDirection:'column',
+      alignItems:'center', justifyContent:'center',
+      padding:'2rem', background:'var(--surface-off)', textAlign:'center',
+    }}>
+      <ShieldOff size={48} strokeWidth={1.2} style={{ color:'#DC2626', marginBottom:'1rem' }} />
+      <h1 style={{ fontSize:'1.4rem', fontWeight:800, color:'var(--ink)', margin:'0 0 0.5rem' }}>
+        Tu acceso ha expirado
+      </h1>
+      <p style={{ fontSize:'0.9rem', color:'var(--ink-muted)', maxWidth:340, margin:'0 0 2rem' }}>
+        Hola <strong>{username}</strong>, tu período de acceso ha finalizado.
+        Contacta con tu academia para renovarlo.
+      </p>
+      <button onClick={onLogout} style={{
+        display:'flex', alignItems:'center', gap:'0.5rem',
+        padding:'0.65rem 1.25rem', background:'var(--ink)', color:'white',
+        border:'none', borderRadius:'8px', fontSize:'0.88rem', fontWeight:700, cursor:'pointer',
+      }}>
+        <LogOut size={15} /> Cerrar sesión
+      </button>
+    </div>
+  )
 }
 
 function AppShell({ currentUser, logout, progress, studyProgress }) {
-  const { settings } = useSettings()
-  const navigate  = useNavigate()
-  const location  = useLocation()
-  const [overlay, setOverlay] = useState(null) // { type, modeId?, supuesto? }
+  const { settings }   = useSettings()
+  const navigate       = useNavigate()
+  const location       = useLocation()
+  const [overlay, setOverlay] = useState(null)
 
-  // Tab activo basado en la URL
+  const academyId    = currentUser?.academy_id
+  const role         = currentUser?.role
+  const isAlumno     = role === 'alumno' || !role
+  const isProfesor   = role === 'profesor'
+  const isDirector   = role === 'director'
+  const isSuperadmin = role === 'superadmin'
+
   const activeTab =
-    location.pathname.startsWith('/estudio')      ? 'estudio' :
+    location.pathname.startsWith('/estudio')      ? 'estudio'      :
     location.pathname.startsWith('/estadisticas') ? 'estadisticas' :
-    location.pathname.startsWith('/perfil')       ? 'perfil' : 'inicio'
+    location.pathname.startsWith('/perfil')        ? 'perfil'       :
+    location.pathname.startsWith('/stats-clase')   ? 'stats-clase'  :
+    location.pathname.startsWith('/profesor')      ? 'profesor'     :
+    location.pathname.startsWith('/direccion')     ? 'direccion'    :
+    location.pathname.startsWith('/papelera')      ? 'papelera'     :
+    location.pathname.startsWith('/admin')         ? 'superadmin'   : 'inicio'
 
   const handleTabChange = (t) => {
     setOverlay(null)
-    navigate(TAB_ROUTES[t] || '/')
+    const routes = {
+      inicio:        homeRoute(currentUser),
+      estudio:       '/estudio',
+      estadisticas:  '/estadisticas',
+      perfil:        '/perfil',
+      profesor:      '/profesor',
+      'stats-clase': '/stats-clase',
+      direccion:     '/direccion',
+      superadmin:    '/admin',
+      papelera:      '/papelera',
+    }
+    navigate(routes[t] || homeRoute(currentUser))
   }
 
-  const handleSelectMode = (modeId) => {
+  const handleSelectMode = (modeId, modeLabel) => {
     const sup = supuestos.find(s => s.id === modeId)
-    if (sup)                     return setOverlay({ type: 'supuesto', supuesto: sup })
-    if (modeId === 'flashcards') return setOverlay({ type: 'flashcards' })
-    setOverlay({ type: 'test', modeId })
+    if (sup)                     return setOverlay({ type:'supuesto', supuesto:sup })
+    if (modeId === 'flashcards') return setOverlay({ type:'flashcards' })
+    setOverlay({ type:'test', modeId, modeLabel })
   }
 
-  const goHome = () => {
-    setOverlay(null)
-    navigate('/')
-  }
+  const goHome = () => { setOverlay(null); navigate(homeRoute(currentUser)) }
 
-  const isTestActive = overlay && ['test', 'supuesto', 'flashcards'].includes(overlay.type)
+  const isTestActive = overlay && ['test','supuesto','flashcards'].includes(overlay.type)
 
   const testLabel =
-    overlay?.type === 'test'       ? overlay.modeId :
+    overlay?.type === 'test'       ? (overlay.modeLabel || overlay.modeId) :
     overlay?.type === 'supuesto'   ? overlay.supuesto?.title :
     overlay?.type === 'flashcards' ? 'Flashcards' : ''
 
   const pageTitle =
-    activeTab === 'estadisticas' ? 'Estadísticas' :
-    activeTab === 'estudio'      ? 'Estudio' :
-    activeTab === 'perfil'       ? 'Mi Perfil' : 'Inicio'
+    activeTab === 'estadisticas' ? 'Estadísticas'       :
+    activeTab === 'estudio'      ? 'Temario'             :
+    activeTab === 'perfil'       ? 'Mi Perfil'           :
+    activeTab === 'profesor'     ? 'Panel Profesor'      :
+    activeTab === 'stats-clase'  ? 'Stats de la clase'   :
+    activeTab === 'direccion'    ? 'Panel de Dirección'  :
+    activeTab === 'superadmin'   ? 'Superadmin'          :
+    activeTab === 'papelera'     ? 'Papelera'            : 'Inicio'
 
   return (
     <div className={styles.shell}>
       {!isTestActive && (
-        <Sidebar
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          currentUser={currentUser}
-          onLogout={logout}
-        />
+        <Sidebar activeTab={activeTab} onTabChange={handleTabChange}
+          currentUser={currentUser} onLogout={logout} />
       )}
-
       <div className={[styles.main, isTestActive ? styles.mainFull : ''].join(' ')}>
         <Header
-          currentUser={currentUser}
-          inTest={isTestActive}
-          modeName={testLabel}
-          onGoHome={goHome}
-          onLogout={logout}
-          pageTitle={pageTitle}
+          currentUser={currentUser} inTest={isTestActive} modeName={testLabel}
+          onGoHome={goHome} onLogout={logout} pageTitle={pageTitle}
           onGoProfile={() => navigate('/perfil')}
           onGoSettings={() => navigate('/perfil?tab=ajustes')}
         />
-
         <div className={styles.content}>
-          {/* Overlays de test — se muestran encima de cualquier ruta */}
           {overlay?.type === 'test' && (
             <TestRunner
-              modeId={overlay.modeId}
-              penalizacion={settings.penalizacion}
-              onGoHome={goHome}
+              modeId={overlay.modeId} modeLabel={overlay.modeLabel} academyId={academyId} subjectId={currentUser?.subject_id}
+              penalizacion={settings.penalizacion} onGoHome={goHome}
               onRecordSession={progress.recordSession}
               onRecordWrong={progress.recordWrongAnswer}
               onRecordCorrectReview={progress.recordCorrectReview}
               wrongAnswers={progress.wrongAnswers}
             />
           )}
-          {overlay?.type === 'flashcards' && (
-            <Flashcard onGoHome={goHome} />
-          )}
-          {overlay?.type === 'supuesto' && (
-            <SupuestoRunner supuesto={overlay.supuesto} onGoHome={goHome} />
-          )}
+          {overlay?.type === 'flashcards' && <Flashcard onGoHome={goHome} />}
+          {overlay?.type === 'supuesto'   && <SupuestoRunner supuesto={overlay.supuesto} onGoHome={goHome} />}
 
-          {/* Rutas normales — solo visibles cuando no hay overlay */}
           {!overlay && (
             <Routes>
               <Route path="/" element={
-                <Home onSelectMode={handleSelectMode} progress={progress} />
-              }/>
+                isSuperadmin ? <Navigate to="/admin"     replace /> :
+                isDirector   ? <Navigate to="/direccion" replace /> :
+                isProfesor   ? <Navigate to="/profesor"  replace /> :
+                <Home onSelectMode={handleSelectMode} progress={progress} currentUser={currentUser} />
+              } />
               <Route path="/estudio" element={
                 <StudyView currentUser={currentUser} onSelectMode={handleSelectMode} />
-              }/>
+              } />
               <Route path="/estadisticas" element={
-                <Stats
-                  progress={progress}
-                  studyReadTopics={studyProgress.readTopics}
-                  studyBookmarks={studyProgress.bookmarks}
-                />
-              }/>
+                isAlumno
+                  ? <Stats progress={progress} studyReadTopics={studyProgress.readTopics} studyBookmarks={studyProgress.bookmarks} />
+                  : <Navigate to={homeRoute(currentUser)} replace />
+              } />
               <Route path="/perfil" element={
-                <Profile
-                  currentUser={currentUser}
-                  progress={progress}
-                  studyReadTopics={studyProgress.readTopics}
-                  studyBookmarks={studyProgress.bookmarks}
-                />
-              }/>
-              {/* Cualquier ruta desconocida → inicio */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+                isSuperadmin
+                  ? <Navigate to="/admin" replace />
+                  : (isProfesor || isDirector)
+                    ? <ProfesorProfile currentUser={currentUser} onLogout={logout} />
+                    : <Profile currentUser={currentUser} progress={progress}
+                        studyReadTopics={studyProgress.readTopics}
+                        studyBookmarks={studyProgress.bookmarks} />
+              } />
+              <Route path="/profesor" element={
+                isProfesor ? <ProfesorPanel currentUser={currentUser} /> : <Navigate to={homeRoute(currentUser)} replace />
+              } />
+              <Route path="/stats-clase" element={
+                isProfesor ? <StatsClase currentUser={currentUser} /> : <Navigate to={homeRoute(currentUser)} replace />
+              } />
+              <Route path="/direccion" element={
+                isDirector ? <DirectorPanel currentUser={currentUser} /> : <Navigate to={homeRoute(currentUser)} replace />
+              } />
+              <Route path="/admin" element={
+                isSuperadmin ? <SuperadminPanel currentUser={currentUser} /> : <Navigate to={homeRoute(currentUser)} replace />
+              } />
+              <Route path="/papelera" element={
+                isSuperadmin ? <SuperadminPanel currentUser={currentUser} modoPapelera /> : <Navigate to={homeRoute(currentUser)} replace />
+              } />
+              <Route path="*" element={<Navigate to={homeRoute(currentUser)} replace />} />
             </Routes>
           )}
         </div>
@@ -145,28 +226,25 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
 }
 
 export default function App() {
-  const { currentUser, loading, login, register, logout, error, clearError } = useAuth()
-  const progress      = useProgress(currentUser?.id)
+  const {
+    currentUser, loading, login, register, logout, error, clearError,
+    clearForcePasswordChange, recoveryMode, requestPasswordReset, confirmPasswordReset,
+  } = useAuth()
+  const progress      = useProgress(currentUser?.id, currentUser?.academy_id, currentUser?.subject_id)
   const studyProgress = useStudyProgress(currentUser?.id)
 
-  if (loading) return (
-    <div className={styles.loadingScreen}>
-      <div className={styles.loadingSpinner} />
-    </div>
-  )
-
-  if (!currentUser) return (
-    <AuthPage onLogin={login} onRegister={register} error={error} clearError={clearError} />
-  )
+  if (loading) return <div className={styles.loadingScreen}><div className={styles.loadingSpinner} /></div>
+  // Token de recuperación de contraseña detectado — mostrar pantalla de nueva contraseña
+  if (recoveryMode) return <ForcePasswordChange currentUser={{ username: '' }} onDone={confirmPasswordReset} isRecovery />
+  if (!currentUser) return <AuthPage onLogin={login} onRegister={register} onRequestReset={requestPasswordReset} error={error} clearError={clearError} />
+  if (currentUser.academyDeleted)      return <AcademiaSuspendidaPage username={currentUser.username} onLogout={logout} />
+  if (currentUser.academySuspended)    return <AcademiaSuspendidaPage username={currentUser.username} onLogout={logout} />
+  if (currentUser.accesoExpirado)      return <AccesoExpiradoPage     username={currentUser.username} onLogout={logout} />
+  if (currentUser.forcePasswordChange) return <ForcePasswordChange    currentUser={currentUser}       onDone={clearForcePasswordChange} />
 
   return (
     <BrowserRouter>
-      <AppShell
-        currentUser={currentUser}
-        logout={logout}
-        progress={progress}
-        studyProgress={studyProgress}
-      />
+      <AppShell currentUser={currentUser} logout={logout} progress={progress} studyProgress={studyProgress} />
     </BrowserRouter>
   )
 }

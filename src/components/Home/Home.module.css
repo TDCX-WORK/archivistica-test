@@ -354,3 +354,94 @@
   .kpiRow { gap: 0.6rem; }
   .statCard { padding: 1rem; }
 }
+
+/* ── Plan semanal / diario widget ───────────────────────────────────────── */
+.planCard {
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #0891b2 100%);
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 6px 24px rgba(15, 118, 110, 0.3), 0 0 0 1px rgba(255,255,255,0.08) inset;
+  position: relative;
+  overflow: hidden;
+}
+/* Glow sutil en la esquina */
+.planCard::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.planCard:hover { box-shadow: 0 10px 32px rgba(15, 118, 110, 0.4); }
+
+/* Variante diario — tono naranja/ámbar */
+.planCardDiario {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 50%, #f59e0b 100%);
+  box-shadow: 0 6px 24px rgba(180, 83, 9, 0.3), 0 0 0 1px rgba(255,255,255,0.08) inset;
+}
+.planCardDiario:hover { box-shadow: 0 10px 32px rgba(180, 83, 9, 0.4); }
+
+.planHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.85rem;
+}
+.planTitle {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: 0.01em;
+}
+.planNota {
+  font-size: 0.76rem;
+  color: rgba(255,255,255,0.85);
+  font-style: italic;
+}
+.planBloques {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.planBloque {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: rgba(255,255,255,0.13);
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: background 0.15s;
+}
+.planBloque:hover { background: rgba(255,255,255,0.2); }
+.planBloqueDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+  border: 1.5px solid rgba(255,255,255,0.6);
+  box-shadow: 0 0 6px rgba(255,255,255,0.4);
+}
+.planBloqueInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.planBloqueLabel {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: white;
+}
+.planBloqueDesc {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.75);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

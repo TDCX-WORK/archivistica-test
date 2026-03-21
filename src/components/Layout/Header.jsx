@@ -12,7 +12,9 @@ function UserMenu({ currentUser, onLogout, onClose, onGoProfile, onGoSettings })
           </div>
           <div>
             <p className={styles.userMenuName}>{currentUser?.displayName}</p>
-            <p className={styles.userMenuSub}>Opositor/a · Archivística</p>
+            <p className={styles.userMenuSub}>
+            {currentUser?.role === 'profesor' ? 'Profesor/a' : currentUser?.role === 'director' ? 'Director/a' : 'Opositor/a'}
+          </p>
           </div>
         </div>
         <div className={styles.userMenuDivider} />
@@ -48,7 +50,7 @@ export default function Header({ currentUser, inTest, modeName, onGoHome, pageTi
             <>
               <div className={styles.pageTitle}>{pageTitle || 'Inicio'}</div>
               <div className={styles.pageTitleInstitutional}>
-                Oposiciones Archivística · Ministerio de Cultura
+                {currentUser?.academyName || 'Plataforma de Oposiciones'}
               </div>
             </>
           )}
@@ -57,8 +59,8 @@ export default function Header({ currentUser, inTest, modeName, onGoHome, pageTi
         {/* Center — solo en home */}
         {!inTest && (
           <div className={styles.center}>
-            <span className={styles.centerTitle}>Oposiciones Archivística</span>
-            <span className={styles.centerSub}>Ministerio de Cultura · Sección Archivos</span>
+            <span className={styles.centerTitle}>{currentUser?.academyName || "Plataforma de Oposiciones"}</span>
+            <span className={styles.centerSub}>{currentUser?.subjectName || ""}</span>
           </div>
         )}
 

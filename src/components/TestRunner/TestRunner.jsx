@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Clock, ChevronLeft, ChevronRight, CheckCircle, AlertTriangle } from 'lucide-react'
-import allQuestions from '../../data/questions.json'
+import { Clock, ChevronLeft, ChevronRight, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
 import config       from '../../data/config.json'
 import QuestionCard from '../Question/QuestionCard'
 import ProgressBar  from '../Progress/ProgressBar'
@@ -9,42 +9,70 @@ import styles       from './TestRunner.module.css'
 
 function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5) }
 
-// Bloques temáticos válidos (para detectar si modeId es un bloque)
 const BLOCK_IDS = new Set(Object.keys(config.blocks))
 
-// Obtener preguntas según el modo
-function getQuestions(modeId, wrongAnswers = []) {
-  // Modo: repasar preguntas pendientes hoy (spaced repetition)
+async function fetchQuestions(modeId, academyId, wrongAnswers = [], subjectId = null) {
+  if (!academyId) return []
+
+  // Modos de repaso — filtran por IDs de preguntas ya falladas
   if (modeId === 'review_due') {
     const today = new Date().toISOString().slice(0, 10)
     const due   = wrongAnswers.filter(w => w.next_review <= today)
-    const ids   = new Set(due.map(w => w.question_id))
-    return shuffle(allQuestions.filter(q => ids.has(q.id)))
+    if (!due.length) return []
+    // wrong_answers guarda question_id como INT (el id original del JSON)
+    // Ahora necesitamos buscar por ese id numérico en la columna category o por UUID
+    // Usamos la tabla questions filtrando por academy_id — los ids numéricos los guardamos en category
+    const ids = due.map(w => w.question_id)
+    let q = supabase.from('questions').select('*').eq('academy_id', academyId).in('id', ids)
+    if (subjectId) q = q.eq('subject_id', subjectId)
+    const { data } = await q
+    return shuffle(data || [])
   }
 
-  // Modo: todos los fallos
   if (modeId === 'all_fails') {
-    const ids = new Set(wrongAnswers.map(w => w.question_id))
-    return shuffle(allQuestions.filter(q => ids.has(q.id)))
+    if (!wrongAnswers.length) return []
+    const ids = wrongAnswers.map(w => w.question_id)
+    let q = supabase.from('questions').select('*').eq('academy_id', academyId).in('id', ids)
+    if (subjectId) q = q.eq('subject_id', subjectId)
+    const { data } = await q
+    return shuffle(data || [])
   }
 
-  // Modo: practicar un bloque temático (viene desde StudyView)
-  if (BLOCK_IDS.has(modeId)) {
-    const blockQuestions = allQuestions.filter(q => q.block === modeId)
-    return shuffle(blockQuestions).slice(0, Math.min(20, blockQuestions.length))
+  // Modo bloque temático (viene desde StudyView — modeId es el UUID del bloque)
+  if (modeId && modeId.includes('-') && !config.modes[modeId]) {
+    let q = supabase.from('questions').select('*').eq('academy_id', academyId).eq('block_id', modeId)
+    if (subjectId) q = q.eq('subject_id', subjectId)
+    const { data } = await q
+    return shuffle(data || []).slice(0, 20)
   }
 
-  // Modos normales
+  // Modos normales del config (beginner, advanced, exam, supuesto_N...)
   const mode = config.modes[modeId]
   if (!mode) return []
-  return shuffle(allQuestions).slice(0, mode.questions)
+
+  let query = supabase
+    .from('questions')
+    .select('*')
+    .eq('academy_id', academyId)
+
+  if (subjectId) {
+    query = query.eq('subject_id', subjectId)
+  }
+
+  if (mode.practical) {
+    query = query.or('difficulty.eq.practical,category.eq.gestion,category.eq.descripcion')
+  }
+
+  const { data } = await query
+  return shuffle(data || []).slice(0, mode.questions)
 }
 
 function getModeLabel(modeId) {
   if (modeId === 'review_due') return 'Repasar hoy'
   if (modeId === 'all_fails')  return 'Todos mis fallos'
   if (BLOCK_IDS.has(modeId))   return config.blocks[modeId]?.label || modeId
-  return config.modes[modeId]?.label || modeId
+  if (modeId && modeId.includes('-') && !config.modes[modeId]) return modeLabel || 'Practicar bloque'
+  return config.modes[modeId]?.label || 'Test'
 }
 
 function getModeTime(modeId) {
@@ -53,12 +81,13 @@ function getModeTime(modeId) {
   return (config.modes[modeId]?.timeMinutes || 25) * 60
 }
 
-export default function TestRunner({ modeId, onGoHome, onRecordSession, onRecordWrong, onRecordCorrectReview, wrongAnswers = [], penalizacion = false }) {
-  const totalSecs = getModeTime(modeId)
+export default function TestRunner({ modeId, modeLabel, academyId, subjectId, onGoHome, onRecordSession, onRecordWrong, onRecordCorrectReview, wrongAnswers = [], penalizacion = false }) {
+  const totalSecs  = getModeTime(modeId)
   const isFailMode = modeId === 'review_due' || modeId === 'all_fails'
 
   const [phase,     setPhase]     = useState('intro')
-  const [questions]               = useState(() => getQuestions(modeId, wrongAnswers))
+  const [questions, setQuestions] = useState([])
+  const [loading,   setLoading]   = useState(true)
   const [index,     setIndex]     = useState(0)
   const [answers,   setAnswers]   = useState({})
   const [secsLeft,  setSecsLeft]  = useState(totalSecs)
@@ -67,7 +96,18 @@ export default function TestRunner({ modeId, onGoHome, onRecordSession, onRecord
 
   useEffect(() => { answersRef.current = answers }, [answers])
 
-  // Timer (solo en modos con tiempo)
+  // Cargar preguntas al montar
+  useEffect(() => {
+    if (!academyId) return
+    setLoading(true)
+    fetchQuestions(modeId, academyId, wrongAnswers, subjectId).then(qs => {
+      setQuestions(qs)
+      setLoading(false)
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modeId, academyId, subjectId])
+
+  // Timer
   useEffect(() => {
     if (phase !== 'running' || !totalSecs) return
     if (secsLeft <= 0) { handleFinish(); return }
@@ -88,10 +128,8 @@ export default function TestRunner({ modeId, onGoHome, onRecordSession, onRecord
     const isInWrong = wrongAnswers.some(w => w.question_id === q.id)
 
     if (!isCorrect) {
-      // Registrar fallo
-      onRecordWrong?.(q.id, q.block)
+      onRecordWrong?.(q.id, q.category || q.block_id)
     } else if (isCorrect && isInWrong) {
-      // Acertó una pregunta que tenía en fallos → actualizar spaced repetition
       onRecordCorrectReview?.(q.id)
     }
   }, [index, questions, wrongAnswers, onRecordWrong, onRecordCorrectReview])
@@ -101,13 +139,13 @@ export default function TestRunner({ modeId, onGoHome, onRecordSession, onRecord
     const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000)
     const correct  = Object.entries(snap).filter(([i, a]) => questions[Number(i)]?.answer === a).length
     const wrong    = Object.entries(snap).filter(([i, a]) => questions[Number(i)]?.answer !== a).length
-    const answered = Object.keys(snap).length
+    const answeredCount = Object.keys(snap).length
     const effectiveCorrect = penalizacion
       ? Math.max(0, correct - wrong * 0.25)
       : correct
-    onRecordSession(modeId, effectiveCorrect, answered, elapsed)
+    onRecordSession(modeId, effectiveCorrect, answeredCount, elapsed)
     setPhase('finished')
-  }, [questions, modeId, onRecordSession])
+  }, [questions, modeId, onRecordSession, penalizacion])
 
   const handleRepeat = useCallback(() => {
     setPhase('intro')
@@ -115,9 +153,25 @@ export default function TestRunner({ modeId, onGoHome, onRecordSession, onRecord
     setAnswers({})
     setSecsLeft(totalSecs)
     startTimeRef.current = Date.now()
-  }, [totalSecs])
+    // Recargar preguntas mezcladas
+    setLoading(true)
+    fetchQuestions(modeId, academyId, wrongAnswers, subjectId).then(qs => {
+      setQuestions(qs)
+      setLoading(false)
+    })
+  }, [totalSecs, modeId, academyId, subjectId, wrongAnswers])
 
-  // Sin preguntas disponibles en modo fallos
+  // Estado de carga inicial
+  if (loading) return (
+    <div className={styles.intro}>
+      <div className={styles.introCard}>
+        <Loader2 size={28} strokeWidth={1.5} style={{ animation: 'spin 1s linear infinite' }} />
+        <p style={{ marginTop: '1rem', color: 'var(--ink-light)' }}>Cargando preguntas…</p>
+      </div>
+    </div>
+  )
+
+  // Sin preguntas en modo fallos
   if (phase === 'intro' && isFailMode && qCount === 0) return (
     <div className={styles.intro}>
       <div className={styles.introCard}>
@@ -145,8 +199,7 @@ export default function TestRunner({ modeId, onGoHome, onRecordSession, onRecord
         <p className={styles.introDesc}>
           {modeId === 'review_due' && 'Preguntas que necesitas repasar según tu ritmo de aprendizaje.'}
           {modeId === 'all_fails'  && 'Practica con todas las preguntas que has fallado anteriormente.'}
-          {BLOCK_IDS.has(modeId)   && `Practica con preguntas del bloque: ${config.blocks[modeId]?.label}.`}
-          {!isFailMode && !BLOCK_IDS.has(modeId) && config.modes[modeId]?.description}
+          {!isFailMode && (config.modes[modeId]?.description || `${qCount} preguntas`)}
         </p>
         <div className={styles.introMeta}>
           {totalSecs && <span><Clock size={14} /> {config.modes[modeId]?.timeMinutes} minutos</span>}
@@ -204,8 +257,8 @@ export default function TestRunner({ modeId, onGoHome, onRecordSession, onRecord
       <div className={styles.main}>
         <div className={styles.questionNum}>
           Pregunta {index + 1} de {qCount}
-          {current?.block && config.blocks[current.block] && (
-            <span className={styles.blockTag}>{config.blocks[current.block].label}</span>
+          {current?.category && config.blocks[current.category] && (
+            <span className={styles.blockTag}>{config.blocks[current.category].label}</span>
           )}
         </div>
         <QuestionCard

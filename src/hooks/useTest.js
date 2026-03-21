@@ -1,28 +1,57 @@
 import { useState, useEffect, useCallback } from 'react'
-import allQuestions from '../data/questions.json'
+import { supabase } from '../lib/supabase'
 import config from '../data/config.json'
 
-function getQuestionsForMode(modeId) {
+async function fetchQuestionsForMode(modeId, academyId, subjectId) {
   const mode = config.modes[modeId]
-  if (!mode) return []
-  let pool = [...allQuestions]
-  if (mode.practical) {
-    pool = pool.filter(q => q.difficulty === 'practical' || q.block === 'gestion' || q.block === 'descripcion')
+  if (!mode || !academyId) return []
+
+  let query = supabase
+    .from('questions')
+    .select('id, question, options, answer, explanation, difficulty, category, block_id')
+    .eq('academy_id', academyId)
+
+  if (subjectId) {
+    query = query.eq('subject_id', subjectId)
   }
-  pool = pool.sort(() => Math.random() - 0.5)
-  return pool.slice(0, mode.questions)
+
+  // Los supuestos prácticos filtran por dificultad o categoría
+  if (mode.practical) {
+    query = query.or('difficulty.eq.practical,category.eq.gestion,category.eq.descripcion')
+  }
+
+  const { data, error } = await query
+
+  if (error || !data) return []
+
+  // Mezclar y recortar al número de preguntas del modo
+  const shuffled = [...data].sort(() => Math.random() - 0.5)
+  return shuffled.slice(0, mode.questions)
 }
 
-export function useTest(modeId) {
+export function useTest(modeId, academyId, subjectId) {
   const mode = config.modes[modeId]
-  const [questions] = useState(() => getQuestionsForMode(modeId))
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [answers, setAnswers] = useState({})
-  const [selectedOption, setSelectedOption] = useState(null)
-  const [isRevealed, setIsRevealed] = useState(false)
-  const [phase, setPhase] = useState('intro')
-  const [timeLeft, setTimeLeft] = useState(mode ? mode.timeMinutes * 60 : 0)
 
+  const [questions, setQuestions]       = useState([])
+  const [loadingQ,  setLoadingQ]        = useState(true)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [answers, setAnswers]           = useState({})
+  const [selectedOption, setSelectedOption] = useState(null)
+  const [isRevealed, setIsRevealed]     = useState(false)
+  const [phase, setPhase]               = useState('intro')
+  const [timeLeft, setTimeLeft]         = useState(mode ? mode.timeMinutes * 60 : 0)
+
+  // Cargar preguntas al montar
+  useEffect(() => {
+    if (!academyId) return
+    setLoadingQ(true)
+    fetchQuestionsForMode(modeId, academyId, subjectId).then(qs => {
+      setQuestions(qs)
+      setLoadingQ(false)
+    })
+  }, [modeId, academyId, subjectId])
+
+  // Temporizador
   useEffect(() => {
     if (phase !== 'running') return
     if (timeLeft <= 0) { setPhase('finished'); return }
@@ -48,9 +77,9 @@ export function useTest(modeId) {
     setAnswers(prev => ({
       ...prev,
       [currentIndex]: {
-        selected: selectedOption,
-        correct: currentQ.answer,
-        isCorrect: selectedOption === currentQ.answer
+        selected:  selectedOption,
+        correct:   currentQ.answer,
+        isCorrect: selectedOption === currentQ.answer,
       }
     }))
     setIsRevealed(true)
@@ -79,29 +108,37 @@ export function useTest(modeId) {
     setIsRevealed(false)
     setPhase('intro')
     setTimeLeft(mode ? mode.timeMinutes * 60 : 0)
-  }, [mode])
+    // Recargar preguntas mezcladas de nuevo
+    if (academyId) {
+      setLoadingQ(true)
+      fetchQuestionsForMode(modeId, academyId, subjectId).then(qs => {
+        setQuestions(qs)
+        setLoadingQ(false)
+      })
+    }
+  }, [mode, modeId, academyId, subjectId])
 
   const totalAnswered = Object.keys(answers).length
-  const totalCorrect = Object.values(answers).filter(a => a.isCorrect).length
+  const totalCorrect  = Object.values(answers).filter(a => a.isCorrect).length
 
   const results = phase === 'finished' ? {
-    total: questions.length,
-    answered: totalAnswered,
-    correct: totalCorrect,
+    total:     questions.length,
+    answered:  totalAnswered,
+    correct:   totalCorrect,
     incorrect: totalAnswered - totalCorrect,
-    skipped: questions.length - totalAnswered,
-    score: totalAnswered > 0 ? Math.round((totalCorrect / questions.length) * 10 * 10) / 10 : 0,
-    percentage: totalAnswered > 0 ? Math.round((totalCorrect / questions.length) * 100) : 0,
+    skipped:   questions.length - totalAnswered,
+    score:     totalAnswered > 0 ? Math.round((totalCorrect / questions.length) * 10 * 10) / 10 : 0,
+    percentage:totalAnswered > 0 ? Math.round((totalCorrect / questions.length) * 100) : 0,
     answers,
-    questions
+    questions,
   } : null
 
   return {
-    mode, questions, currentIndex,
+    mode, questions, currentIndex, loadingQ,
     currentQuestion: questions[currentIndex],
     selectedOption, isRevealed, phase, timeLeft,
     answers, totalAnswered,
     startTest, selectOption, confirmAnswer,
-    nextQuestion, prevQuestion, finishEarly, restart, results
+    nextQuestion, prevQuestion, finishEarly, restart, results,
   }
 }

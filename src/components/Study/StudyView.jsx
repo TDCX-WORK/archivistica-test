@@ -4,7 +4,7 @@ import {
   Zap, ArrowLeft, ChevronRight, ChevronLeft, Scale, LayoutGrid,
   Loader2, Tag, Calendar
 } from 'lucide-react'
-import { STUDY_BLOCKS } from '../../data/study-content'
+import { useContent } from '../../hooks/useContent'
 import useStudyProgress from '../../hooks/useStudyProgress'
 import styles from './StudyView.module.css'
 
@@ -37,7 +37,10 @@ function HighlightedText({ text, keywords = [], laws = [], dates = [] }) {
     ...keywords.map(k => ({ term: k, type: 'keyword' })),
     ...laws.map(l => ({ term: l, type: 'law' })),
     ...dates.map(d => ({ term: d, type: 'date' })),
-  ].sort((a, b) => b.term.length - a.term.length)
+  ]
+    .filter(({ term }) => term && term.length >= 6)
+    .sort((a, b) => b.term.length - a.term.length)
+
   const parts = text.split(/(\*\*[^*]+\*\*)/)
   return (
     <p className={styles.paragraph}>
@@ -167,7 +170,7 @@ function ReadMode({ block, topicIndex, onClose, onToggleRead, onToggleBookmark, 
             </div>
           )}
           <div className={styles.readCTA}>
-            <button className={styles.readCTABtn} onClick={() => onTest(block.id)}>
+            <button className={styles.readCTABtn} onClick={() => onTest(block.id, block.label)}>
               <Zap size={15} /> Practicar este bloque
             </button>
           </div>
@@ -194,20 +197,29 @@ function ReadMode({ block, topicIndex, onClose, onToggleRead, onToggleBookmark, 
 }
 
 export default function StudyView({ currentUser, onSelectMode }) {
-  const { readTopics, bookmarks, loading, toggleRead, toggleBookmark } =
+  const { blocks, loading: loadingContent, error } = useContent(currentUser?.id, currentUser?.subject_id)
+  const { readTopics, bookmarks, loading: loadingProgress, toggleRead, toggleBookmark } =
     useStudyProgress(currentUser?.id)
   const [readMode, setReadMode] = useState(null)
   const [expanded, setExpanded] = useState({})
 
-  const totalTopics = STUDY_BLOCKS.reduce((s, b) => s + b.topics.length, 0)
-  const globalPct   = Math.round((readTopics.size / totalTopics) * 100)
+  const loading = loadingContent || loadingProgress
+
+  const totalTopics = blocks.reduce((s, b) => s + b.topics.length, 0)
+  const globalPct   = totalTopics > 0 ? Math.round((readTopics.size / totalTopics) * 100) : 0
 
   const toggleExpand = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
 
   if (loading) return (
     <div className={styles.loadingState}>
       <Loader2 size={24} className={styles.spinner} />
-      <p>Cargando tu progreso…</p>
+      <p>Cargando temario…</p>
+    </div>
+  )
+
+  if (error) return (
+    <div className={styles.loadingState}>
+      <p style={{ color: 'var(--error)' }}>{error}</p>
     </div>
   )
 
@@ -245,18 +257,17 @@ export default function StudyView({ currentUser, onSelectMode }) {
         </div>
       </div>
 
-      {/* Blocks — vertical expandable */}
+      {/* Blocks */}
       <div className={styles.blocksList}>
-        {STUDY_BLOCKS.map(block => {
+        {blocks.map(block => {
           const read  = block.topics.filter(t => readTopics.has(t.id)).length
           const total = block.topics.length
-          const pct   = Math.round((read / total) * 100)
+          const pct   = total > 0 ? Math.round((read / total) * 100) : 0
           const isOpen = !!expanded[block.id]
           return (
             <div key={block.id}
                 className={[styles.blockRow, isOpen ? styles.blockRowOpen : '', pct === 100 ? 'cardDone' : ''].join(' ')}
                 style={pct === 100 ? { '--done-color': block.color } : {}}>
-              {/* Header — siempre visible */}
               <button
                 className={styles.blockRowHeader}
                 onClick={() => toggleExpand(block.id)}
@@ -285,12 +296,10 @@ export default function StudyView({ currentUser, onSelectMode }) {
                 </div>
               </button>
 
-              {/* Barra de progreso alineada con la global */}
               <div className={styles.blockRowBar}>
                 <div className={styles.blockRowBarFill} style={{ width: `${pct}%`, background: block.color }} />
               </div>
 
-              {/* Topics — expandible */}
               {isOpen && (
                 <div className={styles.blockTopics}>
                   {block.topics.map((topic, i) => {
@@ -318,7 +327,7 @@ export default function StudyView({ currentUser, onSelectMode }) {
                     <button
                       className={styles.practiceBtn}
                       style={{ '--bc': block.color, '--bb': block.bg }}
-                      onClick={() => onSelectMode && onSelectMode(block.id)}
+                      onClick={() => onSelectMode && onSelectMode(block.id, block.label)}
                     >
                       <Zap size={13} /> Practicar este bloque
                     </button>

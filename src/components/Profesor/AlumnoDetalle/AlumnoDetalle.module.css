@@ -1,0 +1,138 @@
+.page { padding: 1.5rem 1.25rem 4rem; max-width: 900px; margin: 0 auto; }
+
+.pageHeader { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+.pageHeaderTop { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.btnBack {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.4rem 0.9rem; background: var(--surface);
+  border: 1px solid var(--line-light); border-radius: 8px;
+  font-size: 0.82rem; color: var(--ink-muted); cursor: pointer;
+  width: fit-content; transition: all 0.15s var(--ease);
+  box-shadow: var(--shadow-xs);
+}
+.btnBack:hover { border-color: var(--primary); color: var(--primary); transform: translateX(-2px); }
+.alumnoTitle { display: flex; align-items: center; gap: 0.85rem; }
+.alumnoAvatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, #3f3f46 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; font-weight: 800; color: white; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.pageTitle   { font-size: 1.3rem; font-weight: 800; color: var(--ink); margin: 0 0 0.15rem; }
+.pageSubtitle { font-size: 0.8rem; color: var(--ink-muted); margin: 0; }
+
+/* KPIs */
+.kpisRow {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.65rem; margin-bottom: 1.25rem;
+}
+@media (max-width: 700px) { .kpisRow { grid-template-columns: repeat(3, 1fr); } }
+
+.kpiCard {
+  background: var(--surface); border: 1px solid var(--line-light);
+  border-radius: 12px; padding: 0.85rem 0.5rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.2rem; text-align: center;
+  position: relative; overflow: hidden;
+  box-shadow: var(--shadow-xs);
+  transition: transform 0.2s var(--spring), box-shadow 0.2s var(--ease);
+}
+.kpiCard::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, transparent 0%, var(--kpi) 50%, transparent 100%);
+}
+.kpiCard:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.kpiIcon  { color: var(--kpi, var(--primary)); }
+.kpiVal   { font-size: 1.1rem; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.kpiLabel { font-size: 0.66rem; color: var(--ink-muted); line-height: 1.2; }
+
+/* Secciones */
+.mainRow {
+  display: grid; grid-template-columns: 210px 1fr; gap: 1.25rem; margin-bottom: 1.25rem;
+}
+@media (max-width: 620px) { .mainRow { grid-template-columns: 1fr; } }
+
+.donutCard, .evolucionCard, .seccionCard {
+  background: var(--surface); border: 1px solid var(--line-light);
+  border-radius: 14px; padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s var(--ease);
+}
+.donutCard:hover, .evolucionCard:hover, .seccionCard:hover {
+  box-shadow: 0 6px 24px rgba(0,0,0,0.07);
+}
+.cardTitle {
+  font-size: 0.78rem; font-weight: 700; color: var(--ink);
+  margin: 0 0 1rem; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.seccionCard { margin-bottom: 1.25rem; }
+
+.donutCenter { display: flex; justify-content: center; margin-bottom: 1rem; }
+.donutStats { display: flex; justify-content: space-around; }
+.donutStat { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
+.donutStatVal   { font-size: 1.1rem; font-weight: 800; color: var(--ink); }
+.donutStatLabel { font-size: 0.7rem; color: var(--ink-muted); }
+
+/* Gráfico barras */
+.barChart {
+  display: flex; align-items: flex-end; gap: 0.35rem; height: 120px; padding-top: 1.5rem;
+}
+.barCol { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 0.25rem; }
+.barScore { font-size: 0.62rem; color: var(--ink-muted); font-weight: 600; }
+.barTrack {
+  width: 100%; flex: 1; background: var(--surface-dim);
+  border-radius: 4px 4px 0 0; overflow: hidden; display: flex; align-items: flex-end;
+}
+.barFill { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.7s var(--ease); min-height: 3px; }
+.barDate { font-size: 0.6rem; color: var(--ink-muted); white-space: nowrap; }
+
+/* Tabla sesiones */
+.sesionTabla { display: flex; flex-direction: column; }
+.sesionHeader {
+  display: grid; grid-template-columns: 1fr 80px 80px;
+  padding: 0.45rem 0.6rem; background: var(--surface-off); border-radius: 6px;
+  margin-bottom: 0.2rem; font-size: 0.7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted);
+}
+.sesionRow {
+  display: grid; grid-template-columns: 1fr 80px 80px;
+  padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--line-light);
+  font-size: 0.84rem; color: var(--ink); transition: background 0.1s;
+}
+.sesionRow:hover { background: var(--surface-off); }
+.sesionRow:last-child { border-bottom: none; }
+.sesionNota { font-weight: 700; }
+
+/* Fallos */
+.fallosList { display: flex; flex-direction: column; gap: 0.5rem; }
+.falloRow { display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; }
+.falloNum { width: 18px; font-weight: 800; color: var(--ink-muted); flex-shrink: 0; text-align: right; }
+.falloId  { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-muted); width: 50px; flex-shrink: 0; }
+.falloBarTrack { flex: 1; height: 6px; background: var(--surface-dim); border-radius: 3px; overflow: hidden; }
+.falloBarFill  { height: 100%; background: linear-gradient(90deg, #F87171, #DC2626); border-radius: 3px; transition: width 0.6s var(--ease); }
+.falloCount    { font-weight: 800; color: var(--ink); width: 28px; flex-shrink: 0; font-size: 0.82rem; }
+.falloReview   { font-size: 0.7rem; color: var(--ink-muted); flex-shrink: 0; }
+
+.empty, .emptyMini { font-size: 0.84rem; color: var(--ink-muted); padding: 1.5rem 0; text-align: center; margin: 0; }
+
+.state {
+  display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+  padding: 4rem 1rem; color: var(--ink-muted); text-align: center;
+}
+.state p { font-size: 0.88rem; margin: 0; }
+.spinner { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Botón exportar PDF */
+.btnExport {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #059669, #047857);
+  color: white; border: none; border-radius: 10px;
+  font-size: 0.82rem; font-weight: 700; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(5,150,105,0.3);
+  transition: transform 0.15s var(--spring), box-shadow 0.15s, opacity 0.15s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.btnExport:hover    { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(5,150,105,0.4); }
+.btnExport:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }

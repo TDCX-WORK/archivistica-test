@@ -1,13 +1,34 @@
-import { Home, BarChart2, BookOpen, LogOut } from 'lucide-react'
+import { Home, BarChart2, BookOpen, LogOut, GraduationCap, User, Building2, ShieldCheck, Trash2 } from 'lucide-react'
 import styles from './Sidebar.module.css'
 
-const NAV_ITEMS = [
-  { id: 'inicio',       icon: Home,      label: 'Inicio' },
-  { id: 'estudio',      icon: BookOpen,  label: 'Estudio' },
-  { id: 'estadisticas', icon: BarChart2, label: 'Stats' },
+const NAV_ALUMNO = [
+  { id: 'inicio',       icon: Home,          label: 'Inicio' },
+  { id: 'estudio',      icon: BookOpen,      label: 'Estudio' },
+  { id: 'estadisticas', icon: BarChart2,     label: 'Stats' },
+]
+
+const NAV_PROFESOR = [
+  { id: 'profesor',    icon: GraduationCap, label: 'Mis alumnos' },
+  { id: 'stats-clase', icon: BarChart2,     label: 'Estadísticas' },
+  { id: 'estudio',     icon: BookOpen,      label: 'Temario' },
+]
+
+const NAV_SUPERADMIN = [
+  { id: 'superadmin', icon: ShieldCheck, label: 'Admin' },
+  { id: 'papelera',   icon: Trash2,      label: 'Papelera' },
+]
+
+const NAV_DIRECTOR = [
+  { id: 'direccion',   icon: Building2,     label: 'Academia' },
+  { id: 'perfil',      icon: User,          label: 'Perfil' },
 ]
 
 export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout }) {
+  const isProfesor = currentUser?.role === 'profesor'
+  const isDirector   = currentUser?.role === 'director'
+  const isSuperadmin = currentUser?.role === 'superadmin'
+  const navItems     = isSuperadmin ? NAV_SUPERADMIN : isDirector ? NAV_DIRECTOR : isProfesor ? NAV_PROFESOR : NAV_ALUMNO
+
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logo}>
@@ -17,7 +38,7 @@ export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout 
       </div>
 
       <nav className={styles.nav}>
-        {NAV_ITEMS.map(({ id, icon: Icon, label }) => (
+        {navItems.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
             className={[styles.navItem, activeTab === id ? styles.navActive : ''].join(' ')}
@@ -30,8 +51,16 @@ export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout 
       </nav>
 
       <div className={styles.footer}>
+        <button
+          className={[styles.navItem, activeTab === 'perfil' ? styles.navActive : ''].join(' ')}
+          onClick={() => onTabChange('perfil')}
+          data-label="Perfil"
+          style={{ marginBottom: '0.5rem' }}
+        >
+          <User size={18} strokeWidth={activeTab === 'perfil' ? 2.2 : 1.8} />
+        </button>
         <div className={styles.avatarWrap}>
-          <div className={styles.avatar}>
+          <div className={[styles.avatar, isProfesor ? styles.avatarProfesor : ''].join(' ')}>
             {currentUser?.displayName?.[0]?.toUpperCase() || '?'}
           </div>
         </div>

@@ -1,24 +1,42 @@
 import { useState } from 'react'
-import { BookOpen, User, Lock, ArrowRight, UserPlus, ChevronLeft, Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { BookOpen, User, Lock, ArrowRight, UserPlus, ChevronLeft, Eye, EyeOff, AlertCircle, Key, Mail, Check } from 'lucide-react'
 import GobiernoLogo from '../ui/GobiernoLogo'
 import styles from './Auth.module.css'
 
-export default function AuthPage({ onLogin, onRegister, error, clearError }) {
-  const [mode, setMode]           = useState('login') // 'login' | 'register'
+export default function AuthPage({ onLogin, onRegister, onRequestReset, error, clearError }) {
+  const [mode,        setMode]        = useState('login') // 'login' | 'register' | 'forgot'
   const [displayName, setDisplayName] = useState('')
-  const [username, setUsername]   = useState('')
-  const [password, setPassword]   = useState('')
-  const [showPw, setShowPw]       = useState(false)
-  const [loading, setLoading]     = useState(false)
+  const [username,    setUsername]    = useState('')
+  const [password,    setPassword]    = useState('')
+  const [inviteCode,  setInviteCode]  = useState('')
+  const [resetEmail,  setResetEmail]  = useState('')
+  const [resetSent,   setResetSent]   = useState(false)
+  const [showPw,      setShowPw]      = useState(false)
+  const [loading,     setLoading]     = useState(false)
 
-  const switchMode = (m) => { setMode(m); clearError(); setUsername(''); setPassword(''); setDisplayName('') }
+  const switchMode = (m) => {
+    setMode(m)
+    clearError()
+    setUsername('')
+    setPassword('')
+    setDisplayName('')
+    setInviteCode('')
+    setResetEmail('')
+    setResetSent(false)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     await new Promise(r => setTimeout(r, 200))
-    if (mode === 'login')    onLogin(username, password)
-    else                     onRegister(displayName, username, password)
+    if (mode === 'login') {
+      onLogin(username, password)
+    } else if (mode === 'register') {
+      onRegister(displayName, username, password, inviteCode)
+    } else if (mode === 'forgot') {
+      const ok = await onRequestReset(resetEmail)
+      if (ok) setResetSent(true)
+    }
     setLoading(false)
   }
 
@@ -28,113 +46,170 @@ export default function AuthPage({ onLogin, onRegister, error, clearError }) {
 
       <div className={styles.card}>
         <div className={styles.cardHeader}>
-          {mode === 'register' && (
+          {(mode === 'register' || mode === 'forgot') && (
             <button className={styles.back} onClick={() => switchMode('login')}>
               <ChevronLeft size={16} /> Volver
             </button>
           )}
           <h1 className={styles.title}>
-            {mode === 'login' ? 'Bienvenido de nuevo' : 'Crear cuenta'}
+            {mode === 'login'    ? 'Bienvenido de nuevo'       :
+             mode === 'register' ? 'Crear cuenta'              :
+                                   'Recuperar contraseña'}
           </h1>
           <p className={styles.subtitle}>
-            {mode === 'login'
-              ? 'Accede a tu progreso de estudio'
-              : 'Empieza a preparar tu oposición'}
+            {mode === 'login'    ? 'Accede a tu progreso de estudio'                      :
+             mode === 'register' ? 'Necesitas un código de tu academia para registrarte'  :
+                                   'Te enviaremos un enlace a tu email para restablecerla'}
           </p>
         </div>
 
-        <form className={styles.form} onSubmit={handleSubmit} noValidate>
-          {mode === 'register' && (
-            <div className={styles.field}>
-              <label className={styles.label}>Nombre completo</label>
-              <div className={styles.inputWrap}>
-                <User size={16} className={styles.inputIcon} />
-                <input
-                  className={styles.input}
-                  type="text"
-                  placeholder="Tu nombre"
-                  value={displayName}
-                  onChange={e => { setDisplayName(e.target.value); clearError() }}
-                  autoComplete="name"
-                  autoFocus
-                />
+        {/* ── Formulario recuperación — estado enviado ── */}
+        {mode === 'forgot' && resetSent ? (
+          <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: '50%', background: '#D1FAE5',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 1rem',
+            }}>
+              <Check size={22} style={{ color: '#059669' }} />
+            </div>
+            <p style={{ fontSize: '0.9rem', color: 'var(--ink)', fontWeight: 600, margin: '0 0 0.5rem' }}>
+              Email enviado
+            </p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--ink-muted)', margin: '0 0 1.5rem' }}>
+              Revisa la bandeja de <strong>{resetEmail}</strong>.<br />
+              Si no lo ves, mira la carpeta de spam.
+            </p>
+            <button className={styles.switchBtn} onClick={() => switchMode('login')}>
+              <ChevronLeft size={15} /> Volver al login
+            </button>
+          </div>
+        ) : (
+          <form className={styles.form} onSubmit={handleSubmit} noValidate>
+
+            {/* ── Registro: nombre completo ── */}
+            {mode === 'register' && (
+              <div className={styles.field}>
+                <label className={styles.label}>Nombre completo</label>
+                <div className={styles.inputWrap}>
+                  <User size={16} className={styles.inputIcon} />
+                  <input className={styles.input} type="text" placeholder="Tu nombre"
+                    value={displayName} onChange={e => { setDisplayName(e.target.value); clearError() }}
+                    autoComplete="name" autoFocus />
+                </div>
               </div>
-            </div>
-          )}
-
-          <div className={styles.field}>
-            <label className={styles.label}>Usuario</label>
-            <div className={styles.inputWrap}>
-              <User size={16} className={styles.inputIcon} />
-              <input
-                className={styles.input}
-                type="text"
-                placeholder={mode === 'login' ? 'Tu nombre de usuario' : 'Elige un usuario'}
-                value={username}
-                onChange={e => { setUsername(e.target.value); clearError() }}
-                autoComplete="username"
-                autoFocus={mode === 'login'}
-              />
-            </div>
-          </div>
-
-          <div className={styles.field}>
-            <label className={styles.label}>Contraseña</label>
-            <div className={styles.inputWrap}>
-              <Lock size={16} className={styles.inputIcon} />
-              <input
-                className={styles.input}
-                type={showPw ? 'text' : 'password'}
-                placeholder="••••••••"
-                value={password}
-                onChange={e => { setPassword(e.target.value); clearError() }}
-                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              />
-              <button type="button" className={styles.eyeBtn} onClick={() => setShowPw(v => !v)} tabIndex={-1}>
-                {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
-            </div>
-          </div>
-
-          {error && (
-            <div className={styles.error}>
-              <AlertCircle size={15} />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <button
-            className={[styles.submit, loading ? styles.submitLoading : ''].join(' ')}
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? (
-              <span className={styles.spinner} />
-            ) : (
-              <>
-                {mode === 'login' ? 'Entrar' : 'Crear cuenta'}
-                <ArrowRight size={16} />
-              </>
             )}
-          </button>
-        </form>
 
-        <div className={styles.divider}><span>o</span></div>
+            {/* ── Login y registro: usuario ── */}
+            {mode !== 'forgot' && (
+              <div className={styles.field}>
+                <label className={styles.label}>
+                  {mode === 'login' ? 'Usuario o email' : 'Usuario'}
+                </label>
+                <div className={styles.inputWrap}>
+                  <User size={16} className={styles.inputIcon} />
+                  <input className={styles.input} type="text"
+                    placeholder={mode === 'login' ? 'Tu usuario o email' : 'Elige un usuario'}
+                    value={username} onChange={e => { setUsername(e.target.value); clearError() }}
+                    autoComplete="username" autoFocus={mode === 'login'} />
+                </div>
+              </div>
+            )}
 
-        <button
-          className={styles.switchBtn}
-          onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
-        >
-          {mode === 'login' ? (
-            <><UserPlus size={15} /> ¿Primera vez? Crear cuenta nueva</>
-          ) : (
-            <><User size={15} /> ¿Ya tienes cuenta? Entrar</>
-          )}
-        </button>
+            {/* ── Recuperación: solo email ── */}
+            {mode === 'forgot' && (
+              <div className={styles.field}>
+                <label className={styles.label}>Tu email</label>
+                <div className={styles.inputWrap}>
+                  <Mail size={16} className={styles.inputIcon} />
+                  <input className={styles.input} type="email"
+                    placeholder="el@email.que.pusiste"
+                    value={resetEmail} onChange={e => { setResetEmail(e.target.value); clearError() }}
+                    autoFocus autoComplete="email" />
+                </div>
+              </div>
+            )}
+
+            {/* ── Login y registro: contraseña ── */}
+            {mode !== 'forgot' && (
+              <div className={styles.field}>
+                <label className={styles.label}>Contraseña</label>
+                <div className={styles.inputWrap}>
+                  <Lock size={16} className={styles.inputIcon} />
+                  <input className={styles.input} type={showPw ? 'text' : 'password'}
+                    placeholder="••••••••" value={password}
+                    onChange={e => { setPassword(e.target.value); clearError() }}
+                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
+                  <button type="button" className={styles.eyeBtn}
+                    onClick={() => setShowPw(v => !v)} tabIndex={-1}>
+                    {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+                {/* Enlace olvidé contraseña — solo en login */}
+                {mode === 'login' && (
+                  <button type="button"
+                    onClick={() => switchMode('forgot')}
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      fontSize: '0.8rem', color: 'var(--ink-muted)', padding: '0.25rem 0',
+                      textAlign: 'right', width: '100%', marginTop: '0.25rem',
+                    }}>
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* ── Registro: código de academia ── */}
+            {mode === 'register' && (
+              <div className={styles.field}>
+                <label className={styles.label}>Código de academia</label>
+                <div className={styles.inputWrap}>
+                  <Key size={16} className={styles.inputIcon} />
+                  <input className={styles.input} type="text" placeholder="ARCH-XXXX"
+                    value={inviteCode}
+                    onChange={e => { setInviteCode(e.target.value.toUpperCase()); clearError() }}
+                    autoComplete="off" maxLength={9}
+                    style={{ textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'monospace' }} />
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className={styles.error}>
+                <AlertCircle size={15} />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <button
+              className={[styles.submit, loading ? styles.submitLoading : ''].join(' ')}
+              type="submit" disabled={loading}>
+              {loading ? (
+                <span className={styles.spinner} />
+              ) : mode === 'forgot' ? (
+                <><Mail size={16} /> Enviar enlace de recuperación</>
+              ) : mode === 'login' ? (
+                <>Entrar <ArrowRight size={16} /></>
+              ) : (
+                <>Crear cuenta <ArrowRight size={16} /></>
+              )}
+            </button>
+          </form>
+        )}
+
+        {mode === 'login' && (
+          <>
+            <div className={styles.divider}><span>o</span></div>
+            <button className={styles.switchBtn} onClick={() => switchMode('register')}>
+              <UserPlus size={15} /> ¿Primera vez? Crear cuenta nueva
+            </button>
+          </>
+        )}
       </div>
 
       <p className={styles.note}>
-        Los datos se guardan solo en este dispositivo
+        Plataforma de preparación de oposiciones
       </p>
     </div>
   )
