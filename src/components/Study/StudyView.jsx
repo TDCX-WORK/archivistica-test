@@ -170,8 +170,8 @@ function ReadMode({ block, topicIndex, onClose, onToggleRead, onToggleBookmark, 
             </div>
           )}
           <div className={styles.readCTA}>
-            <button className={styles.readCTABtn} onClick={() => onTest(block.id, block.label)}>
-              <Zap size={15} /> Practicar este bloque
+            <button className={styles.readCTABtn} onClick={() => onTest(block.id, block.label, topic.id, topic.title)}>
+              <Zap size={15} /> Practicar este tema
             </button>
           </div>
         </div>
@@ -241,7 +241,7 @@ export default function StudyView({ currentUser, onSelectMode }) {
       <div className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Temario</h1>
-          <p className={styles.pageSubtitle}>Cuerpo Facultativo de Archiveros · Ministerio de Cultura</p>
+          <p className={styles.pageSubtitle}>{currentUser?.subjectName || currentUser?.academyName || 'Temario'}</p>
         </div>
       </div>
 
@@ -329,7 +329,7 @@ export default function StudyView({ currentUser, onSelectMode }) {
                       style={{ '--bc': block.color, '--bb': block.bg }}
                       onClick={() => onSelectMode && onSelectMode(block.id, block.label)}
                     >
-                      <Zap size={13} /> Practicar este bloque
+                      <Zap size={13} /> Practicar todo el bloque
                     </button>
                   </div>
                 </div>

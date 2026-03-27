@@ -30,7 +30,8 @@
   to   { left:  100%; }
 }
 @keyframes floatOrb {
-  0%,100%,50% { transform: none; opacity: 0; }
+  0%,100% { transform: translateY(0)   scale(1); opacity: .05; }
+  50%     { transform: translateY(-14px) scale(1.1); opacity: .09; }
 }
 @keyframes spinAnim { to { transform: rotate(360deg); } }
 
@@ -113,8 +114,19 @@
   animation: tickerSlide 2.2s linear infinite;
 }
 /* Float orbs */
-.floatOrb1 { display: none; }
-.floatOrb2 { display: none; }
+.floatOrb1 {
+  position: absolute; top: -50px; left: -30px;
+  width: 160px; height: 160px;
+  background: #D7FE03; border-radius: 50%; pointer-events: none;
+  animation: floatOrb 5s ease-in-out infinite;
+}
+.floatOrb2 {
+  position: absolute; bottom: -50px; right: -20px;
+  width: 120px; height: 120px;
+  background: #6366F1; border-radius: 50%; pointer-events: none;
+  animation: floatOrb 6s ease-in-out infinite reverse;
+  opacity: .04;
+}
 /* Pulse dot */
 .pulseDot {
   width: 7px; height: 7px; border-radius: 50%;
@@ -174,7 +186,7 @@
 /* ── BENTO TOP ──────────────────────────────────────────────────────────────── */
 .bentoTop {
   display: grid;
-  grid-template-columns: 1fr 200px;
+  grid-template-columns: 2fr 1fr;
   gap: 1rem; margin-bottom: 1rem; align-items: stretch;
 }
 @media (max-width: 900px) { .bentoTop { grid-template-columns: 1fr; } }
@@ -232,7 +244,7 @@
 
 /* ── HEALTH CARD ────────────────────────────────────────────────────────────── */
 .healthCard {
-  background: #0A0A0B; border-radius: 18px; padding: 1.25rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  background: #0A0A0B; border-radius: 18px; padding: 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem;
   position: relative; overflow: hidden;
   box-shadow: 0 8px 32px rgba(0,0,0,.15);
 }
@@ -446,10 +458,10 @@
 
 /* ── ROW WRAPPER ─────────────────────────────────────────────── */
 .investRow {
-  border-radius: 16px;
+  border-radius: 18px;
   overflow: hidden;
   transition: box-shadow .2s, transform .2s;
-  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  box-shadow: 0 2px 6px rgba(0,0,0,.06);
 }
 .investRow:hover { box-shadow: 0 4px 20px rgba(0,0,0,.09); transform: translateY(-1px); }
 
@@ -463,11 +475,11 @@
 /* ── HEADER ──────────────────────────────────────────────────── */
 .investHeader {
   display: grid;
-  grid-template-columns: 52px 1fr auto auto auto 28px;
+  grid-template-columns: 48px 1fr auto auto auto 28px;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   width: 100%;
-  padding: 20px 24px;
+  padding: 18px 22px;
   background: none; border: none; cursor: pointer; text-align: left;
   transition: background .15s;
 }
@@ -482,7 +494,7 @@
 
 /* ── ICON ────────────────────────────────────────────────────── */
 .investIcon {
-  width: 52px; height: 52px; border-radius: 12px; flex-shrink: 0;
+  width: 50px; height: 50px; border-radius: 14px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
 }
 .investIcon_active   { background: rgba(215,254,3,.15); color: #D7FE03; }
@@ -493,7 +505,7 @@
 /* ── INFO ────────────────────────────────────────────────────── */
 .investInfo { min-width: 0; }
 .investName {
-  font-size: 20px; font-weight: 800; letter-spacing: -.02em;
+  font-size: 17px; font-weight: 800; letter-spacing: -.02em;
   font-family: 'Urbanist', sans-serif; line-height: 1.2;
   display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
 }
@@ -531,7 +543,7 @@
   display: flex; flex-direction: column; align-items: center; gap: 1px;
 }
 .investStatNum {
-  font-size: 22px; font-weight: 900; letter-spacing: -.02em; line-height: 1;
+  font-size: 19px; font-weight: 900; letter-spacing: -.02em; line-height: 1;
   font-family: 'Urbanist', sans-serif;
 }
 .investRow_active .investStatNum  { color: #fff; }
@@ -552,7 +564,7 @@
 
 /* ── PRECIO ──────────────────────────────────────────────────── */
 .investPriceNum {
-  font-size: 17px; font-weight: 900; letter-spacing: -.03em;
+  font-size: 20px; font-weight: 900; letter-spacing: -.03em;
   font-family: 'Urbanist', sans-serif;
 }
 .investRow_active .investPriceNum  { color: #fff; }
@@ -602,16 +614,16 @@
 .investBento {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 12px;
-  padding-top: 14px;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-top: 16px;
 }
 @media (max-width: 700px) { .investBento { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 440px) { .investBento { grid-template-columns: 1fr; } }
 
 .investCell {
-  border-radius: 12px;
-  padding: 14px;
+  border-radius: 14px;
+  padding: 16px;
   display: flex; flex-direction: column; gap: 5px;
 }
 .investRow_active .investCell {
@@ -633,8 +645,8 @@
 }
 
 .investCellLabel {
-  font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-  margin-bottom: 4px; font-family: 'Urbanist', sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  margin-bottom: 6px; font-family: 'Urbanist', sans-serif;
 }
 .investRow_active .investCellLabel  { color: rgba(255,255,255,.25); }
 .investRow_idle .investCellLabel    { color: #bbb; }
@@ -651,8 +663,8 @@
 .investRow_overdue .investCellBig { color: #111; }
 
 .investCellLine {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 13px; text-decoration: none; transition: color .15s;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 14px; text-decoration: none; transition: color .15s;
 }
 .investRow_active .investCellLine  { color: rgba(255,255,255,.5); }
 .investRow_idle .investCellLine    { color: #888; }
@@ -712,7 +724,7 @@
 .investActBtn {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 10px 18px; border-radius: 10px;
-  font-size: 15px; font-weight: 700; cursor: pointer;
+  font-size: 14px; font-weight: 700; cursor: pointer;
   font-family: 'Urbanist', sans-serif; transition: all .15s;
 }
 /* Dark row buttons */
@@ -901,104 +913,289 @@
 @media (max-width: 900px) { .kpiRow { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 520px)  { .kpiRow { grid-template-columns: 1fr; } }
 
-/* ── SESSIONS CHART CARD ─────────────────────────────────────────────────── */
-@keyframes sessPathDraw {
-  from { stroke-dashoffset: 800; }
-  to   { stroke-dashoffset: 0; }
-}
-@keyframes sessDotPop {
-  0%   { opacity: 0; r: 0; }
-  60%  { r: 7px; }
-  100% { opacity: 1; r: 5px; }
-}
-@keyframes sessDotRing {
-  0%   { r: 5px; opacity: .6; }
-  100% { r: 14px; opacity: 0; }
+/* ── ACADEMIA SECTION — full width ─────────────────────────────────────── */
+.acadSection {
+  width: 100%;
 }
 
-.sessionsCard {
-  background: #fff;
-  border: 1px solid #E8E8E8;
-  border-radius: 16px;
-  padding: 1.1rem 1.1rem .75rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,.04);
-  display: flex; flex-direction: column; gap: .6rem;
-  transition: box-shadow .2s, transform .2s;
-  overflow: hidden;
-}
-.sessionsCard:hover { box-shadow: 0 6px 24px rgba(0,0,0,.08); transform: translateY(-2px); }
+/* ══════════════════════════════════════════════════════════════
+   STRIPE BILLING PANEL — Specific classes
+   ══════════════════════════════════════════════════════════════ */
 
-.sessionsTop {
-  display: flex; align-items: flex-start; justify-content: space-between;
+/* ── HEADER BADGE ── */
+.headerBadge {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .78rem; font-weight: 600; color: #888;
+  background: #fff; border: 1px solid #E8E8E8;
+  padding: .4rem .9rem; border-radius: 20px;
 }
-.sessionsLabel {
+.stripeDot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #22C55E; flex-shrink: 0;
+}
+
+/* ── BENTO TOP ── */
+.bentoTop {
+  display: grid; grid-template-columns: 2fr 1fr;
+  gap: 1rem; margin-bottom: 1.25rem; align-items: stretch;
+}
+@media (max-width: 860px) { .bentoTop { grid-template-columns: 1fr; } }
+
+/* ── HERO CARD overrides for billing ── */
+.heroMrrCurrency { font-size: 1.4rem; font-weight: 800; color: rgba(255,255,255,.4); font-family: 'Urbanist', sans-serif; }
+.heroMrrVal { font-size: 2.6rem; font-weight: 900; color: #D7FE03; letter-spacing: -.04em; line-height: 1; font-family: 'Urbanist', sans-serif; }
+.heroTrend { display: flex; align-items: center; gap: .25rem; font-size: .72rem; font-weight: 700; color: #D7FE03; }
+.heroBottom { display: flex; align-items: center; padding-top: .85rem; border-top: 1px solid rgba(255,255,255,.08); }
+.heroStat   { display: flex; flex-direction: column; gap: .1rem; flex: 1; }
+.heroStatVal   { font-size: 1.1rem; font-weight: 900; color: #fff; line-height: 1; font-family: 'Urbanist', sans-serif; }
+.heroStatLabel { font-size: .6rem; font-weight: 600; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: .05em; }
+.heroStatDiv   { width: 1px; height: 28px; background: rgba(255,255,255,.1); margin: 0 .75rem; flex-shrink: 0; }
+.heroMrr  { display: flex; align-items: baseline; gap: .1rem; }
+
+/* ── PLAN DISTRIBUTION CARD ── */
+.distCard {
+  background: #fff; border: 1px solid #E8E8E8;
+  border-radius: 18px; padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  display: flex; flex-direction: column; gap: .85rem;
+  position: relative; overflow: hidden;
+}
+.distTitle {
   font-size: .65rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-  color: #aaa; font-family: 'Urbanist', sans-serif; margin-bottom: .3rem;
+  color: #aaa; font-family: 'Urbanist', sans-serif; position: relative; z-index: 1;
 }
-.sessionsValue {
-  font-size: 1.6rem; font-weight: 900; letter-spacing: -.04em;
-  color: #111; font-family: 'Urbanist', sans-serif; line-height: 1;
-}
-.sessionsBadge {
-  display: flex; align-items: center; gap: .35rem;
-  font-size: .68rem; font-weight: 700; color: #22C55E;
-  background: rgba(34,197,94,.1); padding: .2rem .6rem;
-  border-radius: 20px; font-family: 'Urbanist', sans-serif;
-  white-space: nowrap;
-}
-.sessionsDot {
-  width: 6px; height: 6px; border-radius: 50%; background: #22C55E;
-  flex-shrink: 0; display: inline-block;
-  animation: sessDotRing 2s ease-in-out infinite;
-}
-
-.sessionsChart {
-  width: 100%; position: relative;
-}
-.sessionsPath {
-  stroke-dasharray: 800;
-  stroke-dashoffset: 800;
-  animation: sessPathDraw 1.6s ease forwards .3s;
-}
-.sessionsDotAnim {
-  animation: sessDotPop .4s ease forwards 1.8s;
-  opacity: 0;
-}
-.sessionsDotPulse {
-  animation: sessDotRing 2s ease-in-out infinite 2s;
-  opacity: 0;
-}
-
-.sessionsWeeks {
-  display: flex; justify-content: space-between;
-}
-.sessionsWeekLabel {
-  font-size: .55rem; color: #ccc; font-family: 'Urbanist', sans-serif;
-}
-
-/* ── Missing classes added ── */
-.sessionsSub {
-  font-size: .65rem; color: rgba(255,255,255,.25); margin-top: .2rem;
+.distBars { display: flex; flex-direction: column; gap: .65rem; position: relative; z-index: 1; }
+.distRow  { display: flex; flex-direction: column; gap: .25rem; }
+.distLabel { display: flex; align-items: center; justify-content: space-between; }
+.distCount { font-size: .75rem; font-weight: 700; color: #111; font-family: 'Urbanist', sans-serif; }
+.distTrack { height: 4px; background: #F0F0F0; border-radius: 4px; overflow: hidden; }
+.distFill  { height: 100%; border-radius: 4px; min-width: 2px; }
+.distPct   { font-size: .68rem; color: #bbb; font-family: 'Urbanist', sans-serif; }
+.distMrr {
+  display: flex; align-items: center; gap: .4rem; flex-wrap: wrap;
+  font-size: .7rem; color: #888; position: relative; z-index: 1;
+  padding-top: .75rem; border-top: 1px solid #F0F0F0;
   font-family: 'Urbanist', sans-serif;
 }
-.sessionsTrendBadge {
-  display: flex; align-items: center; gap: .3rem;
-  font-size: .68rem; font-weight: 700; color: #D7FE03;
-  background: rgba(215,254,3,.1); border: 1px solid rgba(215,254,3,.2);
-  padding: .22rem .65rem; border-radius: 20px;
-  font-family: 'Urbanist', sans-serif; white-space: nowrap;
+
+/* ── ALERTS ── */
+.alerts { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1rem; }
+.alertBanner {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .75rem 1rem; border-radius: 12px;
+  background: var(--ab, rgba(239,68,68,.08));
+  border: 1px solid rgba(239,68,68,.25);
 }
+.alertIcon { flex-shrink: 0; }
+.alertContent { flex: 1; display: flex; flex-direction: column; gap: .15rem; }
+.alertTitle { font-size: .84rem; font-weight: 700; color: #111; font-family: 'Urbanist', sans-serif; }
+.alertSub   { font-size: .75rem; color: #888; }
+.alertBtn {
+  flex-shrink: 0; padding: .35rem .85rem; border-radius: 8px;
+  background: none; border: 1px solid; font-size: .78rem; font-weight: 700;
+  cursor: pointer; font-family: 'Urbanist', sans-serif; transition: opacity .15s;
+}
+.alertBtn:hover { opacity: .75; }
+
+/* ── TABS ── */
+.tabs {
+  display: flex; gap: .35rem; margin-bottom: 1rem;
+  border-bottom: 1px solid #E8E8E8; padding-bottom: .5rem;
+}
+.tab {
+  display: flex; align-items: center; gap: .35rem;
+  padding: .4rem .85rem; border-radius: 8px;
+  background: none; border: none;
+  font-size: .82rem; font-weight: 600; color: #888;
+  cursor: pointer; font-family: 'Urbanist', sans-serif; transition: all .15s;
+}
+.tab:hover  { color: #111; background: #F5F5F5; }
+.tabActive  { background: #111; color: #D7FE03; }
+.tabActive:hover { background: #111; color: #D7FE03; }
+
+/* ── BILLING LIST & ROWS ── */
+.billingList { display: flex; flex-direction: column; gap: .55rem; }
+.emptyState {
+  display: flex; flex-direction: column; align-items: center; gap: .75rem;
+  padding: 4rem 1rem; color: #bbb; text-align: center;
+}
+.emptyState p { font-size: .9rem; color: #888; margin: 0; }
+
+.billingRow {
+  background: #fff; border: 1px solid #E8E8E8;
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04); transition: box-shadow .2s;
+}
+.billingRow:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+.billingRowHeader {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto auto;
+  align-items: center; gap: .75rem;
+  width: 100%; padding: .85rem 1.1rem;
+  background: none; border: none; cursor: pointer; text-align: left;
+}
+.billingRowLeft  { display: flex; align-items: center; gap: .65rem; min-width: 0; }
+.billingRowIcon  {
+  width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+  background: #111; display: flex; align-items: center; justify-content: center; color: #D7FE03;
+}
+.billingRowName  { font-size: .9rem; font-weight: 800; color: #111; font-family: 'Urbanist', sans-serif; letter-spacing: -.02em; }
+.billingRowSlug  { font-size: .72rem; color: #999; font-family: monospace; margin-top: 1px; }
+.billingRowPlan  { font-size: .68rem; font-weight: 800; letter-spacing: .05em; padding: .2rem .65rem; border-radius: 20px; font-family: 'Urbanist', sans-serif; flex-shrink: 0; }
+.trialBadge {
+  display: flex; align-items: center; gap: .3rem;
+  font-size: .7rem; font-weight: 700; color: #6366F1;
+  background: rgba(99,102,241,.1); padding: .2rem .6rem; border-radius: 20px;
+  flex-shrink: 0; font-family: 'Urbanist', sans-serif;
+}
+.billingRowPrice    { text-align: right; flex-shrink: 0; }
+.billingRowPriceNum { font-size: .95rem; font-weight: 900; color: #111; font-family: 'Urbanist', sans-serif; }
+.billingRowPricePer { font-size: .65rem; color: #aaa; }
+.billingRowPriceFree { font-size: .8rem; color: #bbb; font-style: italic; }
+.billingRowStatus {
+  display: flex; align-items: center; gap: .3rem;
+  font-size: .7rem; font-weight: 700; padding: .2rem .65rem; border-radius: 20px;
+  flex-shrink: 0; font-family: 'Urbanist', sans-serif;
+}
+.billingRowBody   { padding: .85rem 1.1rem 1rem; border-top: 1px solid #F0F0F0; background: #FAFAFA; }
+.billingMini      { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); gap: .75rem; margin-bottom: .85rem; }
+.billingMiniStat  { display: flex; flex-direction: column; gap: .2rem; }
+.billingMiniLabel { font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #bbb; font-family: 'Urbanist', sans-serif; }
+.billingMiniVal   { font-size: .88rem; font-weight: 700; color: #111; font-family: 'Urbanist', sans-serif; }
+
+.trialBar     { margin-bottom: .85rem; }
+.trialBarTop  { display: flex; align-items: center; gap: .5rem; font-size: .78rem; color: #666; margin-bottom: .4rem; }
+.trialTrack   { height: 4px; background: #E8E8E8; border-radius: 4px; overflow: hidden; }
+.trialFill    { height: 100%; background: #6366F1; border-radius: 4px; transition: width .3s; }
+
+.billingRowActions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; padding-top: .75rem; border-top: 1px solid #F0F0F0; }
+.billingBtn {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .4rem .85rem; border-radius: 8px;
+  background: #fff; border: 1.5px solid #E8E8E8;
+  font-size: .78rem; font-weight: 700; color: #666;
+  cursor: pointer; font-family: 'Urbanist', sans-serif; transition: all .15s;
+}
+.billingBtn:hover { border-color: #111; color: #111; }
+.billingBtnAccent {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .4rem .9rem; border-radius: 8px;
+  background: #111; border: none; font-size: .78rem; font-weight: 700; color: #D7FE03;
+  cursor: pointer; font-family: 'Urbanist', sans-serif; transition: opacity .15s;
+}
+.billingBtnAccent:hover    { opacity: .88; }
+.billingBtnAccent:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── PAYMENT HISTORY ── */
+.historyCard { background: #fff; border: 1px solid #E8E8E8; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+.historyHeader { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid #F0F0F0; }
+.historyTitle  { display: flex; align-items: center; gap: .4rem; font-size: .82rem; font-weight: 800; color: #111; font-family: 'Urbanist', sans-serif; }
+.historyExport {
+  display: flex; align-items: center; gap: .3rem; padding: .3rem .75rem;
+  border-radius: 8px; background: none; border: 1px solid #E8E8E8;
+  font-size: .75rem; font-weight: 700; color: #888; cursor: pointer;
+  font-family: 'Urbanist', sans-serif; transition: all .15s;
+}
+.historyExport:hover { border-color: #111; color: #111; }
+.historyList { display: flex; flex-direction: column; }
+.historyRow  {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: .85rem 1.25rem; border-bottom: 1px solid #F8F8F8; transition: background .15s;
+}
+.historyRow:last-child { border-bottom: none; }
+.historyRow:hover { background: #FAFAFA; }
+.historyRowLeft   { display: flex; align-items: center; gap: .65rem; flex: 1; min-width: 0; }
+.historyRowIcon   { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.historyRowName   { font-size: .84rem; font-weight: 700; color: #111; font-family: 'Urbanist', sans-serif; }
+.historyRowDate   { font-size: .72rem; color: #888; margin-top: .05rem; }
+.historyRowRight  { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+.historyRowAmount { font-size: .9rem; font-weight: 900; color: #111; font-family: 'Urbanist', sans-serif; letter-spacing: -.02em; }
+.historyRowStatus { font-size: .7rem; font-weight: 700; padding: .18rem .6rem; border-radius: 20px; font-family: 'Urbanist', sans-serif; }
+.historyRowBtn    {
+  width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center;
+  background: #F5F5F5; border: 1px solid #E8E8E8; color: #888; cursor: pointer;
+  text-decoration: none; transition: all .15s;
+}
+.historyRowBtn:hover { background: #111; color: #D7FE03; border-color: #111; }
+
+/* ── PLANES SECTION ── */
+.planesSection      { padding-top: .5rem; }
+.planesBillingToggle { margin-bottom: 1rem; }
+.planesBillingLabel  { font-size: .8rem; font-weight: 700; color: #888; font-family: 'Urbanist', sans-serif; }
+.planesGrid { display: grid; grid-template-columns: repeat(4,1fr); gap: .85rem; }
+@media (max-width: 900px) { .planesGrid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 540px) { .planesGrid { grid-template-columns: 1fr; } }
+
+.planShowCard { background: #fff; border: 1.5px solid #E8E8E8; border-radius: 16px; padding: 1.25rem 1rem; display: flex; flex-direction: column; gap: .6rem; position: relative; transition: box-shadow .2s, transform .2s; }
+.planShowCard:hover { box-shadow: 0 6px 24px rgba(0,0,0,.08); transform: translateY(-2px); }
+.planShowCardPopular { border-color: var(--pc, #F59E0B); }
+.planShowPopular { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--pc, #F59E0B); color: #fff; font-size: .64rem; font-weight: 800; padding: .2rem .75rem; border-radius: 20px; font-family: 'Urbanist', sans-serif; white-space: nowrap; }
+.planShowTop      { display: flex; flex-direction: column; align-items: center; text-align: center; gap: .4rem; }
+.planShowIconWrap { width: 44px; height: 44px; border-radius: 12px; background: var(--pb); color: var(--pc); display: flex; align-items: center; justify-content: center; }
+.planShowName     { font-size: .95rem; font-weight: 900; color: #111; font-family: 'Urbanist', sans-serif; }
+.planShowPrice    { display: flex; align-items: baseline; gap: .05rem; }
+.planShowPriceCur { font-size: 1rem; font-weight: 800; color: #888; font-family: 'Urbanist', sans-serif; }
+.planShowPriceNum { font-size: 1.8rem; font-weight: 900; color: #111; font-family: 'Urbanist', sans-serif; letter-spacing: -.04em; }
+.planShowPricePer { font-size: .78rem; color: #888; font-family: 'Urbanist', sans-serif; }
+.planShowPriceYear { font-size: .68rem; color: #bbb; font-family: 'Urbanist', sans-serif; }
+.planShowUsage { display: flex; align-items: center; gap: .3rem; font-size: .72rem; color: #888; font-family: 'Urbanist', sans-serif; }
+.planShowFeatures { display: flex; flex-direction: column; gap: .4rem; width: 100%; padding-top: .5rem; border-top: 1px solid #F0F0F0; }
+.planShowFeature  { display: flex; align-items: flex-start; gap: .4rem; font-size: .75rem; color: #555; font-family: 'Urbanist', sans-serif; }
+.planShowFeatureNo { display: flex; align-items: flex-start; gap: .4rem; font-size: .75rem; color: #ccc; font-family: 'Urbanist', sans-serif; }
+
+/* ── UPGRADE MODAL ── */
+.modalOverlay { position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,.5); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.upgradeModal { background: #fff; border-radius: 20px; width: 100%; max-width: 680px; box-shadow: 0 24px 64px rgba(0,0,0,.18); max-height: 90vh; overflow-y: auto; }
+.upgradeSuccess { display: flex; flex-direction: column; align-items: center; gap: .75rem; padding: 3rem 2rem; text-align: center; }
+.upgradeSuccessTitle { font-size: 1.1rem; font-weight: 900; color: #111; font-family: 'Urbanist', sans-serif; }
+.upgradeSuccessText  { font-size: .88rem; color: #666; }
+.upgradeHeader { display: flex; align-items: flex-start; justify-content: space-between; padding: 1.5rem 1.5rem 0; gap: 1rem; }
+.upgradeTitle  { font-size: 1.05rem; font-weight: 900; color: #111; margin: 0 0 .1rem; font-family: 'Urbanist', sans-serif; }
+.upgradeSub    { font-size: .82rem; color: #888; margin: 0; }
+.upgradeBtnClose { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #E8E8E8; background: #F5F5F5; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #888; flex-shrink: 0; transition: all .15s; }
+.upgradeBtnClose:hover { background: #E8E8E8; color: #111; }
+.billingToggle  { display: flex; gap: .35rem; padding: 1rem 1.5rem .5rem; }
+.toggleBtn      { flex: 1; padding: .45rem .75rem; border-radius: 9px; border: 1.5px solid #E8E8E8; background: none; font-size: .82rem; font-weight: 700; color: #888; cursor: pointer; font-family: 'Urbanist', sans-serif; transition: all .15s; }
+.toggleBtn:hover { border-color: #111; color: #111; }
+.toggleBtnActive { background: #111; color: #D7FE03; border-color: #111; }
+.toggleBtnActive:hover { background: #111; color: #D7FE03; }
+.toggleSave { font-size: .65rem; font-weight: 800; color: #22C55E; margin-left: .25rem; }
+.planGrid { display: grid; grid-template-columns: repeat(4,1fr); gap: .5rem; padding: .75rem 1.5rem; }
+@media (max-width: 600px) { .planGrid { grid-template-columns: 1fr 1fr; } }
+.planCard { border: 1.5px solid #E8E8E8; border-radius: 12px; padding: .85rem .65rem; cursor: pointer; background: none; text-align: center; position: relative; transition: all .15s; display: flex; flex-direction: column; align-items: center; gap: .4rem; }
+.planCard:hover { border-color: var(--pc, #6366F1); }
+.planCardSelected { border-color: var(--pc,#6366F1) !important; box-shadow: 0 0 0 2px color-mix(in srgb, var(--pc,#6366F1) 30%, transparent); }
+.planCardCurrent  { opacity: .6; }
+.popularBadge { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: var(--pc,#F59E0B); color: #fff; font-size: .58rem; font-weight: 800; padding: .15rem .6rem; border-radius: 20px; white-space: nowrap; }
+.currentBadge { position: absolute; top: -9px; right: 6px; background: #E8E8E8; color: #888; font-size: .58rem; font-weight: 800; padding: .15rem .6rem; border-radius: 20px; white-space: nowrap; }
+.planCardIcon     { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+.planCardName     { font-size: .8rem; font-weight: 800; color: #111; font-family: 'Urbanist', sans-serif; }
+.planCardPrice    { display: flex; align-items: baseline; gap: .05rem; }
+.planCardPriceCur { font-size: .75rem; font-weight: 800; color: #888; font-family: 'Urbanist', sans-serif; }
+.planCardPriceNum { font-size: 1.2rem; font-weight: 900; color: #111; font-family: 'Urbanist', sans-serif; letter-spacing: -.03em; }
+.planCardPricePer { font-size: .65rem; color: #aaa; font-family: 'Urbanist', sans-serif; }
+.planCardYearlyNote { font-size: .62rem; color: #bbb; font-family: 'Urbanist', sans-serif; }
+.planCardFeatures { display: flex; flex-direction: column; gap: .25rem; width: 100%; text-align: left; margin-top: .25rem; }
+.planCardFeature  { display: flex; align-items: flex-start; gap: .3rem; font-size: .68rem; color: #666; font-family: 'Urbanist', sans-serif; }
+.planCardCheck    { position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; border-radius: 50%; background: var(--pc,#6366F1); color: #fff; display: flex; align-items: center; justify-content: center; }
+.changeSummary     { display: flex; align-items: center; gap: .75rem; margin: .5rem 1.5rem; padding: .75rem 1rem; border-radius: 10px; background: #F8F8F8; border: 1px solid #E8E8E8; }
+.changeSummaryIcon { flex-shrink: 0; }
+.changeSummaryText { flex: 1; font-size: .8rem; color: #666; font-family: 'Urbanist', sans-serif; }
+.changeSummaryDiff { font-size: .88rem; font-weight: 800; font-family: 'Urbanist', sans-serif; flex-shrink: 0; }
+.upgradeActions    { display: flex; align-items: center; justify-content: flex-end; gap: .5rem; padding: 1rem 1.5rem 1.5rem; }
+.upgradeBtnCancel  { padding: .55rem 1.1rem; border-radius: 9px; background: none; border: 1.5px solid #E8E8E8; font-size: .84rem; font-weight: 700; color: #888; cursor: pointer; font-family: 'Urbanist', sans-serif; transition: all .15s; }
+.upgradeBtnCancel:hover { border-color: #999; color: #111; }
+.upgradeBtnSave    { display: flex; align-items: center; gap: .4rem; padding: .6rem 1.25rem; border-radius: 9px; background: #111; border: none; color: #D7FE03; font-size: .84rem; font-weight: 800; cursor: pointer; font-family: 'Urbanist', sans-serif; transition: opacity .15s; }
+.upgradeBtnSave:hover    { opacity: .88; }
+.upgradeBtnSave:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ── Dot grid decoration (PlanDistCard) ── */
 .dotGrid {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   display: grid; grid-template-columns: repeat(6,1fr); gap: 6px;
-  padding: 8px; pointer-events: none; opacity: .4;
+  padding: 8px; pointer-events: none; opacity: .35;
 }
 .dot {
   width: 4px; height: 4px; border-radius: 50%; background: #E5E5E5;
-}
-.dotDark {
-  width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,.08);
-}
-.acadSection {
-  width: 100%;
+  animation: dotPulse 3s ease-in-out infinite;
 }

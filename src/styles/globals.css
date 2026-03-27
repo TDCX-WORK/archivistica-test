@@ -16,6 +16,7 @@
   /* ── Bordes ── */
   --line:        #E5E7EB;
   --line-strong: #D1D5DB;
+  --line-light:  #E5E7EB;   /* alias de --line, para compatibilidad */
 
   /* ── Primario (negro/zinc) ── */
   --primary:     #18181B;
@@ -215,6 +216,7 @@ h1, h2, h3, h4, h5, h6 {
 
   --line:        #3A3A3C;
   --line-strong: #48484A;
+  --line-light:  #3A3A3C;
 
   --primary:     #F2F2F7;
   --primary-mid: #E5E5EA;
@@ -259,6 +261,7 @@ h1, h2, h3, h4, h5, h6 {
 
   --line:        #E0D8CE;
   --line-strong: #CEC4B8;
+  --line-light:  #E0D8CE;
 
   --primary:     #2C1E0F;
   --primary-mid: #3D2D1A;

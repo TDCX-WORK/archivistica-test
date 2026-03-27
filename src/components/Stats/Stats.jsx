@@ -1,27 +1,15 @@
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   BarChart2, TrendingUp, Award, Flame, BookOpen, CheckCircle,
-  Target, Clock, Bookmark, Brain, ArrowUp, ArrowDown, Minus
+  Target, Clock, Bookmark, Brain, ArrowUp, ArrowDown, Minus, Loader2
 } from 'lucide-react'
 import {
   AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid
 } from 'recharts'
-import config from '../../data/config.json'
-import allQuestions from '../../data/questions.json'
-import { STUDY_BLOCKS } from '../../data/study-content'
+import { supabase } from '../../lib/supabase'
+import { useContent } from '../../hooks/useContent'
 import styles from './Stats.module.css'
-
-const BLOCK_META = {
-  historia:      { label: 'Historia',       color: '#7C3AED' },
-  constitucion:  { label: 'Constitución',   color: '#2563EB' },
-  legislacion:   { label: 'Legislación',    color: '#059669' },
-  gestion:       { label: 'Gestión Doc.',   color: '#0891B2' },
-  descripcion:   { label: 'Descripción',    color: '#DC2626' },
-  normas:        { label: 'Normas',         color: '#B45309' },
-  conservacion:  { label: 'Conservación',   color: '#9333EA' },
-  digitalizacion:{ label: 'Digitalización', color: '#0F766E' },
-}
 
 // ── Donut SVG ──────────────────────────────────────────────────────────────
 function Donut({ pct, color = '#2563EB', size = 130, stroke = 14, label, sublabel }) {
@@ -126,11 +114,51 @@ function ChowchowCard({ modeData, avgScore, sessions }) {
 }
 
 
-export default function Stats({ progress, studyReadTopics, studyBookmarks }) {
+export default function Stats({ currentUser, progress, studyReadTopics, studyBookmarks }) {
   const [activeTab, setActiveTab] = useState('test')
+
+  // ── Datos desde Supabase ────────────────────────────────────────────────
+  // Bloques con temas (para pestaña Estudio + metadata de bloques para Tests)
+  const { blocks: studyBlocks, loading: loadingContent } = useContent(
+    currentUser?.id,
+    currentUser?.subject_id
+  )
+
+  // Preguntas (id, block_id, question) para stats por bloque y fallos
+  const [questions, setQuestions]         = useState([])
+  const [loadingQuestions, setLoadingQuestions] = useState(true)
+
+  useEffect(() => {
+    if (!currentUser?.academy_id) return
+
+    const load = async () => {
+      setLoadingQuestions(true)
+
+      let query = supabase
+        .from('questions')
+        .select('id, block_id, question')
+        .eq('academy_id', currentUser.academy_id)
+
+      if (currentUser.subject_id) {
+        query = query.eq('subject_id', currentUser.subject_id)
+      }
+
+      const { data } = await query
+      setQuestions(data || [])
+      setLoadingQuestions(false)
+    }
+
+    load()
+  }, [currentUser?.academy_id, currentUser?.subject_id])
+
+  // ── Loading state ───────────────────────────────────────────────────────
+  const isLoading = loadingContent || loadingQuestions
 
   const sessions = progress?.sessions || []
   const wrongs   = progress?.wrongAnswers || []
+
+  // ── Bloques filtrados (con temas y estimatedMinutes) ────────────────────
+  const ROOT_BLOCKS = studyBlocks.filter(b => b.topics?.length > 0 && b.estimatedMinutes)
 
   // ── Stats de TEST ──────────────────────────────────────────────────────
   const totalSessions  = sessions.length
@@ -165,12 +193,12 @@ export default function Stats({ progress, studyReadTopics, studyBookmarks }) {
     correctas: s.correct||0, total: s.total||0
   }))
 
-  // Por bloques
-  const blockStats = Object.entries(BLOCK_META).map(([id, meta]) => {
-    const blockQ   = allQuestions.filter(q => q.block === id)
-    const blockW   = wrongs.filter(w => blockQ.some(q=>q.id===w.question_id))
+  // Por bloques — dinámico desde Supabase
+  const blockStats = studyBlocks.map(block => {
+    const blockQ   = questions.filter(q => q.block_id === block.id)
+    const blockW   = wrongs.filter(w => blockQ.some(q => q.id === w.question_id))
     const score    = blockQ.length ? Math.max(0, Math.round(100-(blockW.length/blockQ.length)*100)) : 0
-    return { id, ...meta, score, fails: blockW.length, total: blockQ.length }
+    return { id: block.id, label: block.label, color: block.color, score, fails: blockW.length, total: blockQ.length }
   })
 
   // Pie por modo
@@ -179,8 +207,6 @@ export default function Stats({ progress, studyReadTopics, studyBookmarks }) {
   const modeData = Object.entries(modeCount).map(([name,value]) => ({ name, value }))
 
   // ── Stats de ESTUDIO ───────────────────────────────────────────────────
-  // Solo bloques raiz (los que tienen topics propios y estimatedMinutes)
-  const ROOT_BLOCKS = STUDY_BLOCKS.filter(b => b.topics?.length > 0 && b.estimatedMinutes)
 
   const totalTopics    = ROOT_BLOCKS.reduce((s,b) => s+b.topics.length, 0)
   const readCount      = studyReadTopics?.size || 0
@@ -201,6 +227,16 @@ export default function Stats({ progress, studyReadTopics, studyBookmarks }) {
     return s + Math.round((b.estimatedMinutes||0) * readFrac)
   }, 0)
   const remainMins = totalMinutes - readMinutes
+
+  // ── Loading ─────────────────────────────────────────────────────────────
+  if (isLoading) return (
+    <div className={styles.page} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <div style={{ textAlign: 'center' }}>
+        <Loader2 size={28} strokeWidth={1.5} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)' }} />
+        <p style={{ marginTop: '1rem', color: 'var(--ink-light)', fontSize: '0.88rem' }}>Cargando estadísticas…</p>
+      </div>
+    </div>
+  )
 
   return (
     <div className={styles.page}>
@@ -334,13 +370,14 @@ export default function Stats({ progress, studyReadTopics, studyBookmarks }) {
               <h3 className={styles.cardTitle}>Preguntas con más fallos</h3>
               <div className={styles.wrongList}>
                 {wrongs.slice(0,8).map(w => {
-                  const q = allQuestions.find(x=>x.id===w.question_id)
+                  const q = questions.find(x=>x.id===w.question_id)
                   if(!q) return null
+                  const block = studyBlocks.find(b => b.id === q.block_id)
                   return (
                     <div key={w.id} className={styles.wrongItem}>
                       <div className={styles.wrongBadge}
-                        style={{background:BLOCK_META[q.block]?.color+'20',color:BLOCK_META[q.block]?.color}}>
-                        {BLOCK_META[q.block]?.label||q.block}
+                        style={{background:(block?.color||'#6B7280')+'20',color:block?.color||'#6B7280'}}>
+                        {block?.label||'General'}
                       </div>
                       <p className={styles.wrongQ}>{q.question}</p>
                       <span className={styles.wrongCount}>{w.fail_count}x</span>

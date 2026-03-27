@@ -25,7 +25,9 @@ export function useSuperadmin(currentUser) {
         contact_email, contact_phone, city, province,
         billing_name, billing_nif, billing_address,
         notes, price_monthly, contract_start, contract_renews,
-        payment_status, payment_method
+        payment_status, payment_method,
+        stripe_customer_id, stripe_subscription_id, stripe_price_id,
+        trial_ends_at, billing_cycle, setup_fee_paid
       `)
       .order('created_at', { ascending: false })
 
@@ -90,8 +92,8 @@ export function useSuperadmin(currentUser) {
     })
 
     // Stats globales + MRR
-    const totalAcademias  = acads?.length || 0
-    const acadActivas     = (acads || []).filter(a => !a.suspended).length
+    const totalAcademias  = (acads || []).filter(a => !a.deleted_at).length
+    const acadActivas     = (acads || []).filter(a => !a.suspended && !a.deleted_at).length
     const totalAlumnos    = (profiles || []).filter(p => p.role === 'alumno').length
     const totalProfes     = (profiles || []).filter(p => p.role === 'profesor').length
     const alumnosActivos  = new Set((sessions || []).filter(s => s.played_at >= sevenDaysAgo).map(s => s.user_id)).size

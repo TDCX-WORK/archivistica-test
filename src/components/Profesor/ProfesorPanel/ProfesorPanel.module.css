@@ -308,4 +308,4 @@
 }
 .emptyState p, .loading p, .errorState p { font-size: 0.88rem; margin: 0; }
 .spinner { animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+

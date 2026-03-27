@@ -9,84 +9,113 @@ import styles       from './TestRunner.module.css'
 
 function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5) }
 
-const BLOCK_IDS = new Set(Object.keys(config.blocks))
+function isUUID(id) { return id && id.includes('-') && !config.modes[id] }
 
-async function fetchQuestions(modeId, academyId, wrongAnswers = [], subjectId = null) {
-  if (!academyId) return []
+async function fetchQuestions(modeId, academyId, wrongAnswers = [], subjectId = null, topicId = null) {
+  if (!academyId) return { questions: [], fromTopic: false }
 
-  // Modos de repaso — filtran por IDs de preguntas ya falladas
+  // Modos de repaso
   if (modeId === 'review_due') {
     const today = new Date().toISOString().slice(0, 10)
     const due   = wrongAnswers.filter(w => w.next_review <= today)
-    if (!due.length) return []
-    // wrong_answers guarda question_id como INT (el id original del JSON)
-    // Ahora necesitamos buscar por ese id numérico en la columna category o por UUID
-    // Usamos la tabla questions filtrando por academy_id — los ids numéricos los guardamos en category
+    if (!due.length) return { questions: [], fromTopic: false }
     const ids = due.map(w => w.question_id)
     let q = supabase.from('questions').select('*').eq('academy_id', academyId).in('id', ids)
     if (subjectId) q = q.eq('subject_id', subjectId)
     const { data } = await q
-    return shuffle(data || [])
+    return { questions: shuffle(data || []), fromTopic: false }
   }
 
   if (modeId === 'all_fails') {
-    if (!wrongAnswers.length) return []
+    if (!wrongAnswers.length) return { questions: [], fromTopic: false }
     const ids = wrongAnswers.map(w => w.question_id)
     let q = supabase.from('questions').select('*').eq('academy_id', academyId).in('id', ids)
     if (subjectId) q = q.eq('subject_id', subjectId)
     const { data } = await q
-    return shuffle(data || [])
+    return { questions: shuffle(data || []), fromTopic: false }
   }
 
-  // Modo bloque temático (viene desde StudyView — modeId es el UUID del bloque)
-  if (modeId && modeId.includes('-') && !config.modes[modeId]) {
+  // Modo bloque temático (UUID)
+  if (isUUID(modeId)) {
+    // Si hay topicId, intentar cargar preguntas específicas del tema
+    if (topicId) {
+      let tq = supabase.from('questions').select('*').eq('academy_id', academyId).eq('topic_id', topicId)
+      if (subjectId) tq = tq.eq('subject_id', subjectId)
+      const { data: topicData } = await tq
+
+      if (topicData && topicData.length >= 5) {
+        return { questions: shuffle(topicData).slice(0, 20), fromTopic: true }
+      }
+
+      // Pocas preguntas del tema: poner primero las del tema, completar con las del bloque
+      const topicQuestionIds = new Set((topicData || []).map(q => q.id))
+      let bq = supabase.from('questions').select('*').eq('academy_id', academyId).eq('block_id', modeId)
+      if (subjectId) bq = bq.eq('subject_id', subjectId)
+      const { data: blockData } = await bq
+
+      const blockExtras = (blockData || []).filter(q => !topicQuestionIds.has(q.id))
+      const combined = [...(topicData || []), ...shuffle(blockExtras)]
+      return { questions: combined.slice(0, 20), fromTopic: (topicData || []).length > 0 }
+    }
+
+    // Sin topicId: todas las preguntas del bloque
     let q = supabase.from('questions').select('*').eq('academy_id', academyId).eq('block_id', modeId)
     if (subjectId) q = q.eq('subject_id', subjectId)
     const { data } = await q
-    return shuffle(data || []).slice(0, 20)
+    return { questions: shuffle(data || []).slice(0, 20), fromTopic: false }
   }
 
-  // Modos normales del config (beginner, advanced, exam, supuesto_N...)
+  // Modos normales del config (beginner, advanced, exam)
   const mode = config.modes[modeId]
-  if (!mode) return []
+  if (!mode) return { questions: [], fromTopic: false }
 
-  let query = supabase
-    .from('questions')
-    .select('*')
-    .eq('academy_id', academyId)
-
-  if (subjectId) {
-    query = query.eq('subject_id', subjectId)
-  }
-
-  if (mode.practical) {
-    query = query.or('difficulty.eq.practical,category.eq.gestion,category.eq.descripcion')
-  }
-
+  let query = supabase.from('questions').select('*').eq('academy_id', academyId)
+  if (subjectId) query = query.eq('subject_id', subjectId)
   const { data } = await query
-  return shuffle(data || []).slice(0, mode.questions)
+  return { questions: shuffle(data || []).slice(0, mode.questions), fromTopic: false }
 }
 
-function getModeLabel(modeId) {
-  if (modeId === 'review_due') return 'Repasar hoy'
-  if (modeId === 'all_fails')  return 'Todos mis fallos'
-  if (BLOCK_IDS.has(modeId))   return config.blocks[modeId]?.label || modeId
-  if (modeId && modeId.includes('-') && !config.modes[modeId]) return modeLabel || 'Practicar bloque'
-  return config.modes[modeId]?.label || 'Test'
-}
+export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, academyId, subjectId, onGoHome, onRecordSession, onRecordWrong, onRecordCorrectReview, wrongAnswers = [], penalizacion = false }) {
 
-function getModeTime(modeId) {
-  if (modeId === 'review_due' || modeId === 'all_fails') return null
-  if (BLOCK_IDS.has(modeId)) return 25 * 60
-  return (config.modes[modeId]?.timeMinutes || 25) * 60
-}
+  const isFailMode  = modeId === 'review_due' || modeId === 'all_fails'
+  const isBlockMode = isUUID(modeId)
+  const isTopicMode = isBlockMode && !!topicId
 
-export default function TestRunner({ modeId, modeLabel, academyId, subjectId, onGoHome, onRecordSession, onRecordWrong, onRecordCorrectReview, wrongAnswers = [], penalizacion = false }) {
-  const totalSecs  = getModeTime(modeId)
-  const isFailMode = modeId === 'review_due' || modeId === 'all_fails'
+  const resolvedLabel = isFailMode
+    ? (modeId === 'review_due' ? 'Repasar hoy' : 'Todos mis fallos')
+    : isTopicMode
+      ? (topicLabel || modeLabel || 'Practicar tema')
+      : isBlockMode
+        ? (modeLabel || 'Practicar bloque')
+        : (config.modes[modeId]?.label || 'Test')
+
+  const totalSecs = isFailMode
+    ? null
+    : isBlockMode
+      ? 25 * 60
+      : (config.modes[modeId]?.timeMinutes || 25) * 60
+
+  const timeMinutes = isBlockMode ? 25 : config.modes[modeId]?.timeMinutes
+
+  // Bloques para tags — cargados 100% desde Supabase
+  const [blockMap, setBlockMap] = useState({})
+
+  useEffect(() => {
+    if (!academyId) return
+    const load = async () => {
+      let q = supabase.from('content_blocks').select('id, label, color').eq('academy_id', academyId)
+      if (subjectId) q = q.eq('subject_id', subjectId)
+      const { data } = await q
+      const map = {}
+      for (const b of (data || [])) map[b.id] = { label: b.label, color: b.color }
+      setBlockMap(map)
+    }
+    load()
+  }, [academyId, subjectId])
 
   const [phase,     setPhase]     = useState('intro')
   const [questions, setQuestions] = useState([])
+  const [fromTopic, setFromTopic] = useState(false)
   const [loading,   setLoading]   = useState(true)
   const [index,     setIndex]     = useState(0)
   const [answers,   setAnswers]   = useState({})
@@ -96,18 +125,17 @@ export default function TestRunner({ modeId, modeLabel, academyId, subjectId, on
 
   useEffect(() => { answersRef.current = answers }, [answers])
 
-  // Cargar preguntas al montar
   useEffect(() => {
     if (!academyId) return
     setLoading(true)
-    fetchQuestions(modeId, academyId, wrongAnswers, subjectId).then(qs => {
-      setQuestions(qs)
+    fetchQuestions(modeId, academyId, wrongAnswers, subjectId, topicId).then(result => {
+      setQuestions(result.questions)
+      setFromTopic(result.fromTopic)
       setLoading(false)
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modeId, academyId, subjectId])
+  }, [modeId, academyId, subjectId, topicId])
 
-  // Timer
   useEffect(() => {
     if (phase !== 'running' || !totalSecs) return
     if (secsLeft <= 0) { handleFinish(); return }
@@ -120,18 +148,18 @@ export default function TestRunner({ modeId, modeLabel, academyId, subjectId, on
   const current  = questions[index]
   const answered = index in answers
 
+  // Tag de bloque: solo desde el blockMap de Supabase
+  const currentBlockTag = current?.block_id && blockMap[current.block_id]
+    ? blockMap[current.block_id].label
+    : null
+
   const handleAnswer = useCallback((optIdx) => {
     setAnswers(prev => ({ ...prev, [index]: optIdx }))
-
     const q         = questions[index]
     const isCorrect = optIdx === q.answer
     const isInWrong = wrongAnswers.some(w => w.question_id === q.id)
-
-    if (!isCorrect) {
-      onRecordWrong?.(q.id, q.category || q.block_id)
-    } else if (isCorrect && isInWrong) {
-      onRecordCorrectReview?.(q.id)
-    }
+    if (!isCorrect) onRecordWrong?.(q.id, q.block_id)
+    else if (isCorrect && isInWrong) onRecordCorrectReview?.(q.id)
   }, [index, questions, wrongAnswers, onRecordWrong, onRecordCorrectReview])
 
   const handleFinish = useCallback(() => {
@@ -140,9 +168,7 @@ export default function TestRunner({ modeId, modeLabel, academyId, subjectId, on
     const correct  = Object.entries(snap).filter(([i, a]) => questions[Number(i)]?.answer === a).length
     const wrong    = Object.entries(snap).filter(([i, a]) => questions[Number(i)]?.answer !== a).length
     const answeredCount = Object.keys(snap).length
-    const effectiveCorrect = penalizacion
-      ? Math.max(0, correct - wrong * 0.25)
-      : correct
+    const effectiveCorrect = penalizacion ? Math.max(0, correct - wrong * 0.25) : correct
     onRecordSession(modeId, effectiveCorrect, answeredCount, elapsed)
     setPhase('finished')
   }, [questions, modeId, onRecordSession, penalizacion])
@@ -153,15 +179,14 @@ export default function TestRunner({ modeId, modeLabel, academyId, subjectId, on
     setAnswers({})
     setSecsLeft(totalSecs)
     startTimeRef.current = Date.now()
-    // Recargar preguntas mezcladas
     setLoading(true)
-    fetchQuestions(modeId, academyId, wrongAnswers, subjectId).then(qs => {
-      setQuestions(qs)
+    fetchQuestions(modeId, academyId, wrongAnswers, subjectId, topicId).then(result => {
+      setQuestions(result.questions)
+      setFromTopic(result.fromTopic)
       setLoading(false)
     })
-  }, [totalSecs, modeId, academyId, subjectId, wrongAnswers])
+  }, [totalSecs, modeId, academyId, subjectId, topicId, wrongAnswers])
 
-  // Estado de carga inicial
   if (loading) return (
     <div className={styles.intro}>
       <div className={styles.introCard}>
@@ -171,16 +196,18 @@ export default function TestRunner({ modeId, modeLabel, academyId, subjectId, on
     </div>
   )
 
-  // Sin preguntas en modo fallos
-  if (phase === 'intro' && isFailMode && qCount === 0) return (
+  if (phase === 'intro' && qCount === 0) return (
     <div className={styles.intro}>
       <div className={styles.introCard}>
         <div className={styles.introIcon}><AlertTriangle size={28} strokeWidth={1.5} /></div>
-        <h2 className={styles.introTitle}>Sin preguntas pendientes</h2>
+        <h2 className={styles.introTitle}>
+          {isFailMode ? 'Sin preguntas pendientes' : 'Sin preguntas disponibles'}
+        </h2>
         <p className={styles.introDesc}>
-          {modeId === 'review_due'
-            ? 'No tienes preguntas pendientes de repaso hoy. ¡Vuelve mañana!'
-            : 'Aún no tienes fallos registrados. Completa un test primero.'}
+          {modeId === 'review_due' ? 'No tienes preguntas pendientes de repaso hoy. ¡Vuelve mañana!'
+            : modeId === 'all_fails' ? 'Aún no tienes fallos registrados. Completa un test primero.'
+            : isTopicMode ? 'Este tema aún no tiene preguntas de tipo test disponibles.'
+            : 'Este bloque aún no tiene preguntas disponibles.'}
         </p>
         <button className={styles.startBtn} onClick={onGoHome}>Volver al inicio</button>
       </div>
@@ -195,14 +222,17 @@ export default function TestRunner({ modeId, modeLabel, academyId, subjectId, on
             ? <AlertTriangle size={28} strokeWidth={1.5} style={{ color: 'var(--danger)' }} />
             : <CheckCircle   size={28} strokeWidth={1.5} />}
         </div>
-        <h2 className={styles.introTitle}>{getModeLabel(modeId)}</h2>
+        <h2 className={styles.introTitle}>{resolvedLabel}</h2>
         <p className={styles.introDesc}>
           {modeId === 'review_due' && 'Preguntas que necesitas repasar según tu ritmo de aprendizaje.'}
           {modeId === 'all_fails'  && 'Practica con todas las preguntas que has fallado anteriormente.'}
-          {!isFailMode && (config.modes[modeId]?.description || `${qCount} preguntas`)}
+          {isTopicMode && fromTopic && `Preguntas específicas del tema`}
+          {isTopicMode && !fromTopic && `Preguntas del bloque que incluye este tema`}
+          {isBlockMode && !isTopicMode && `Preguntas del bloque "${modeLabel || 'seleccionado'}"`}
+          {!isFailMode && !isBlockMode && (config.modes[modeId]?.description || `${qCount} preguntas`)}
         </p>
         <div className={styles.introMeta}>
-          {totalSecs && <span><Clock size={14} /> {config.modes[modeId]?.timeMinutes} minutos</span>}
+          {totalSecs && <span><Clock size={14} /> {timeMinutes} minutos</span>}
           {totalSecs && <span>·</span>}
           <span>{qCount} pregunta{qCount !== 1 ? 's' : ''}</span>
           {isFailMode && <span>· Sin límite de tiempo</span>}
@@ -219,13 +249,8 @@ export default function TestRunner({ modeId, modeLabel, academyId, subjectId, on
   )
 
   if (phase === 'finished') return (
-    <Results
-      questions={questions}
-      answers={answers}
-      onGoHome={onGoHome}
-      onRepeat={handleRepeat}
-      durationSecs={Math.round((Date.now() - startTimeRef.current) / 1000)}
-    />
+    <Results questions={questions} answers={answers} onGoHome={onGoHome}
+      onRepeat={handleRepeat} durationSecs={Math.round((Date.now() - startTimeRef.current) / 1000)} />
   )
 
   const mm     = totalSecs ? String(Math.floor(secsLeft / 60)).padStart(2, '0') : null
@@ -257,51 +282,28 @@ export default function TestRunner({ modeId, modeLabel, academyId, subjectId, on
       <div className={styles.main}>
         <div className={styles.questionNum}>
           Pregunta {index + 1} de {qCount}
-          {current?.category && config.blocks[current.category] && (
-            <span className={styles.blockTag}>{config.blocks[current.category].label}</span>
-          )}
+          {currentBlockTag && <span className={styles.blockTag}>{currentBlockTag}</span>}
         </div>
-        <QuestionCard
-          question={current}
-          onAnswer={handleAnswer}
-          answered={answered}
-          selectedIndex={answers[index]}
-        />
+        <QuestionCard question={current} onAnswer={handleAnswer} answered={answered} selectedIndex={answers[index]} />
       </div>
 
       <div className={styles.nav}>
-        <button
-          className={styles.navBtn}
-          onClick={() => setIndex(i => i - 1)}
-          disabled={index === 0}
-        >
+        <button className={styles.navBtn} onClick={() => setIndex(i => i - 1)} disabled={index === 0}>
           <ChevronLeft size={17} /> Anterior
         </button>
-
         <div className={styles.dotTrack}>
           {questions.map((_, i) => (
-            <button
-              key={i}
-              className={[
-                styles.dot,
-                i === index   ? styles.dotActive   : '',
-                i in answers  ? styles.dotAnswered : ''
-              ].join(' ')}
-              onClick={() => setIndex(i)}
-              title={`Pregunta ${i + 1}`}
-            />
+            <button key={i}
+              className={[styles.dot, i === index ? styles.dotActive : '', i in answers ? styles.dotAnswered : ''].join(' ')}
+              onClick={() => setIndex(i)} title={`Pregunta ${i + 1}`} />
           ))}
         </div>
-
         {index < qCount - 1 ? (
           <button className={styles.navBtn} onClick={() => setIndex(i => i + 1)}>
             Siguiente <ChevronRight size={17} />
           </button>
         ) : (
-          <button
-            className={[styles.navBtn, styles.navBtnFinish].join(' ')}
-            onClick={handleFinish}
-          >
+          <button className={[styles.navBtn, styles.navBtnFinish].join(' ')} onClick={handleFinish}>
             Finalizar <CheckCircle size={16} />
           </button>
         )}

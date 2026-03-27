@@ -90,7 +90,7 @@ export function useAuth() {
 
     if (signUpError) {
       setError(signUpError.message.includes('already registered')
-        ? 'Ese nombre de usuario ya existe'
+        ? `El nombre de usuario "${username.trim().toLowerCase()}" ya está en uso. Prueba añadiendo un apellido o número.`
         : signUpError.message)
       return false
     }
@@ -110,7 +110,13 @@ export function useAuth() {
       access_until: accessUntil.toISOString(),
     })
 
-    if (profileErr) { setError('Error creando el perfil'); return false }
+    if (profileErr) {
+      const msg = profileErr.message || ''
+      setError(msg.includes('duplicate') || msg.includes('unique')
+        ? `El nombre de usuario "${username.trim().toLowerCase()}" ya está en uso. Elige otro.`
+        : 'Error creando el perfil. Inténtalo de nuevo.')
+      return false
+    }
 
     // 5. Marcar código como usado
     await supabase

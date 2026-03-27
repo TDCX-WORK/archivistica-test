@@ -42,7 +42,7 @@
   background: linear-gradient(90deg, transparent 0%, var(--kpi) 50%, transparent 100%);
 }
 .kpiCard:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.kpiIcon  { color: var(--kpi, var(--primary)); }
+.kpiIcon  { color: var(--kpi, #059669); }
 .kpiVal   { font-size: 1.1rem; font-weight: 800; color: var(--ink); line-height: 1.1; }
 .kpiLabel { font-size: 0.66rem; color: var(--ink-muted); line-height: 1.2; }
 
@@ -121,7 +121,7 @@
 }
 .state p { font-size: 0.88rem; margin: 0; }
 .spinner { animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+
 
 /* Botón exportar PDF */
 .btnExport {

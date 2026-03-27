@@ -88,7 +88,7 @@
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 .kpiCard:hover::before { opacity: 0.35; }
-.kpiIcon  { color: var(--kpi-color); }
+.kpiIcon  { color: var(--kpi-color, #059669); }
 .kpiValue { font-size: 1.35rem; font-weight: 800; color: var(--ink); line-height: 1.1; }
 .kpiLabel { font-size: 0.68rem; color: var(--ink-muted); line-height: 1.3; }
 
@@ -247,4 +247,4 @@
 }
 .loadingState p, .errorState p, .emptyState p { font-size: 0.88rem; margin: 0; }
 .spinner { animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+

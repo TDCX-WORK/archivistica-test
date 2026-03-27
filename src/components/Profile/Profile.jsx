@@ -1,9 +1,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { Flame, BookOpen, Star, Lock, CheckCircle, TrendingUp, Calendar, Target, Zap, Trophy, User, Settings, Sun, ChevronRight, Save, ClipboardList, Layers, Award, GraduationCap, Bookmark, Clock, Shield, Hash, Gem, FileText, BarChart2, Medal } from 'lucide-react'
-import { STUDY_BLOCKS } from '../../data/study-content'
-import allQuestions from '../../data/questions.json'
-import config from '../../data/config.json'
+import { Flame, BookOpen, Star, Lock, CheckCircle, TrendingUp, Calendar, Target, Zap, Trophy, User, Settings, Sun, ChevronRight, Save, ClipboardList, Layers, Award, GraduationCap, Bookmark, Clock, Shield, Hash, Gem, FileText, BarChart2, Medal, Loader2 } from 'lucide-react'
+import { useContent } from '../../hooks/useContent'
 import { useSettings } from '../../hooks/useSettings'
 import styles from './Profile.module.css'
 
@@ -22,11 +20,10 @@ const LEVELS = [
 ]
 
 // ── MISIONES ───────────────────────────────────────────────────────────────
-function buildMissions(sessions, wrongAnswers, studyReadTopics, studyBookmarks) {
+function buildMissions(sessions, wrongAnswers, studyReadTopics, studyBookmarks, totalTopics) {
   const totalSessions   = sessions.length
   const totalAnswered   = sessions.reduce((s, x) => s + x.total, 0)
   const avgScore        = totalSessions ? Math.round(sessions.reduce((s,x)=>s+(x.score||0),0)/totalSessions) : 0
-  const totalTopics     = STUDY_BLOCKS.reduce((s,b) => s + b.topics.length, 0)
   const readCount       = studyReadTopics?.size || 0
   const bookmarkCount   = studyBookmarks?.size  || 0
   const examSessions    = sessions.filter(s => s.mode_id === 'exam')
@@ -54,9 +51,9 @@ function buildMissions(sessions, wrongAnswers, studyReadTopics, studyBookmarks) 
     { id: 'exam_pass',     category: 'Simulacros',  title: 'Aprobado',              desc: 'Supera el 50% en un simulacro oficial',       icon: '✅', current: Math.min(examAvg, 50),       target: 50,  unlocked: examAvg >= 50,   unit: '%' },
     { id: 'exam_master',   category: 'Simulacros',  title: 'Nota de corte',         desc: 'Supera el 75% en un simulacro oficial',       icon: '🥇', current: Math.min(examAvg, 75),       target: 75,  unlocked: examAvg >= 75,   unit: '%' },
     { id: 'study_first',   category: 'Estudio',     title: 'Primera lectura',       desc: 'Lee tu primer tema del temario',              icon: '📖', current: Math.min(readCount, 1),       target: 1,   unlocked: readCount >= 1 },
-    { id: 'study_25',      category: 'Estudio',     title: 'Buen comienzo',         desc: `Lee el 25% del temario`,                      icon: '📚', current: readCount, target: Math.round(totalTopics * 0.25), unlocked: readCount >= Math.round(totalTopics * 0.25) },
-    { id: 'study_50',      category: 'Estudio',     title: 'A mitad de camino',     desc: `Lee el 50% del temario`,                      icon: '📚', current: readCount, target: Math.round(totalTopics * 0.5),  unlocked: readCount >= Math.round(totalTopics * 0.5) },
-    { id: 'study_100',     category: 'Estudio',     title: 'Temario completado',    desc: 'Lee todos los temas del temario',             icon: '🎓', current: readCount, target: totalTopics, unlocked: readCount >= totalTopics },
+    { id: 'study_25',      category: 'Estudio',     title: 'Buen comienzo',         desc: `Lee el 25% del temario`,                      icon: '📚', current: readCount, target: Math.max(1, Math.round(totalTopics * 0.25)), unlocked: readCount >= Math.round(totalTopics * 0.25) },
+    { id: 'study_50',      category: 'Estudio',     title: 'A mitad de camino',     desc: `Lee el 50% del temario`,                      icon: '📚', current: readCount, target: Math.max(1, Math.round(totalTopics * 0.5)),  unlocked: readCount >= Math.round(totalTopics * 0.5) },
+    { id: 'study_100',     category: 'Estudio',     title: 'Temario completado',    desc: 'Lee todos los temas del temario',             icon: '🎓', current: readCount, target: Math.max(1, totalTopics), unlocked: totalTopics > 0 && readCount >= totalTopics },
     { id: 'bookmark_5',    category: 'Estudio',     title: 'Lector selectivo',      desc: 'Guarda 5 temas como favoritos',               icon: '🔖', current: Math.min(bookmarkCount, 5),   target: 5,   unlocked: bookmarkCount >= 5 },
     { id: 'streak_3',      category: 'Constancia',  title: 'Tres días seguidos',    desc: 'Mantén una racha de 3 días',                  icon: '🔥', current: Math.min(streakDays, 3),      target: 3,   unlocked: streakDays >= 3 },
     { id: 'streak_7',      category: 'Constancia',  title: 'Una semana entera',     desc: 'Mantén una racha de 7 días',                  icon: '🔥', current: Math.min(streakDays, 7),      target: 7,   unlocked: streakDays >= 7 },
@@ -67,8 +64,7 @@ function buildMissions(sessions, wrongAnswers, studyReadTopics, studyBookmarks) 
   ]
 }
 
-function calcXP(sessions, studyReadTopics, wrongAnswers) {
-  const totalTopics   = STUDY_BLOCKS.reduce((s,b) => s + b.topics.length, 0)
+function calcXP(sessions, studyReadTopics, wrongAnswers, totalTopics) {
   const readCount     = studyReadTopics?.size || 0
   const avgScore      = sessions.length ? Math.round(sessions.reduce((s,x)=>s+(x.score||0),0)/sessions.length) : 0
   const totalAnswered = sessions.reduce((s,x) => s + x.total, 0)
@@ -287,14 +283,26 @@ export default function Profile({ currentUser, progress, studyReadTopics, studyB
   const [activeTab, setActiveTab] = useState(() =>
     new URLSearchParams(location.search).get('tab') || 'logros'
   )
+
+  // Cargar bloques desde Supabase para calcular totalTopics dinámicamente
+  const { blocks: studyBlocks, loading: loadingContent } = useContent(
+    currentUser?.id,
+    currentUser?.subject_id
+  )
+
+  const totalTopics = useMemo(
+    () => studyBlocks.reduce((s, b) => s + (b.topics?.length || 0), 0),
+    [studyBlocks]
+  )
+
   // Sincronizar tab cuando cambia la URL (ej: Mi Perfil → Ajustes desde el header)
   useEffect(() => {
     const tab = new URLSearchParams(location.search).get('tab') || 'logros'
     setActiveTab(tab)
   }, [location.search])
 
-  const xp       = useMemo(() => calcXP(sessions, studyReadTopics, wrongAnswers), [sessions, studyReadTopics, wrongAnswers])
-  const missions = useMemo(() => buildMissions(sessions, wrongAnswers, studyReadTopics, studyBookmarks), [sessions, wrongAnswers, studyReadTopics, studyBookmarks])
+  const xp       = useMemo(() => calcXP(sessions, studyReadTopics, wrongAnswers, totalTopics), [sessions, studyReadTopics, wrongAnswers, totalTopics])
+  const missions = useMemo(() => buildMissions(sessions, wrongAnswers, studyReadTopics, studyBookmarks, totalTopics), [sessions, wrongAnswers, studyReadTopics, studyBookmarks, totalTopics])
 
   const currentLevelData = [...LEVELS].reverse().find(l => xp >= l.xpRequired) || LEVELS[0]
   const nextLevelData    = LEVELS.find(l => l.level === currentLevelData.level + 1)
@@ -303,7 +311,6 @@ export default function Profile({ currentUser, progress, studyReadTopics, studyB
   const levelPct         = nextLevelData ? Math.min(100, Math.round((xpInLevel / xpNeeded) * 100)) : 100
 
   const totalAnswered  = sessions.reduce((s,x) => s + x.total, 0)
-  const totalTopics    = STUDY_BLOCKS.reduce((s,b) => s + b.topics.length, 0)
   const readCount      = studyReadTopics?.size || 0
   const unlockedCount  = missions.filter(m => m.unlocked).length
   const nextMission    = missions.find(m => !m.unlocked && m.current > 0) || missions.find(m => !m.unlocked)
@@ -311,6 +318,16 @@ export default function Profile({ currentUser, progress, studyReadTopics, studyB
 
   const bookLevel = currentLevelData.level <= 2 ? 1 : currentLevelData.level <= 5 ? 2 : currentLevelData.level <= 7 ? 3 : currentLevelData.level <= 9 ? 4 : 5
   const bookColor = currentLevelData.level <= 3 ? '#059669' : currentLevelData.level <= 6 ? '#2563EB' : currentLevelData.level <= 8 ? '#7C3AED' : '#D97706'
+
+  // Loading
+  if (loadingContent) return (
+    <div className={styles.page} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <div style={{ textAlign: 'center' }}>
+        <Loader2 size={28} strokeWidth={1.5} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)' }} />
+        <p style={{ marginTop: '1rem', color: 'var(--ink-light)', fontSize: '0.88rem' }}>Cargando perfil…</p>
+      </div>
+    </div>
+  )
 
   return (
     <div className={styles.page}>

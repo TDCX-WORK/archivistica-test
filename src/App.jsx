@@ -21,7 +21,7 @@ import StatsClase         from './components/Profesor/StatsClase/StatsClase'
 import ProfesorProfile    from './components/Profesor/ProfesorProfile/ProfesorProfile'
 import DirectorPanel      from './components/Profesor/DirectorPanel/DirectorPanel'
 import SuperadminPanel    from './components/Superadmin/SuperadminPanel'
-import supuestos          from './data/supuestos.json'
+import StripeBillingPanel from './components/Superadmin/StripeBillingPanel'
 import styles             from './App.module.css'
 
 const homeRoute = (user) => {
@@ -105,6 +105,7 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
     location.pathname.startsWith('/profesor')      ? 'profesor'     :
     location.pathname.startsWith('/direccion')     ? 'direccion'    :
     location.pathname.startsWith('/papelera')      ? 'papelera'     :
+    location.pathname.startsWith('/billing')       ? 'billing'      :
     location.pathname.startsWith('/admin')         ? 'superadmin'   : 'inicio'
 
   const handleTabChange = (t) => {
@@ -119,15 +120,22 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
       direccion:     '/direccion',
       superadmin:    '/admin',
       papelera:      '/papelera',
+      billing:       '/billing',
     }
     navigate(routes[t] || homeRoute(currentUser))
   }
 
-  const handleSelectMode = (modeId, modeLabel) => {
-    const sup = supuestos.find(s => s.id === modeId)
-    if (sup)                     return setOverlay({ type:'supuesto', supuesto:sup })
-    if (modeId === 'flashcards') return setOverlay({ type:'flashcards' })
-    setOverlay({ type:'test', modeId, modeLabel })
+  const handleSelectMode = (modeId, modeLabel, thirdArg, fourthArg) => {
+    if (thirdArg && typeof thirdArg === 'object' && thirdArg.questions) {
+      return setOverlay({ type: 'supuesto', supuesto: thirdArg })
+    }
+    if (modeId === 'flashcards') {
+      return setOverlay({ type: 'flashcards' })
+    }
+    if (thirdArg && typeof thirdArg === 'string') {
+      return setOverlay({ type: 'test', modeId, modeLabel, topicId: thirdArg, topicLabel: fourthArg || '' })
+    }
+    setOverlay({ type: 'test', modeId, modeLabel })
   }
 
   const goHome = () => { setOverlay(null); navigate(homeRoute(currentUser)) }
@@ -135,7 +143,7 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
   const isTestActive = overlay && ['test','supuesto','flashcards'].includes(overlay.type)
 
   const testLabel =
-    overlay?.type === 'test'       ? (overlay.modeLabel || overlay.modeId) :
+    overlay?.type === 'test'       ? (overlay.topicLabel || overlay.modeLabel || overlay.modeId) :
     overlay?.type === 'supuesto'   ? overlay.supuesto?.title :
     overlay?.type === 'flashcards' ? 'Flashcards' : ''
 
@@ -147,7 +155,8 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
     activeTab === 'stats-clase'  ? 'Stats de la clase'   :
     activeTab === 'direccion'    ? 'Panel de Dirección'  :
     activeTab === 'superadmin'   ? 'Superadmin'          :
-    activeTab === 'papelera'     ? 'Papelera'            : 'Inicio'
+    activeTab === 'papelera'     ? 'Papelera'            :
+    activeTab === 'billing'      ? 'Facturación'         : 'Inicio'
 
   return (
     <div className={styles.shell}>
@@ -165,16 +174,24 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
         <div className={styles.content}>
           {overlay?.type === 'test' && (
             <TestRunner
-              modeId={overlay.modeId} modeLabel={overlay.modeLabel} academyId={academyId} subjectId={currentUser?.subject_id}
-              penalizacion={settings.penalizacion} onGoHome={goHome}
+              modeId={overlay.modeId}
+              modeLabel={overlay.modeLabel}
+              topicId={overlay.topicId || null}
+              topicLabel={overlay.topicLabel || null}
+              academyId={academyId}
+              subjectId={currentUser?.subject_id}
+              penalizacion={settings.penalizacion}
+              onGoHome={goHome}
               onRecordSession={progress.recordSession}
               onRecordWrong={progress.recordWrongAnswer}
               onRecordCorrectReview={progress.recordCorrectReview}
               wrongAnswers={progress.wrongAnswers}
             />
           )}
-          {overlay?.type === 'flashcards' && <Flashcard onGoHome={goHome} />}
-          {overlay?.type === 'supuesto'   && <SupuestoRunner supuesto={overlay.supuesto} onGoHome={goHome} />}
+          {overlay?.type === 'flashcards' && (
+            <Flashcard academyId={academyId} subjectId={currentUser?.subject_id} onGoHome={goHome} />
+          )}
+          {overlay?.type === 'supuesto' && <SupuestoRunner supuesto={overlay.supuesto} onGoHome={goHome} />}
 
           {!overlay && (
             <Routes>
@@ -189,7 +206,7 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
               } />
               <Route path="/estadisticas" element={
                 isAlumno
-                  ? <Stats progress={progress} studyReadTopics={studyProgress.readTopics} studyBookmarks={studyProgress.bookmarks} />
+                  ? <Stats currentUser={currentUser} progress={progress} studyReadTopics={studyProgress.readTopics} studyBookmarks={studyProgress.bookmarks} />
                   : <Navigate to={homeRoute(currentUser)} replace />
               } />
               <Route path="/perfil" element={
@@ -216,6 +233,11 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
               <Route path="/papelera" element={
                 isSuperadmin ? <SuperadminPanel currentUser={currentUser} modoPapelera /> : <Navigate to={homeRoute(currentUser)} replace />
               } />
+              <Route path="/billing" element={
+                isSuperadmin
+                  ? <BillingWrapper currentUser={currentUser} />
+                  : <Navigate to={homeRoute(currentUser)} replace />
+              } />
               <Route path="*" element={<Navigate to={homeRoute(currentUser)} replace />} />
             </Routes>
           )}
@@ -223,6 +245,19 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
       </div>
     </div>
   )
+}
+
+// Wrapper que carga academias y las pasa al panel de billing
+import { useSuperadmin } from './hooks/useSuperadmin'
+
+function BillingWrapper({ currentUser }) {
+  const { academias, loading, recargar } = useSuperadmin(currentUser)
+  if (loading) return (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', padding:'5rem', color:'var(--ink-muted)' }}>
+      Cargando…
+    </div>
+  )
+  return <StripeBillingPanel academias={academias} onRecargar={recargar} />
 }
 
 export default function App() {
@@ -234,7 +269,6 @@ export default function App() {
   const studyProgress = useStudyProgress(currentUser?.id)
 
   if (loading) return <div className={styles.loadingScreen}><div className={styles.loadingSpinner} /></div>
-  // Token de recuperación de contraseña detectado — mostrar pantalla de nueva contraseña
   if (recoveryMode) return <ForcePasswordChange currentUser={{ username: '' }} onDone={confirmPasswordReset} isRecovery />
   if (!currentUser) return <AuthPage onLogin={login} onRegister={register} onRequestReset={requestPasswordReset} error={error} clearError={clearError} />
   if (currentUser.academyDeleted)      return <AcademiaSuspendidaPage username={currentUser.username} onLogout={logout} />

@@ -5,7 +5,6 @@ import { BookOpen, Timer, Trophy, Flame, FileText, Layers, Zap, Archive,
          Building2, BookMarked, Database, Globe, Users } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import config from '../../data/config.json'
-import supuestosArchivistica from '../../data/supuestos.json'
 import { usePlanSemanal } from '../../hooks/usePlanSemanal'
 import styles from './Home.module.css'
 
@@ -130,9 +129,8 @@ export default function Home({ onSelectMode, progress, currentUser }) {
       setBlocks(blocksData)
     })
 
-    // 3. Supuestos: primero busca en Supabase, fallback a JSON local (Archivística)
+    // 3. Supuestos desde Supabase
     const loadSupuestos = async () => {
-      // Intentar cargar desde Supabase (tabla supuestos)
       let query = supabase
         .from('supuestos')
         .select('id, slug, title, subtitle, scenario, position, supuesto_questions(id, question, options, answer, explanation, position)')
@@ -144,7 +142,7 @@ export default function Home({ onSelectMode, progress, currentUser }) {
       const { data: supData } = await query
 
       if (supData?.length > 0) {
-        // Formatear igual que supuestos.json para compatibilidad con SupuestoRunner
+        // Formatear para compatibilidad con SupuestoRunner
         const formatted = supData.map(s => ({
           id:       s.slug,
           title:    s.title,
@@ -160,18 +158,6 @@ export default function Home({ onSelectMode, progress, currentUser }) {
             }))
         }))
         setSupuestos(formatted)
-        return
-      }
-
-      // Fallback a JSON local solo para Archivística
-      if (!subjectId) {
-        setSupuestos(supuestosArchivistica)
-        return
-      }
-      const { data: subjectData } = await supabase
-        .from('subjects').select('slug').eq('id', subjectId).maybeSingle()
-      if (subjectData?.slug === 'archivistica' || subjectData?.slug?.includes('archiv')) {
-        setSupuestos(supuestosArchivistica)
       } else {
         setSupuestos([])
       }
@@ -311,7 +297,7 @@ export default function Home({ onSelectMode, progress, currentUser }) {
                     label={s.title}
                     desc={s.subtitle}
                     meta={{ color: '#2563EB', bg: '#EFF6FF' }}
-                    onClick={() => onSelectMode(s.id)}
+                    onClick={() => onSelectMode(s.id, null, s)}
                   />
                 ))}
               </div>

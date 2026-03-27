@@ -192,3 +192,14 @@
   }
 
 }
+
+/* ── Avatar additions ── */
+.avatarWrap {
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: .25rem;
+}
+.avatarProfesor {
+  background: rgba(215,254,3,.15);
+  color: #D7FE03;
+  border: 1.5px solid rgba(215,254,3,.3);
+}
