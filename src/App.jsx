@@ -166,11 +166,12 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
       )}
       <div className={[styles.main, isTestActive ? styles.mainFull : ''].join(' ')}>
         <Header
-          currentUser={currentUser} inTest={isTestActive} modeName={testLabel}
-          onGoHome={goHome} onLogout={logout} pageTitle={pageTitle}
-          onGoProfile={() => navigate('/perfil')}
-          onGoSettings={() => navigate('/perfil?tab=ajustes')}
-        />
+  currentUser={currentUser} inTest={isTestActive} modeName={testLabel}
+  onGoHome={goHome} onLogout={logout} pageTitle={pageTitle}
+  onGoProfile={() => navigate('/perfil')}
+  onGoSettings={() => navigate('/perfil?tab=ajustes')}
+  onNavigate={navigate}
+/>
         <div className={styles.content}>
           {overlay?.type === 'test' && (
             <TestRunner

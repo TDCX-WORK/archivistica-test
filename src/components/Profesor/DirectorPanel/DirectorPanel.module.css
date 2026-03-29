@@ -107,7 +107,7 @@
 .tabActive { background:var(--ink); color:white; border-color:var(--ink); }
 .tabActive:hover { color:white; border-color:var(--ink); }
 
-/* Gráfico */
+/* Grafico */
 .chartCard {
   background:var(--surface); border:1px solid var(--line-light);
   border-radius:14px; padding:1.25rem 1rem 0.75rem;
@@ -193,5 +193,141 @@
 }
 .state p { font-size:0.88rem; margin:0; }
 .spinner { animation:spin 1s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
 
 .empty { font-size:0.84rem; color:var(--ink-muted); padding:1rem 0; margin:0; }
+
+/* ── ONBOARDING CHECKLIST ─────────────────────────────────────────────────── */
+.onboarding {
+  background: var(--surface);
+  border: 1px solid #BFDBFE;
+  border-radius: 14px;
+  padding: 1rem 1.1rem 1.1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 12px rgba(8, 145, 178, 0.06);
+}
+
+.onboardingHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.onboardingTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.onboardingPct {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  background: var(--surface-dim);
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+}
+
+.onboardingDismiss {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--ink-muted);
+  transition: background 0.15s;
+}
+.onboardingDismiss:hover { background: var(--surface-dim); color: var(--ink); }
+
+.onboardingBar {
+  height: 5px;
+  background: var(--surface-dim);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.onboardingBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #0891B2, #059669);
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.onboardingSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.onboardingStep {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  transition: background 0.1s;
+}
+
+.onboardingStepDone {
+  opacity: 0.5;
+}
+
+.onboardingStepNext {
+  background: #EFF6FF;
+  opacity: 1;
+}
+
+.onboardingStepIcon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  background: var(--surface-dim);
+  color: var(--ink-muted);
+}
+
+.onboardingStepDone .onboardingStepIcon {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.onboardingStepNext .onboardingStepIcon {
+  background: #0891B2;
+  color: white;
+}
+
+.onboardingStepBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.onboardingStepLabel {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.onboardingStepDone .onboardingStepLabel {
+  color: var(--ink-muted);
+  text-decoration: line-through;
+}
+
+.onboardingStepDesc {
+  font-size: 0.76rem;
+  color: #0891B2;
+  font-weight: 500;
+}

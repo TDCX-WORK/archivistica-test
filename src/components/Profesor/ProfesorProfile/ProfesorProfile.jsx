@@ -22,7 +22,7 @@ const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov'
 
 export default function ProfesorProfile({ currentUser, onLogout }) {
   const { settings, updateSetting } = useSettings()
-  const { plan, bloques } = usePlanSemanal(currentUser?.academy_id)
+  const { plan, bloques } = usePlanSemanal(currentUser?.academy_id, currentUser?.subject_id)
   const [tab, setTab] = useState('perfil')
 
   const weekDays  = getWeekDays()

@@ -200,3 +200,75 @@
 @media (max-width: 400px) {
   .kpiGrid       { grid-template-columns:1fr; }
 }
+
+/* ── COMPARATIVA CON LA CLASE ────────────────────────────────────────────── */
+.comparativaCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 0;
+  box-shadow: var(--shadow-xs);
+}
+.comparativaHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.comparativaIcon { color: var(--ink-muted); flex-shrink: 0; }
+.comparativaTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink);
+  flex: 1;
+}
+.comparativaSub {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
+.comparativaBody {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 0.5rem 0;
+}
+.comparativaStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+.comparativaStatVal {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.comparativaStatLabel {
+  font-size: 0.73rem;
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+.comparativaSep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+.comparativaMejor { color: #059669; }
+.comparativaPeor  { color: #DC2626; }
+.comparativaIgual { color: #6B7280; }
+.comparativaDiff {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.comparativaMsg {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}

@@ -314,7 +314,8 @@ function ModalUsuario({ academia, onCrear, onClose }){
   const [error,setError]=useState('')
   const [saving,setSaving]=useState(false)
   const emailValido=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
-  const emailPreview=email.trim()||`${username||'usuario'}@${academia.slug}.archivistica.test`
+  const suffix = role === 'alumno' ? 'alumno' : role === 'profesor' ? 'prof' : 'dir'
+const emailPreview = email.trim() || `${username||'usuario'}.<generado>@${academia?.slug}.${suffix}`
   const handleCrear=async()=>{
     if(!username.trim()||password.length<4){setError('Usuario requerido y contraseña mínimo 4 caracteres');return}
     if(role!=='director'&&!subjectId){setError('Selecciona una asignatura');return}
@@ -453,9 +454,17 @@ function AcademiaCard({ ac, onVerDetalle, onEditar, onNuevaAsignatura, onNuevoUs
             <span className={styles.investStatusDot} style={{background:st.color}}/>
             {st.label}
           </span>
-          <span className={styles.investPlan} style={{color:planCfg.color,background:planCfg.bg}}>
+         <span className={styles.investPlan} style={{color:planCfg.color,background:planCfg.bg}}>
             {planCfg.label}
           </span>
+          {ac.healthScore !== null && (
+            <span className={styles.investHealth} style={{
+              color:      ac.healthScore >= 7 ? '#059669' : ac.healthScore >= 4 ? '#D97706' : '#DC2626',
+              background: ac.healthScore >= 7 ? '#ECFDF5' : ac.healthScore >= 4 ? '#FFFBEB' : '#FEF2F2',
+            }}>
+              {ac.healthScore >= 7 ? '●' : ac.healthScore >= 4 ? '◐' : '○'} {ac.healthScore}/10
+            </span>
+          )}
         </div>
 
         {/* Chevron */}

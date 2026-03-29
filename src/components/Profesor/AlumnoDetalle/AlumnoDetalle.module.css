@@ -1,17 +1,23 @@
 .page { padding: 1.5rem 1.25rem 4rem; max-width: 900px; margin: 0 auto; }
 
-.pageHeader { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
-.pageHeaderTop { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.pageHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
 .btnBack {
   display: inline-flex; align-items: center; gap: 0.4rem;
   padding: 0.4rem 0.9rem; background: var(--surface);
   border: 1px solid var(--line-light); border-radius: 8px;
   font-size: 0.82rem; color: var(--ink-muted); cursor: pointer;
   width: fit-content; transition: all 0.15s var(--ease);
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-xs); flex-shrink: 0;
 }
 .btnBack:hover { border-color: var(--primary); color: var(--primary); transform: translateX(-2px); }
-.alumnoTitle { display: flex; align-items: center; gap: 0.85rem; }
+
+.alumnoTitle { display: flex; align-items: center; gap: 0.85rem; flex: 1; min-width: 0; }
 .alumnoAvatar {
   width: 48px; height: 48px; border-radius: 50%;
   background: linear-gradient(135deg, var(--primary) 0%, #3f3f46 100%);
@@ -21,6 +27,10 @@
 }
 .pageTitle   { font-size: 1.3rem; font-weight: 800; color: var(--ink); margin: 0 0 0.15rem; }
 .pageSubtitle { font-size: 0.8rem; color: var(--ink-muted); margin: 0; }
+
+.headerActions {
+  display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;
+}
 
 /* KPIs */
 .kpisRow {
@@ -73,7 +83,7 @@
 .donutStatVal   { font-size: 1.1rem; font-weight: 800; color: var(--ink); }
 .donutStatLabel { font-size: 0.7rem; color: var(--ink-muted); }
 
-/* Gráfico barras */
+/* Grafico barras */
 .barChart {
   display: flex; align-items: flex-end; gap: 0.35rem; height: 120px; padding-top: 1.5rem;
 }
@@ -121,9 +131,9 @@
 }
 .state p { font-size: 0.88rem; margin: 0; }
 .spinner { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-
-/* Botón exportar PDF */
+/* Boton exportar PDF */
 .btnExport {
   display: flex; align-items: center; gap: 0.4rem;
   padding: 0.5rem 1rem;
@@ -131,8 +141,85 @@
   color: white; border: none; border-radius: 10px;
   font-size: 0.82rem; font-weight: 700; cursor: pointer;
   box-shadow: 0 2px 8px rgba(5,150,105,0.3);
-  transition: transform 0.15s var(--spring), box-shadow 0.15s, opacity 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
   white-space: nowrap; flex-shrink: 0;
 }
 .btnExport:hover    { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(5,150,105,0.4); }
 .btnExport:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* Boton mensaje */
+.btnMsg {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  background: var(--surface-dim);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  font-size: 0.82rem; font-weight: 600;
+  color: var(--ink-soft); cursor: pointer;
+  font-family: var(--font-body);
+  transition: all 0.15s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.btnMsg:hover { background: #EFF6FF; border-color: #93C5FD; color: #1D4ED8; }
+
+/* Modal mensaje */
+.msgOverlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500; padding: 1rem;
+}
+.msgModal {
+  background: var(--surface);
+  border-radius: 14px;
+  width: 100%; max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+.msgModalHead {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+}
+.msgModalTitle {
+  font-size: 0.9rem; font-weight: 700; color: var(--ink);
+}
+.msgModalClose {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-dim); border: none; border-radius: 6px;
+  cursor: pointer; color: var(--ink-muted);
+}
+.msgModalClose:hover { background: var(--line); }
+.msgTextarea {
+  width: 100%; padding: 1rem 1.1rem;
+  border: none; outline: none; resize: none;
+  font-size: 0.87rem; font-family: var(--font-body);
+  color: var(--ink); background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  box-sizing: border-box;
+}
+.msgModalFoot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1.1rem; gap: 1rem;
+}
+.msgHint {
+  font-size: 0.75rem; color: var(--ink-muted); flex: 1;
+}
+.msgBtnEnviar {
+  display: flex; align-items: center; gap: 0.35rem;
+  padding: 0.5rem 1rem;
+  background: var(--ink); color: white;
+  border: none; border-radius: 8px;
+  font-size: 0.82rem; font-weight: 600;
+  font-family: var(--font-body); cursor: pointer;
+  transition: opacity 0.15s; white-space: nowrap;
+}
+.msgBtnEnviar:hover { opacity: 0.85; }
+.msgBtnEnviar:disabled { opacity: 0.4; cursor: not-allowed; }
+.msgSent {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 0.5rem;
+  padding: 2.5rem; color: #059669;
+  font-size: 0.88rem; font-weight: 600;
+}

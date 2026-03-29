@@ -19,7 +19,7 @@ function getLunesDeOffset(offset = 0) {
 
 function getDiaDeHoy() {
   const day = new Date().getDay()
-  return day === 0 ? 6 : day - 1 // 0=lun…6=dom
+  return day === 0 ? 6 : day - 1
 }
 
 function formatWeek(lunes) {
@@ -31,7 +31,7 @@ function formatWeek(lunes) {
 
 const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
-// ── Overlay de guardado con SVG animado ─────────────────────────────────
+// ── Overlay de guardado ───────────────────────────────────────────────────────
 function SavedOverlay({ onDone }) {
   useEffect(() => {
     const t = setTimeout(onDone, 2200)
@@ -57,7 +57,7 @@ function SavedOverlay({ onDone }) {
 export default function PlanSemanal({ currentUser }) {
   const [modo,        setModo]        = useState('semanal')
   const [weekOffset,  setWeekOffset]  = useState(0)
-  const [diaActivo,   setDiaActivo]   = useState(getDiaDeHoy) // preselecciona hoy
+  const [diaActivo,   setDiaActivo]   = useState(getDiaDeHoy)
   const [bloques,     setBloques]     = useState([])
   const [selBlocks,   setSelBlocks]   = useState([])
   const [selTopics,   setSelTopics]   = useState([])
@@ -69,42 +69,47 @@ export default function PlanSemanal({ currentUser }) {
   const [expanded,    setExpanded]    = useState(null)
 
   const academyId = currentUser?.academy_id
+  const subjectId = currentUser?.subject_id
   const userId    = currentUser?.id
 
-  // Calcular la fecha objetivo según modo
-  const lunesDate   = getLunesDeOffset(weekOffset)
-  const targetDate  = modo === 'diario'
+  // Calcular fecha objetivo
+  const lunesDate  = getLunesDeOffset(weekOffset)
+  const targetDate = modo === 'diario'
     ? (() => { const d = new Date(lunesDate); d.setDate(d.getDate() + diaActivo); return d })()
     : lunesDate
-  const targetKey   = localDateStr(targetDate)
+  const targetKey  = localDateStr(targetDate)
 
-  // Cargar bloques y temas (una sola vez)
+  // Cargar bloques y temas
   useEffect(() => {
     if (!academyId) return
     const load = async () => {
-      const { data: blks } = await supabase
+      let q = supabase
         .from('content_blocks').select('id, label, color')
         .eq('academy_id', academyId).order('position')
+      if (subjectId) q = q.eq('subject_id', subjectId)
+      const { data: blks } = await q
       const { data: tops } = await supabase
         .from('content_topics').select('id, title, block_id')
         .in('block_id', (blks || []).map(b => b.id)).order('position')
       setBloques((blks || []).map(b => ({
         ...b, topics: (tops || []).filter(t => t.block_id === b.id)
       })))
+      setLoading(false)
     }
     load()
-  }, [academyId])
+  }, [academyId, subjectId])
 
   // Cargar plan del período seleccionado
   useEffect(() => {
     if (!academyId) return
     const load = async () => {
       setLoading(true)
-      const { data } = await supabase
+      let q = supabase
         .from('study_plans').select('*')
         .eq('academy_id', academyId)
         .eq('week_start', targetKey)
-        .maybeSingle()
+      if (subjectId) q = q.eq('subject_id', subjectId)
+      const { data } = await q.maybeSingle()
 
       if (data) {
         setSelBlocks(data.block_ids || [])
@@ -116,7 +121,7 @@ export default function PlanSemanal({ currentUser }) {
       setLoading(false)
     }
     load()
-  }, [academyId, targetKey])
+  }, [academyId, subjectId, targetKey])
 
   const toggleBlock = useCallback((blockId) => {
     setSelBlocks(prev => {
@@ -136,23 +141,66 @@ export default function PlanSemanal({ currentUser }) {
 
   const handleSave = async () => {
     setSaving(true); setError(null)
+
     const { error: err } = await supabase
       .from('study_plans')
       .upsert({
         academy_id: academyId,
+        subject_id: subjectId || null,
         created_by: userId,
         week_start: targetKey,
         block_ids:  selBlocks,
         topic_ids:  selTopics,
         notes:      notes.trim() || null,
-      }, { onConflict: 'academy_id,week_start' })
+      }, { onConflict: 'academy_id,subject_id,week_start' })  // fix Bug #6
+
+    if (err) { setError(`Error: ${err.message}`); setSaving(false); return }
+
+    // ── Notificar a los alumnos de esta asignatura ────────────────────────
+    try {
+      // Obtener alumnos de esta academia y asignatura
+      let alumnosQ = supabase
+        .from('profiles')
+        .select('id')
+        .eq('academy_id', academyId)
+        .eq('role', 'alumno')
+      if (subjectId) alumnosQ = alumnosQ.eq('subject_id', subjectId)
+      const { data: alumnos } = await alumnosQ
+
+      if (alumnos?.length) {
+        // Calcular cuantos temas hay en el plan
+        const totalTemas = new Set([
+          ...selTopics,
+          ...bloques.filter(b => selBlocks.includes(b.id)).flatMap(b => b.topics.map(t => t.id))
+        ]).size
+
+        const modoTexto = modo === 'diario'
+          ? targetDate.toLocaleDateString('es-ES', { weekday: 'long', day: '2-digit', month: 'long' })
+          : 'esta semana'
+
+        const body = totalTemas > 0
+          ? `${totalTemas} tema${totalTemas !== 1 ? 's' : ''} para estudiar${notes.trim() ? ` · "${notes.trim()}"` : ''}`
+          : notes.trim() || null
+
+        // Insertar notificacion para cada alumno
+        await supabase.from('notifications').insert(
+          alumnos.map(a => ({
+            user_id: a.id,
+            type:    'plan_semanal',
+            title:   `Tu profesor ha publicado el plan de ${modoTexto}`,
+            body,
+            link:    '/',
+          }))
+        )
+      }
+    } catch (_) {
+      // Las notificaciones no deben bloquear el guardado del plan
+    }
 
     setSaving(false)
-    if (err) { setError(`Error: ${err.message}`); return }
     setShowSaved(true)
   }
 
-  // Temas únicos seleccionados (sueltos + los de bloques completos)
   const uniqueTemas = new Set([
     ...selTopics,
     ...bloques.filter(b => selBlocks.includes(b.id)).flatMap(b => b.topics.map(t => t.id))

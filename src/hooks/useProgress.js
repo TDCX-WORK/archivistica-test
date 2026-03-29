@@ -17,11 +17,11 @@ function calcStreak(sessions) {
 }
 
 export function useProgress(userId, academyId, subjectId) {
-  const [sessions, setSessions]           = useState([])
-  const [wrongAnswers, setWrongAnswers]   = useState([])
-  const [loadingData, setLoadingData]     = useState(false)
+  const [sessions,     setSessions]     = useState([])
+  const [wrongAnswers, setWrongAnswers] = useState([])
+  const [loadingData,  setLoadingData]  = useState(false)
 
-  // Cargar datos al iniciar sesión
+  // Cargar datos al iniciar sesion
   useEffect(() => {
     if (!userId) { setSessions([]); setWrongAnswers([]); return }
     setLoadingData(true)
@@ -35,7 +35,7 @@ export function useProgress(userId, academyId, subjectId) {
     })
   }, [userId])
 
-  // Guardar sesión al terminar un test
+  // Guardar sesion al terminar un test
   const recordSession = useCallback(async (modeId, correct, total, durationSecs) => {
     if (!userId) return
     const score = total > 0 ? Math.round((correct / total) * 100) : 0
@@ -50,9 +50,83 @@ export function useProgress(userId, academyId, subjectId) {
       duration_secs: durationSecs,
       played_at:     new Date().toISOString().slice(0, 10),
     }
+
     const { data } = await supabase.from('sessions').insert(newSession).select().maybeSingle()
-    if (data) setSessions(prev => [data, ...prev])
-  }, [userId])
+    if (!data) return
+
+    // Actualizar estado
+    setSessions(prev => [data, ...prev])
+
+    // ── Notificaciones post-sesion ────────────────────────────────────────
+    try {
+      // 1. Mejor nota historica
+      const mejorNota = sessions.length > 0 ? Math.max(...sessions.map(s => s.score)) : 0
+
+      if (score > mejorNota && score >= 70 && sessions.length >= 3) {
+        await supabase.from('notifications').insert({
+          user_id: userId,
+          type:    'mejor_nota',
+          title:   `Nueva mejor nota: ${score}/100`,
+          body:    `Has superado tu record anterior de ${mejorNota}/100. Sigue asi!`,
+          link:    '/estadisticas',
+        })
+
+        // Notificar al profesor
+        if (academyId && subjectId) {
+          const { data: prof } = await supabase
+            .from('profiles').select('id')
+            .eq('academy_id', academyId)
+            .eq('subject_id', subjectId)
+            .eq('role', 'profesor')
+            .maybeSingle()
+
+          if (prof) {
+            await supabase.from('notifications').insert({
+              user_id: prof.id,
+              type:    'alumno_supera',
+              title:   'Un alumno ha superado su mejor nota',
+              body:    `Ha obtenido ${score}/100, su nuevo record personal.`,
+              link:    '/profesor',
+            })
+          }
+        }
+      }
+
+      // 2. Racha destacada
+      const diasConHoy = [...new Set([...sessions.map(s => s.played_at), data.played_at])]
+      const racha      = calcStreak(diasConHoy.map(d => ({ played_at: d })))
+      const hitosRacha = [3, 7, 14, 30]
+
+      if (hitosRacha.includes(racha)) {
+        const { data: yaEnviada } = await supabase
+          .from('notifications').select('id')
+          .eq('user_id', userId)
+          .eq('type', 'racha')
+          .like('title', `%${racha} d%`)
+          .gte('created_at', new Date(Date.now() - 2 * 86400000).toISOString())
+          .maybeSingle()
+
+        if (!yaEnviada) {
+          const emojis  = { 3: '🔥', 7: '⚡', 14: '🏆', 30: '👑' }
+          const cuerpos = {
+            3:  'Llevas 3 dias seguidos estudiando. Buen comienzo.',
+            7:  'Una semana completa de estudio. Eres constante.',
+            14: 'Dos semanas seguidas. Esto ya es un habito.',
+            30: 'Un mes entero de racha. Nivel leyenda.',
+          }
+          await supabase.from('notifications').insert({
+            user_id: userId,
+            type:    'racha',
+            title:   `${emojis[racha]} ${racha} dias de racha`,
+            body:    cuerpos[racha],
+            link:    '/estadisticas',
+          })
+        }
+      }
+    } catch (_) {
+      // Las notificaciones no bloquean el guardado de la sesion
+    }
+  }, [userId, academyId, subjectId, sessions])
 
   // Registrar una pregunta fallada (con spaced repetition)
   const recordWrongAnswer = useCallback(async (questionId, block) => {
@@ -62,7 +136,6 @@ export function useProgress(userId, academyId, subjectId) {
     const existing = wrongAnswers.find(w => w.question_id === questionId)
 
     if (existing) {
-      // Ya la falló antes — reiniciar racha y mantener repaso al día siguiente
       const updated = {
         fail_count:     existing.fail_count + 1,
         correct_streak: 0,
@@ -73,7 +146,6 @@ export function useProgress(userId, academyId, subjectId) {
         .from('wrong_answers').update(updated).eq('id', existing.id).select().maybeSingle()
       if (data) setWrongAnswers(prev => prev.map(w => w.id === data.id ? data : w))
     } else {
-      // Primera vez que falla esta pregunta
       const newWrong = {
         user_id:        userId,
         academy_id:     academyId,
@@ -90,7 +162,7 @@ export function useProgress(userId, academyId, subjectId) {
     }
   }, [userId, wrongAnswers])
 
-  // Registrar que acertó una pregunta que tenía en repaso (spaced repetition)
+  // Registrar que acerto una pregunta de repaso (spaced repetition)
   const recordCorrectReview = useCallback(async (questionId) => {
     if (!userId) return
     const existing = wrongAnswers.find(w => w.question_id === questionId)
@@ -99,12 +171,10 @@ export function useProgress(userId, academyId, subjectId) {
     const newStreak = existing.correct_streak + 1
     const today     = new Date().toISOString().slice(0, 10)
 
-    // Intervalos: 1 acierto → 3 días, 2 → 7 días, 3+ → 30 días, 4+ → eliminar
     let daysUntilNext = 3
     if (newStreak === 2)      daysUntilNext = 7
     else if (newStreak === 3) daysUntilNext = 30
     else if (newStreak >= 4) {
-      // Domina la pregunta — la eliminamos del repaso
       await supabase.from('wrong_answers').delete().eq('id', existing.id)
       setWrongAnswers(prev => prev.filter(w => w.id !== existing.id))
       return
@@ -124,7 +194,7 @@ export function useProgress(userId, academyId, subjectId) {
   const today = new Date().toISOString().slice(0, 10)
   const dueForReview = wrongAnswers.filter(w => w.next_review <= today)
 
-  // Estadísticas derivadas
+  // Estadisticas derivadas
   const totalSessions = sessions.length
   const totalAnswered = sessions.reduce((s, x) => s + x.total, 0)
   const totalCorrect  = sessions.reduce((s, x) => s + x.correct, 0)
@@ -133,10 +203,7 @@ export function useProgress(userId, academyId, subjectId) {
   const streakDays    = calcStreak(sessions)
   const studiedDays   = new Set(sessions.map(s => s.played_at))
 
-  // Rendimiento por bloque temático
-  const blockStats = sessions.reduce((acc, session) => acc, {}) // se calcula en Stats
-
-  // Últimas 30 sesiones agrupadas por día para gráficas
+  // Ultimas 30 sesiones agrupadas por dia para graficas
   const last30 = (() => {
     const map = {}
     sessions.forEach(s => {

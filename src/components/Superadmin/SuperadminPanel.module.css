@@ -1002,3 +1002,10 @@
 .acadSection {
   width: 100%;
 }
+
+.investHealth {
+  font-size: 10px; font-weight: 800; letter-spacing: .03em;
+  padding: 3px 8px; border-radius: 20px;
+  font-family: 'Urbanist', sans-serif;
+  white-space: nowrap;
+}

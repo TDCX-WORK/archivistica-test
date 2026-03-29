@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Clock, ChevronLeft, ChevronRight, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react'
+import { Clock, ChevronLeft, ChevronRight, CheckCircle, AlertTriangle, Loader2, Zap } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import config       from '../../data/config.json'
 import QuestionCard from '../Question/QuestionCard'
@@ -14,7 +14,19 @@ function isUUID(id) { return id && id.includes('-') && !config.modes[id] }
 async function fetchQuestions(modeId, academyId, wrongAnswers = [], subjectId = null, topicId = null) {
   if (!academyId) return { questions: [], fromTopic: false }
 
-  // Modos de repaso
+  // ── Repaso expres: 5 preguntas pendientes hoy ──────────────────────────
+  if (modeId === 'quick_review') {
+    const today = new Date().toISOString().slice(0, 10)
+    const due   = wrongAnswers.filter(w => w.next_review <= today)
+    if (!due.length) return { questions: [], fromTopic: false }
+    const ids = shuffle(due).slice(0, 5).map(w => w.question_id)
+    let q = supabase.from('questions').select('*').eq('academy_id', academyId).in('id', ids)
+    if (subjectId) q = q.eq('subject_id', subjectId)
+    const { data } = await q
+    return { questions: shuffle(data || []), fromTopic: false }
+  }
+
+  // ── Repasar hoy: todas las pendientes ─────────────────────────────────
   if (modeId === 'review_due') {
     const today = new Date().toISOString().slice(0, 10)
     const due   = wrongAnswers.filter(w => w.next_review <= today)
@@ -35,9 +47,8 @@ async function fetchQuestions(modeId, academyId, wrongAnswers = [], subjectId = 
     return { questions: shuffle(data || []), fromTopic: false }
   }
 
-  // Modo bloque temático (UUID)
+  // Modo bloque tematico (UUID)
   if (isUUID(modeId)) {
-    // Si hay topicId, intentar cargar preguntas específicas del tema
     if (topicId) {
       let tq = supabase.from('questions').select('*').eq('academy_id', academyId).eq('topic_id', topicId)
       if (subjectId) tq = tq.eq('subject_id', subjectId)
@@ -47,7 +58,6 @@ async function fetchQuestions(modeId, academyId, wrongAnswers = [], subjectId = 
         return { questions: shuffle(topicData).slice(0, 20), fromTopic: true }
       }
 
-      // Pocas preguntas del tema: poner primero las del tema, completar con las del bloque
       const topicQuestionIds = new Set((topicData || []).map(q => q.id))
       let bq = supabase.from('questions').select('*').eq('academy_id', academyId).eq('block_id', modeId)
       if (subjectId) bq = bq.eq('subject_id', subjectId)
@@ -58,7 +68,6 @@ async function fetchQuestions(modeId, academyId, wrongAnswers = [], subjectId = 
       return { questions: combined.slice(0, 20), fromTopic: (topicData || []).length > 0 }
     }
 
-    // Sin topicId: todas las preguntas del bloque
     let q = supabase.from('questions').select('*').eq('academy_id', academyId).eq('block_id', modeId)
     if (subjectId) q = q.eq('subject_id', subjectId)
     const { data } = await q
@@ -77,28 +86,36 @@ async function fetchQuestions(modeId, academyId, wrongAnswers = [], subjectId = 
 
 export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, academyId, subjectId, onGoHome, onRecordSession, onRecordWrong, onRecordCorrectReview, wrongAnswers = [], penalizacion = false }) {
 
-  const isFailMode  = modeId === 'review_due' || modeId === 'all_fails'
-  const isBlockMode = isUUID(modeId)
-  const isTopicMode = isBlockMode && !!topicId
+  const isQuickReview = modeId === 'quick_review'
+  const isFailMode    = modeId === 'review_due' || modeId === 'all_fails' || isQuickReview
+  const isBlockMode   = isUUID(modeId)
+  const isTopicMode   = isBlockMode && !!topicId
 
-  const resolvedLabel = isFailMode
-    ? (modeId === 'review_due' ? 'Repasar hoy' : 'Todos mis fallos')
-    : isTopicMode
-      ? (topicLabel || modeLabel || 'Practicar tema')
-      : isBlockMode
-        ? (modeLabel || 'Practicar bloque')
-        : (config.modes[modeId]?.label || 'Test')
+  const resolvedLabel = isQuickReview
+    ? 'Repaso Exprés'
+    : isFailMode
+      ? (modeId === 'review_due' ? 'Repasar hoy' : 'Todos mis fallos')
+      : isTopicMode
+        ? (topicLabel || modeLabel || 'Practicar tema')
+        : isBlockMode
+          ? (modeLabel || 'Practicar bloque')
+          : (config.modes[modeId]?.label || 'Test')
 
-  const totalSecs = isFailMode
-    ? null
-    : isBlockMode
-      ? 25 * 60
-      : (config.modes[modeId]?.timeMinutes || 25) * 60
-
+  const totalSecs   = isFailMode ? null : isBlockMode ? 25 * 60 : (config.modes[modeId]?.timeMinutes || 25) * 60
   const timeMinutes = isBlockMode ? 25 : config.modes[modeId]?.timeMinutes
 
-  // Bloques para tags — cargados 100% desde Supabase
-  const [blockMap, setBlockMap] = useState({})
+  const [blockMap,   setBlockMap]   = useState({})
+  const [phase,      setPhase]      = useState(isQuickReview ? 'running' : 'intro')
+  const [questions,  setQuestions]  = useState([])
+  const [fromTopic,  setFromTopic]  = useState(false)
+  const [loading,    setLoading]    = useState(true)
+  const [index,      setIndex]      = useState(0)
+  const [answers,    setAnswers]    = useState({})
+  const [secsLeft,   setSecsLeft]   = useState(totalSecs)
+  const startTimeRef                = useRef(Date.now())
+  const answersRef                  = useRef(answers)
+
+  useEffect(() => { answersRef.current = answers }, [answers])
 
   useEffect(() => {
     if (!academyId) return
@@ -113,18 +130,6 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
     load()
   }, [academyId, subjectId])
 
-  const [phase,     setPhase]     = useState('intro')
-  const [questions, setQuestions] = useState([])
-  const [fromTopic, setFromTopic] = useState(false)
-  const [loading,   setLoading]   = useState(true)
-  const [index,     setIndex]     = useState(0)
-  const [answers,   setAnswers]   = useState({})
-  const [secsLeft,  setSecsLeft]  = useState(totalSecs)
-  const startTimeRef              = useRef(Date.now())
-  const answersRef                = useRef(answers)
-
-  useEffect(() => { answersRef.current = answers }, [answers])
-
   useEffect(() => {
     if (!academyId) return
     setLoading(true)
@@ -132,6 +137,11 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
       setQuestions(result.questions)
       setFromTopic(result.fromTopic)
       setLoading(false)
+      // Repaso expres: arrancar directamente sin intro
+      if (isQuickReview) {
+        startTimeRef.current = Date.now()
+        setPhase('running')
+      }
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modeId, academyId, subjectId, topicId])
@@ -148,7 +158,6 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
   const current  = questions[index]
   const answered = index in answers
 
-  // Tag de bloque: solo desde el blockMap de Supabase
   const currentBlockTag = current?.block_id && blockMap[current.block_id]
     ? blockMap[current.block_id].label
     : null
@@ -160,7 +169,18 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
     const isInWrong = wrongAnswers.some(w => w.question_id === q.id)
     if (!isCorrect) onRecordWrong?.(q.id, q.block_id)
     else if (isCorrect && isInWrong) onRecordCorrectReview?.(q.id)
-  }, [index, questions, wrongAnswers, onRecordWrong, onRecordCorrectReview])
+
+    // Repaso expres: avanzar automaticamente tras responder
+    if (isQuickReview) {
+      setTimeout(() => {
+        if (index < questions.length - 1) {
+          setIndex(i => i + 1)
+        } else {
+          handleFinish()
+        }
+      }, 600)
+    }
+  }, [index, questions, wrongAnswers, onRecordWrong, onRecordCorrectReview, isQuickReview])
 
   const handleFinish = useCallback(() => {
     const snap    = answersRef.current
@@ -174,7 +194,7 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
   }, [questions, modeId, onRecordSession, penalizacion])
 
   const handleRepeat = useCallback(() => {
-    setPhase('intro')
+    setPhase(isQuickReview ? 'running' : 'intro')
     setIndex(0)
     setAnswers({})
     setSecsLeft(totalSecs)
@@ -185,7 +205,7 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
       setFromTopic(result.fromTopic)
       setLoading(false)
     })
-  }, [totalSecs, modeId, academyId, subjectId, topicId, wrongAnswers])
+  }, [totalSecs, modeId, academyId, subjectId, topicId, wrongAnswers, isQuickReview])
 
   if (loading) return (
     <div className={styles.intro}>
@@ -226,8 +246,8 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
         <p className={styles.introDesc}>
           {modeId === 'review_due' && 'Preguntas que necesitas repasar según tu ritmo de aprendizaje.'}
           {modeId === 'all_fails'  && 'Practica con todas las preguntas que has fallado anteriormente.'}
-          {isTopicMode && fromTopic && `Preguntas específicas del tema`}
-          {isTopicMode && !fromTopic && `Preguntas del bloque que incluye este tema`}
+          {isTopicMode && fromTopic && 'Preguntas específicas del tema'}
+          {isTopicMode && !fromTopic && 'Preguntas del bloque que incluye este tema'}
           {isBlockMode && !isTopicMode && `Preguntas del bloque "${modeLabel || 'seleccionado'}"`}
           {!isFailMode && !isBlockMode && (config.modes[modeId]?.description || `${qCount} preguntas`)}
         </p>
@@ -250,7 +270,12 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
 
   if (phase === 'finished') return (
     <Results questions={questions} answers={answers} onGoHome={onGoHome}
-      onRepeat={handleRepeat} durationSecs={Math.round((Date.now() - startTimeRef.current) / 1000)} />
+      onRepeat={handleRepeat}
+      durationSecs={Math.round((Date.now() - startTimeRef.current) / 1000)}
+      academyId={academyId}
+      subjectId={subjectId}
+      onRecordWrong={onRecordWrong}
+      wrongAnswers={wrongAnswers} />
   )
 
   const mm     = totalSecs ? String(Math.floor(secsLeft / 60)).padStart(2, '0') : null
@@ -259,6 +284,7 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
 
   return (
     <div className={styles.wrapper}>
+      {/* Barra de progreso */}
       <div className={styles.topBar}>
         <div className={styles.progress}>
           <span className={styles.progressNum}>{index + 1}</span>
@@ -266,7 +292,12 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
           <span className={styles.progressTotal}>{qCount}</span>
         </div>
         <ProgressBar current={index + 1} total={qCount} secsLeft={secsLeft} totalSecs={totalSecs} />
-        {totalSecs ? (
+        {isQuickReview ? (
+          <div className={styles.timer} style={{ color: '#D97706' }}>
+            <Zap size={14} strokeWidth={1.8} />
+            <span className={styles.timerText} style={{ color: '#D97706' }}>Exprés</span>
+          </div>
+        ) : totalSecs ? (
           <div className={[styles.timer, urgent ? styles.timerUrgent : ''].join(' ')}>
             <Clock size={14} strokeWidth={1.8} />
             <span className={styles.timerText}>{mm}:{ss}</span>
@@ -283,31 +314,44 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
         <div className={styles.questionNum}>
           Pregunta {index + 1} de {qCount}
           {currentBlockTag && <span className={styles.blockTag}>{currentBlockTag}</span>}
+          {isQuickReview && <span className={styles.blockTag} style={{ background: '#FFFBEB', color: '#D97706' }}>⚡ Exprés</span>}
         </div>
         <QuestionCard question={current} onAnswer={handleAnswer} answered={answered} selectedIndex={answers[index]} />
       </div>
 
-      <div className={styles.nav}>
-        <button className={styles.navBtn} onClick={() => setIndex(i => i - 1)} disabled={index === 0}>
-          <ChevronLeft size={17} /> Anterior
-        </button>
-        <div className={styles.dotTrack}>
-          {questions.map((_, i) => (
-            <button key={i}
-              className={[styles.dot, i === index ? styles.dotActive : '', i in answers ? styles.dotAnswered : ''].join(' ')}
-              onClick={() => setIndex(i)} title={`Pregunta ${i + 1}`} />
-          ))}
-        </div>
-        {index < qCount - 1 ? (
-          <button className={styles.navBtn} onClick={() => setIndex(i => i + 1)}>
-            Siguiente <ChevronRight size={17} />
+      {/* Nav — en modo exprés no se muestra (avance automatico) */}
+      {!isQuickReview && (
+        <div className={styles.nav}>
+          <button className={styles.navBtn} onClick={() => setIndex(i => i - 1)} disabled={index === 0}>
+            <ChevronLeft size={17} /> Anterior
           </button>
-        ) : (
+          <div className={styles.dotTrack}>
+            {questions.map((_, i) => (
+              <button key={i}
+                className={[styles.dot, i === index ? styles.dotActive : '', i in answers ? styles.dotAnswered : ''].join(' ')}
+                onClick={() => setIndex(i)} title={`Pregunta ${i + 1}`} />
+            ))}
+          </div>
+          {index < qCount - 1 ? (
+            <button className={styles.navBtn} onClick={() => setIndex(i => i + 1)}>
+              Siguiente <ChevronRight size={17} />
+            </button>
+          ) : (
+            <button className={[styles.navBtn, styles.navBtnFinish].join(' ')} onClick={handleFinish}>
+              Finalizar <CheckCircle size={16} />
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* En modo expres: boton finalizar si quiere salir antes */}
+      {isQuickReview && (
+        <div className={styles.nav} style={{ justifyContent: 'center' }}>
           <button className={[styles.navBtn, styles.navBtnFinish].join(' ')} onClick={handleFinish}>
             Finalizar <CheckCircle size={16} />
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

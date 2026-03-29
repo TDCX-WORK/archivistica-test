@@ -12,6 +12,7 @@ export default function FallosClase({ currentUser }) {
   const [expanded, setExpanded] = useState(null)
 
   const academyId = currentUser?.academy_id
+  const subjectId = currentUser?.subject_id ?? null
 
   useEffect(() => {
     if (!academyId) return
@@ -19,32 +20,31 @@ export default function FallosClase({ currentUser }) {
       setLoading(true)
       setError(null)
 
-      // 1. Fallos agregados por pregunta
+      // 1. Fallos agregados por pregunta — filtrados por asignatura del profesor
       const { data: fallosData, error: fErr } = await supabase
-        .rpc('get_class_wrong_answers', { p_academy_id: academyId })
+        .rpc('get_class_wrong_answers', {
+          p_academy_id: academyId,
+          p_subject_id: subjectId,
+        })
 
       if (fErr) { setError(`Error: ${fErr.message}`); setLoading(false); return }
       if (!fallosData?.length) { setFallos([]); setLoading(false); return }
 
-      // 2. Buscar preguntas por original_id (integer = wrong_answers.question_id)
-      const qIds = fallosData.map(f => Number(f.question_id))
+      // 2. Buscar preguntas por id (UUID)
+      const qIds = fallosData.map(f => f.question_id).filter(Boolean)
 
       const { data: pregData, error: pErr } = await supabase
         .from('questions')
-        .select('id, original_id, question, options, answer, explanation, block_id')
+        .select('id, question, options, answer, explanation, block_id')
         .eq('academy_id', academyId)
-        .in('original_id', qIds)
+        .in('id', qIds)
 
       if (pErr) { setError(`Error preguntas: ${pErr.message}`); setLoading(false); return }
 
-      // Mapa por original_id
+      // Mapa por id (UUID)
       const pregsMap = {}
       for (const q of pregData || []) {
-        if (q.original_id !== null && q.original_id !== undefined) {
-          pregsMap[q.original_id]         = q
-          pregsMap[String(q.original_id)] = q
-          pregsMap[Number(q.original_id)] = q
-        }
+        pregsMap[q.id] = q
       }
 
       // 3. Bloques
@@ -64,7 +64,7 @@ export default function FallosClase({ currentUser }) {
       setLoading(false)
     }
     load()
-  }, [academyId])
+  }, [academyId, subjectId])
 
   if (loading) return (
     <div className={styles.state}><RefreshCw size={22} className={styles.spinner} /><p>Analizando fallos de la clase…</p></div>
@@ -76,7 +76,7 @@ export default function FallosClase({ currentUser }) {
     <div className={styles.state}><TrendingDown size={36} strokeWidth={1.2} /><p>Ningún alumno ha fallado preguntas todavía.</p></div>
   )
 
-  const getQ   = (id) => pregs[id] || pregs[Number(id)] || pregs[String(id)]
+  const getQ   = (id) => pregs[id]
   const maxPct = Math.max(...fallos.map(f => parseFloat(f.pct_fallo) || 0), 1)
 
   // Agrupar por bloque

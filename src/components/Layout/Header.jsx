@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react'
-import { Search, Bell, X, LogOut, User, Settings } from 'lucide-react'
+import { useState } from 'react'
+import { Search, X, LogOut, User, Settings } from 'lucide-react'
+import NotificationBell from '../Notifications/NotificationBell'
 import styles from './Header.module.css'
 
 function UserMenu({ currentUser, onLogout, onClose, onGoProfile, onGoSettings }) {
@@ -13,8 +14,10 @@ function UserMenu({ currentUser, onLogout, onClose, onGoProfile, onGoSettings })
           <div>
             <p className={styles.userMenuName}>{currentUser?.displayName}</p>
             <p className={styles.userMenuSub}>
-            {currentUser?.role === 'profesor' ? 'Profesor/a' : currentUser?.role === 'director' ? 'Director/a' : 'Opositor/a'}
-          </p>
+              {currentUser?.role === 'profesor'   ? 'Profesor/a'  :
+               currentUser?.role === 'director'   ? 'Director/a'  :
+               currentUser?.role === 'superadmin' ? 'Superadmin'  : 'Opositor/a'}
+            </p>
           </div>
         </div>
         <div className={styles.userMenuDivider} />
@@ -33,7 +36,11 @@ function UserMenu({ currentUser, onLogout, onClose, onGoProfile, onGoSettings })
   )
 }
 
-export default function Header({ currentUser, inTest, modeName, onGoHome, pageTitle, onLogout, onGoProfile, onGoSettings }) {
+export default function Header({
+  currentUser, inTest, modeName, onGoHome,
+  pageTitle, onLogout, onGoProfile, onGoSettings,
+  onNavigate,
+}) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -56,11 +63,13 @@ export default function Header({ currentUser, inTest, modeName, onGoHome, pageTi
           )}
         </div>
 
-        {/* Center — solo en home */}
+        {/* Center */}
         {!inTest && (
           <div className={styles.center}>
-            <span className={styles.centerTitle}>{currentUser?.academyName || "Plataforma de Oposiciones"}</span>
-            <span className={styles.centerSub}>{currentUser?.subjectName || ""}</span>
+            <span className={styles.centerTitle}>
+              {currentUser?.academyName || 'Plataforma de Oposiciones'}
+            </span>
+            <span className={styles.centerSub}>{currentUser?.subjectName || ''}</span>
           </div>
         )}
 
@@ -76,9 +85,13 @@ export default function Header({ currentUser, inTest, modeName, onGoHome, pageTi
                 <Search size={13} className={styles.searchIcon} />
                 <input className={styles.searchInput} placeholder="Buscar tema…" readOnly />
               </div>
-              <button className={styles.iconBtn} title="Notificaciones">
-                <Bell size={16} strokeWidth={1.8} />
-              </button>
+
+              {/* Campanita de notificaciones — funcional para todos los roles */}
+              <NotificationBell
+                currentUser={currentUser}
+                onNavigate={onNavigate}
+              />
+
               <button
                 className={styles.avatarPill}
                 onClick={() => setMenuOpen(v => !v)}

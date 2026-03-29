@@ -24,7 +24,6 @@ export function useProfesor(currentUser) {
         .eq('role', 'alumno')
         .order('username')
 
-      // Filtrar por asignatura del profesor — solo ve sus alumnos
       if (subjectId) alumnosQuery = alumnosQuery.eq('subject_id', subjectId)
 
       const { data: profiles, error: profErr } = await alumnosQuery
@@ -68,10 +67,10 @@ export function useProfesor(currentUser) {
           }
         }
 
-        const ultimaSesion   = sesionesAlumno[0]?.created_at ?? null
-        const diasInactivo   = ultimaSesion ? Math.floor((now - new Date(ultimaSesion)) / 86400000) : null
-        const accessUntil    = alumno.access_until ? new Date(alumno.access_until) : null
-        const accesoExpirado = accessUntil ? accessUntil < now : false
+        const ultimaSesion    = sesionesAlumno[0]?.created_at ?? null
+        const diasInactivo    = ultimaSesion ? Math.floor((now - new Date(ultimaSesion)) / 86400000) : null
+        const accessUntil     = alumno.access_until ? new Date(alumno.access_until) : null
+        const accesoExpirado  = accessUntil ? accessUntil < now : false
         const diasParaExpirar = accessUntil ? Math.ceil((accessUntil - now) / 86400000) : null
         const proximoAExpirar = diasParaExpirar !== null && diasParaExpirar > 0 && diasParaExpirar <= 14
 
@@ -87,9 +86,64 @@ export function useProfesor(currentUser) {
 
       setAlumnos(alumnosConStats)
       setLoading(false)
+
+      // ── Notificacion: alumnos en riesgo (inactivos) ───────────────────────
+      try {
+        const enRiesgo = alumnosConStats.filter(a => a.enRiesgo)
+        if (enRiesgo.length > 0 && currentUser?.id) {
+          const hoy = new Date().toISOString().slice(0, 10)
+          const { data: yaNotificado } = await supabase
+            .from('notifications').select('id')
+            .eq('user_id', currentUser.id)
+            .eq('type', 'alumno_inactivo')
+            .gte('created_at', hoy + 'T00:00:00Z')
+            .maybeSingle()
+
+          if (!yaNotificado) {
+            const nombres = enRiesgo.slice(0, 3).map(a => a.username).join(', ')
+            const resto   = enRiesgo.length > 3 ? ` y ${enRiesgo.length - 3} mas` : ''
+            await supabase.from('notifications').insert({
+              user_id: currentUser.id,
+              type:    'alumno_inactivo',
+              title:   `${enRiesgo.length} alumno${enRiesgo.length !== 1 ? 's' : ''} sin actividad`,
+              body:    `${nombres}${resto} llevan mas de 3 dias sin estudiar.`,
+              link:    '/profesor',
+            })
+          }
+        }
+      } catch (_) {}
+
+      // ── Notificacion: alumnos con acceso proximo a expirar ────────────────
+      try {
+        const porExpirar = alumnosConStats.filter(a => a.proximoAExpirar)
+        if (porExpirar.length > 0 && currentUser?.id) {
+          const hace3dias = new Date(Date.now() - 3 * 86400000).toISOString()
+          const { data: yaNotificado } = await supabase
+            .from('notifications').select('id')
+            .eq('user_id', currentUser.id)
+            .eq('type', 'alumno_expira')
+            .gte('created_at', hace3dias)
+            .maybeSingle()
+
+          if (!yaNotificado) {
+            const nombres = porExpirar.slice(0, 3).map(a =>
+              `${a.username} (${a.diasParaExpirar}d)`
+            ).join(', ')
+            const resto = porExpirar.length > 3 ? ` y ${porExpirar.length - 3} mas` : ''
+            await supabase.from('notifications').insert({
+              user_id: currentUser.id,
+              type:    'alumno_expira',
+              title:   `${porExpirar.length} alumno${porExpirar.length !== 1 ? 's' : ''} con acceso por expirar`,
+              body:    `${nombres}${resto}. Renueva su acceso antes de que expire.`,
+              link:    '/profesor',
+            })
+          }
+        }
+      } catch (_) {}
+
     }
     load()
-  }, [isProfesor, academyId, currentUser?.subject_id])
+  }, [isProfesor, academyId, currentUser?.subject_id, currentUser?.id])
 
   const loadCodes = useCallback(async () => {
     if (!isProfesor) return
@@ -97,7 +151,43 @@ export function useProfesor(currentUser) {
       .from('invite_codes').select('*').eq('academy_id', academyId)
       .order('created_at', { ascending: false }).limit(20)
     setInviteCodes(data || [])
-  }, [isProfesor, academyId])
+
+    // ── Notificacion: codigos sin usar que caducan en menos de 48h ─────────
+    try {
+      const ahora     = new Date()
+      const en48h     = new Date(ahora.getTime() + 48 * 3600000)
+      const porCaducar = (data || []).filter(c =>
+        !c.used_by &&
+        c.created_by === currentUser?.id &&
+        new Date(c.expires_at) > ahora &&
+        new Date(c.expires_at) <= en48h
+      )
+
+      if (porCaducar.length > 0 && currentUser?.id) {
+        const hoy = ahora.toISOString().slice(0, 10)
+        for (const codigo of porCaducar) {
+          const { data: yaEnviada } = await supabase
+            .from('notifications').select('id')
+            .eq('user_id', currentUser.id)
+            .eq('type', 'codigo_caduca')
+            .like('body', `%${codigo.code}%`)
+            .gte('created_at', hoy + 'T00:00:00Z')
+            .maybeSingle()
+
+          if (!yaEnviada) {
+            const horas = Math.ceil((new Date(codigo.expires_at) - ahora) / 3600000)
+            await supabase.from('notifications').insert({
+              user_id: currentUser.id,
+              type:    'codigo_caduca',
+              title:   `El codigo ${codigo.code} caduca en ${horas}h`,
+              body:    `El codigo ${codigo.code} no ha sido usado y caduca pronto. Genera uno nuevo si lo necesitas.`,
+              link:    '/profesor',
+            })
+          }
+        }
+      }
+    } catch (_) {}
+  }, [isProfesor, academyId, currentUser?.id])
 
   useEffect(() => { loadCodes() }, [loadCodes])
 
@@ -138,7 +228,6 @@ export function useProfesor(currentUser) {
     return true
   }, [isProfesor, alumnos])
 
-  // ── Revocar acceso inmediatamente ──────────────────────────────────────
   const revocarAcceso = useCallback(async (alumnoId) => {
     if (!isProfesor) return false
     const ayer = new Date(Date.now() - 86400000).toISOString()

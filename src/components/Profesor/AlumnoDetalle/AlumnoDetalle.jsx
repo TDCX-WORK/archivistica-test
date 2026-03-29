@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { ArrowLeft, BookOpen, Zap, AlertTriangle, TrendingUp,
-         Calendar, BarChart2, RefreshCw, Shield, Download, FileText } from 'lucide-react'
+         Calendar, BarChart2, RefreshCw, Shield, Download, FileText,
+         MessageSquare, Send, Check, X } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
 import styles from './AlumnoDetalle.module.css'
 
@@ -45,7 +46,7 @@ function KpiCard({ icon: Icon, label, value, color }) {
   )
 }
 
-// ── Generador de PDF inline (sin dependencias externas) ─────────────────────
+// ── Generador de PDF inline ──────────────────────────────────────────────────
 function generateInformePDF(alumno, sesiones, temasLeidos, fallos) {
   const now        = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })
   const notaColor  = scoreColor(alumno.notaMedia)
@@ -54,7 +55,6 @@ function generateInformePDF(alumno, sesiones, temasLeidos, fallos) {
     alumno.notaMedia >= 60 ? 'Notable' :
     alumno.notaMedia >= 40 ? 'Mejorable' : 'Necesita refuerzo'
 
-  // Últimas 8 sesiones para mini-gráfico
   const ultimas = [...sesiones].reverse().slice(-8)
 
   const sesTrs = sesiones.slice(0, 12).map(s => `
@@ -72,7 +72,6 @@ function generateInformePDF(alumno, sesiones, temasLeidos, fallos) {
       <td style="color:var(--muted)">${formatFecha(f.next_review)}</td>
     </tr>`).join('')
 
-  // Mini barras SVG de evolución
   const maxS    = Math.max(...ultimas.map(e => e.score), 1)
   const barW    = 28
   const barGap  = 8
@@ -96,52 +95,34 @@ function generateInformePDF(alumno, sesiones, temasLeidos, fallos) {
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: -apple-system, 'Segoe UI', sans-serif; color:var(--ink); background:#fff; padding:0; }
   .page { max-width:780px; margin:0 auto; padding:40px 48px; }
-
-  /* Header */
   .header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:20px; border-bottom:2px solid var(--ink); margin-bottom:28px; }
   .header-left h1 { font-size:22px; font-weight:800; margin-bottom:4px; }
   .header-left p  { font-size:13px; color:var(--muted); }
   .header-right   { text-align:right; }
   .header-right .academia { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
   .header-right .fecha    { font-size:12px; color:var(--muted); margin-top:4px; }
-  .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
-
-  /* KPIs */
   .kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:28px; }
   .kpi  { background:var(--bg); border-radius:10px; padding:14px 10px; text-align:center; border:1px solid var(--line); }
   .kpi-val   { font-size:20px; font-weight:800; line-height:1; margin-bottom:4px; }
   .kpi-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
-
-  /* Secciones */
   .section { margin-bottom:24px; }
   .section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--line); }
-
-  /* Tablas */
   table { width:100%; border-collapse:collapse; font-size:12.5px; }
   th    { text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding:6px 8px; border-bottom:1px solid var(--line); }
   td    { padding:8px 8px; border-bottom:1px solid var(--line); color:var(--ink); }
   tr:last-child td { border-bottom:none; }
   tr:nth-child(even) td { background:#F9FAFB; }
-
-  /* Nota global */
   .nota-box { display:flex; align-items:center; gap:24px; background:var(--bg); border-radius:12px; padding:20px 24px; border:1px solid var(--line); margin-bottom:28px; }
   .nota-num  { font-size:48px; font-weight:800; line-height:1; }
   .nota-info h3 { font-size:16px; font-weight:700; margin-bottom:4px; }
   .nota-info p  { font-size:12px; color:var(--muted); }
-
-  /* Gráfico */
   .chart-wrap { background:var(--bg); border-radius:10px; padding:16px 20px; border:1px solid var(--line); }
-  .chart-label { font-size:10px; color:var(--muted); margin-bottom:10px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
-
-  /* Footer */
   .footer { margin-top:36px; padding-top:16px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
   .footer p { font-size:10px; color:var(--muted); }
 </style>
 </head>
 <body>
 <div class="page">
-
-  <!-- HEADER -->
   <div class="header">
     <div class="header-left">
       <h1>Informe de progreso</h1>
@@ -149,102 +130,75 @@ function generateInformePDF(alumno, sesiones, temasLeidos, fallos) {
       <p>Acceso hasta: ${formatFecha(alumno.accessUntil)}</p>
     </div>
     <div class="header-right">
-      <div class="academia">Archivística Test</div>
+      <div class="academia">FrostFox Academy</div>
       <div class="fecha">Generado el ${now}</div>
     </div>
   </div>
-
-  <!-- NOTA GLOBAL -->
   <div class="nota-box">
     <div class="nota-num" style="color:${notaColor}">${alumno.notaMedia ?? '—'}${alumno.notaMedia !== null ? '%' : ''}</div>
     <div class="nota-info">
       <h3>${notaLabel}</h3>
-      <p>Basado en ${sesiones.length} sesión${sesiones.length !== 1 ? 'es' : ''} completada${sesiones.length !== 1 ? 's' : ''}</p>
-      <p style="margin-top:4px">Racha actual: <strong>${alumno.racha} día${alumno.racha !== 1 ? 's' : ''}</strong></p>
+      <p>Basado en ${sesiones.length} sesion${sesiones.length !== 1 ? 'es' : ''} completada${sesiones.length !== 1 ? 's' : ''}</p>
+      <p style="margin-top:4px">Racha actual: <strong>${alumno.racha} dia${alumno.racha !== 1 ? 's' : ''}</strong></p>
     </div>
   </div>
-
-  <!-- KPIs -->
   <div class="kpis">
-    <div class="kpi">
-      <div class="kpi-val" style="color:#7C3AED">${alumno.notaMedia ?? '—'}${alumno.notaMedia !== null ? '%' : ''}</div>
-      <div class="kpi-label">Nota media</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-val" style="color:#059669">${sesiones.length}</div>
-      <div class="kpi-label">Sesiones</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-val" style="color:#0891B2">${temasLeidos.length}</div>
-      <div class="kpi-label">Temas leídos</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-val" style="color:#DC2626">${fallos.length}</div>
-      <div class="kpi-label">Preguntas falladas</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-val" style="color:#D97706">${alumno.racha}d</div>
-      <div class="kpi-label">Racha</div>
-    </div>
+    <div class="kpi"><div class="kpi-val" style="color:#7C3AED">${alumno.notaMedia ?? '—'}${alumno.notaMedia !== null ? '%' : ''}</div><div class="kpi-label">Nota media</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:#059669">${sesiones.length}</div><div class="kpi-label">Sesiones</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:#0891B2">${temasLeidos.length}</div><div class="kpi-label">Temas leidos</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:#DC2626">${fallos.length}</div><div class="kpi-label">Preguntas falladas</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:#D97706">${alumno.racha}d</div><div class="kpi-label">Racha</div></div>
   </div>
-
-  <!-- EVOLUCIÓN -->
   ${ultimas.length > 0 ? `
   <div class="section">
-    <div class="section-title">Evolución de nota (últimas sesiones)</div>
+    <div class="section-title">Evolucion de nota (ultimas sesiones)</div>
     <div class="chart-wrap">
       <svg viewBox="0 0 ${Math.max(chartW, 100)} ${chartH + 20}" width="100%" height="${chartH + 20}">
         ${barsSVG}
       </svg>
     </div>
   </div>` : ''}
-
-  <!-- SESIONES -->
   ${sesiones.length > 0 ? `
   <div class="section">
-    <div class="section-title">Últimas sesiones</div>
+    <div class="section-title">Ultimas sesiones</div>
     <table>
       <thead><tr><th>Fecha</th><th>Nota</th><th>Preguntas</th></tr></thead>
       <tbody>${sesTrs}</tbody>
     </table>
   </div>` : ''}
-
-  <!-- FALLOS -->
   ${fallos.length > 0 ? `
   <div class="section">
-    <div class="section-title">Preguntas con más fallos</div>
+    <div class="section-title">Preguntas con mas fallos</div>
     <table>
-      <thead><tr><th>#</th><th>Pregunta</th><th>Fallos</th><th>Próximo repaso</th></tr></thead>
+      <thead><tr><th>#</th><th>Pregunta</th><th>Fallos</th><th>Proximo repaso</th></tr></thead>
       <tbody>${falloTrs}</tbody>
     </table>
   </div>` : ''}
-
-  <!-- FOOTER -->
   <div class="footer">
-    <p>Archivística Test · IHateMarqueting</p>
-    <p>${alumno.username} · Informe generado automáticamente</p>
+    <p>FrostFox Academy</p>
+    <p>${alumno.username} · Informe generado automaticamente</p>
   </div>
-
 </div>
 </body>
 </html>`
 
-  // Abrir en nueva ventana y lanzar print (genera PDF desde el navegador)
   const win = window.open('', '_blank', 'width=900,height=700')
   win.document.write(html)
   win.document.close()
-  win.onload = () => {
-    setTimeout(() => win.print(), 300)
-  }
+  win.onload = () => { setTimeout(() => win.print(), 300) }
 }
 
-// ── Componente principal ────────────────────────────────────────────────────
-export default function AlumnoDetalle({ alumno, onBack, academyId }) {
-  const [sesiones,    setSesiones]  = useState([])
-  const [temasLeidos, setTemas]     = useState([])
-  const [fallos,      setFallos]    = useState([])
-  const [loading,     setLoading]   = useState(true)
-  const [exporting,   setExporting] = useState(false)
+// ── Componente principal ─────────────────────────────────────────────────────
+export default function AlumnoDetalle({ alumno, onBack, academyId, currentUser }) {
+  const [sesiones,     setSesiones]    = useState([])
+  const [temasLeidos,  setTemas]       = useState([])
+  const [fallos,       setFallos]      = useState([])
+  const [loading,      setLoading]     = useState(true)
+  const [exporting,    setExporting]   = useState(false)
+  const [showMsgModal, setShowMsgModal] = useState(false)
+  const [msgTexto,     setMsgTexto]    = useState('')
+  const [msgSending,   setMsgSending]  = useState(false)
+  const [msgSent,      setMsgSent]     = useState(false)
 
   useEffect(() => {
     if (!alumno?.id) return
@@ -275,6 +229,25 @@ export default function AlumnoDetalle({ alumno, onBack, academyId }) {
     }
   }, [alumno, sesiones, temasLeidos, fallos])
 
+  const handleEnviarMensaje = useCallback(async () => {
+    if (!msgTexto.trim()) return
+    setMsgSending(true)
+    await supabase.from('notifications').insert({
+      user_id: alumno.id,
+      type:    'mensaje_profesor',
+      title:   `Mensaje de tu profesor`,
+      body:    msgTexto.trim(),
+      link:    '/',
+    })
+    setMsgSending(false)
+    setMsgSent(true)
+    setTimeout(() => {
+      setShowMsgModal(false)
+      setMsgTexto('')
+      setMsgSent(false)
+    }, 1500)
+  }, [alumno.id, msgTexto])
+
   const evolucion = [...sesiones].reverse().slice(-10).map((s, i) => ({
     i, score: s.score,
     date: new Date(s.played_at || s.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
@@ -292,16 +265,21 @@ export default function AlumnoDetalle({ alumno, onBack, academyId }) {
           <div>
             <h1 className={styles.pageTitle}>{alumno.username}</h1>
             <p className={styles.pageSubtitle}>
-              Último acceso: {alumno.diasInactivo === 0 ? 'Hoy' : alumno.diasInactivo === 1 ? 'Ayer' : `Hace ${alumno.diasInactivo} días`}
+              Ultimo acceso: {alumno.diasInactivo === 0 ? 'Hoy' : alumno.diasInactivo === 1 ? 'Ayer' : `Hace ${alumno.diasInactivo} dias`}
             </p>
           </div>
         </div>
-        <button className={styles.btnExport} onClick={handleExport} disabled={exporting || loading}>
-          {exporting
-            ? <RefreshCw size={14} className={styles.spinner} />
-            : <Download size={14} />}
-          Exportar PDF
-        </button>
+        <div className={styles.headerActions}>
+          <button className={styles.btnMsg} onClick={() => setShowMsgModal(true)}>
+            <MessageSquare size={14} /> Mensaje
+          </button>
+          <button className={styles.btnExport} onClick={handleExport} disabled={exporting || loading}>
+            {exporting
+              ? <RefreshCw size={14} className={styles.spinner} />
+              : <Download size={14} />}
+            Exportar PDF
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -309,12 +287,12 @@ export default function AlumnoDetalle({ alumno, onBack, academyId }) {
       ) : (
         <>
           <div className={styles.kpisRow}>
-            <KpiCard icon={BarChart2}      label="Nota media"   value={alumno.notaMedia !== null ? `${alumno.notaMedia}%` : '—'} color="#7C3AED" />
-            <KpiCard icon={Zap}            label="Sesiones"     value={sesiones.length}    color="#059669" />
-            <KpiCard icon={BookOpen}       label="Temas leídos" value={temasLeidos.length} color="#0891B2" />
-            <KpiCard icon={AlertTriangle}  label="Fallos"       value={fallos.length}      color="#DC2626" />
-            <KpiCard icon={TrendingUp}     label="Racha"        value={`${alumno.racha}d`} color="#D97706" />
-            <KpiCard icon={Shield}         label="Acceso hasta" value={formatFecha(alumno.accessUntil)} color="#6B7280" />
+            <KpiCard icon={BarChart2}     label="Nota media"   value={alumno.notaMedia !== null ? `${alumno.notaMedia}%` : '—'} color="#7C3AED" />
+            <KpiCard icon={Zap}           label="Sesiones"     value={sesiones.length}    color="#059669" />
+            <KpiCard icon={BookOpen}      label="Temas leidos" value={temasLeidos.length} color="#0891B2" />
+            <KpiCard icon={AlertTriangle} label="Fallos"       value={fallos.length}      color="#DC2626" />
+            <KpiCard icon={TrendingUp}    label="Racha"        value={`${alumno.racha}d`} color="#D97706" />
+            <KpiCard icon={Shield}        label="Acceso hasta" value={formatFecha(alumno.accessUntil)} color="#6B7280" />
           </div>
 
           <div className={styles.mainRow}>
@@ -331,9 +309,9 @@ export default function AlumnoDetalle({ alumno, onBack, academyId }) {
             </div>
 
             <div className={styles.evolucionCard}>
-              <h3 className={styles.cardTitle}>Evolución de nota</h3>
+              <h3 className={styles.cardTitle}>Evolucion de nota</h3>
               {evolucion.length === 0 ? (
-                <div className={styles.emptyMini}><p>Sin sesiones todavía</p></div>
+                <div className={styles.emptyMini}><p>Sin sesiones todavia</p></div>
               ) : (
                 <div className={styles.barChart}>
                   {evolucion.map(e => (
@@ -351,7 +329,7 @@ export default function AlumnoDetalle({ alumno, onBack, academyId }) {
           </div>
 
           <div className={styles.seccionCard}>
-            <h3 className={styles.cardTitle}>Últimas sesiones</h3>
+            <h3 className={styles.cardTitle}>Ultimas sesiones</h3>
             {sesiones.length === 0 ? <p className={styles.empty}>Sin sesiones registradas</p> : (
               <div className={styles.sesionTabla}>
                 <div className={styles.sesionHeader}><span>Fecha</span><span>Nota</span><span>Preguntas</span></div>
@@ -368,7 +346,7 @@ export default function AlumnoDetalle({ alumno, onBack, academyId }) {
 
           {fallos.length > 0 && (
             <div className={styles.seccionCard}>
-              <h3 className={styles.cardTitle}>Preguntas con más fallos</h3>
+              <h3 className={styles.cardTitle}>Preguntas con mas fallos</h3>
               <div className={styles.fallosList}>
                 {fallos.slice(0, 10).map((f, i) => (
                   <div key={f.question_id} className={styles.falloRow}>
@@ -385,6 +363,51 @@ export default function AlumnoDetalle({ alumno, onBack, academyId }) {
             </div>
           )}
         </>
+      )}
+
+      {/* Modal mensaje directo */}
+      {showMsgModal && (
+        <div className={styles.msgOverlay} onClick={() => setShowMsgModal(false)}>
+          <div className={styles.msgModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.msgModalHead}>
+              <span className={styles.msgModalTitle}>Mensaje para {alumno.username}</span>
+              <button className={styles.msgModalClose} onClick={() => setShowMsgModal(false)}>
+                <X size={14} />
+              </button>
+            </div>
+            {msgSent ? (
+              <div className={styles.msgSent}>
+                <Check size={20} style={{ color: '#059669' }} />
+                <span>Mensaje enviado</span>
+              </div>
+            ) : (
+              <>
+                <textarea
+                  className={styles.msgTextarea}
+                  placeholder={`Escribe un mensaje para ${alumno.username}...`}
+                  value={msgTexto}
+                  onChange={e => setMsgTexto(e.target.value)}
+                  rows={4}
+                  autoFocus
+                />
+                <div className={styles.msgModalFoot}>
+                  <span className={styles.msgHint}>
+                    El alumno lo vera en su campanita de notificaciones
+                  </span>
+                  <button
+                    className={styles.msgBtnEnviar}
+                    onClick={handleEnviarMensaje}
+                    disabled={msgSending || !msgTexto.trim()}>
+                    {msgSending
+                      ? <RefreshCw size={13} className={styles.spinner} />
+                      : <Send size={13} />}
+                    Enviar
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       )}
     </div>
   )

@@ -9,8 +9,9 @@ import {
   Clock, Zap, ChevronRight, Building2, ArrowUpRight,
   Download, RefreshCw, Shield, Star, Rocket, Crown,
   ToggleLeft, ToggleRight, Bell, Calendar, Users,
-  CheckCircle, XCircle, Info
+  CheckCircle, XCircle, Info, FileText
 } from 'lucide-react'
+import ManualBillingTab from './ManualBillingTab'
 import styles from './StripeBillingPanel.module.css'
 
 // ── Datos de planes ────────────────────────────────────────────────────────────
@@ -751,9 +752,10 @@ export default function StripeBillingPanel({ academias = [], onRecargar }) {
       {/* ── TABS ── */}
       <div className={styles.tabs}>
         {[
-          { id: 'academias', label: 'Academias', icon: Building2 },
-          { id: 'historial', label: 'Historial', icon: Calendar },
-          { id: 'planes',    label: 'Planes',    icon: Star },
+          { id: 'academias', label: 'Academias',          icon: Building2 },
+          { id: 'historial', label: 'Historial Stripe',   icon: Calendar  },
+          { id: 'planes',    label: 'Planes',             icon: Star      },
+          { id: 'manual',    label: 'Facturación manual', icon: FileText  },
         ].map(t => (
           <button key={t.id}
             className={[styles.tab, tab === t.id ? styles.tabActive : ''].join(' ')}
@@ -835,6 +837,11 @@ export default function StripeBillingPanel({ academias = [], onRecargar }) {
             })}
           </div>
         </div>
+      )}
+
+      {/* ── TAB: FACTURACIÓN MANUAL ── */}
+      {tab === 'manual' && (
+        <ManualBillingTab academias={acadsActivas} />
       )}
 
       {/* ── MODAL UPGRADE ── */}

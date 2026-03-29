@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import {
   BarChart2, TrendingUp, Award, Flame, BookOpen, CheckCircle,
-  Target, Clock, Bookmark, Brain, ArrowUp, ArrowDown, Minus, Loader2
+  Target, Clock, Bookmark, Brain, ArrowUp, ArrowDown, Minus, Loader2, Users
 } from 'lucide-react'
 import {
   AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, Tooltip,
@@ -48,6 +48,85 @@ function CustomTooltip({ active, payload, label }) {
   )
 }
 
+// ── Comparativa anonima con la clase ──────────────────────────────────────
+function ComparativaClaseCard({ avgScore, academyId, subjectId }) {
+  const [mediaClase,    setMediaClase]    = useState(null)
+  const [totalSesiones, setTotalSesiones] = useState(0)
+  const [loading,       setLoading]       = useState(true)
+
+  useEffect(() => {
+    if (!academyId || !avgScore) { setLoading(false); return }
+    const fetch = async () => {
+      const hace30 = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
+      let q = supabase
+        .from('sessions')
+        .select('score, user_id')
+        .eq('academy_id', academyId)
+        .gte('played_at', hace30)
+      if (subjectId) q = q.eq('subject_id', subjectId)
+      const { data } = await q
+      if (data?.length > 1) {
+        const media = Math.round(data.reduce((s, x) => s + x.score, 0) / data.length)
+        const usuarios = new Set(data.map(x => x.user_id)).size
+        setMediaClase(media)
+        setTotalSesiones(usuarios)
+      }
+      setLoading(false)
+    }
+    fetch()
+  }, [academyId, subjectId, avgScore])
+
+  if (loading || mediaClase === null || avgScore === 0) return null
+
+  const diff  = avgScore - mediaClase
+  const mejor = diff > 0
+  const igual = diff === 0
+
+  // Calcular percentil aproximado
+  const percentilMsg = mejor
+    ? `Estás por encima de la media de tu clase`
+    : igual
+    ? `Estás exactamente en la media de tu clase`
+    : `Estás por debajo de la media de tu clase`
+
+  return (
+    <div className={styles.comparativaCard}>
+      <div className={styles.comparativaHeader}>
+        <Users size={14} className={styles.comparativaIcon} />
+        <span className={styles.comparativaTitle}>Comparativa con la clase</span>
+        <span className={styles.comparativaSub}>{totalSesiones} alumno{totalSesiones !== 1 ? 's' : ''} · últimos 30 días</span>
+      </div>
+      <div className={styles.comparativaBody}>
+        <div className={styles.comparativaStat}>
+          <span className={styles.comparativaStatVal} style={{ color: '#2563EB' }}>{avgScore}%</span>
+          <span className={styles.comparativaStatLabel}>Tu nota media</span>
+        </div>
+        <div className={styles.comparativaSep}>
+          {igual ? (
+            <Minus size={20} className={styles.comparativaIgual} />
+          ) : mejor ? (
+            <ArrowUp size={20} className={styles.comparativaMejor} />
+          ) : (
+            <ArrowDown size={20} className={styles.comparativaPeor} />
+          )}
+          <span className={styles.comparativaDiff}
+            style={{ color: igual ? '#6B7280' : mejor ? '#059669' : '#DC2626' }}>
+            {igual ? 'igual' : `${Math.abs(diff)} pts`}
+          </span>
+        </div>
+        <div className={styles.comparativaStat}>
+          <span className={styles.comparativaStatVal} style={{ color: '#6B7280' }}>{mediaClase}%</span>
+          <span className={styles.comparativaStatLabel}>Media de la clase</span>
+        </div>
+      </div>
+      <p className={styles.comparativaMsg}
+        style={{ color: igual ? '#6B7280' : mejor ? '#059669' : '#DC2626' }}>
+        {percentilMsg}
+      </p>
+    </div>
+  )
+}
+
 // ── CHOWCHOW ──────────────────────────────────────────────────────────────
 function ChowchowCard({ modeData, avgScore, sessions }) {
   const totalSessions = sessions.length
@@ -74,7 +153,7 @@ function ChowchowCard({ modeData, avgScore, sessions }) {
   const modeLabel = n =>
     n === 'beginner' ? 'Test Rápido' : n === 'advanced' ? 'Test Avanzado' :
     n === 'exam' ? 'Simulacro' : n === 'review_due' ? 'Repasar' :
-    n === 'all_fails' ? 'Fallos' : n
+    n === 'all_fails' ? 'Fallos' : n === 'quick_review' ? 'Exprés' : n
 
   const colors = ['#2563EB','#059669','#D97706','#9333EA','#DC2626','#0891B2']
   const sorted = [...modeData].sort((a,b) => b.value - a.value)
@@ -86,7 +165,6 @@ function ChowchowCard({ modeData, avgScore, sessions }) {
         <div className={styles.chowBubbleTail}/>
       </div>
 
-      {/* Video chowchow */}
       <video
         ref={videoRef}
         className={styles.chowVideo}
@@ -117,47 +195,37 @@ function ChowchowCard({ modeData, avgScore, sessions }) {
 export default function Stats({ currentUser, progress, studyReadTopics, studyBookmarks }) {
   const [activeTab, setActiveTab] = useState('test')
 
-  // ── Datos desde Supabase ────────────────────────────────────────────────
-  // Bloques con temas (para pestaña Estudio + metadata de bloques para Tests)
   const { blocks: studyBlocks, loading: loadingContent } = useContent(
     currentUser?.id,
     currentUser?.subject_id
   )
 
-  // Preguntas (id, block_id, question) para stats por bloque y fallos
-  const [questions, setQuestions]         = useState([])
+  const [questions,        setQuestions]        = useState([])
   const [loadingQuestions, setLoadingQuestions] = useState(true)
 
   useEffect(() => {
     if (!currentUser?.academy_id) return
-
     const load = async () => {
       setLoadingQuestions(true)
-
       let query = supabase
         .from('questions')
         .select('id, block_id, question')
         .eq('academy_id', currentUser.academy_id)
-
       if (currentUser.subject_id) {
         query = query.eq('subject_id', currentUser.subject_id)
       }
-
       const { data } = await query
       setQuestions(data || [])
       setLoadingQuestions(false)
     }
-
     load()
   }, [currentUser?.academy_id, currentUser?.subject_id])
 
-  // ── Loading state ───────────────────────────────────────────────────────
   const isLoading = loadingContent || loadingQuestions
 
   const sessions = progress?.sessions || []
   const wrongs   = progress?.wrongAnswers || []
 
-  // ── Bloques filtrados (con temas y estimatedMinutes) ────────────────────
   const ROOT_BLOCKS = studyBlocks.filter(b => b.topics?.length > 0 && b.estimatedMinutes)
 
   // ── Stats de TEST ──────────────────────────────────────────────────────
@@ -168,7 +236,6 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
   const avgScore       = totalSessions ? Math.round(sessions.reduce((s,x)=>s+(x.score||0),0)/totalSessions) : 0
   const globalPct      = totalQuestions ? Math.round((totalCorrect/totalQuestions)*100) : 0
 
-  // Rachas
   const sortedSessions = [...sessions].sort((a,b) => new Date(a.played_at)-new Date(b.played_at))
   let currentStreak = 0, bestStreak = 0, tmp = 0
   const today = new Date().toISOString().split('T')[0]
@@ -187,13 +254,11 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
     }
   }
 
-  // Evolución últimas 10 sesiones
   const last10 = sortedSessions.slice(-10).map((s,i) => ({
     name: `S${i+1}`, score: s.score||0,
     correctas: s.correct||0, total: s.total||0
   }))
 
-  // Por bloques — dinámico desde Supabase
   const blockStats = studyBlocks.map(block => {
     const blockQ   = questions.filter(q => q.block_id === block.id)
     const blockW   = wrongs.filter(w => blockQ.some(q => q.id === w.question_id))
@@ -201,13 +266,11 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
     return { id: block.id, label: block.label, color: block.color, score, fails: blockW.length, total: blockQ.length }
   })
 
-  // Pie por modo
   const modeCount = {}
   sessions.forEach(s => { modeCount[s.mode_id] = (modeCount[s.mode_id]||0)+1 })
   const modeData = Object.entries(modeCount).map(([name,value]) => ({ name, value }))
 
   // ── Stats de ESTUDIO ───────────────────────────────────────────────────
-
   const totalTopics    = ROOT_BLOCKS.reduce((s,b) => s+b.topics.length, 0)
   const readCount      = studyReadTopics?.size || 0
   const bookmarkCount  = studyBookmarks?.size  || 0
@@ -220,7 +283,6 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
     return { name: b.label.split(' ')[0], pct, read, total, color: b.color }
   })
 
-  // Tiempo estimado restante
   const totalMinutes = ROOT_BLOCKS.reduce((s,b)=>s+(b.estimatedMinutes||0),0)
   const readMinutes  = ROOT_BLOCKS.reduce((s,b) => {
     const readFrac = b.topics.filter(t=>studyReadTopics?.has(t.id)).length / b.topics.length
@@ -228,7 +290,6 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
   }, 0)
   const remainMins = totalMinutes - readMinutes
 
-  // ── Loading ─────────────────────────────────────────────────────────────
   if (isLoading) return (
     <div className={styles.page} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
       <div style={{ textAlign: 'center' }}>
@@ -282,7 +343,16 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
             ))}
           </div>
 
-          {/* Donuts + Evolución */}
+          {/* Comparativa anonima con la clase */}
+          {totalSessions > 0 && (
+            <ComparativaClaseCard
+              avgScore={avgScore}
+              academyId={currentUser?.academy_id}
+              subjectId={currentUser?.subject_id}
+            />
+          )}
+
+          {/* Donuts + Evolucion */}
           <div className={styles.row2}>
             <div className={styles.card}>
               <h3 className={styles.cardTitle}>Resultado global</h3>
@@ -334,7 +404,7 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
             </div>
           </div>
 
-          {/* Distribución por modos + por bloques */}
+          {/* Distribucion por modos + por bloques */}
           <div className={styles.row2}>
             <div className={styles.card}>
               <h3 className={styles.cardTitle}>Modos de práctica</h3>
@@ -393,7 +463,6 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
       {/* ══════════ TAB: ESTUDIO ══════════ */}
       {activeTab === 'estudio' && (
         <>
-          {/* KPIs estudio */}
           <div className={styles.kpiGrid}>
             {[
               { icon: BookOpen,    label: 'Temas leídos',    value: `${readCount}/${totalTopics}`, color:'#2563EB' },
@@ -415,7 +484,6 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
             ))}
           </div>
 
-          {/* Donut progreso global + barra bloques */}
           <div className={styles.row2}>
             <div className={styles.card}>
               <h3 className={styles.cardTitle}>Progreso global del temario</h3>
@@ -459,7 +527,6 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
             </div>
           </div>
 
-          {/* Detalle por bloque con donuts */}
           <div className={styles.card}>
             <h3 className={styles.cardTitle}>Detalle por bloque</h3>
             <div className={styles.studyDonutGrid}>
@@ -478,7 +545,6 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
             </div>
           </div>
 
-          {/* Marcadores guardados */}
           {bookmarkCount > 0 && (
             <div className={styles.card}>
               <h3 className={styles.cardTitle}>Temas marcados como favoritos</h3>

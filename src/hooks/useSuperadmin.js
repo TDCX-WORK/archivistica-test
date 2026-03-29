@@ -72,10 +72,22 @@ export function useSuperadmin(currentUser) {
         return dias > 0 && dias <= 14
       }).length
 
-      // Última actividad
       const ultimaActividad = acSessions.length
         ? acSessions.sort((a, b) => b.played_at?.localeCompare(a.played_at))[0]?.played_at
         : null
+
+      // ── Health score 1-10 ───────────────────────────────────────────────
+      // 5 pts: % alumnos activos esta semana
+      // 3 pts: nota media 30d
+      // 2 pts: sesiones por alumno esta semana
+      const pctActivos  = alumnos.length > 0 ? alumnosActivos / alumnos.length : 0
+      const ptsActivos  = pctActivos * 5
+      const ptsNota     = ((notaMedia || 0) / 100) * 3
+      const sesXAlumno  = alumnos.length > 0 ? sesThisWeek.length / alumnos.length : 0
+      const ptsSesiones = Math.min(1, sesXAlumno) * 2
+      const healthScore = alumnos.length === 0
+        ? null
+        : Math.max(1, Math.min(10, Math.round(ptsActivos + ptsNota + ptsSesiones)))
 
       return {
         ...ac,
@@ -88,6 +100,7 @@ export function useSuperadmin(currentUser) {
         sesiones30d:    ses30d.length,
         porExpirar,
         ultimaActividad,
+        healthScore,
       }
     })
 
@@ -172,7 +185,7 @@ export function useSuperadmin(currentUser) {
     return { ok: true }
   }, [load])
 
-  // ── Llamar Edge Function gestionar-academia ─────────────────────────────
+  // ── Llamar Edge Function gestionar-academia ──────────────────────────────
   const llamarGestionar = useCallback(async (action, academy_id) => {
     setSaving(true)
     const { data: { session } } = await supabase.auth.getSession()
@@ -193,7 +206,7 @@ export function useSuperadmin(currentUser) {
     return { ok: true, affected: result.affected }
   }, [load])
 
-  // ── Suspender / reactivar ─────────────────────────────────────────────────
+  // ── Suspender / reactivar ────────────────────────────────────────────────
   const toggleSuspender = useCallback(async (id, suspended) => {
     return llamarGestionar(suspended ? 'suspender' : 'reactivar', id)
   }, [llamarGestionar])
@@ -203,7 +216,7 @@ export function useSuperadmin(currentUser) {
     return llamarGestionar('eliminar', id)
   }, [llamarGestionar])
 
-  // ── Restaurar desde papelera ──────────────────────────────────────────────
+  // ── Restaurar desde papelera ─────────────────────────────────────────────
   const restaurarAcademia = useCallback(async (id) => {
     return llamarGestionar('restaurar', id)
   }, [llamarGestionar])
@@ -220,7 +233,7 @@ export function useSuperadmin(currentUser) {
     return { data }
   }, [load])
 
-  // ── Crear usuario via Edge Function ─────────────────────────────────────
+  // ── Crear usuario via Edge Function ──────────────────────────────────────
   const crearUsuario = useCallback(async ({ username, password, role, academyId, subjectId, academySlug, emailOverride }) => {
     setSaving(true)
     const { data: { session } } = await supabase.auth.getSession()
