@@ -77,17 +77,18 @@ export function useSuperadmin(currentUser) {
         : null
 
       // ── Health score 1-10 ───────────────────────────────────────────────
-      // 5 pts: % alumnos activos esta semana
-      // 3 pts: nota media 30d
-      // 2 pts: sesiones por alumno esta semana
+      // Briefing: 40% alumnos activos + 30% nota media 30d + 20% sesiones 7d + 10% temas leídos
+      // Nota: temas leídos no se cargan en superadmin, se omite ese 10% y se normaliza sobre 90
       const pctActivos  = alumnos.length > 0 ? alumnosActivos / alumnos.length : 0
-      const ptsActivos  = pctActivos * 5
-      const ptsNota     = ((notaMedia || 0) / 100) * 3
+      const ptsActivos  = pctActivos * 4                         // max 4 pts (40%)
+      const ptsNota     = ((notaMedia || 0) / 100) * 3           // max 3 pts (30%)
       const sesXAlumno  = alumnos.length > 0 ? sesThisWeek.length / alumnos.length : 0
-      const ptsSesiones = Math.min(1, sesXAlumno) * 2
+      const ptsSesiones = Math.min(1, sesXAlumno) * 2            // max 2 pts (20%)
+      // 10% temas leídos omitido — pendiente cargar study_read en superadmin
+      const rawScore    = ptsActivos + ptsNota + ptsSesiones     // max 9 pts
       const healthScore = alumnos.length === 0
         ? null
-        : Math.max(1, Math.min(10, Math.round(ptsActivos + ptsNota + ptsSesiones)))
+        : Math.max(1, Math.min(10, Math.round((rawScore / 9) * 10)))
 
       return {
         ...ac,

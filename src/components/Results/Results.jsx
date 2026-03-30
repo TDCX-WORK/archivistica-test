@@ -143,7 +143,8 @@ function FailItem({ q, i, userAns, onAddToRepaso, alreadyInRepaso }) {
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function Results({
   questions, answers, onGoHome, onRepeat, durationSecs,
-  academyId, subjectId, onRecordWrong, wrongAnswers = []
+  academyId, subjectId, onRecordWrong, wrongAnswers = [],
+  blockMap = {}
 }) {
   const [showFails,   setShowFails]   = useState(false)
   const [showCorrect, setShowCorrect] = useState(false)
@@ -169,7 +170,8 @@ export default function Results({
   const byBlock = {}
   questions.forEach((q, i) => {
     const blockId = q.block_id || 'sin-bloque'
-    if (!byBlock[blockId]) byBlock[blockId] = { label: q.block_label || blockId, correct: 0, total: 0 }
+    const blockLabel = blockMap[blockId]?.label || 'Sin bloque'
+    if (!byBlock[blockId]) byBlock[blockId] = { label: blockLabel, correct: 0, total: 0 }
     byBlock[blockId].total++
     if (answers[i] === q.answer) byBlock[blockId].correct++
   })

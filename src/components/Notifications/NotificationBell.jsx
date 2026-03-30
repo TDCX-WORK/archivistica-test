@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Bell, Check, CheckCheck, X, Zap, AlertTriangle,
          Users, Calendar, TrendingDown, Trophy, Flame,
-         Clock, MessageSquare, BookOpen, CreditCard } from 'lucide-react'
+         Clock, MessageSquare, BookOpen, CreditCard, Trash2 } from 'lucide-react'
 import { useNotifications } from '../../hooks/useNotifications'
 import styles from './NotificationBell.module.css'
 
@@ -55,30 +55,39 @@ function timeAgo(iso) {
 }
 
 // ── Item de notificacion ───────────────────────────────────────────────────────
-function NotifItem({ notif, onRead, onNavigate }) {
+function NotifItem({ notif, onRead, onDelete, onNavigate }) {
   const handleClick = () => {
     if (!notif.read) onRead(notif.id)
     if (notif.link && onNavigate) onNavigate(notif.link)
   }
 
+  const handleDelete = (e) => {
+    e.stopPropagation()
+    onDelete(notif.id)
+  }
+
   return (
-    <button
-      className={[styles.item, !notif.read ? styles.itemUnread : ''].join(' ')}
-      onClick={handleClick}
-    >
-      <NotifIcon type={notif.type} />
-      <div className={styles.itemBody}>
-        <div className={styles.itemTitle}>{notif.title}</div>
-        {notif.body && <div className={styles.itemDesc}>{notif.body}</div>}
-        <div className={styles.itemTime}>{timeAgo(notif.created_at)}</div>
-      </div>
-      {!notif.read && <div className={styles.itemDot} />}
-    </button>
+    <div className={[styles.item, !notif.read ? styles.itemUnread : ''].join(' ')}>
+      <button className={styles.itemMain} onClick={handleClick}>
+        <NotifIcon type={notif.type} />
+        <div className={styles.itemBody}>
+          <div className={styles.itemTitle}>{notif.title}</div>
+          {notif.body && <div className={styles.itemDesc}>{notif.body}</div>}
+          <div className={styles.itemTime}>{timeAgo(notif.created_at)}</div>
+        </div>
+        {!notif.read && <div className={styles.itemDot} />}
+      </button>
+      <button className={styles.itemDelete} onClick={handleDelete} title="Eliminar">
+        <X size={12} />
+      </button>
+    </div>
   )
 }
 
 // ── Panel desplegable ──────────────────────────────────────────────────────────
-function NotifPanel({ notifications, unreadCount, loading, onRead, onMarkAll, onClose, onNavigate }) {
+function NotifPanel({ notifications, unreadCount, loading, onRead, onMarkAll, onDelete, onDeleteAllRead, onClose, onNavigate }) {
+  const hasRead = notifications.some(n => n.read)
+
   return (
     <div className={styles.panel}>
       {/* Header del panel */}
@@ -91,8 +100,13 @@ function NotifPanel({ notifications, unreadCount, loading, onRead, onMarkAll, on
         </div>
         <div className={styles.panelActions}>
           {unreadCount > 0 && (
-            <button className={styles.panelBtn} onClick={onMarkAll} title="Marcar todas como leidas">
-              <CheckCheck size={13} /> Todas leidas
+            <button className={styles.panelBtn} onClick={onMarkAll} title="Marcar todas como leídas">
+              <CheckCheck size={13} /> Todas leídas
+            </button>
+          )}
+          {hasRead && (
+            <button className={styles.panelBtn} onClick={onDeleteAllRead} title="Eliminar leídas">
+              <Trash2 size={13} /> Limpiar
             </button>
           )}
           <button className={styles.panelClose} onClick={onClose}>
@@ -117,6 +131,7 @@ function NotifPanel({ notifications, unreadCount, loading, onRead, onMarkAll, on
             key={n.id}
             notif={n}
             onRead={onRead}
+            onDelete={onDelete}
             onNavigate={(link) => { onNavigate(link); onClose() }}
           />
         ))}
@@ -130,8 +145,11 @@ export default function NotificationBell({ currentUser, onNavigate }) {
   const [open, setOpen] = useState(false)
   const ref             = useRef(null)
 
-  const { notifications, unreadCount, loading, markRead, markAllRead } =
-    useNotifications(currentUser?.id)
+  const {
+    notifications, unreadCount, loading,
+    markRead, markAllRead,
+    deleteNotification, deleteAllRead,
+  } = useNotifications(currentUser?.id)
 
   // Cerrar al hacer click fuera
   useEffect(() => {
@@ -165,6 +183,8 @@ export default function NotificationBell({ currentUser, onNavigate }) {
           loading={loading}
           onRead={markRead}
           onMarkAll={markAllRead}
+          onDelete={deleteNotification}
+          onDeleteAllRead={deleteAllRead}
           onClose={() => setOpen(false)}
           onNavigate={onNavigate}
         />

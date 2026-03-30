@@ -188,7 +188,7 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
     const correct  = Object.entries(snap).filter(([i, a]) => questions[Number(i)]?.answer === a).length
     const wrong    = Object.entries(snap).filter(([i, a]) => questions[Number(i)]?.answer !== a).length
     const answeredCount = Object.keys(snap).length
-    const effectiveCorrect = penalizacion ? Math.max(0, correct - wrong * 0.25) : correct
+    const effectiveCorrect = penalizacion ? Math.round(Math.max(0, correct - wrong * 0.25)) : correct
     onRecordSession(modeId, effectiveCorrect, answeredCount, elapsed)
     setPhase('finished')
   }, [questions, modeId, onRecordSession, penalizacion])
@@ -275,7 +275,8 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
       academyId={academyId}
       subjectId={subjectId}
       onRecordWrong={onRecordWrong}
-      wrongAnswers={wrongAnswers} />
+      wrongAnswers={wrongAnswers}
+      blockMap={blockMap} />
   )
 
   const mm     = totalSecs ? String(Math.floor(secsLeft / 60)).padStart(2, '0') : null

@@ -20,6 +20,13 @@
   transition: all var(--t) var(--ease);
   /* min 44px touch target on mobile */
   min-height: 52px;
+  /* Eliminar outline del navegador — el borde del propio botón ya indica el estado */
+  outline: none;
+}
+.option:focus-visible {
+  /* Focus accesible con el color del tema en lugar del negro del navegador */
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-xlt);
 }
 .option:not(:disabled):hover {
   border-color: var(--primary);

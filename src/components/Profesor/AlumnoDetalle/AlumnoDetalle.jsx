@@ -18,6 +18,13 @@ function scoreColor(s) {
   return '#DC2626'
 }
 
+// Muestra los primeros 8 chars del UUID seguidos de … para no romper layouts
+function shortId(uuid) {
+  if (!uuid) return '—'
+  if (uuid.length <= 8) return `#${uuid}`
+  return `#${uuid.slice(0, 8)}…`
+}
+
 function DonutMini({ pct, color, size = 100, stroke = 10 }) {
   const r    = (size - stroke) / 2
   const circ = 2 * Math.PI * r
@@ -61,18 +68,18 @@ function generateInformePDF(alumno, sesiones, temasLeidos, fallos) {
     <tr>
       <td>${formatFecha(s.played_at || s.created_at)}</td>
       <td style="color:${scoreColor(s.score)};font-weight:700">${s.score}%</td>
-      <td>${s.total_questions ?? '—'}</td>
+      <td>${s.total ?? '—'}</td>
     </tr>`).join('')
 
+  // UUID truncado a 8 chars en el PDF — legible sin ocupar toda la celda
   const falloTrs = fallos.slice(0, 8).map((f, i) => `
     <tr>
       <td style="color:var(--muted)">${i + 1}</td>
-      <td>#${f.question_id}</td>
+      <td style="font-family:monospace;font-size:11px">${shortId(f.question_id)}</td>
       <td style="color:#DC2626;font-weight:700">${f.fail_count}×</td>
       <td style="color:var(--muted)">${formatFecha(f.next_review)}</td>
     </tr>`).join('')
 
-  const maxS    = Math.max(...ultimas.map(e => e.score), 1)
   const barW    = 28
   const barGap  = 8
   const chartW  = ultimas.length * (barW + barGap)
@@ -170,7 +177,7 @@ function generateInformePDF(alumno, sesiones, temasLeidos, fallos) {
   <div class="section">
     <div class="section-title">Preguntas con mas fallos</div>
     <table>
-      <thead><tr><th>#</th><th>Pregunta</th><th>Fallos</th><th>Proximo repaso</th></tr></thead>
+      <thead><tr><th>#</th><th>ID pregunta</th><th>Fallos</th><th>Proximo repaso</th></tr></thead>
       <tbody>${falloTrs}</tbody>
     </table>
   </div>` : ''}
@@ -351,7 +358,7 @@ export default function AlumnoDetalle({ alumno, onBack, academyId, currentUser }
                 {fallos.slice(0, 10).map((f, i) => (
                   <div key={f.question_id} className={styles.falloRow}>
                     <span className={styles.falloNum}>{i + 1}</span>
-                    <span className={styles.falloId}>#{f.question_id}</span>
+                    <span className={styles.falloId} title={f.question_id}>{shortId(f.question_id)}</span>
                     <div className={styles.falloBarTrack}>
                       <div className={styles.falloBarFill} style={{ width: `${Math.min((f.fail_count / (fallos[0]?.fail_count || 1)) * 100, 100)}%` }} />
                     </div>

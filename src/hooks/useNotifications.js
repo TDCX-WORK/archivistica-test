@@ -63,6 +63,27 @@ export function useNotifications(userId) {
     setUnreadCount(0)
   }, [userId])
 
+  const deleteNotification = useCallback(async (id) => {
+    await supabase
+      .from('notifications')
+      .delete()
+      .eq('id', id)
+    setNotifications(prev => {
+      const removed = prev.find(n => n.id === id)
+      if (removed && !removed.read) setUnreadCount(c => Math.max(0, c - 1))
+      return prev.filter(n => n.id !== id)
+    })
+  }, [])
+
+  const deleteAllRead = useCallback(async () => {
+    await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', userId)
+      .eq('read', true)
+    setNotifications(prev => prev.filter(n => !n.read))
+  }, [userId])
+
   // Funcion helper para crear notificaciones desde el frontend
   const createNotification = useCallback(async ({ targetUserId, type, title, body, link }) => {
     await supabase.from('notifications').insert({
@@ -76,7 +97,9 @@ export function useNotifications(userId) {
 
   return {
     notifications, unreadCount, loading,
-    markRead, markAllRead, createNotification,
+    markRead, markAllRead,
+    deleteNotification, deleteAllRead,
+    createNotification,
     reload: load,
   }
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
-export default function useStudyProgress(userId) {
+export default function useStudyProgress(userId, academyId, subjectId) {
   const [readTopics,  setReadTopics]  = useState(new Set())
   const [bookmarks,   setBookmarks]   = useState(new Set())
   const [loading,     setLoading]     = useState(true)
@@ -48,9 +48,15 @@ export default function useStudyProgress(userId) {
     } else {
       await supabase
         .from('study_read')
-        .upsert({ user_id: userId, topic_id: topicId, block_id: blockId })
+        .upsert({
+          user_id:    userId,
+          topic_id:   topicId,
+          block_id:   blockId,
+          academy_id: academyId  || null,
+          subject_id: subjectId  || null,
+        })
     }
-  }, [userId, readTopics])
+  }, [userId, academyId, subjectId, readTopics])
 
   // ── Marcar / quitar marcador ────────────────────────────────────────────
   const toggleBookmark = useCallback(async (topicId, blockId) => {
@@ -74,9 +80,15 @@ export default function useStudyProgress(userId) {
     } else {
       await supabase
         .from('study_bookmarks')
-        .upsert({ user_id: userId, topic_id: topicId, block_id: blockId })
+        .upsert({
+          user_id:    userId,
+          topic_id:   topicId,
+          block_id:   blockId,
+          academy_id: academyId  || null,
+          subject_id: subjectId  || null,
+        })
     }
-  }, [userId, bookmarks])
+  }, [userId, academyId, subjectId, bookmarks])
 
   return { readTopics, bookmarks, loading, toggleRead, toggleBookmark }
 }

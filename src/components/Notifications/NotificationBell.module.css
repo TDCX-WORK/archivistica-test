@@ -161,18 +161,11 @@
 }
 
 /* ── ITEM ──────────────────────────────────────────────────────────────────── */
+/* Item es ahora un div contenedor — itemMain es el área clickable principal  */
 .item {
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
-  width: 100%;
-  text-align: left;
-  background: transparent;
-  border: none;
+  align-items: stretch;
   border-bottom: 1px solid var(--line);
-  cursor: pointer;
-  font-family: var(--font-body);
   transition: background 0.12s;
   position: relative;
 }
@@ -181,6 +174,39 @@
 
 .itemUnread { background: #EFF6FF; }
 .itemUnread:hover { background: #DBEAFE; }
+
+/* Botón principal (icono + texto) */
+.itemMain {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 0.75rem 0.85rem 1rem;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+/* Botón de borrar — oculto hasta hover */
+.itemDelete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--ink-subtle);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+  padding: 0;
+}
+.item:hover .itemDelete { opacity: 1; }
+.itemDelete:hover { color: #DC2626; }
 
 /* ── ITEM ICON ─────────────────────────────────────────────────────────────── */
 .notifIcon {
@@ -247,4 +273,7 @@
     border-right: none;
     border-top: none;
   }
+
+  /* En móvil el botón de borrar siempre visible (no hay hover) */
+  .itemDelete { opacity: 0.5; }
 }

@@ -267,7 +267,7 @@ export default function App() {
     clearForcePasswordChange, recoveryMode, requestPasswordReset, confirmPasswordReset,
   } = useAuth()
   const progress      = useProgress(currentUser?.id, currentUser?.academy_id, currentUser?.subject_id)
-  const studyProgress = useStudyProgress(currentUser?.id)
+  const studyProgress = useStudyProgress(currentUser?.id, currentUser?.academy_id, currentUser?.subject_id)
 
   if (loading) return <div className={styles.loadingScreen}><div className={styles.loadingSpinner} /></div>
   if (recoveryMode) return <ForcePasswordChange currentUser={{ username: '' }} onDone={confirmPasswordReset} isRecovery />

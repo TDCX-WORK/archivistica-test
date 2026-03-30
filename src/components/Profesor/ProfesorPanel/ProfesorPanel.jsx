@@ -334,6 +334,7 @@ export default function ProfesorPanel({ currentUser }) {
       alumno={alumnoDetalle}
       onBack={() => setAlumnoDetalle(null)}
       academyId={currentUser?.academy_id}
+      currentUser={currentUser}
     />
   )
 
