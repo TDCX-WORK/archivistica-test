@@ -93,6 +93,17 @@ export function useAuth() {
       .eq('id', user.id)
       .single()
 
+    // Cargar onboarding_completed solo para alumnos
+    let onboardingCompleted = true
+    if (profile?.role === 'alumno') {
+      const { data: sp } = await supabase
+        .from('student_profiles')
+        .select('onboarding_completed')
+        .eq('id', user.id)
+        .maybeSingle()
+      onboardingCompleted = sp?.onboarding_completed === true
+    }
+
     const accessUntil      = profile?.access_until ? new Date(profile.access_until) : null
     const accesoExpirado   = accessUntil ? accessUntil < new Date() : false
     const academySuspended = profile?.academies?.suspended === true
@@ -112,6 +123,7 @@ export function useAuth() {
       subjectName:         profile?.subjects?.name ?? null,
       accesoExpirado:      ['profesor','director','superadmin'].includes(profile?.role) ? false : accesoExpirado,
       forcePasswordChange: ['profesor','director'].includes(profile?.role) ? (profile?.force_password_change ?? false) : false,
+      onboardingCompleted,
     })
     setLoading(false)
 

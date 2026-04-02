@@ -1,4 +1,4 @@
-import { Home, BarChart2, BookOpen, LogOut, GraduationCap, User, Building2, ShieldCheck, Trash2, CreditCard } from 'lucide-react'
+import { Home, BarChart2, BookOpen, LogOut, GraduationCap, User, Building2, ShieldCheck, Trash2, CreditCard, Settings2 } from 'lucide-react'
 import styles from './Sidebar.module.css'
 
 const NAV_ALUMNO = [
@@ -20,8 +20,9 @@ const NAV_SUPERADMIN = [
 ]
 
 const NAV_DIRECTOR = [
-  { id: 'direccion', icon: Building2, label: 'Academia' },
-  { id: 'perfil',    icon: User,      label: 'Perfil'   },
+  { id: 'direccion', icon: Building2,  label: 'Academia' },
+  { id: 'gestion',   icon: Settings2,  label: 'Gestión'  },
+  { id: 'perfil',    icon: User,       label: 'Perfil'   },
 ]
 
 export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout }) {

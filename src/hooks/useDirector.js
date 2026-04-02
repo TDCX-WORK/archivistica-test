@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
 export function useDirector(currentUser) {
-  const [stats,   setStats]   = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState(null)
+  const [stats,      setStats]      = useState(null)
+  const [allProfiles, setAllProfiles] = useState([])
+  const [loading,     setLoading]     = useState(true)
+  const [error,       setError]       = useState(null)
 
   const academyId  = currentUser?.academy_id
   const isDirector = currentUser?.role === 'director'
@@ -157,6 +158,7 @@ export function useDirector(currentUser) {
         ? Math.round(ses30d.reduce((a, s) => a + s.score, 0) / ses30d.length)
         : null
 
+      setAllProfiles(profiles || [])
       setStats({
         totalAlumnos:   alumnos.length,
         totalProfesores: profesores.length,
@@ -174,5 +176,5 @@ export function useDirector(currentUser) {
     load()
   }, [isDirector, academyId])
 
-  return { stats, loading, error }
+  return { stats, allProfiles, loading, error }
 }

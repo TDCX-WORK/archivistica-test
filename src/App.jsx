@@ -22,6 +22,8 @@ import ProfesorProfile    from './components/Profesor/ProfesorProfile/ProfesorPr
 import DirectorPanel      from './components/Profesor/DirectorPanel/DirectorPanel'
 import SuperadminPanel    from './components/Superadmin/SuperadminPanel'
 import StripeBillingPanel from './components/Superadmin/StripeBillingPanel'
+import OnboardingWizard   from './components/Onboarding/OnboardingWizard'
+import GestionAcademia    from './components/Director/GestionAcademia/GestionAcademia'
 import styles             from './App.module.css'
 
 const homeRoute = (user) => {
@@ -112,6 +114,7 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
     setOverlay(null)
     const routes = {
       inicio:        homeRoute(currentUser),
+      gestion:       '/gestion',
       estudio:       '/estudio',
       estadisticas:  '/estadisticas',
       perfil:        '/perfil',
@@ -200,10 +203,10 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
                 isSuperadmin ? <Navigate to="/admin"     replace /> :
                 isDirector   ? <Navigate to="/direccion" replace /> :
                 isProfesor   ? <Navigate to="/profesor"  replace /> :
-                <Home onSelectMode={handleSelectMode} progress={progress} currentUser={currentUser} />
+                <Home onSelectMode={handleSelectMode} progress={progress} currentUser={currentUser} studyProgress={studyProgress} />
               } />
               <Route path="/estudio" element={
-                <StudyView currentUser={currentUser} onSelectMode={handleSelectMode} />
+                <StudyViewWrapper currentUser={currentUser} onSelectMode={handleSelectMode} />
               } />
               <Route path="/estadisticas" element={
                 isAlumno
@@ -227,6 +230,9 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
               } />
               <Route path="/direccion" element={
                 isDirector ? <DirectorPanel currentUser={currentUser} /> : <Navigate to={homeRoute(currentUser)} replace />
+              } />
+              <Route path="/gestion" element={
+                isDirector ? <GestionAcademia currentUser={currentUser} /> : <Navigate to={homeRoute(currentUser)} replace />
               } />
               <Route path="/admin" element={
                 isSuperadmin ? <SuperadminPanel currentUser={currentUser} /> : <Navigate to={homeRoute(currentUser)} replace />
@@ -261,6 +267,16 @@ function BillingWrapper({ currentUser }) {
   return <StripeBillingPanel academias={academias} onRecargar={recargar} />
 }
 
+
+// Wrapper que lee ?block=ID de la URL y lo pasa a StudyView
+import { useSearchParams } from 'react-router-dom'
+
+function StudyViewWrapper({ currentUser, onSelectMode }) {
+  const [searchParams] = useSearchParams()
+  const initialBlockId  = searchParams.get('block') || null
+  return <StudyView currentUser={currentUser} onSelectMode={onSelectMode} initialBlockId={initialBlockId} />
+}
+
 export default function App() {
   const {
     currentUser, loading, login, register, logout, error, clearError,
@@ -276,6 +292,14 @@ export default function App() {
   if (currentUser.academySuspended)    return <AcademiaSuspendidaPage username={currentUser.username} onLogout={logout} />
   if (currentUser.accesoExpirado)      return <AccesoExpiradoPage     username={currentUser.username} onLogout={logout} />
   if (currentUser.forcePasswordChange) return <ForcePasswordChange    currentUser={currentUser}       onDone={clearForcePasswordChange} />
+  if (currentUser.role === 'alumno' && currentUser.onboardingCompleted === false) {
+    return (
+      <OnboardingWizard
+        currentUser={currentUser}
+        onComplete={() => window.location.reload()}
+      />
+    )
+  }
 
   return (
     <BrowserRouter>

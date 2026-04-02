@@ -164,3 +164,35 @@
 .spinnerInline { animation: spinAnim 1s linear infinite; }
 .loadState2 { display: flex; flex-direction: column; align-items: center; gap: .75rem; padding: 5rem 1rem; color: #888; text-align: center; }
 .loadState2 p { font-size: .9rem; margin: 0; font-family: 'Urbanist', sans-serif; }
+
+/* ── Perfil extendido en UsuarioRow ─────────────────────────────────────────── */
+.extendedBlock {
+  margin-top: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--primary) 15%, var(--line));
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.extendedTitle {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.15rem;
+}
+
+.emailDiff {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #D97706;
+  background: #FFFBEB;
+  padding: 0.08rem 0.35rem;
+  border-radius: 4px;
+  margin-left: 0.35rem;
+  flex-shrink: 0;
+}

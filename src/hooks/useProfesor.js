@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 export function useProfesor(currentUser) {
   const [alumnos,     setAlumnos]     = useState([])
   const [inviteCodes, setInviteCodes] = useState([])
+  const [allSessions, setAllSessions] = useState([])
   const [loading,     setLoading]     = useState(true)
   const [error,       setError]       = useState(null)
 
@@ -34,7 +35,7 @@ export function useProfesor(currentUser) {
       const alumnoIds = profiles.map(p => p.id)
 
       const [{ data: sessions }, { data: reads }, { data: wrongs }] = await Promise.all([
-        supabase.from('sessions').select('user_id, score, played_at, created_at')
+        supabase.from('sessions').select('user_id, score, played_at, created_at, mode_id')
           .eq('academy_id', academyId).in('user_id', alumnoIds).order('created_at', { ascending: false }),
         supabase.from('study_read').select('user_id, topic_id')
           .eq('academy_id', academyId).in('user_id', alumnoIds),
@@ -84,6 +85,7 @@ export function useProfesor(currentUser) {
         }
       })
 
+      setAllSessions(sessions || [])
       setAlumnos(alumnosConStats)
       setLoading(false)
 
@@ -91,15 +93,11 @@ export function useProfesor(currentUser) {
       try {
         const enRiesgo = alumnosConStats.filter(a => a.enRiesgo)
         if (enRiesgo.length > 0 && currentUser?.id) {
-          const hoy = new Date().toISOString().slice(0, 10)
-          const { data: yaNotificado } = await supabase
-            .from('notifications').select('id')
-            .eq('user_id', currentUser.id)
-            .eq('type', 'alumno_inactivo')
-            .gte('created_at', hoy + 'T00:00:00Z')
-            .maybeSingle()
+          const hoy       = new Date().toISOString().slice(0, 10)
+          const cacheKey  = `notif_inactivo_${currentUser.id}_${hoy}`
+          const yaEnviado = localStorage.getItem(cacheKey)
 
-          if (!yaNotificado) {
+          if (!yaEnviado) {
             const nombres = enRiesgo.slice(0, 3).map(a => a.username).join(', ')
             const resto   = enRiesgo.length > 3 ? ` y ${enRiesgo.length - 3} mas` : ''
             await supabase.from('notifications').insert({
@@ -109,6 +107,7 @@ export function useProfesor(currentUser) {
               body:    `${nombres}${resto} llevan mas de 3 dias sin estudiar.`,
               link:    '/profesor',
             })
+            localStorage.setItem(cacheKey, '1')
           }
         }
       } catch (_) {}
@@ -117,15 +116,12 @@ export function useProfesor(currentUser) {
       try {
         const porExpirar = alumnosConStats.filter(a => a.proximoAExpirar)
         if (porExpirar.length > 0 && currentUser?.id) {
-          const hace3dias = new Date(Date.now() - 3 * 86400000).toISOString()
-          const { data: yaNotificado } = await supabase
-            .from('notifications').select('id')
-            .eq('user_id', currentUser.id)
-            .eq('type', 'alumno_expira')
-            .gte('created_at', hace3dias)
-            .maybeSingle()
+          // Anti-spam: una vez cada 3 días por usuario
+          const hace3dias  = new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10)
+          const cacheKey   = `notif_expira_${currentUser.id}_${hace3dias}`
+          const yaEnviado  = localStorage.getItem(cacheKey)
 
-          if (!yaNotificado) {
+          if (!yaEnviado) {
             const nombres = porExpirar.slice(0, 3).map(a =>
               `${a.username} (${a.diasParaExpirar}d)`
             ).join(', ')
@@ -137,6 +133,7 @@ export function useProfesor(currentUser) {
               body:    `${nombres}${resto}. Renueva su acceso antes de que expire.`,
               link:    '/profesor',
             })
+            localStorage.setItem(cacheKey, '1')
           }
         }
       } catch (_) {}
@@ -255,5 +252,5 @@ export function useProfesor(currentUser) {
     mediaTemasLeidos: Math.round(alumnos.reduce((s, a) => s + a.temasLeidos, 0) / alumnos.length),
   } : null
 
-  return { alumnos, inviteCodes, statsClase, loading, error, generarCodigo, renovarAcceso, revocarAcceso, recargar: loadCodes }
+  return { alumnos, inviteCodes, statsClase, allSessions, loading, error, generarCodigo, renovarAcceso, revocarAcceso, recargar: loadCodes }
 }

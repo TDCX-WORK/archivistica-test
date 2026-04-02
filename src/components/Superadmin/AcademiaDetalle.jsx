@@ -6,7 +6,7 @@ import {
   BarChart2, Zap, AlertTriangle, RefreshCw,
   ChevronDown, ChevronUp, Calendar, Clock, TrendingUp,
   Mail, Trash2, Lock, Eye, EyeOff, PauseCircle, PlayCircle,
-  Edit3, Check, X, Shield
+  Edit3, Check, X, Shield, Phone, MapPin, Target, Euro, User
 } from 'lucide-react'
 import styles from './AcademiaDetalle.module.css'
 
@@ -121,7 +121,7 @@ async function callGestionarUsuario(action, userId, params = {}) {
 }
 
 // ── Usuario row ───────────────────────────────────────────────────────────────
-function UsuarioRow({ user, sesiones, emails, expanded, onToggle, onReload }) {
+function UsuarioRow({ user, sesiones, emails, extended, expanded, onToggle, onReload }) {
   const isAlumno     = user.role === 'alumno'
   const userSessions = isAlumno ? sesiones.filter(s => s.user_id === user.id) : []
   const notaMedia    = userSessions.length
@@ -304,6 +304,48 @@ function UsuarioRow({ user, sesiones, emails, expanded, onToggle, onReload }) {
                       <a href={`mailto:${email}`} style={{ color:'var(--ink-muted)', textDecoration:'none' }} onClick={e => e.stopPropagation()}>{email}</a>
                     </div>}
                   </>}
+
+                  {/* Datos extendidos del alumno (student_profiles) */}
+                  {isAlumno && extended && (
+                    <div className={styles.extendedBlock}>
+                      <div className={styles.extendedTitle}>Perfil extendido</div>
+                      {extended.full_name     && <div className={styles.userCard2Stat}><User size={12} /><span>{extended.full_name}</span></div>}
+                      {extended.phone         && <div className={styles.userCard2Stat}><Phone size={12} /><span>{extended.phone}</span></div>}
+                      {extended.email_contact && (
+                        <div className={styles.userCard2Stat}>
+                          <Mail size={12} />
+                          <span>{extended.email_contact}</span>
+                          {email && extended.email_contact !== email && (
+                            <span className={styles.emailDiff} title="Diferente al email del sistema">≠ sistema</span>
+                          )}
+                        </div>
+                      )}
+                      {extended.city          && <div className={styles.userCard2Stat}><MapPin size={12} /><span>{extended.city}</span></div>}
+                      {extended.exam_date     && <div className={styles.userCard2Stat}><Target size={12} /><span>Examen: {new Date(extended.exam_date + 'T12:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}</span></div>}
+                      {extended.monthly_price && <div className={styles.userCard2Stat}><Euro size={12} /><span style={{ fontWeight: 700, color: '#059669' }}>{extended.monthly_price} €/mes</span></div>}
+                      {extended.mascota       && <div className={styles.userCard2Stat}><span>Mascota: {extended.mascota}</span></div>}
+                    </div>
+                  )}
+
+                  {/* Datos extendidos del staff (staff_profiles) */}
+                  {!isAlumno && extended && (extended.full_name || extended.phone || extended.email_contact) && (
+                    <div className={styles.extendedBlock}>
+                      <div className={styles.extendedTitle}>Perfil extendido</div>
+                      {extended.full_name     && <div className={styles.userCard2Stat}><User size={12} /><span>{extended.full_name}</span></div>}
+                      {extended.phone         && <div className={styles.userCard2Stat}><Phone size={12} /><span>{extended.phone}</span></div>}
+                      {extended.email_contact && (
+                        <div className={styles.userCard2Stat}>
+                          <Mail size={12} />
+                          <span>{extended.email_contact}</span>
+                          {email && extended.email_contact !== email && (
+                            <span className={styles.emailDiff} title="Diferente al email del sistema">≠ sistema</span>
+                          )}
+                        </div>
+                      )}
+                      {extended.bio           && <div className={styles.userCard2Stat} style={{ alignItems: 'flex-start' }}><BookOpen size={12} style={{ marginTop: 2 }} /><span style={{ fontStyle: 'italic' }}>{extended.bio}</span></div>}
+                    </div>
+                  )}
+
                   {!isAlumno && <>
                     <div className={styles.userCard2Stat}><Shield size={12} /><span style={{ textTransform:'capitalize' }}>Rol: {user.role}</span></div>
                     <div className={styles.userCard2Stat}><Calendar size={12} /><span>Alta: {formatFecha(user.created_at)}</span></div>
@@ -360,7 +402,7 @@ function UsuarioRow({ user, sesiones, emails, expanded, onToggle, onReload }) {
 }
 
 // ── Subject section ────────────────────────────────────────────────────────────
-function SubjectSection({ subject, profiles, sesiones, emails, onReload }) {
+function SubjectSection({ subject, profiles, sesiones, emails, extendedProfiles, onReload }) {
   const [open, setOpen]             = useState(true)
   const [expandedUser, setExpandedUser] = useState(null)
 
@@ -402,7 +444,7 @@ function SubjectSection({ subject, profiles, sesiones, emails, onReload }) {
                 <div className={styles.roleGroup2}>
                   <div className={styles.roleGroupTitle2}><GraduationCap size={12} /> Profesores</div>
                   {profes.map(p => (
-                    <UsuarioRow key={p.id} user={p} sesiones={sesiones} emails={emails}
+                    <UsuarioRow key={p.id} user={p} sesiones={sesiones} emails={emails} extended={extendedProfiles[p?.id] || null}
                       expanded={expandedUser === p.id} onReload={onReload}
                       onToggle={() => setExpandedUser(v => v === p.id ? null : p.id)} />
                   ))}
@@ -412,7 +454,7 @@ function SubjectSection({ subject, profiles, sesiones, emails, onReload }) {
                 <div className={styles.roleGroup2}>
                   <div className={styles.roleGroupTitle2}><Users size={12} /> Alumnos ({alumnos.length})</div>
                   {alumnos.map(a => (
-                    <UsuarioRow key={a.id} user={a} sesiones={sesiones} emails={emails}
+                    <UsuarioRow key={a.id} user={a} sesiones={sesiones} emails={emails} extended={extendedProfiles[a?.id] || null}
                       expanded={expandedUser === a.id} onReload={onReload}
                       onToggle={() => setExpandedUser(v => v === a.id ? null : a.id)} />
                   ))}
@@ -431,11 +473,12 @@ function SubjectSection({ subject, profiles, sesiones, emails, onReload }) {
 
 // ── Main export ───────────────────────────────────────────────────────────────
 export default function AcademiaDetalle({ academia, onBack }) {
-  const [profiles,    setProfiles]    = useState([])
-  const [sesiones,    setSesiones]    = useState([])
-  const [emails,      setEmails]      = useState({})
-  const [loading,     setLoading]     = useState(true)
-  const [expandedDir, setExpandedDir] = useState(null)
+  const [profiles,         setProfiles]         = useState([])
+  const [sesiones,         setSesiones]         = useState([])
+  const [emails,           setEmails]           = useState({})
+  const [extendedProfiles, setExtendedProfiles] = useState({})
+  const [loading,          setLoading]          = useState(true)
+  const [expandedDir,      setExpandedDir]      = useState(null)
 
   const load = async () => {
     if (!academia?.id) return
@@ -450,6 +493,21 @@ export default function AcademiaDetalle({ academia, onBack }) {
     const emailMap = {}
     for (const row of (emailData || [])) emailMap[row.user_id] = row.email
     setEmails(emailMap)
+
+    // Cargar perfiles extendidos (student_profiles + staff_profiles)
+    const userIds = (profs || []).map(p => p.id)
+    if (userIds.length) {
+      const alumnoIds = (profs || []).filter(p => p.role === 'alumno').map(p => p.id)
+      const staffIds  = (profs || []).filter(p => ['profesor','director'].includes(p.role)).map(p => p.id)
+      const [{ data: sps }, { data: sfps }] = await Promise.all([
+        alumnoIds.length ? supabase.from('student_profiles').select('*').in('id', alumnoIds) : Promise.resolve({ data: [] }),
+        staffIds.length  ? supabase.from('staff_profiles').select('*').in('id', staffIds)    : Promise.resolve({ data: [] }),
+      ])
+      const extMap = {}
+      for (const sp of (sps  || [])) extMap[sp.id]  = sp
+      for (const sf of (sfps || [])) extMap[sf.id]  = sf
+      setExtendedProfiles(extMap)
+    }
     setLoading(false)
   }
 
@@ -615,7 +673,7 @@ export default function AcademiaDetalle({ academia, onBack }) {
               </div>
               <div className={styles.userList2}>
                 {directores.map(d => (
-                  <UsuarioRow key={d.id} user={d} sesiones={sesiones} emails={emails}
+                  <UsuarioRow key={d.id} user={d} sesiones={sesiones} emails={emails} extended={extendedProfiles[d?.id] || null}
                     expanded={expandedDir === d.id} onReload={load}
                     onToggle={() => setExpandedDir(v => v === d.id ? null : d.id)} />
                 ))}
@@ -637,7 +695,7 @@ export default function AcademiaDetalle({ academia, onBack }) {
                 {academia.subjects.map(sub => (
                   <SubjectSection key={sub.id} subject={sub}
                     profiles={profiles} sesiones={sesiones}
-                    emails={emails} onReload={load} />
+                    emails={emails} extendedProfiles={extendedProfiles} onReload={load} />
                 ))}
               </div>
             )}

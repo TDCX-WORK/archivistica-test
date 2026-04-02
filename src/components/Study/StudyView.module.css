@@ -253,3 +253,432 @@
 @media (min-width: 641px) and (max-width: 900px) {
   /* blocksList is already 1 col */
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TABS — Temario / Mis apuntes
+══════════════════════════════════════════════════════════════════════════ */
+.studyTabs {
+  display: flex;
+  gap: 0.35rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0;
+  margin-bottom: 0.25rem;
+}
+.studyTab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: var(--r-md) var(--r-md) 0 0;
+  border: 1px solid transparent;
+  border-bottom: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  bottom: -1px;
+}
+.studyTab:hover { color: var(--ink); background: var(--surface-dim); }
+.studyTabActive {
+  color: var(--ink);
+  background: var(--surface);
+  border-color: var(--line);
+  border-bottom-color: var(--surface);
+}
+.studyTabBadge {
+  background: #D97706;
+  color: white;
+  font-size: 0.62rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SUBRAYADO — tooltip flotante y marks
+══════════════════════════════════════════════════════════════════════════ */
+.highlightableContent {
+  position: relative;
+  user-select: text;
+  cursor: text;
+}
+
+/* Tooltip que aparece al seleccionar texto */
+.highlightTooltip {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.8rem;
+  background: #1c1c1e;
+  color: white;
+  font-size: 0.76rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  z-index: 100;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  transition: transform 0.1s;
+  font-family: var(--font-body);
+}
+.highlightTooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1c1c1e;
+}
+.highlightTooltip:hover { transform: translateX(-50%) scale(1.04); }
+
+/* El mark del subrayado */
+.highlightMark {
+  border-radius: 2px;
+  padding: 1px 0;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+.highlightMark:hover {
+  filter: brightness(0.88);
+}
+
+/* Hint discreto en la parte superior del contenido */
+.highlightHint {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  color: var(--ink-subtle);
+  margin-bottom: 1rem;
+  padding: 0.35rem 0.65rem;
+  background: var(--surface-dim);
+  border-radius: var(--r-sm);
+  width: fit-content;
+}
+
+/* Badge de subrayados en el topBar del readMode */
+.highlightBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #D97706;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  padding: 0.2rem 0.5rem;
+  border-radius: 99px;
+}
+
+/* Badge en la lista de temas */
+.topicHlBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #D97706;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  padding: 0.1rem 0.35rem;
+  border-radius: 99px;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MIS APUNTES
+══════════════════════════════════════════════════════════════════════════ */
+.apuntesEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 4rem 2rem;
+  color: var(--ink-subtle);
+  text-align: center;
+}
+.apuntesEmpty p {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  margin: 0;
+}
+.apuntesEmpty span {
+  font-size: 0.78rem;
+  color: var(--ink-subtle);
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+.apuntesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.apuntesBlock {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.apuntesBlockHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--surface-off);
+  border-bottom: 1px solid var(--line);
+}
+
+.apuntesTopic {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.apuntesTopic:last-child { border-bottom: none; }
+
+.apuntesTopicTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.6rem;
+}
+
+.apuntesFragments {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.apuntesFragment {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.apuntesMark {
+  flex: 1;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.apuntesRemove {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-subtle);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-top: 2px;
+}
+.apuntesRemove:hover {
+  background: #FEF2F2;
+  border-color: #FECACA;
+  color: #DC2626;
+}
+
+/* ── Modo subrayado activo ── */
+.highlightModeActive {
+  cursor: text;
+}
+.highlightModeActive::selection,
+.highlightModeActive *::selection {
+  background: rgba(254, 240, 138, 0.7);
+}
+
+/* Botón del topBar cuando el modo subrayado está activo */
+.highlightModeBtn {
+  background: #FEF08A !important;
+  color: #78350F !important;
+  border-radius: var(--r-sm);
+}
+
+/* Pills de subrayados existentes bajo el contenido */
+.highlightOverlayInfo {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.highlightPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  color: #78350F;
+  cursor: pointer;
+  transition: filter 0.15s;
+  max-width: 100%;
+  line-height: 1.4;
+  font-style: italic;
+}
+.highlightPill:hover { filter: brightness(0.9); }
+
+.highlightPillX {
+  font-style: normal;
+  font-weight: 700;
+  margin-left: auto;
+  opacity: 0.5;
+  font-size: 0.9rem;
+}
+
+/* ── CSS Custom Highlight API — colores registrados ── */
+::highlight(hl-yellow) { background-color: #FEF08A; color: inherit; }
+::highlight(hl-green)  { background-color: #BBF7D0; color: inherit; }
+::highlight(hl-blue)   { background-color: #BAE6FD; color: inherit; }
+::highlight(hl-pink)   { background-color: #FBCFE8; color: inherit; }
+
+/* ── Botón de subrayado prominente en el topBar ── */
+.highlightToggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--line-strong);
+  background: var(--surface-dim);
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+.highlightToggleBtn:hover {
+  background: #FEF9C3;
+  border-color: #FDE68A;
+  color: #78350F;
+}
+.highlightToggleBtnActive {
+  background: #FEF08A;
+  border-color: #FDE68A;
+  color: #78350F;
+  box-shadow: 0 0 0 3px rgba(253,230,138,0.35);
+}
+
+/* ── Paleta de colores flotante ── */
+.colorPicker {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.8rem;
+  background: #1c1c1e;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  z-index: 200;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.colorPicker::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1c1c1e;
+}
+
+.colorPickerLabel {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.55);
+  font-weight: 500;
+  margin-right: 0.2rem;
+}
+
+.colorDot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+  flex-shrink: 0;
+}
+.colorDot:hover {
+  transform: scale(1.25);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* ── Lista de subrayados al pie del contenido ── */
+.highlightList {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.highlightListTitle {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--ink-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.25rem;
+}
+.highlightPill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #1c1c1e;
+  line-height: 1.4;
+}
+.highlightPillText { flex: 1; }
+.highlightPillRemove {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.12);
+  color: rgba(0,0,0,0.5);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.15s;
+}
+.highlightPillRemove:hover { background: rgba(0,0,0,0.25); }

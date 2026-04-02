@@ -1,0 +1,219 @@
+/* ── Overlay ───────────────────────────────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease both;
+}
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+/* ── Wizard card ───────────────────────────────────────────────────────────── */
+.wizard {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes slideUp { from{opacity:0;transform:translateY(32px) scale(0.96)} to{opacity:1;transform:none} }
+
+/* ── Header ────────────────────────────────────────────────────────────────── */
+.wizardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.5rem 1rem;
+  border-bottom: 1px solid #F1F5F9;
+  background: #FAFAFA;
+}
+.wizardBrand { font-size: 0.9rem; font-weight: 800; color: #111; letter-spacing: -0.02em; }
+.wizardSub   { font-size: 0.72rem; color: #94A3B8; font-weight: 500; }
+
+/* ── Stepper ───────────────────────────────────────────────────────────────── */
+.stepper {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem 0.85rem;
+  gap: 0;
+  border-bottom: 1px solid #F1F5F9;
+}
+.stepperItem {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+.stepperCircle {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 800;
+  background: #F1F5F9; color: #94A3B8;
+  border: 2px solid #E2E8F0;
+  transition: all 0.2s ease;
+}
+.stepperDone   { background: #059669; border-color: #059669; color: white; }
+.stepperActive { background: #111; border-color: #111; color: white; box-shadow: 0 0 0 3px rgba(0,0,0,0.1); }
+
+.stepperLabel {
+  font-size: 0.68rem; font-weight: 600; color: #94A3B8;
+  margin-left: 0.4rem; white-space: nowrap;
+}
+.stepperLabelActive { color: #111; }
+
+.stepperLine {
+  flex: 1; height: 2px; background: #E2E8F0;
+  margin: 0 0.5rem;
+  transition: background 0.3s ease;
+}
+.stepperLineDone { background: #059669; }
+
+/* ── Body ──────────────────────────────────────────────────────────────────── */
+.wizardBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+.wizardBody::-webkit-scrollbar { width: 4px; }
+.wizardBody::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 99px; }
+
+/* ── Paso ──────────────────────────────────────────────────────────────────── */
+.paso { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+
+.pasoIcon {
+  width: 52px; height: 52px; border-radius: 16px;
+  background: #F8FAFC; border: 1px solid #E2E8F0;
+  display: flex; align-items: center; justify-content: center;
+  color: #111; font-size: 1.3rem;
+}
+.pasoIconGrande { font-size: 3.5rem; line-height: 1; }
+
+.pasoTitle { font-size: 1.15rem; font-weight: 800; color: #111; margin: 0; letter-spacing: -0.03em; text-align: center; }
+.pasoDesc  { font-size: 0.82rem; color: #64748B; margin: 0; text-align: center; line-height: 1.5; max-width: 380px; }
+
+/* ── Campos ────────────────────────────────────────────────────────────────── */
+.campos { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; }
+.campoRow { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.campo { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.campoLabel {
+  font-size: 0.72rem; font-weight: 700; color: #374151;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.opcional { font-weight: 500; color: #94A3B8; text-transform: none; letter-spacing: 0; }
+
+.campoInput {
+  padding: 0.6rem 0.85rem;
+  border: 1.5px solid #E2E8F0; border-radius: 10px;
+  background: #FAFAFA; color: #111;
+  font-size: 0.88rem; font-family: var(--font-body, inherit);
+  transition: border-color 0.15s, background 0.15s;
+}
+.campoInput:focus {
+  outline: none; border-color: #111; background: white;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+}
+.campoInput::placeholder { color: #CBD5E1; }
+
+/* ── Mascotas grid ─────────────────────────────────────────────────────────── */
+.mascotasGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.mascotaCard {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  padding: 0.75rem 0.5rem;
+  border: 1.5px solid #E2E8F0; border-radius: 14px;
+  background: #FAFAFA; cursor: pointer;
+  transition: all 0.15s; text-align: center;
+  font-family: inherit;
+}
+.mascotaCard:hover { border-color: #111; background: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.mascotaCardActive { border-color: #111; background: white; box-shadow: 0 0 0 3px rgba(0,0,0,0.08); }
+
+.mascotaEmoji  { font-size: 1.75rem; line-height: 1; }
+.mascotaNombre { font-size: 0.72rem; font-weight: 800; color: #111; }
+.mascotaDesc   { font-size: 0.6rem; color: #64748B; line-height: 1.3; display: none; }
+.mascotaCardActive .mascotaDesc { display: block; }
+
+.mascotaCheck {
+  position: absolute; top: 6px; right: 6px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #111; color: white;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── Resumen ───────────────────────────────────────────────────────────────── */
+.resumen {
+  background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;
+  padding: 0.85rem 1rem; width: 100%;
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.resumenRow {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.82rem; color: #374151;
+}
+.resumenRow svg { color: #94A3B8; flex-shrink: 0; }
+
+.pasoMotivacion {
+  font-size: 0.78rem; color: #94A3B8; text-align: center;
+  font-style: italic; margin: 0; line-height: 1.5;
+}
+
+/* ── Footer ────────────────────────────────────────────────────────────────── */
+.wizardFooter {
+  display: flex; align-items: center; gap: 0.65rem;
+  padding: 1rem 1.5rem 1.25rem;
+  border-top: 1px solid #F1F5F9;
+  background: #FAFAFA;
+}
+
+.btnVolver {
+  display: flex; align-items: center; gap: 0.3rem;
+  padding: 0.55rem 0.9rem; border-radius: 10px;
+  border: 1.5px solid #E2E8F0; background: white;
+  font-size: 0.8rem; font-weight: 600; color: #64748B;
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.btnVolver:hover { border-color: #CBD5E1; color: #111; }
+
+.btnSaltar {
+  font-size: 0.75rem; font-weight: 600; color: #94A3B8;
+  background: none; border: none; cursor: pointer;
+  font-family: inherit; padding: 0.55rem 0.5rem;
+  text-decoration: underline; text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+.btnSaltar:hover { color: #64748B; }
+
+.btnSiguiente {
+  display: flex; align-items: center; gap: 0.35rem;
+  padding: 0.6rem 1.35rem; border-radius: 10px;
+  background: #111; color: white; border: none;
+  font-size: 0.85rem; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  margin-left: auto;
+  transition: background 0.15s, transform 0.12s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.btnSiguiente:hover:not(:disabled) { background: #374151; transform: translateY(-1px); }
+.btnSiguiente:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .wizardBody { padding: 1.1rem; }
+  .mascotasGrid { grid-template-columns: repeat(2, 1fr); }
+  .campoRow { grid-template-columns: 1fr; }
+  .stepperLabel { display: none; }
+}
