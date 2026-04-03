@@ -626,3 +626,205 @@
   cursor: pointer; transition: all 0.15s;
 }
 .tablonItemDelete:hover { background: #FEF2F2; border-color: #FECACA; color: #DC2626; }
+
+/* ── Bento Grid ─────────────────────────────────────────────────────────── */
+.bentoGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto auto;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.bentoCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-xl);
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  padding: 1.1rem 1.15rem;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.2s var(--spring), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+  box-shadow: var(--shadow-sm);
+}
+
+.bentoBig {
+  grid-column: span 2;
+}
+
+.bentoCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+  border-color: var(--bento-color, var(--primary));
+}
+
+.bentoActive {
+  border-color: var(--bento-color, var(--primary));
+  background: var(--surface);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+}
+
+.bentoActive::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--bento-color, var(--primary));
+  opacity: 0.04;
+  pointer-events: none;
+}
+
+.bentoContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+}
+
+.bentoIconWrap {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bentoBig .bentoIconWrap {
+  width: 42px;
+  height: 42px;
+}
+
+.bentoText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.bentoLabel {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.bentoBig .bentoLabel {
+  font-size: 1rem;
+}
+
+.bentoDesc {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+
+.bentoBadge {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  min-width: 20px;
+  height: 20px;
+  border-radius: var(--r-full);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+@media (max-width: 900px) {
+  .bentoGrid { grid-template-columns: repeat(2, 1fr); }
+  .bentoBig  { grid-column: span 2; }
+}
+
+@media (max-width: 480px) {
+  .bentoGrid { grid-template-columns: 1fr 1fr; }
+  .bentoBig  { grid-column: span 2; }
+}
+
+
+/* ── Card Próximos Exámenes ─────────────────────────────────────────────── */
+.bentoExam {
+  cursor: default;
+}
+
+.bentoExamHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.examList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.examRow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.6rem;
+  background: var(--surface-off);
+  border-radius: var(--r-md);
+}
+
+.examDias {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--r-full);
+  min-width: 32px;
+  text-align: center;
+}
+
+.examInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.examNombre {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.examFecha {
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+}
+
+.examEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  color: var(--ink-subtle);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.btnExport {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  background: var(--surface); color: var(--ink);
+  border: 1.5px solid var(--line); border-radius: 10px;
+  font-size: 0.82rem; font-weight: 700; cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+.btnExport:hover { border-color: var(--primary); background: var(--surface-off); }

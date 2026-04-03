@@ -1,17 +1,20 @@
 import { useState, useCallback } from 'react'
 import {
-  Users, TrendingUp, AlertTriangle, BookOpen, Copy, Check,
+  Users, TrendingUp, AlertTriangle, BookOpen, Copy, Check, FileText,
   Plus, RefreshCw, ChevronDown, ChevronUp, Zap, Clock,
   UserX, BarChart2, Key, Calendar, Shield, ShieldOff, RotateCcw, XCircle,
   TrendingDown, CalendarDays, ExternalLink, Bell, CheckCircle2, ArrowRight,
   Megaphone, Trash2, AlertTriangle as AlertIcon, Info, BookOpen as BookIcon
 } from 'lucide-react'
+import { Ripple }             from '../../magicui/Ripple'
+import { AnimatedGridPattern } from '../../magicui/AnimatedGridPattern'
 import { useProfesor }        from '../../../hooks/useProfesor'
 import { useAnnouncements }   from '../../../hooks/useAnnouncements'
 import FallosClase   from '../FallosClase/FallosClase'
 import PlanSemanal   from '../PlanSemanal/PlanSemanal'
 import AlumnoDetalle from '../AlumnoDetalle/AlumnoDetalle'
 import ClaseEvolucionChart from '../ClaseEvolucionChart/ClaseEvolucionChart'
+import BancoPreguntas     from '../BancoPreguntas/BancoPreguntas'
 import styles from './ProfesorPanel.module.css'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -284,6 +287,317 @@ function CodigoCard({ code, onCopy, copied }) {
           {copied === code.code ? <Check size={14} /> : <Copy size={14} />}
         </button>
       )}
+    </div>
+  )
+}
+
+
+// ── Exportar PDF Profesor ─────────────────────────────────────────────────────
+function exportarInformeProfesor(alumnos, statsClase, academyName, subjectName) {
+  const fecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })
+
+  const enRiesgo   = alumnos.filter(a => a.enRiesgo)
+  const porExpirar = alumnos.filter(a => a.proximoAExpirar)
+  const sorted     = [...alumnos].sort((a, b) => (b.notaMedia ?? -1) - (a.notaMedia ?? -1))
+
+  const css = `
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111;background:#fff;padding:2.5rem;max-width:860px;margin:0 auto;font-size:13px}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:2px solid #111}
+    .header-left h1{font-size:1.5rem;font-weight:800;margin-bottom:.2rem}
+    .header-left p{color:#6B7280;font-size:.8rem}
+    .header-right{text-align:right;color:#6B7280;font-size:.75rem;line-height:1.8}
+    h2{font-size:.7rem;font-weight:800;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;margin:1.75rem 0 .75rem}
+    .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem;margin-bottom:.5rem}
+    .kpi{border:1px solid #E5E7EB;border-radius:10px;padding:.75rem .5rem;text-align:center}
+    .kv{font-size:1.4rem;font-weight:800;line-height:1}
+    .kl{font-size:.62rem;color:#6B7280;margin-top:.3rem;text-transform:uppercase;letter-spacing:.04em}
+    table{width:100%;border-collapse:collapse;margin-bottom:1rem}
+    th{background:#F9FAFB;font-size:.7rem;font-weight:700;text-align:left;padding:.5rem .75rem;border-bottom:2px solid #E5E7EB;text-transform:uppercase;letter-spacing:.04em;color:#374151}
+    td{padding:.5rem .75rem;border-bottom:1px solid #F3F4F6;font-size:.78rem;vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    .tag{display:inline-block;border-radius:4px;padding:.15rem .45rem;font-size:.65rem;font-weight:700}
+    .tag-red{background:#FEF2F2;color:#DC2626}
+    .tag-green{background:#ECFDF5;color:#059669}
+    .tag-amber{background:#FFFBEB;color:#B45309}
+    .tag-blue{background:#EFF6FF;color:#2563EB}
+    .alert-section{border:1px solid #FEE2E2;border-radius:10px;padding:1rem;background:#FFF5F5;margin-bottom:.75rem}
+    .alert-title{font-size:.7rem;font-weight:800;color:#DC2626;text-transform:uppercase;margin-bottom:.5rem}
+    .alert-row{display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border-bottom:1px solid #FEE2E2;font-size:.75rem}
+    .alert-row:last-child{border:none}
+    .nota-bar-wrap{display:flex;align-items:center;gap:.5rem}
+    .nota-bar{height:6px;border-radius:3px;background:#E5E7EB;flex:1;overflow:hidden}
+    .nota-bar-fill{height:100%;border-radius:3px}
+    footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid #E5E7EB;display:flex;justify-content:space-between;color:#9CA3AF;font-size:.7rem}
+    @media print{body{padding:1rem}@page{margin:1.5cm}}
+  `
+
+  const notaColor = n => n >= 70 ? '#059669' : n >= 50 ? '#B45309' : '#DC2626'
+
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
+  <title>Informe de clase — ${subjectName || 'Clase'} — ${fecha}</title>
+  <style>${css}</style></head><body>
+
+  <div class="header">
+    <div class="header-left">
+      <h1>${academyName || 'Academia'}</h1>
+      <p>Informe del profesor · ${subjectName || 'Clase'}</p>
+    </div>
+    <div class="header-right">
+      <div><strong>Generado el</strong> ${fecha}</div>
+      <div>FrostFox Academy</div>
+    </div>
+  </div>
+
+  <h2>Resumen de la clase</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="kv">${statsClase?.totalAlumnos ?? 0}</div><div class="kl">Alumnos</div></div>
+    <div class="kpi"><div class="kv" style="color:#059669">${statsClase?.alumnosActivos ?? 0}</div><div class="kl">Activos 7d</div></div>
+    <div class="kpi"><div class="kv" style="color:${notaColor(statsClase?.notaMediaClase ?? 0)}">${statsClase?.notaMediaClase !== null && statsClase?.notaMediaClase !== undefined ? statsClase.notaMediaClase + '%' : '—'}</div><div class="kl">Nota media</div></div>
+    <div class="kpi"><div class="kv" style="color:#DC2626">${statsClase?.enRiesgo ?? 0}</div><div class="kl">En riesgo</div></div>
+    <div class="kpi"><div class="kv" style="color:#B45309">${statsClase?.proximosAExpirar ?? 0}</div><div class="kl">Expiran pronto</div></div>
+  </div>
+
+  <h2>Ranking de alumnos</h2>
+  <table>
+    <tr><th>#</th><th>Alumno</th><th>Nota media</th><th>Sesiones</th><th>Temas leídos</th><th>Racha</th><th>Estado</th></tr>
+    ${sorted.map((a, i) => `<tr>
+      <td style="color:#9CA3AF;font-weight:700">${i + 1}</td>
+      <td><strong>${a.username}</strong></td>
+      <td>
+        <div class="nota-bar-wrap">
+          <span style="font-weight:700;color:${notaColor(a.notaMedia ?? 0)};min-width:36px">${a.notaMedia !== null ? a.notaMedia + '%' : '—'}</span>
+          <div class="nota-bar"><div class="nota-bar-fill" style="width:${a.notaMedia ?? 0}%;background:${notaColor(a.notaMedia ?? 0)}"></div></div>
+        </div>
+      </td>
+      <td>${a.sesiones}</td>
+      <td>${a.temasLeidos}</td>
+      <td>${a.racha > 0 ? `<span class="tag tag-blue">${a.racha}d 🔥</span>` : '—'}</td>
+      <td>${a.accesoExpirado
+        ? '<span class="tag tag-red">Expirado</span>'
+        : a.enRiesgo
+          ? `<span class="tag tag-amber">${a.diasInactivo ?? '?'}d inactivo</span>`
+          : '<span class="tag tag-green">Activo</span>'
+      }</td>
+    </tr>`).join('')}
+  </table>
+
+  ${enRiesgo.length > 0 ? `
+  <h2>Alumnos en riesgo</h2>
+  <div class="alert-section">
+    <div class="alert-title">⚠ ${enRiesgo.length} alumno${enRiesgo.length !== 1 ? 's' : ''} sin actividad reciente</div>
+    ${enRiesgo.map(a => `<div class="alert-row">
+      <span><strong>${a.username}</strong></span>
+      <span style="color:#DC2626">${a.diasInactivo ?? '?'} días sin estudiar</span>
+    </div>`).join('')}
+  </div>` : ''}
+
+  ${porExpirar.length > 0 ? `
+  <div class="alert-section" style="border-color:#FDE68A;background:#FFFBEB">
+    <div class="alert-title" style="color:#B45309">🔒 ${porExpirar.length} acceso${porExpirar.length !== 1 ? 's' : ''} próximos a expirar</div>
+    ${porExpirar.map(a => `<div class="alert-row" style="border-color:#FDE68A">
+      <span><strong>${a.username}</strong></span>
+      <span style="color:#B45309">Expira en ${a.diasParaExpirar} días</span>
+    </div>`).join('')}
+  </div>` : ''}
+
+  <footer>
+    <span>FrostFox Academy · Informe del profesor · ${subjectName || ''}</span>
+    <span>${fecha}</span>
+  </footer>
+  </body></html>`
+
+  const w = window.open('', '_blank')
+  w.document.write(html)
+  w.document.close()
+  setTimeout(() => w.print(), 500)
+}
+
+// ── Bento Nav ─────────────────────────────────────────────────────────────────
+function ProximosExamenes({ alumnos }) {
+  const hoy = new Date()
+
+  const proximos = alumnos
+    .filter(a => a.examDate)
+    .map(a => ({
+      nombre: a.fullName || a.username,
+      fecha:  a.examDate,
+      dias:   Math.ceil((new Date(a.examDate) - hoy) / 86400000),
+    }))
+    .sort((a, b) => a.dias - b.dias)
+
+  if (proximos.length === 0) return (
+    <div className={styles.examEmpty}>
+      <CalendarDays size={22} strokeWidth={1.4} />
+      <p>Sin fechas de examen registradas</p>
+    </div>
+  )
+
+  return (
+    <div className={styles.examList}>
+      {proximos.map((ex, i) => (
+        <div key={i} className={styles.examRow}>
+          <div className={styles.examDias} style={{
+            color:      ex.dias <= 14 ? '#DC2626' : ex.dias <= 30 ? '#D97706' : '#059669',
+            background: ex.dias <= 14 ? '#FEF2F2' : ex.dias <= 30 ? '#FFFBEB' : '#ECFDF5',
+          }}>
+            {ex.dias}d
+          </div>
+          <div className={styles.examInfo}>
+            <span className={styles.examNombre}>{ex.nombre}</span>
+            <span className={styles.examFecha}>
+              {new Date(ex.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function BentoNav({ tab, setTab, statsClase, nAcciones, announcements, preguntas, alumnos }) {
+  const cards = [
+    {
+      id:       'clase',
+      label:    'Mi clase',
+      desc:     statsClase ? `${statsClase.totalAlumnos} alumnos · ${statsClase.alumnosActivos} activos` : 'Ver alumnos',
+      icon:     Users,
+      color:    '#2563EB',
+      big:      true,
+      badge:    null,
+    },
+    {
+      id:       'inbox',
+      label:    'Acciones',
+      desc:     nAcciones > 0 ? `${nAcciones} pendiente${nAcciones !== 1 ? 's' : ''}` : 'Todo al día',
+      icon:     Bell,
+      color:    nAcciones > 0 ? '#DC2626' : '#059669',
+      badge:    nAcciones > 0 ? nAcciones : null,
+    },
+    {
+      id:       'evolucion',
+      label:    'Evolución',
+      desc:     statsClase ? `Nota media ${statsClase.notaMediaClase ?? 0}%` : 'Ver progreso',
+      icon:     TrendingUp,
+      color:    '#7C3AED',
+    },
+    {
+      id:       'fallos',
+      label:    'Fallos clase',
+      desc:     'Preguntas con más errores',
+      icon:     TrendingDown,
+      color:    '#DC2626',
+    },
+    {
+      id:       'plan',
+      label:    'Plan semanal',
+      desc:     'Organiza el temario',
+      icon:     CalendarDays,
+      color:    '#D97706',
+    },
+    {
+      id:       'tablon',
+      label:    'Tablón',
+      desc:     announcements.length > 0 ? `${announcements.length} aviso${announcements.length !== 1 ? 's' : ''} activo${announcements.length !== 1 ? 's' : ''}` : 'Sin avisos activos',
+      icon:     Megaphone,
+      color:    '#059669',
+      badge:    announcements.length > 0 ? announcements.length : null,
+    },
+    {
+      id:       'codigos',
+      label:    'Códigos',
+      desc:     'Invitaciones de acceso',
+      icon:     Key,
+      color:    '#0891B2',
+    },
+    {
+      id:       'banco',
+      label:    'Banco de preguntas',
+      desc:     preguntas > 0 ? `${preguntas} preguntas` : 'Ver temario completo',
+      icon:     BookIcon,
+      color:    '#6366F1',
+      big:      true,
+    },
+    {
+      id:       'examenes',
+      label:    'Fecha de examen',
+      desc:     'Por alumno',
+      icon:     CalendarDays,
+      color:    '#0891B2',
+      big:      true,
+    },
+  ]
+
+  return (
+    <div className={styles.bentoGrid}>
+      {cards.map(card => {
+        const Icon    = card.icon
+        const active  = tab === card.id
+        const isExam  = card.id === 'examenes'
+        return (
+          <button
+            key={card.id}
+            className={[
+              styles.bentoCard,
+              card.big  ? styles.bentoBig  : '',
+              active && !isExam ? styles.bentoActive : '',
+              isExam ? styles.bentoExam : '',
+            ].join(' ')}
+            style={{ '--bento-color': card.color }}
+            onClick={() => !isExam && setTab(card.id)}
+          >
+            {/* Fondo animado solo en la card grande no-exam */}
+            {card.big && !isExam && (
+              <AnimatedGridPattern
+                numSquares={18}
+                maxOpacity={active ? 0.12 : 0.06}
+                duration={4}
+                color={card.color}
+                lineColor={card.color + '20'}
+              />
+            )}
+
+            {/* Ripple solo en cards normales */}
+            {!isExam && (
+              <Ripple
+                mainCircleSize={card.big ? 60 : 40}
+                mainCircleOpacity={active ? 0.25 : 0.12}
+                numCircles={card.big ? 5 : 3}
+                color={card.color}
+                duration={card.big ? 3 : 3.5}
+              />
+            )}
+
+            {/* Contenido especial para examenes */}
+            {isExam ? (
+              <div className={styles.bentoContent}>
+                <div className={styles.bentoExamHeader}>
+                  <div className={styles.bentoIconWrap} style={{ background: card.color + '18', color: card.color }}>
+                    <Icon size={16} strokeWidth={1.8} />
+                  </div>
+                  <span className={styles.bentoLabel}>{card.label}</span>
+                </div>
+                <ProximosExamenes alumnos={alumnos} />
+              </div>
+            ) : (
+              <div className={styles.bentoContent}>
+                <div className={styles.bentoIconWrap} style={{ background: card.color + '18', color: card.color }}>
+                  <Icon size={card.big ? 20 : 16} strokeWidth={1.8} />
+                </div>
+                <div className={styles.bentoText}>
+                  <span className={styles.bentoLabel}>{card.label}</span>
+                  <span className={styles.bentoDesc}>{card.desc}</span>
+                </div>
+                {card.badge && (
+                  <span className={styles.bentoBadge} style={{ background: card.color }}>
+                    {card.badge}
+                  </span>
+                )}
+              </div>
+            )}
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -579,7 +893,8 @@ export default function ProfesorPanel({ currentUser }) {
     setTimeout(() => setCopied(null), 2000)
   }, [])
 
-  const nExpirando = alumnos.filter(a => a.proximoAExpirar || a.accesoExpirado).length
+  const nExpirando   = alumnos.filter(a => a.proximoAExpirar || a.accesoExpirado).length
+  const [nPreguntas, setNPreguntas] = useState(0)
   const nAcciones  = alumnos.filter(a => a.accesoExpirado || a.proximoAExpirar || a.enRiesgo).length
                    + inviteCodes.filter(c => !c.usedBy && new Date(c.expiresAt || c.expires_at) < new Date()).length
 
@@ -634,9 +949,14 @@ export default function ProfesorPanel({ currentUser }) {
           <h1 className={styles.pageTitle}>Panel del Profesor</h1>
           <p className={styles.pageSubtitle}>Seguimiento de tu clase en tiempo real</p>
         </div>
-        <button className={styles.btnGenerar} onClick={() => setModalCodigo(true)}>
-          <Plus size={15} /> Nuevo código
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className={styles.btnExport} onClick={() => exportarInformeProfesor(alumnos, statsClase, currentUser?.academyName, currentUser?.subjectName)}>
+            <FileText size={14} /> Exportar PDF
+          </button>
+          <button className={styles.btnGenerar} onClick={() => setModalCodigo(true)}>
+            <Plus size={15} /> Nuevo código
+          </button>
+        </div>
       </div>
 
       {/* Alerta expiraciones */}
@@ -664,32 +984,16 @@ export default function ProfesorPanel({ currentUser }) {
         </div>
       )}
 
-      {/* Tabs */}
-      <div className={styles.tabs}>
-        <button className={[styles.tab, tab === 'inbox' ? styles.tabActive : ''].join(' ')} onClick={() => setTab('inbox')}>
-          <Bell size={14} /> Acciones
-          {nAcciones > 0 && <span className={styles.tabBadge}>{nAcciones}</span>}
-        </button>
-        <button className={[styles.tab, tab === 'clase' ? styles.tabActive : ''].join(' ')} onClick={() => setTab('clase')}>
-          <Users size={14} /> Clase ({alumnos.length})
-        </button>
-        <button className={[styles.tab, tab === 'evolucion' ? styles.tabActive : ''].join(' ')} onClick={() => setTab('evolucion')}>
-          <TrendingUp size={14} /> Evolución
-        </button>
-        <button className={[styles.tab, tab === 'fallos' ? styles.tabActive : ''].join(' ')} onClick={() => setTab('fallos')}>
-          <TrendingDown size={14} /> Fallos clase
-        </button>
-        <button className={[styles.tab, tab === 'plan' ? styles.tabActive : ''].join(' ')} onClick={() => setTab('plan')}>
-          <CalendarDays size={14} /> Plan semanal
-        </button>
-        <button className={[styles.tab, tab === 'tablon' ? styles.tabActive : ''].join(' ')} onClick={() => setTab('tablon')}>
-          <Megaphone size={14} /> Tablón
-          {announcements.length > 0 && <span className={styles.tabBadge} style={{ background: '#059669' }}>{announcements.length}</span>}
-        </button>
-        <button className={[styles.tab, tab === 'codigos' ? styles.tabActive : ''].join(' ')} onClick={() => setTab('codigos')}>
-          <Key size={14} /> Códigos de invitación
-        </button>
-      </div>
+      {/* Bento Nav */}
+      <BentoNav
+        tab={tab}
+        setTab={setTab}
+        statsClase={statsClase}
+        nAcciones={nAcciones}
+        announcements={announcements}
+        preguntas={nPreguntas}
+        alumnos={alumnos}
+      />
 
       {/* Tab: Evolución */}
       {tab === 'evolucion' && (
@@ -778,6 +1082,13 @@ export default function ProfesorPanel({ currentUser }) {
           onDelete={deleteAnnouncement}
           currentUser={currentUser}
         />
+      )}
+
+      {/* Tab: Banco de preguntas */}
+      {tab === 'banco' && (
+        <div className={styles.tabContent}>
+          <BancoPreguntas currentUser={currentUser} onLoad={setNPreguntas} />
+        </div>
       )}
 
       {tab === 'codigos' && (

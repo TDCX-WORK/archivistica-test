@@ -305,9 +305,13 @@ export function useAuth() {
     return true
   }, [])
 
+  const completeOnboarding = useCallback(() => {
+    setCurrentUser(u => u ? { ...u, onboardingCompleted: true } : u)
+  }, [])
+
   return {
     currentUser, loading, login, register, logout, error, clearError,
-    clearForcePasswordChange,
+    clearForcePasswordChange, completeOnboarding,
     recoveryMode, requestPasswordReset, confirmPasswordReset,
   }
 }

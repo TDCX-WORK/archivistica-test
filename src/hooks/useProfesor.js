@@ -11,6 +11,19 @@ export function useProfesor(currentUser) {
   const isProfesor = currentUser?.role === 'profesor'
   const academyId  = currentUser?.academy_id
 
+  // Limpieza de keys de localStorage con mas de 7 dias de antiguedad
+  useEffect(() => {
+    if (!currentUser?.id) return
+    const hace7dias = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10)
+    const prefijos  = [`notif_inactivo_${currentUser.id}_`, `notif_expira_${currentUser.id}_`]
+    Object.keys(localStorage).forEach(key => {
+      const prefijo = prefijos.find(p => key.startsWith(p))
+      if (!prefijo) return
+      const fecha = key.replace(prefijo, '')
+      if (fecha < hace7dias) localStorage.removeItem(key)
+    })
+  }, [currentUser?.id])
+
   useEffect(() => {
     if (!isProfesor || !academyId) return
     const load = async () => {
@@ -34,18 +47,23 @@ export function useProfesor(currentUser) {
 
       const alumnoIds = profiles.map(p => p.id)
 
-      const [{ data: sessions }, { data: reads }, { data: wrongs }] = await Promise.all([
+      const [{ data: sessions }, { data: reads }, { data: wrongs }, { data: studentProfiles }] = await Promise.all([
         supabase.from('sessions').select('user_id, score, played_at, created_at, mode_id')
           .eq('academy_id', academyId).in('user_id', alumnoIds).order('created_at', { ascending: false }),
         supabase.from('study_read').select('user_id, topic_id')
           .eq('academy_id', academyId).in('user_id', alumnoIds),
         supabase.from('wrong_answers').select('user_id, question_id, fail_count, next_review')
           .eq('academy_id', academyId).in('user_id', alumnoIds),
+        supabase.from('student_profiles').select('id, full_name, exam_date')
+          .in('id', alumnoIds),
       ])
 
       const today     = new Date().toISOString().slice(0, 10)
       const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
       const now       = new Date()
+
+      const spMap = {}
+      for (const sp of studentProfiles || []) spMap[sp.id] = sp
 
       const alumnosConStats = profiles.map(alumno => {
         const sesionesAlumno = (sessions || []).filter(s => s.user_id === alumno.id)
@@ -76,7 +94,7 @@ export function useProfesor(currentUser) {
         const proximoAExpirar = diasParaExpirar !== null && diasParaExpirar > 0 && diasParaExpirar <= 14
 
         return {
-          id: alumno.id, username: alumno.username, createdAt: alumno.created_at,
+          id: alumno.id, username: alumno.username, fullName: spMap[alumno.id]?.full_name || null, examDate: spMap[alumno.id]?.exam_date || null, createdAt: alumno.created_at,
           sesiones: sesionesAlumno.length, notaMedia,
           temasLeidos: leidos.length, fallos: fallos.length, pendientesHoy: pendientesHoy.length,
           racha, ultimaSesion, diasInactivo,

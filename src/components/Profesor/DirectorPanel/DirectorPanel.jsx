@@ -10,6 +10,8 @@ import {
   Minus, Phone, MapPin, Mail, Target, Calendar, Edit3,
   Save, ChevronLeft
 } from 'lucide-react'
+import { Ripple }             from '../../magicui/Ripple'
+import { AnimatedGridPattern } from '../../magicui/AnimatedGridPattern'
 import styles from './DirectorPanel.module.css'
 
 /* ─── Mascotas (mismo array que wizard) ───────────────────────────────────── */
@@ -662,31 +664,482 @@ function OnboardingChecklist({ currentUser, stats }) {
   )
 }
 
-/* ─── Exportar PDF ────────────────────────────────────────────────────────── */
-function exportarInforme(stats, academyName) {
-  const fecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })
-  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><style>
-    body{font-family:-apple-system,sans-serif;color:#111;padding:2rem;max-width:800px;margin:0 auto}
-    h1{font-size:1.5rem;border-bottom:2px solid #111;padding-bottom:.5rem}h2{font-size:1rem;margin:1.5rem 0 .5rem;color:#374151;text-transform:uppercase}
-    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1rem 0}.kpi{border:1px solid #E5E7EB;border-radius:8px;padding:1rem;text-align:center}
-    .kv{font-size:1.75rem;font-weight:800}.kl{font-size:.75rem;color:#6B7280;margin-top:.25rem}
-    table{width:100%;border-collapse:collapse;font-size:.85rem}th{background:#F9FAFB;text-align:left;padding:.5rem .75rem;border-bottom:2px solid #E5E7EB}td{padding:.5rem .75rem;border-bottom:1px solid #F3F4F6}
-    footer{margin-top:2rem;font-size:.75rem;color:#9CA3AF;text-align:center}
-  </style></head><body>
-  <h1>Informe — ${academyName || 'Academia'}</h1><p style="color:#6B7280;font-size:.85rem">${fecha}</p>
-  <h2>Resumen global</h2><div class="kpis">
+/* ─── Exportar PDF Director ──────────────────────────────────────────────── */
+function exportarInforme(stats, academyName, studentProfiles) {
+  const fecha    = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })
+  const periodo  = 'Últimos 30 días'
+
+  // Rentabilidad
+  const preciosReales = (studentProfiles || [])
+    .filter(p => p.extended?.monthly_price)
+    .map(p => parseFloat(p.extended.monthly_price))
+  const mrr = preciosReales.length > 0 ? preciosReales.reduce((a, b) => a + b, 0) : null
+
+  // Alertas
+  const enRiesgo  = stats.bySubject.flatMap(s => s.alumnosEnRiesgo)
+  const porExpirar = stats.bySubject.flatMap(s => s.alumnosPorExpirar)
+
+  // Todos los alumnos con nota
+  const spMap = {}
+  for (const sp of studentProfiles || []) spMap[sp.id] = sp
+  const todosAlumnos = stats.bySubject.flatMap(sub =>
+    sub.alumnosConNota.map(a => ({
+      ...a,
+      subjectName:  sub.name,
+      enRiesgo:     sub.alumnosEnRiesgo.some(r => r.id === a.id),
+      examDate:     spMap[a.id]?.extended?.exam_date || null,
+      fullName:     spMap[a.id]?.extended?.full_name || null,
+    }))
+  ).sort((a, b) => (b.nota ?? -1) - (a.nota ?? -1))
+
+  const css = `
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111;background:#fff;padding:2.5rem;max-width:860px;margin:0 auto;font-size:13px}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:2px solid #111}
+    .header-left h1{font-size:1.5rem;font-weight:800;margin-bottom:.2rem}
+    .header-left p{color:#6B7280;font-size:.8rem}
+    .header-right{text-align:right;color:#6B7280;font-size:.75rem;line-height:1.6}
+    .badge{display:inline-block;background:#F3F4F6;border-radius:4px;padding:.15rem .5rem;font-size:.7rem;font-weight:700;color:#374151}
+    h2{font-size:.7rem;font-weight:800;color:#6B7280;text-transform:uppercase;letter-spacing:.08em;margin:1.75rem 0 .75rem}
+    .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:.6rem;margin-bottom:.5rem}
+    .kpi{border:1px solid #E5E7EB;border-radius:10px;padding:.75rem .5rem;text-align:center}
+    .kv{font-size:1.4rem;font-weight:800;line-height:1}
+    .kl{font-size:.62rem;color:#6B7280;margin-top:.3rem;text-transform:uppercase;letter-spacing:.04em}
+    .rent{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+    .rent-kpi{border:1px solid #E5E7EB;border-radius:10px;padding:.75rem 1rem}
+    .rent-kpi .kv{font-size:1.2rem;color:#059669}
+    table{width:100%;border-collapse:collapse;margin-bottom:1rem}
+    th{background:#F9FAFB;font-size:.7rem;font-weight:700;text-align:left;padding:.5rem .75rem;border-bottom:2px solid #E5E7EB;text-transform:uppercase;letter-spacing:.04em;color:#374151}
+    td{padding:.5rem .75rem;border-bottom:1px solid #F3F4F6;font-size:.78rem;vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    .tag{display:inline-block;border-radius:4px;padding:.15rem .45rem;font-size:.65rem;font-weight:700}
+    .tag-red{background:#FEF2F2;color:#DC2626}
+    .tag-green{background:#ECFDF5;color:#059669}
+    .tag-amber{background:#FFFBEB;color:#B45309}
+    .alert-section{border:1px solid #FEE2E2;border-radius:10px;padding:1rem;background:#FFF5F5;margin-bottom:.5rem}
+    .alert-title{font-size:.7rem;font-weight:800;color:#DC2626;text-transform:uppercase;margin-bottom:.5rem}
+    .alert-row{display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid #FEE2E2;font-size:.75rem}
+    .alert-row:last-child{border:none}
+    .semanas{display:grid;grid-template-columns:repeat(8,1fr);gap:.4rem;align-items:flex-end;height:60px;margin-bottom:.3rem}
+    .sem-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:.2rem;height:100%;justify-content:flex-end}
+    .sem-bar{width:100%;border-radius:3px;background:#0891B2;min-height:2px}
+    .sem-label{font-size:.55rem;color:#9CA3AF;text-align:center;white-space:nowrap}
+    .sem-val{font-size:.6rem;color:#374151;font-weight:700}
+    footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid #E5E7EB;display:flex;justify-content:space-between;color:#9CA3AF;font-size:.7rem}
+    @media print{body{padding:1rem}@page{margin:1.5cm}}
+  `
+
+  const maxSes = Math.max(...stats.semanas.map(s => s.sesiones), 1)
+  const semanasHtml = stats.semanas.map(s => {
+    const h = Math.round((s.sesiones / maxSes) * 50)
+    return `<div class="sem-bar-wrap">
+      ${s.sesiones > 0 ? `<div class="sem-val">${s.sesiones}</div>` : ''}
+      <div class="sem-bar" style="height:${Math.max(h, 2)}px"></div>
+      <div class="sem-label">${s.label}</div>
+    </div>`
+  }).join('')
+
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
+  <title>Informe ${academyName || 'Academia'} — ${fecha}</title>
+  <style>${css}</style></head><body>
+
+  <div class="header">
+    <div class="header-left">
+      <h1>${academyName || 'Academia'}</h1>
+      <p>Informe de dirección · ${periodo}</p>
+    </div>
+    <div class="header-right">
+      <div><strong>Generado el</strong> ${fecha}</div>
+      <div>FrostFox Academy</div>
+      <div style="margin-top:.4rem"><span class="badge">${stats.bySubject.length} asignatura${stats.bySubject.length !== 1 ? 's' : ''}</span></div>
+    </div>
+  </div>
+
+  <h2>Resumen global</h2>
+  <div class="kpis">
     <div class="kpi"><div class="kv">${stats.totalAlumnos}</div><div class="kl">Alumnos</div></div>
-    <div class="kpi"><div class="kv">${stats.totalActivos}</div><div class="kl">Activos 7d</div></div>
-    <div class="kpi"><div class="kv">${stats.notaGlobal ?? '—'}${stats.notaGlobal !== null ? '%' : ''}</div><div class="kl">Nota media 30d</div></div>
+    <div class="kpi"><div class="kv" style="color:#059669">${stats.totalActivos}</div><div class="kl">Activos 7d</div></div>
+    <div class="kpi"><div class="kv">${stats.notaGlobal !== null ? stats.notaGlobal + '%' : '—'}</div><div class="kl">Nota media 30d</div></div>
     <div class="kpi"><div class="kv">${stats.sesiones30d}</div><div class="kl">Sesiones 30d</div></div>
     <div class="kpi"><div class="kv" style="color:#DC2626">${stats.totalEnRiesgo}</div><div class="kl">En riesgo</div></div>
     <div class="kpi"><div class="kv" style="color:#B45309">${stats.totalPorExpirar}</div><div class="kl">Expiran pronto</div></div>
   </div>
-  <h2>Por asignatura</h2><table><tr><th>Asignatura</th><th>Alumnos</th><th>Activos</th><th>Nota</th><th>Sesiones</th><th>Riesgo</th></tr>
-  ${stats.bySubject.map(s=>`<tr><td>${s.name}</td><td>${s.totalAlumnos}</td><td>${s.alumnosActivos}</td><td>${s.notaMedia!==null?s.notaMedia+'%':'—'}</td><td>${s.sesiones30d}</td><td>${s.enRiesgo}</td></tr>`).join('')}
-  </table><footer>FrostFox Academy · ${fecha}</footer></body></html>`
-  const w = window.open('', '_blank'); w.document.write(html); w.document.close()
-  setTimeout(() => w.print(), 400)
+
+  <h2>Actividad — últimas 8 semanas</h2>
+  <div class="semanas">${semanasHtml}</div>
+
+  <h2>Por asignatura</h2>
+  <table>
+    <tr><th>Asignatura</th><th>Alumnos</th><th>Activos 7d</th><th>Nota media</th><th>Sesiones 30d</th><th>En riesgo</th><th>Expiran pronto</th></tr>
+    ${stats.bySubject.map(s => `<tr>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.totalAlumnos}</td>
+      <td>${s.alumnosActivos}</td>
+      <td style="font-weight:700;color:${s.notaMedia >= 70 ? '#059669' : s.notaMedia >= 50 ? '#B45309' : '#DC2626'}">${s.notaMedia !== null ? s.notaMedia + '%' : '—'}</td>
+      <td>${s.sesiones30d}</td>
+      <td>${s.enRiesgo > 0 ? `<span class="tag tag-red">${s.enRiesgo}</span>` : '—'}</td>
+      <td>${s.porExpirar > 0 ? `<span class="tag tag-amber">${s.porExpirar}</span>` : '—'}</td>
+    </tr>`).join('')}
+  </table>
+
+  <h2>Alumnos</h2>
+  <table>
+    <tr><th>Alumno</th><th>Asignatura</th><th>Nota media</th><th>Sesiones</th><th>Estado</th><th>Fecha examen</th></tr>
+    ${todosAlumnos.map(a => `<tr>
+      <td><strong>${a.fullName || a.username}</strong>${a.fullName ? `<br><span style="color:#9CA3AF;font-size:.68rem">@${a.username}</span>` : ''}</td>
+      <td>${a.subjectName}</td>
+      <td style="font-weight:700;color:${a.nota >= 70 ? '#059669' : a.nota >= 50 ? '#B45309' : '#DC2626'}">${a.nota !== null ? a.nota + '%' : '—'}</td>
+      <td>${a.sesiones}</td>
+      <td>${a.enRiesgo ? '<span class="tag tag-red">En riesgo</span>' : '<span class="tag tag-green">Activo</span>'}</td>
+      <td style="color:#6B7280">${a.examDate ? new Date(a.examDate).toLocaleDateString('es-ES', {day:'2-digit',month:'short',year:'numeric'}) : '—'}</td>
+    </tr>`).join('')}
+  </table>
+
+  ${(enRiesgo.length > 0 || porExpirar.length > 0) ? `
+  <h2>Alertas activas</h2>
+  ${enRiesgo.length > 0 ? `<div class="alert-section">
+    <div class="alert-title">⚠ ${enRiesgo.length} alumno${enRiesgo.length !== 1 ? 's' : ''} sin actividad</div>
+    ${enRiesgo.map(a => `<div class="alert-row"><span>${a.username}</span><span style="color:#DC2626">${a.diasInactivo ?? '?'} días inactivo</span></div>`).join('')}
+  </div>` : ''}
+  ${porExpirar.length > 0 ? `<div class="alert-section" style="border-color:#FDE68A;background:#FFFBEB">
+    <div class="alert-title" style="color:#B45309">🔒 ${porExpirar.length} acceso${porExpirar.length !== 1 ? 's' : ''} próximos a expirar</div>
+    ${porExpirar.map(a => `<div class="alert-row" style="border-color:#FDE68A"><span>${a.username}</span><span style="color:#B45309">Expira en ${a.diasRestantes} días</span></div>`).join('')}
+  </div>` : ''}
+  ` : ''}
+
+  ${mrr !== null ? `
+  <h2>Rentabilidad</h2>
+  <div class="rent">
+    <div class="rent-kpi"><div class="kv">${mrr.toLocaleString('es-ES')} €</div><div class="kl">MRR</div></div>
+    <div class="rent-kpi"><div class="kv">${(mrr * 12).toLocaleString('es-ES')} €</div><div class="kl">ARR estimado</div></div>
+    <div class="rent-kpi"><div class="kv">${preciosReales.length}</div><div class="kl">Alumnos con precio</div></div>
+  </div>` : ''}
+
+  <footer>
+    <span>FrostFox Academy · Informe de dirección</span>
+    <span>${fecha}</span>
+  </footer>
+  </body></html>`
+
+  const w = window.open('', '_blank')
+  w.document.write(html)
+  w.document.close()
+  setTimeout(() => w.print(), 500)
+}
+
+
+
+
+// ── Asignaturas Detalle ───────────────────────────────────────────────────────
+function AsignaturasDetalle({ stats, studentProfiles, onAlumnoClick }) {
+  const [subSel, setSubSel] = useState(stats.bySubject?.[0]?.id || null)
+  const [sortBy,  setSortBy]  = useState('nota')
+  const [sortDir, setSortDir] = useState('desc')
+
+  const spMap = {}
+  for (const sp of studentProfiles) spMap[sp.id] = sp
+
+  const sub = stats.bySubject?.find(s => s.id === subSel)
+
+  const alumnos = useMemo(() => {
+    if (!sub) return []
+    return [...sub.alumnosConNota]
+      .map(a => ({
+        ...a,
+        enRiesgo:    sub.alumnosEnRiesgo.some(r => r.id === a.id),
+        diasInactivo: sub.alumnosEnRiesgo.find(r => r.id === a.id)?.diasInactivo ?? null,
+        extended:    spMap[a.id]?.extended || null,
+        access_until: spMap[a.id]?.access_until || null,
+        created_at:  spMap[a.id]?.created_at || null,
+      }))
+      .sort((a, b) => {
+        const va = a[sortBy] ?? -1, vb = b[sortBy] ?? -1
+        return sortDir === 'desc' ? vb - va : va - vb
+      })
+  }, [sub, sortBy, sortDir, studentProfiles])
+
+  const handleSort = col => {
+    if (sortBy === col) setSortDir(d => d === 'desc' ? 'asc' : 'desc')
+    else { setSortBy(col); setSortDir('desc') }
+  }
+
+  if (!stats.bySubject?.length) return null
+
+  return (
+    <div className={styles.asigDetalle}>
+      {/* Cards de asignaturas */}
+      <div className={styles.asigCards}>
+        {stats.bySubject.map(s => (
+          <button
+            key={s.id}
+            className={[styles.asigDetailCard, subSel === s.id ? styles.asigDetailCardActive : ''].join(' ')}
+            style={{ '--sc': s.color }}
+            onClick={() => setSubSel(s.id)}
+          >
+            <div className={styles.asigDetailBar} />
+            <div className={styles.asigDetailContent}>
+              <span className={styles.asigDetailName}>{s.name}</span>
+              <div className={styles.asigDetailKpis}>
+                <div className={styles.asigDetailKpi}>
+                  <span className={styles.asigDetailKpiVal}>{s.totalAlumnos}</span>
+                  <span className={styles.asigDetailKpiLabel}>Alumnos</span>
+                </div>
+                <div className={styles.asigDetailKpi}>
+                  <span className={styles.asigDetailKpiVal} style={{ color: '#059669' }}>{s.alumnosActivos}</span>
+                  <span className={styles.asigDetailKpiLabel}>Activos</span>
+                </div>
+                <div className={styles.asigDetailKpi}>
+                  <span className={styles.asigDetailKpiVal} style={{ color: scoreColor(s.notaMedia) }}>
+                    {s.notaMedia !== null ? `${s.notaMedia}%` : '—'}
+                  </span>
+                  <span className={styles.asigDetailKpiLabel}>Nota media</span>
+                </div>
+                <div className={styles.asigDetailKpi}>
+                  <span className={styles.asigDetailKpiVal}>{s.sesiones30d}</span>
+                  <span className={styles.asigDetailKpiLabel}>Sesiones 30d</span>
+                </div>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Tabla de alumnos de la asignatura seleccionada */}
+      {sub && (
+        <div className={styles.asigAlumnos}>
+          <div className={styles.asigAlumnosHead}>
+            <h3 className={styles.asigAlumnosTitle} style={{ color: sub.color }}>
+              <span className={styles.asigAlumnosDot} style={{ background: sub.color }} />
+              {sub.name}
+            </h3>
+            <div className={styles.asigAlumnosStats}>
+              {sub.enRiesgo > 0 && (
+                <span className={styles.asigBadgeRed}>⚠ {sub.enRiesgo} en riesgo</span>
+              )}
+              {sub.porExpirar > 0 && (
+                <span className={styles.asigBadgeAmber}>🔒 {sub.porExpirar} expiran pronto</span>
+              )}
+            </div>
+          </div>
+
+          {alumnos.length === 0 ? (
+            <p className={styles.empty}>Sin alumnos en esta asignatura</p>
+          ) : (
+            <div className={styles.alumnosTable}>
+              <div className={styles.alumnosTableHead}>
+                <span>Alumno</span>
+                <button className={styles.sortBtn} onClick={() => handleSort('nota')}>
+                  Nota <ArrowUpDown size={10} style={{ opacity: sortBy === 'nota' ? 1 : 0.4 }} />
+                </button>
+                <button className={styles.sortBtn} onClick={() => handleSort('sesiones')}>
+                  Sesiones <ArrowUpDown size={10} style={{ opacity: sortBy === 'sesiones' ? 1 : 0.4 }} />
+                </button>
+                <span>Estado</span>
+                <span />
+              </div>
+              {alumnos.map(a => {
+                const mascota = MASCOTAS[a.extended?.mascota]
+                const nombre  = a.extended?.full_name || a.username
+                return (
+                  <div key={a.id} className={styles.alumnoRow}
+                    style={{ gridTemplateColumns: '1.5fr 100px 100px 120px 32px' }}
+                    onClick={() => onAlumnoClick({ ...a })}>
+                    <div className={styles.alumnoNameCell}>
+                      <div className={styles.alumnoAvatarSm}
+                        style={{ background: scoreColor(a.nota) + '22', color: scoreColor(a.nota) }}>
+                        {mascota ? mascota.emoji : nombre[0].toUpperCase()}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--ink)' }}>{nombre}</div>
+                        {a.extended?.full_name && <div style={{ fontSize: '0.68rem', color: 'var(--ink-muted)' }}>@{a.username}</div>}
+                      </div>
+                    </div>
+                    <span style={{ color: scoreColor(a.nota), fontWeight: 700, fontSize: '0.88rem' }}>
+                      {a.nota !== null ? `${a.nota}%` : '—'}
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--ink-muted)' }}>{a.sesiones}</span>
+                    <span className={a.enRiesgo ? styles.estadoRiesgo : styles.estadoOk}>
+                      {a.enRiesgo ? `${a.diasInactivo ?? '?'}d inactivo` : 'Activo'}
+                    </span>
+                    <ArrowRight size={13} className={styles.alumnoArrow} />
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Asignaturas Card ──────────────────────────────────────────────────────────
+function AsignaturasCard({ stats }) {
+  const subs = stats.bySubject || []
+
+  if (subs.length === 0) return (
+    <div className={styles.examEmpty}>
+      <BookOpen size={22} strokeWidth={1.4} />
+      <p>Sin asignaturas configuradas</p>
+    </div>
+  )
+
+  return (
+    <div className={styles.asigList}>
+      {subs.map(sub => (
+        <div key={sub.id} className={styles.asigRow}>
+          <div className={styles.asigDot} style={{ background: sub.color }} />
+          <div className={styles.asigInfo}>
+            <span className={styles.asigNombre}>{sub.name}</span>
+            <span className={styles.asigMeta}>{sub.totalAlumnos} alumnos · {sub.alumnosActivos} activos</span>
+          </div>
+          {sub.notaMedia !== null && (
+            <span className={styles.asigNota} style={{ color: scoreColor(sub.notaMedia) }}>
+              {sub.notaMedia}%
+            </span>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── Bento Nav Director ────────────────────────────────────────────────────────
+function DirectorBentoNav({ tab, setTab, stats, nAlertas, studentProfiles }) {
+  const preciosReales = studentProfiles
+    .filter(p => p.extended?.monthly_price)
+    .map(p => parseFloat(p.extended.monthly_price))
+  const mrr = preciosReales.length > 0
+    ? preciosReales.reduce((a, b) => a + b, 0)
+    : null
+
+  const cards = [
+    {
+      id:    'overview',
+      label: 'Actividad',
+      desc:  stats.sesiones30d > 0
+        ? `${stats.sesiones30d} sesiones este mes`
+        : 'Sin sesiones todavía',
+      icon:  TrendingUp,
+      color: '#0891B2',
+      big:   true,
+    },
+    {
+      id:    'alumnos',
+      label: 'Alumnos',
+      desc:  stats.totalAlumnos > 0
+        ? `${stats.totalAlumnos} matriculados · ${stats.totalActivos} activos`
+        : 'Sin alumnos aún',
+      icon:  Users,
+      color: '#2563EB',
+    },
+    {
+      id:    'alertas',
+      label: 'Alertas',
+      desc:  nAlertas > 0
+        ? `${nAlertas} acción${nAlertas !== 1 ? 'es' : ''} pendiente${nAlertas !== 1 ? 's' : ''}`
+        : 'Todo en orden',
+      icon:  AlertTriangle,
+      color: nAlertas > 0 ? '#DC2626' : '#059669',
+      badge: nAlertas > 0 ? nAlertas : null,
+    },
+    {
+      id:    'profesores',
+      label: 'Profesores',
+      desc:  stats.totalProfesores > 0
+        ? `${stats.totalProfesores} profesor${stats.totalProfesores !== 1 ? 'es' : ''}`
+        : 'Sin profesores aún',
+      icon:  GraduationCap,
+      color: '#7C3AED',
+    },
+    {
+      id:      'asignaturas',
+      label:   'Asignaturas',
+      desc:    `${stats.bySubject?.length || 0} asignatura${(stats.bySubject?.length || 0) !== 1 ? 's' : ''} activa${(stats.bySubject?.length || 0) !== 1 ? 's' : ''}`,
+      icon:    BookOpen,
+      color:   '#D97706',
+      isAsig:  true,
+    },
+    {
+      id:    'finanzas',
+      label: 'Rentabilidad',
+      desc:  mrr !== null
+        ? `${mrr.toLocaleString('es-ES')} €/mes · ${(mrr * 12).toLocaleString('es-ES')} € ARR`
+        : 'Sin precios asignados',
+      icon:  Euro,
+      color: '#059669',
+      big:   true,
+    },
+  ]
+
+  return (
+    <div className={styles.bentoGrid}>
+      {cards.map(card => {
+        const Icon   = card.icon
+        const active = tab === card.id
+        return (
+          <button
+            key={card.id}
+            className={[
+              styles.bentoCard,
+              card.big    ? styles.bentoBig    : '',
+              (active || (card.isAsig && tab === 'asignaturas')) && !card.isAsig ? styles.bentoActive : '',
+              card.isAsig ? styles.bentoExam   : '',
+            ].join(' ')}
+            style={{ '--bento-color': card.color }}
+            onClick={() => setTab(card.isAsig ? 'asignaturas' : card.id)}
+          >
+            {card.big && !card.isAsig && (
+              <AnimatedGridPattern
+                numSquares={18}
+                maxOpacity={active ? 0.12 : 0.06}
+                duration={4}
+                color={card.color}
+                lineColor={card.color + '20'}
+              />
+            )}
+            {!card.isAsig && (
+              <Ripple
+                mainCircleSize={card.big ? 60 : 40}
+                mainCircleOpacity={active ? 0.25 : 0.12}
+                numCircles={card.big ? 5 : 3}
+                color={card.color}
+                duration={card.big ? 3 : 3.5}
+              />
+            )}
+            {card.isAsig ? (
+              <div className={styles.bentoContent}>
+                <div className={styles.bentoExamHeader}>
+                  <div className={styles.bentoIconWrap}
+                    style={{ background: card.color + '18', color: card.color }}>
+                    <Icon size={16} strokeWidth={1.8} />
+                  </div>
+                  <span className={styles.bentoLabel}>{card.label}</span>
+                </div>
+                <AsignaturasCard stats={stats} />
+              </div>
+            ) : (
+              <div className={styles.bentoContent}>
+                <div className={styles.bentoIconWrap}
+                  style={{ background: card.color + '18', color: card.color }}>
+                  <Icon size={card.big ? 20 : 16} strokeWidth={1.8} />
+                </div>
+                <div className={styles.bentoText}>
+                  <span className={styles.bentoLabel}>{card.label}</span>
+                  <span className={styles.bentoDesc}>{card.desc}</span>
+                </div>
+                {card.badge && (
+                  <span className={styles.bentoBadge} style={{ background: card.color }}>
+                    {card.badge}
+                  </span>
+                )}
+              </div>
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
 }
 
 /* ─── Panel principal ─────────────────────────────────────────────────────── */
@@ -771,7 +1224,7 @@ export default function DirectorPanel({ currentUser }) {
           <h1 className={styles.pageTitle}>Panel de Dirección</h1>
           <p className={styles.pageSubtitle}>{currentUser?.academyName || 'Tu academia'}</p>
         </div>
-        <button className={styles.btnExport} onClick={() => exportarInforme(stats, currentUser?.academyName)}>
+        <button className={styles.btnExport} onClick={() => exportarInforme(stats, currentUser?.academyName, studentProfiles)}>
           <FileText size={14} /> Exportar PDF
         </button>
       </div>
@@ -789,21 +1242,24 @@ export default function DirectorPanel({ currentUser }) {
         <KpiCard icon={Shield}        label="Expiran pronto" value={stats.totalPorExpirar} color="#B45309" alert={stats.totalPorExpirar > 0} />
       </div>
 
-      <div className={styles.tabs}>
-        {[
-          { id: 'overview',    label: 'Actividad',    icon: TrendingUp },
-          { id: 'alumnos',     label: 'Alumnos',      icon: Users },
-          { id: 'profesores',  label: 'Profesores',   icon: GraduationCap },
-          { id: 'alertas',     label: nAlertas > 0 ? `Alertas (${nAlertas})` : 'Alertas', icon: AlertTriangle },
-          { id: 'finanzas',    label: 'Rentabilidad', icon: Euro },
-        ].map(({ id, label, icon: Icon }) => (
-          <button key={id}
-            className={[styles.tab, tab === id ? styles.tabActive : ''].join(' ')}
-            onClick={() => setTab(id)}>
-            <Icon size={13} /> {label}
-          </button>
-        ))}
-      </div>
+      <DirectorBentoNav
+        tab={tab}
+        setTab={setTab}
+        stats={stats}
+        nAlertas={nAlertas}
+        studentProfiles={studentProfiles}
+      />
+
+      {tab === 'asignaturas' && (
+        <AsignaturasDetalle
+          stats={stats}
+          studentProfiles={studentProfiles}
+          onAlumnoClick={a => {
+            const sp = spMap[a.id]
+            setAlumnoDetalle({ ...a, extended: sp?.extended || null, access_until: sp?.access_until, created_at: sp?.created_at })
+          }}
+        />
+      )}
 
       {tab === 'overview' && (
         <div className={styles.section}>

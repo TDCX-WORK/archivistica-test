@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Flame, BookOpen, Star, Lock, CheckCircle, TrendingUp, Calendar, Target, Zap, Trophy, User, Settings, Sun, ChevronRight, Save, ClipboardList, Layers, Award, GraduationCap, Bookmark, Clock, Shield, Hash, Gem, FileText, BarChart2, Medal, Loader2 } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
+import { useStudentProfile } from '../../hooks/useStudentProfile'
 import { useSettings } from '../../hooks/useSettings'
 import styles from './Profile.module.css'
 
@@ -120,8 +121,9 @@ const MISSION_ICONS = {
 
 // ── TABS ──────────────────────────────────────────────────────────────────
 const TABS = [
-  { id: 'logros',   label: 'Logros',   icon: Trophy },
-  { id: 'ajustes',  label: 'Ajustes',  icon: Settings },
+  { id: 'logros',    label: 'Logros',    icon: Trophy },
+  { id: 'mis-datos', label: 'Mis datos', icon: User   },
+  { id: 'ajustes',   label: 'Ajustes',   icon: Settings },
 ]
 
 // ── TOGGLE COMPONENT ──────────────────────────────────────────────────────
@@ -271,6 +273,107 @@ function SettingsTab({ currentUser, settings, updateSetting }) {
         </div>
       </div>
 
+    </div>
+  )
+}
+
+
+// ── MIS DATOS TAB ─────────────────────────────────────────────────────────
+function MisDatosTab({ currentUser }) {
+  const { profile, loading, saving, save } = useStudentProfile(currentUser?.id)
+  const [form, setForm] = useState({
+    full_name:     '',
+    phone:         '',
+    city:          '',
+    email_contact: '',
+    exam_date:     '',
+  })
+  const [saved, setSaved] = useState(false)
+
+  // Inicializar form cuando carga el perfil
+  useEffect(() => {
+    if (profile) {
+      setForm({
+        full_name:     profile.full_name     || '',
+        phone:         profile.phone         || '',
+        city:          profile.city          || '',
+        email_contact: profile.email_contact || '',
+        exam_date:     profile.exam_date     || '',
+      })
+    }
+  }, [profile])
+
+  const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }))
+
+  const handleSave = async () => {
+    const ok = await save({
+      full_name:     form.full_name.trim()     || null,
+      phone:         form.phone.trim()         || null,
+      city:          form.city.trim()          || null,
+      email_contact: form.email_contact.trim() || null,
+      exam_date:     form.exam_date            || null,
+    })
+    if (ok) {
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    }
+  }
+
+  if (loading) return (
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+      <Loader2 size={24} strokeWidth={1.5} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)' }} />
+    </div>
+  )
+
+  const CAMPOS = [
+    { key: 'full_name',     label: 'Nombre completo',    desc: 'Tu nombre real, visible para el profesor',     placeholder: 'María García López',    type: 'text'  },
+    { key: 'phone',         label: 'Teléfono',           desc: 'Para que tu academia pueda contactarte',       placeholder: '612 345 678',           type: 'tel'   },
+    { key: 'city',          label: 'Ciudad',             desc: 'Tu ciudad de residencia actual',               placeholder: 'Madrid',                type: 'text'  },
+    { key: 'email_contact', label: 'Email de contacto',  desc: 'Puede ser distinto al de tu cuenta',          placeholder: 'tu@email.com',          type: 'email' },
+    { key: 'exam_date',     label: 'Fecha del examen',   desc: 'Fecha aproximada de tu oposición',             placeholder: '',                      type: 'date'  },
+  ]
+
+  return (
+    <div className={styles.settingsPage}>
+      <div className={styles.settingsSection}>
+        <div className={styles.settingsSectionHeader}>
+          <User size={15} />
+          <span>Mis datos personales</span>
+        </div>
+        <div className={styles.settingsCard}>
+          {CAMPOS.map((campo, idx) => (
+            <div key={campo.key}>
+              {idx > 0 && <div className={styles.settingsDivider} />}
+              <div className={styles.settingsRow}>
+                <div className={styles.settingsRowInfo}>
+                  <span className={styles.settingsRowLabel}>{campo.label}</span>
+                  <span className={styles.settingsRowDesc}>{campo.desc}</span>
+                </div>
+                <div className={styles.settingsRowControl}>
+                  <input
+                    className={styles.settingsInput}
+                    type={campo.type}
+                    value={form[campo.key]}
+                    onChange={e => set(campo.key, e.target.value)}
+                    placeholder={campo.placeholder}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+        <button
+          className={[styles.settingsSaveBtn, saved ? styles.settingsSaved : ''].join(' ')}
+          onClick={handleSave}
+          disabled={saving}
+          style={{ height: 38, padding: '0 1.25rem', fontSize: '0.85rem' }}
+        >
+          {saving ? 'Guardando…' : saved ? '✓ Guardado' : 'Guardar cambios'}
+        </button>
+      </div>
     </div>
   )
 }
@@ -502,6 +605,11 @@ export default function Profile({ currentUser, progress, studyReadTopics, studyB
             </div>
           ))}
         </>
+      )}
+
+      {/* ── TAB: MIS DATOS ── */}
+      {activeTab === 'mis-datos' && (
+        <MisDatosTab currentUser={currentUser} />
       )}
 
       {/* ── TAB: AJUSTES ── */}

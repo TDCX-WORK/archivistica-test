@@ -58,11 +58,15 @@ export function useProgress(userId, academyId, subjectId) {
     setSessions(prev => [data, ...prev])
 
     // ── Notificaciones post-sesion ────────────────────────────────────────
+    // Usamos sessions (historico anterior) + data (sesion recien guardada)
+    // para evitar stale closure — el setSessions de arriba aun no se ha procesado
+    const sesionesConNueva = [data, ...sessions]
+
     try {
       // 1. Mejor nota historica
       const mejorNota = sessions.length > 0 ? Math.max(...sessions.map(s => s.score)) : 0
 
-      if (score > mejorNota && score >= 70 && sessions.length >= 3) {
+      if (score > mejorNota && score >= 70 && sesionesConNueva.length >= 3) {
         await supabase.from('notifications').insert({
           user_id: userId,
           type:    'mejor_nota',
@@ -93,7 +97,7 @@ export function useProgress(userId, academyId, subjectId) {
       }
 
       // 2. Racha destacada
-      const diasConHoy = [...new Set([...sessions.map(s => s.played_at), data.played_at])]
+      const diasConHoy = [...new Set(sesionesConNueva.map(s => s.played_at))]
       const racha      = calcStreak(diasConHoy.map(d => ({ played_at: d })))
       const hitosRacha = [3, 7, 14, 30]
 

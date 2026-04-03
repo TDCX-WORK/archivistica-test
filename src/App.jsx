@@ -1,5 +1,5 @@
 import { useSettings }    from './hooks/useSettings'
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useState }       from 'react'
 import { ShieldOff, LogOut } from 'lucide-react'
 import useAuth            from './hooks/useAuth'
@@ -268,19 +268,17 @@ function BillingWrapper({ currentUser }) {
 }
 
 
-// Wrapper que lee ?block=ID de la URL y lo pasa a StudyView
-import { useSearchParams } from 'react-router-dom'
-
 function StudyViewWrapper({ currentUser, onSelectMode }) {
   const [searchParams] = useSearchParams()
   const initialBlockId  = searchParams.get('block') || null
   return <StudyView currentUser={currentUser} onSelectMode={onSelectMode} initialBlockId={initialBlockId} />
 }
 
-export default function App() {
+function AppInner() {
   const {
     currentUser, loading, login, register, logout, error, clearError,
-    clearForcePasswordChange, recoveryMode, requestPasswordReset, confirmPasswordReset,
+    clearForcePasswordChange, completeOnboarding,
+    recoveryMode, requestPasswordReset, confirmPasswordReset,
   } = useAuth()
   const progress      = useProgress(currentUser?.id, currentUser?.academy_id, currentUser?.subject_id)
   const studyProgress = useStudyProgress(currentUser?.id, currentUser?.academy_id, currentUser?.subject_id)
@@ -296,14 +294,18 @@ export default function App() {
     return (
       <OnboardingWizard
         currentUser={currentUser}
-        onComplete={() => window.location.reload()}
+        onComplete={completeOnboarding}
       />
     )
   }
 
+  return <AppShell currentUser={currentUser} logout={logout} progress={progress} studyProgress={studyProgress} />
+}
+
+export default function App() {
   return (
     <BrowserRouter>
-      <AppShell currentUser={currentUser} logout={logout} progress={progress} studyProgress={studyProgress} />
+      <AppInner />
     </BrowserRouter>
   )
 }

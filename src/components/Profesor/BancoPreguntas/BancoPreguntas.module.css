@@ -1,0 +1,309 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+/* ── Header stats ─────────────────────────────── */
+.header {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.headerStat {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.headerIcon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+/* ── Filtros de bloque ────────────────────────── */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filtroBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.filtroBtn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-xlt);
+}
+
+.filtroActive {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-xlt);
+}
+
+.filtroDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Buscador ─────────────────────────────────── */
+.searchWrap {
+  position: relative;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-subtle);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  height: 38px;
+  padding: 0 0.75rem 0 2.25rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  font-size: 0.83rem;
+  color: var(--ink);
+  outline: none;
+  font-family: var(--font-body);
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  border-color: var(--primary);
+}
+
+.searchInput::placeholder {
+  color: var(--ink-subtle);
+}
+
+/* ── Título bloque seleccionado ───────────────── */
+.bloqueTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.75rem;
+  border-left: 3px solid var(--primary);
+  background: var(--surface-off);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.bloqueTitleCount {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+/* ── Lista de preguntas ───────────────────────── */
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── Card de pregunta ─────────────────────────── */
+.preguntaCard {
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.preguntaCard:hover {
+  border-color: var(--line-strong);
+}
+
+.preguntaHeader {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.preguntaNum {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface-dim);
+  color: var(--ink-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.preguntaTexto {
+  flex: 1;
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--ink-muted);
+  margin-top: 3px;
+}
+
+/* ── Body expandido ───────────────────────────── */
+.preguntaBody {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-top: 0.75rem;
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--r-md);
+  background: var(--surface-off);
+  border: 1.5px solid transparent;
+}
+
+.opcionCorrecta {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.opcionLetra {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface-dim);
+  color: var(--ink-muted);
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.opcionCorrecta .opcionLetra {
+  background: #22c55e;
+  color: #fff;
+}
+
+.opcionTexto {
+  flex: 1;
+  font-size: 0.8rem;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.opcionBadge {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #16a34a;
+  background: #dcfce7;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+}
+
+/* ── Explicación ──────────────────────────────── */
+.explicacion {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: #fffbeb;
+  border-radius: var(--r-md);
+  border-left: 3px solid #f59e0b;
+}
+
+.explicacionLabel {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #d97706;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.3rem;
+}
+
+.explicacionTexto {
+  font-size: 0.8rem;
+  color: var(--ink);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Estados ──────────────────────────────────── */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 4rem 2rem;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+}
+
+.loadingSpinner {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid var(--line);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 4rem 2rem;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
