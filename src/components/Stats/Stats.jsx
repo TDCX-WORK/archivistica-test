@@ -8,6 +8,7 @@ import {
   ResponsiveContainer, CartesianGrid
 } from 'recharts'
 import { supabase } from '../../lib/supabase'
+import ErrorState from '../ui/ErrorState'
 import { useContent } from '../../hooks/useContent'
 import styles from './Stats.module.css'
 
@@ -195,18 +196,20 @@ function ChowchowCard({ modeData, avgScore, sessions }) {
 export default function Stats({ currentUser, progress, studyReadTopics, studyBookmarks }) {
   const [activeTab, setActiveTab] = useState('test')
 
-  const { blocks: studyBlocks, loading: loadingContent } = useContent(
+  const { blocks: studyBlocks, loading: loadingContent, error: errorContent } = useContent(
     currentUser?.id,
     currentUser?.subject_id
   )
 
   const [questions,        setQuestions]        = useState([])
   const [loadingQuestions, setLoadingQuestions] = useState(true)
+  const [errorQuestions,   setErrorQuestions]   = useState(null)
 
   useEffect(() => {
     if (!currentUser?.academy_id) return
     const load = async () => {
       setLoadingQuestions(true)
+      setErrorQuestions(null)
       let query = supabase
         .from('questions')
         .select('id, block_id, question')
@@ -214,7 +217,8 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
       if (currentUser.subject_id) {
         query = query.eq('subject_id', currentUser.subject_id)
       }
-      const { data } = await query
+      const { data, error: qErr } = await query
+      if (qErr) { setErrorQuestions('Error cargando preguntas'); setLoadingQuestions(false); return }
       setQuestions(data || [])
       setLoadingQuestions(false)
     }
@@ -222,6 +226,7 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
   }, [currentUser?.academy_id, currentUser?.subject_id])
 
   const isLoading = loadingContent || loadingQuestions
+  const hasError  = errorContent || errorQuestions
 
   const sessions = progress?.sessions || []
   const wrongs   = progress?.wrongAnswers || []
@@ -289,6 +294,8 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
     return s + Math.round((b.estimatedMinutes||0) * readFrac)
   }, 0)
   const remainMins = totalMinutes - readMinutes
+
+  if (hasError) return <ErrorState message="No se pudieron cargar tus estadísticas. Comprueba tu conexión." onRetry={() => window.location.reload()} />
 
   if (isLoading) return (
     <div className={styles.page} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>

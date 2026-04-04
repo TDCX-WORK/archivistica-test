@@ -842,7 +842,13 @@ export default function SuperadminPanel({ currentUser, modoPapelera=false }){
   const handleCrearUsuario=useCallback(async d=>crearUsuario(d),[crearUsuario])
   const handleToggleSuspender=useCallback(async(id,suspendido)=>{
     const res=await toggleSuspender(id,suspendido)
-    if(res?.ok)showBanner(`Academia ${suspendido?'suspendida':'reactivada'}. Usuarios afectados: ${res.affected??'?'}`)
+    if(res?.ok){
+      if(res.warning){
+        showBanner(res.warning,'error')
+      } else {
+        showBanner(`Academia ${suspendido?'suspendida':'reactivada'}. ${res.affected??0} usuario(s) procesados.`)
+      }
+    }
     return res
   },[toggleSuspender])
   const handleEliminar=async()=>{

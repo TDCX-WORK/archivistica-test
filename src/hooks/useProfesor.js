@@ -47,9 +47,14 @@ export function useProfesor(currentUser) {
 
       const alumnoIds = profiles.map(p => p.id)
 
+      // Límite de 90 días para sesiones — suficiente para stats y gráficos
+      const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10)
+
       const [{ data: sessions }, { data: reads }, { data: wrongs }, { data: studentProfiles }] = await Promise.all([
         supabase.from('sessions').select('user_id, score, played_at, created_at, mode_id')
-          .eq('academy_id', academyId).in('user_id', alumnoIds).order('created_at', { ascending: false }),
+          .eq('academy_id', academyId).in('user_id', alumnoIds)
+          .gte('played_at', ninetyDaysAgo)
+          .order('created_at', { ascending: false }),
         supabase.from('study_read').select('user_id, topic_id')
           .eq('academy_id', academyId).in('user_id', alumnoIds),
         supabase.from('wrong_answers').select('user_id, question_id, fail_count, next_review')

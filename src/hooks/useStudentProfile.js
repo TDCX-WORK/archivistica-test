@@ -6,15 +6,18 @@ export function useStudentProfile(userId) {
   const [profile,  setProfile]  = useState(null)
   const [loading,  setLoading]  = useState(true)
   const [saving,   setSaving]   = useState(false)
+  const [error,    setError]    = useState(null)
 
   const load = useCallback(async () => {
     if (!userId) { setLoading(false); return }
     setLoading(true)
-    const { data } = await supabase
+    setError(null)
+    const { data, error: err } = await supabase
       .from('student_profiles')
       .select('*')
       .eq('id', userId)
       .maybeSingle()
+    if (err) { setError('Error cargando perfil'); setLoading(false); return }
     setProfile(data || null)
     setLoading(false)
   }, [userId])
@@ -32,7 +35,7 @@ export function useStudentProfile(userId) {
     return !error
   }, [userId])
 
-  return { profile, loading, saving, save, reload: load }
+  return { profile, loading, saving, error, save, reload: load }
 }
 
 /* ─── Hook para el perfil extendido del staff (profesor/director) ────────── */

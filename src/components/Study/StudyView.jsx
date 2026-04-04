@@ -5,6 +5,7 @@ import {
   Loader2, Tag, Calendar, Highlighter, Trash2
 } from 'lucide-react'
 import { useContent }        from '../../hooks/useContent'
+import ErrorState from '../ui/ErrorState'
 import useStudyProgress      from '../../hooks/useStudyProgress'
 import { useHighlights }     from '../../hooks/useHighlights'
 import styles from './StudyView.module.css'
@@ -542,7 +543,7 @@ function ReadMode({ block, topicIndex, onClose, onToggleRead, onToggleBookmark,
 
 /* ─── Componente principal ───────────────────────────────────────────────── */
 export default function StudyView({ currentUser, onSelectMode, initialBlockId }) {
-  const { blocks, loading: loadingContent } = useContent(currentUser?.id, currentUser?.subject_id)
+  const { blocks, loading: loadingContent, error: errorContent } = useContent(currentUser?.id, currentUser?.subject_id)
   const { readTopics, bookmarks, loading: loadingProgress, toggleRead, toggleBookmark } =
     useStudyProgress(currentUser?.id)
   const { highlights, addHighlight, removeHighlight, highlightCountByTopic } =
@@ -567,6 +568,7 @@ export default function StudyView({ currentUser, onSelectMode, initialBlockId })
 
   const toggleExpand = id => setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
 
+  if (errorContent) return <ErrorState message="No se pudo cargar el temario. Comprueba tu conexión." onRetry={() => window.location.reload()} />
   if (loading) return <div className={styles.loadingState}><Loader2 size={24} className={styles.spinner} /></div>
 
   if (readMode) return (

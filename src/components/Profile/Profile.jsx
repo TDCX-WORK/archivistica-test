@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { Flame, BookOpen, Star, Lock, CheckCircle, TrendingUp, Calendar, Target, Zap, Trophy, User, Settings, Sun, ChevronRight, Save, ClipboardList, Layers, Award, GraduationCap, Bookmark, Clock, Shield, Hash, Gem, FileText, BarChart2, Medal, Loader2 } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
 import { useStudentProfile } from '../../hooks/useStudentProfile'
+import ErrorState from '../ui/ErrorState'
 import { useSettings } from '../../hooks/useSettings'
 import styles from './Profile.module.css'
 
@@ -280,7 +281,7 @@ function SettingsTab({ currentUser, settings, updateSetting }) {
 
 // ── MIS DATOS TAB ─────────────────────────────────────────────────────────
 function MisDatosTab({ currentUser }) {
-  const { profile, loading, saving, save } = useStudentProfile(currentUser?.id)
+  const { profile, loading, saving, error, save } = useStudentProfile(currentUser?.id)
   const [form, setForm] = useState({
     full_name:     '',
     phone:         '',
@@ -319,6 +320,7 @@ function MisDatosTab({ currentUser }) {
     }
   }
 
+  if (error) return <ErrorState message="No se pudo cargar tu perfil." onRetry={() => window.location.reload()} compact />
   if (loading) return (
     <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
       <Loader2 size={24} strokeWidth={1.5} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)' }} />

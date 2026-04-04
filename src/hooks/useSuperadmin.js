@@ -204,7 +204,11 @@ export function useSuperadmin(currentUser) {
     setSaving(false)
     if (!res.ok) return { error: result.error }
     await load()
-    return { ok: true, affected: result.affected }
+    return {
+      ok:      true,
+      affected: result.affected,
+      warning:  result.warning || null,
+    }
   }, [load])
 
   // ── Suspender / reactivar ────────────────────────────────────────────────

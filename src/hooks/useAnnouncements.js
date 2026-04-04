@@ -4,10 +4,12 @@ import { supabase } from '../lib/supabase'
 export function useAnnouncements(academyId, subjectId) {
   const [announcements, setAnnouncements] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   const load = useCallback(async () => {
     if (!academyId) { setLoading(false); return }
     setLoading(true)
+    setError(null)
 
     const now = new Date().toISOString()
     let q = supabase
@@ -19,7 +21,8 @@ export function useAnnouncements(academyId, subjectId) {
 
     if (subjectId) q = q.eq('subject_id', subjectId)
 
-    const { data } = await q
+    const { data, error: qErr } = await q
+    if (qErr) { setError('Error cargando avisos'); setLoading(false); return }
     setAnnouncements(data || [])
     setLoading(false)
   }, [academyId, subjectId])
@@ -52,5 +55,5 @@ export function useAnnouncements(academyId, subjectId) {
     setAnnouncements(prev => prev.filter(a => a.id !== id))
   }, [])
 
-  return { announcements, loading, addAnnouncement, deleteAnnouncement, reload: load }
+  return { announcements, loading, error, addAnnouncement, deleteAnnouncement, reload: load }
 }

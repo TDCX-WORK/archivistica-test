@@ -23,7 +23,8 @@ import DirectorPanel      from './components/Profesor/DirectorPanel/DirectorPane
 import SuperadminPanel    from './components/Superadmin/SuperadminPanel'
 import StripeBillingPanel from './components/Superadmin/StripeBillingPanel'
 import OnboardingWizard   from './components/Onboarding/OnboardingWizard'
-import GestionAcademia    from './components/Director/GestionAcademia/GestionAcademia'
+import GestionAcademia        from './components/Director/GestionAcademia/GestionAcademia'
+import FacturacionDirector    from './components/Director/FacturacionDirector/FacturacionDirector'
 import styles             from './App.module.css'
 
 const homeRoute = (user) => {
@@ -106,6 +107,7 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
     location.pathname.startsWith('/stats-clase')   ? 'stats-clase'  :
     location.pathname.startsWith('/profesor')      ? 'profesor'     :
     location.pathname.startsWith('/direccion')     ? 'direccion'    :
+    location.pathname.startsWith('/facturacion-director') ? 'facturacion-director' :
     location.pathname.startsWith('/papelera')      ? 'papelera'     :
     location.pathname.startsWith('/billing')       ? 'billing'      :
     location.pathname.startsWith('/admin')         ? 'superadmin'   : 'inicio'
@@ -120,7 +122,8 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
       perfil:        '/perfil',
       profesor:      '/profesor',
       'stats-clase': '/stats-clase',
-      direccion:     '/direccion',
+      direccion:               '/direccion',
+      'facturacion-director':   '/facturacion-director',
       superadmin:    '/admin',
       papelera:      '/papelera',
       billing:       '/billing',
@@ -156,7 +159,8 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
     activeTab === 'perfil'       ? 'Mi Perfil'           :
     activeTab === 'profesor'     ? 'Panel Profesor'      :
     activeTab === 'stats-clase'  ? 'Stats de la clase'   :
-    activeTab === 'direccion'    ? 'Panel de Dirección'  :
+    activeTab === 'direccion'            ? 'Panel de Dirección'  :
+    activeTab === 'facturacion-director' ? 'Facturación'          :
     activeTab === 'superadmin'   ? 'Superadmin'          :
     activeTab === 'papelera'     ? 'Papelera'            :
     activeTab === 'billing'      ? 'Facturación'         : 'Inicio'
@@ -233,6 +237,9 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
               } />
               <Route path="/gestion" element={
                 isDirector ? <GestionAcademia currentUser={currentUser} /> : <Navigate to={homeRoute(currentUser)} replace />
+              } />
+              <Route path="/facturacion-director" element={
+                isDirector ? <FacturacionDirector currentUser={currentUser} /> : <Navigate to={homeRoute(currentUser)} replace />
               } />
               <Route path="/admin" element={
                 isSuperadmin ? <SuperadminPanel currentUser={currentUser} /> : <Navigate to={homeRoute(currentUser)} replace />

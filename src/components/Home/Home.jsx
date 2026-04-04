@@ -12,6 +12,7 @@ import StudyHeatmap        from './StudyHeatmap'
 import { Ripple }          from '../magicui/Ripple'
 import { useAnnouncements }  from '../../hooks/useAnnouncements'
 import { useStudentProfile } from '../../hooks/useStudentProfile'
+import ErrorState from '../ui/ErrorState'
 import AnnouncementsCard    from './AnnouncementsCard'
 import styles              from './Home.module.css'
 
@@ -203,7 +204,7 @@ function BlockCard({ block, onClick }) {
 
 /* ── Componente principal ───────────────────────────────────────────────── */
 export default function Home({ onSelectMode, progress, currentUser, studyProgress }) {
-  const { announcements, loading: loadingAnn } = useAnnouncements(
+  const { announcements, loading: loadingAnn, error: errorAnn } = useAnnouncements(
     currentUser?.academy_id, currentUser?.subject_id
   )
   const { profile: studentProfile } = useStudentProfile(currentUser?.id)
