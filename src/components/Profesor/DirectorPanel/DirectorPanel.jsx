@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useDirector }        from '../../../hooks/useDirector'
 import { useAcademyProfiles } from '../../../hooks/useStudentProfile'
 import { supabase }           from '../../../lib/supabase'
@@ -8,7 +8,7 @@ import {
   Clock, FileText, CheckCircle, X, Check, Key, Euro,
   UserPlus, BookMarked, Rocket, ArrowUpDown, ArrowRight,
   Minus, Phone, MapPin, Mail, Target, Calendar, Edit3,
-  Save, ChevronLeft
+  Save, ChevronLeft, ChevronUp
 } from 'lucide-react'
 import { Ripple }             from '../../magicui/Ripple'
 import { AnimatedGridPattern } from '../../magicui/AnimatedGridPattern'
@@ -1153,6 +1153,18 @@ export default function DirectorPanel({ currentUser }) {
   const [alumnoDetalle,  setAlumnoDetalle]  = useState(null)
   const [profDetalle,    setProfDetalle]    = useState(null)
 
+  // ── Scroll automático al contenido en mobile ─────────────────────────────
+  const bentoRef   = useRef(null)
+  const contentRef = useRef(null)
+
+  useEffect(() => {
+    if (!tab || !contentRef.current) return
+    if (window.innerWidth > 900) return
+    setTimeout(() => {
+      contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+  }, [tab])
+
   const handleSaveAlumno = useCallback(async (userId, fields) => {
     // Campos de student_profiles
     const spFields = {
@@ -1242,13 +1254,18 @@ export default function DirectorPanel({ currentUser }) {
         <KpiCard icon={Shield}        label="Expiran pronto" value={stats.totalPorExpirar} color="#B45309" alert={stats.totalPorExpirar > 0} />
       </div>
 
-      <DirectorBentoNav
-        tab={tab}
-        setTab={setTab}
-        stats={stats}
-        nAlertas={nAlertas}
-        studentProfiles={studentProfiles}
-      />
+      <div ref={bentoRef}>
+        <DirectorBentoNav
+          tab={tab}
+          setTab={setTab}
+          stats={stats}
+          nAlertas={nAlertas}
+          studentProfiles={studentProfiles}
+        />
+      </div>
+
+      {/* Contenido de tabs — ref para scroll automático en mobile */}
+      <div ref={contentRef} className={styles.contentArea}>
 
       {tab === 'asignaturas' && (
         <AsignaturasDetalle
@@ -1330,6 +1347,19 @@ export default function DirectorPanel({ currentUser }) {
           studentProfiles={studentProfiles}
         />
       )}
+
+      {/* Botón volver arriba — solo visible en mobile cuando hay tab activo */}
+      {tab && (
+        <button
+          className={styles.scrollBackBtn}
+          onClick={() => bentoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          aria-label="Volver arriba"
+        >
+          <ChevronUp size={18} strokeWidth={2.5} />
+        </button>
+      )}
+
+      </div>{/* /contentArea */}
     </div>
   )
 }

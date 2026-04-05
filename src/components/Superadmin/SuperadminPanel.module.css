@@ -113,13 +113,14 @@
   padding: 0.55rem 1.1rem;
   background: linear-gradient(135deg, #1d4ed8, #5de4ff);
   border: none;
-  border-radius: var(--r-full);
+  border-radius: var(--r-xl);
   font-size: var(--fs-5);
   font-weight: 700;
   color: #fff;
   cursor: pointer;
   box-shadow: 0 0 20px rgba(93,228,255,0.2), 0 4px 12px rgba(0,0,0,0.3);
   transition: all 0.2s;
+  white-space: nowrap;
 }
 .btnPrimary:hover {
   box-shadow: 0 0 30px rgba(93,228,255,0.35), 0 8px 20px rgba(0,0,0,0.4);
@@ -1224,6 +1225,21 @@
   .acadBadges { display: none; }
   .acadSectionHeader { flex-direction: column; align-items: flex-start; }
   .fieldRow { grid-template-columns: 1fr; }
+  /* Botones de academia — wrap en mobile para no salirse de pantalla */
+  .acadActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .acadActionsL, .acadActionsR {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  .acadActBtn {
+    font-size: var(--fs-7);
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--r-lg); /* menos oval en mobile */
+  }
 }
 
 @media (max-width: 480px) {

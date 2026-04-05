@@ -101,6 +101,7 @@ export default function Header({
               <NotificationBell
                 currentUser={currentUser}
                 onNavigate={onNavigate}
+                isDark={isSuperadmin}
               />
 
               <button

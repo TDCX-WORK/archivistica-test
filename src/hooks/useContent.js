@@ -6,6 +6,9 @@ import { supabase } from '../lib/supabase'
  * Filtra automáticamente por la academia del usuario autenticado.
  * Devuelve la misma estructura que tenía STUDY_BLOCKS en el JSON local,
  * para que StudyView no necesite cambios en su lógica interna.
+ *
+ * Nota: content_blocks no tiene columnas 'estimated_minutes' ni 'bg' en BD.
+ * Se usan valores por defecto directamente.
  */
 export function useContent(userId, subjectId) {
   const [blocks, setBlocks]   = useState([])
@@ -35,13 +38,13 @@ export function useContent(userId, subjectId) {
       const academyId = profile.academy_id
 
       // 2. Cargar bloques — filtrar por asignatura si existe
+      // Solo pedimos columnas que realmente existen en content_blocks
       let blocksQuery = supabase
         .from('content_blocks')
-        .select('*')
+        .select('id, label, color, position, subject_id')
         .eq('academy_id', academyId)
         .order('position', { ascending: true })
 
-      // Si el usuario tiene asignatura, filtrar solo sus bloques
       if (subjectId) blocksQuery = blocksQuery.eq('subject_id', subjectId)
 
       const { data: blocksData, error: blocksErr } = await blocksQuery
@@ -57,7 +60,7 @@ export function useContent(userId, subjectId) {
 
       const { data: topicsData, error: topicsErr } = await supabase
         .from('content_topics')
-        .select('*')
+        .select('id, block_id, title, position, content_json, keywords, laws, dates')
         .in('block_id', blockIds)
         .order('position', { ascending: true })
 
@@ -82,12 +85,14 @@ export function useContent(userId, subjectId) {
       }
 
       // 5. Estructura final compatible con la que usaba STUDY_BLOCKS
+      // estimatedMinutes: 60 por defecto (la columna no existe en BD)
+      // bg: color con opacidad 20% calculado desde el color del bloque
       const structured = blocksData.map(block => ({
         id:               block.id,
         label:            block.label,
         color:            block.color,
-        bg:               block.bg || block.color + '20', // fallback si no hay bg
-        estimatedMinutes: block.estimated_minutes || 60,
+        bg:               block.color + '20',
+        estimatedMinutes: 60,
         topics:           topicsByBlock[block.id] || [],
       }))
 

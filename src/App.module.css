@@ -36,6 +36,11 @@
   margin-left: 0;
 }
 
+/* Fondo oscuro para superadmin — evita que el fondo claro del app asome */
+.mainDark {
+  background: #080c10;
+}
+
 .content {
   flex: 1;
   overflow-y: auto;

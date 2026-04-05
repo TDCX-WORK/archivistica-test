@@ -1,6 +1,24 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
+// ── Candado en memoria contra race conditions en notificaciones ──────────────
+// JS es de un solo hilo: añadir a un Set es instantáneo e ininterrumpible.
+// Si dos ejecuciones de load() corren "a la vez" (StrictMode, doble render),
+// la primera añade la clave al Set de forma síncrona; la segunda ya la ve.
+// localStorage solo como respaldo entre sesiones (el Set se resetea al recargar).
+const _notifEnviadas = new Set()
+
+function yaEnviadaHoy(cacheKey) {
+  if (_notifEnviadas.has(cacheKey)) return true
+  if (localStorage.getItem(cacheKey)) return true
+  return false
+}
+
+function marcarEnviada(cacheKey) {
+  _notifEnviadas.add(cacheKey)
+  try { localStorage.setItem(cacheKey, '1') } catch (_) {}
+}
+
 export function useProfesor(currentUser) {
   const [alumnos,     setAlumnos]     = useState([])
   const [inviteCodes, setInviteCodes] = useState([])
@@ -112,15 +130,16 @@ export function useProfesor(currentUser) {
       setAlumnos(alumnosConStats)
       setLoading(false)
 
+      const hoy = today
+
       // ── Notificacion: alumnos en riesgo (inactivos) ───────────────────────
       try {
         const enRiesgo = alumnosConStats.filter(a => a.enRiesgo)
         if (enRiesgo.length > 0 && currentUser?.id) {
-          const hoy       = new Date().toISOString().slice(0, 10)
-          const cacheKey  = `notif_inactivo_${currentUser.id}_${hoy}`
-          const yaEnviado = localStorage.getItem(cacheKey)
-
-          if (!yaEnviado) {
+          const cacheKey = `notif_inactivo_${currentUser.id}_${hoy}`
+          // Comprobación + marcado síncrono — evita la race condition
+          if (!yaEnviadaHoy(cacheKey)) {
+            marcarEnviada(cacheKey) // síncrono: la siguiente ejecución ya lo verá
             const nombres = enRiesgo.slice(0, 3).map(a => a.username).join(', ')
             const resto   = enRiesgo.length > 3 ? ` y ${enRiesgo.length - 3} mas` : ''
             await supabase.from('notifications').insert({
@@ -130,7 +149,6 @@ export function useProfesor(currentUser) {
               body:    `${nombres}${resto} llevan mas de 3 dias sin estudiar.`,
               link:    '/profesor',
             })
-            localStorage.setItem(cacheKey, '1')
           }
         }
       } catch (_) {}
@@ -139,11 +157,10 @@ export function useProfesor(currentUser) {
       try {
         const porExpirar = alumnosConStats.filter(a => a.proximoAExpirar)
         if (porExpirar.length > 0 && currentUser?.id) {
-          // Anti-spam: una vez al día por usuario
-          const cacheKey   = `notif_expira_${currentUser.id}_${hoy}`
-          const yaEnviado  = localStorage.getItem(cacheKey)
-
-          if (!yaEnviado) {
+          const cacheKey = `notif_expira_${currentUser.id}_${hoy}`
+          // Comprobación + marcado síncrono — evita la race condition
+          if (!yaEnviadaHoy(cacheKey)) {
+            marcarEnviada(cacheKey) // síncrono: la siguiente ejecución ya lo verá
             const nombres = porExpirar.slice(0, 3).map(a =>
               `${a.username} (${a.diasParaExpirar}d)`
             ).join(', ')
@@ -155,7 +172,6 @@ export function useProfesor(currentUser) {
               body:    `${nombres}${resto}. Renueva su acceso antes de que expire.`,
               link:    '/profesor',
             })
-            localStorage.setItem(cacheKey, '1')
           }
         }
       } catch (_) {}
@@ -185,23 +201,29 @@ export function useProfesor(currentUser) {
       if (porCaducar.length > 0 && currentUser?.id) {
         const hoy = ahora.toISOString().slice(0, 10)
         for (const codigo of porCaducar) {
-          const { data: yaEnviada } = await supabase
-            .from('notifications').select('id')
-            .eq('user_id', currentUser.id)
-            .eq('type', 'codigo_caduca')
-            .like('body', `%${codigo.code}%`)
-            .gte('created_at', hoy + 'T00:00:00Z')
-            .maybeSingle()
+          const cacheKey = `notif_codigo_${currentUser.id}_${codigo.code}_${hoy}`
+          // También aplicamos el candado en memoria aquí
+          if (!yaEnviadaHoy(cacheKey)) {
+            // Verificación extra en BD para este caso (el código específico)
+            const { data: yaEnviada } = await supabase
+              .from('notifications').select('id')
+              .eq('user_id', currentUser.id)
+              .eq('type', 'codigo_caduca')
+              .like('body', `%${codigo.code}%`)
+              .gte('created_at', hoy + 'T00:00:00Z')
+              .maybeSingle()
 
-          if (!yaEnviada) {
-            const horas = Math.ceil((new Date(codigo.expires_at) - ahora) / 3600000)
-            await supabase.from('notifications').insert({
-              user_id: currentUser.id,
-              type:    'codigo_caduca',
-              title:   `El codigo ${codigo.code} caduca en ${horas}h`,
-              body:    `El codigo ${codigo.code} no ha sido usado y caduca pronto. Genera uno nuevo si lo necesitas.`,
-              link:    '/profesor',
-            })
+            if (!yaEnviada) {
+              marcarEnviada(cacheKey)
+              const horas = Math.ceil((new Date(codigo.expires_at) - ahora) / 3600000)
+              await supabase.from('notifications').insert({
+                user_id: currentUser.id,
+                type:    'codigo_caduca',
+                title:   `El codigo ${codigo.code} caduca en ${horas}h`,
+                body:    `El codigo ${codigo.code} no ha sido usado y caduca pronto. Genera uno nuevo si lo necesitas.`,
+                link:    '/profesor',
+              })
+            }
           }
         }
       }

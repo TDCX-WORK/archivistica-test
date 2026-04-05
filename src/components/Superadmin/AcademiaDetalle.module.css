@@ -566,6 +566,10 @@
   font-size: var(--fs-7);
   color: rgba(232,244,248,0.25);
   font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
 }
 
 .userCard2Stats {
@@ -1178,5 +1182,9 @@
 @media (max-width: 768px) {
   .userCard2Stats { grid-template-columns: 1fr 1fr; }
   .extendedBlock { grid-template-columns: 1fr 1fr; }
-  .userCard2Actions { gap: 0.3rem; }
+  .userCard2Actions { gap: 0.3rem; flex-wrap: wrap; }
+  .userCard2Btn,
+  .userCard2BtnWarn,
+  .userCard2BtnActivar,
+  .userCard2BtnDanger { font-size: var(--fs-7); padding: 0.28rem 0.55rem; }
 }

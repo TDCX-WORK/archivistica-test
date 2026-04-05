@@ -273,7 +273,50 @@
   margin-top: 6px;
 }
 
-/* ── MOBILE ────────────────────────────────────────────────────────────────── */
+/* ── PANEL DARK — superadmin context ───────────────────────────────────────── */
+.panelDark {
+  background: #0d1520;
+  border-color: rgba(93,228,255,0.12);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
+}
+.panelDark .panelHead {
+  border-bottom-color: rgba(93,228,255,0.08);
+}
+.panelDark .panelTitle {
+  color: #e8f4f8;
+}
+.panelDark .panelBtn {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.08);
+  color: rgba(232,244,248,0.5);
+}
+.panelDark .panelBtn:hover {
+  color: #e8f4f8;
+  border-color: rgba(255,255,255,0.18);
+}
+.panelDark .panelClose {
+  color: rgba(232,244,248,0.35);
+}
+.panelDark .panelClose:hover {
+  background: rgba(255,255,255,0.06);
+  color: #e8f4f8;
+}
+.panelDark .item {
+  border-bottom-color: rgba(93,228,255,0.06);
+}
+.panelDark .item:hover {
+  background: rgba(255,255,255,0.03);
+}
+.panelDark .itemUnread {
+  background: rgba(8,145,178,0.1);
+}
+.panelDark .itemUnread:hover {
+  background: rgba(8,145,178,0.15);
+}
+.panelDark .itemTitle { color: #e8f4f8; }
+.panelDark .itemDesc  { color: rgba(232,244,248,0.45); }
+.panelDark .itemTime  { color: rgba(232,244,248,0.25); }
+.panelDark .panelEmpty { color: rgba(232,244,248,0.25); }
 @media (max-width: 768px) {
   .panel {
     position: fixed;

@@ -5,11 +5,58 @@
 }
 
 .pageHeader {
-  display: flex; align-items: flex-start; justify-content: space-between;
+  display: flex; align-items: center; justify-content: space-between;
   gap: 1rem; margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
-.pageTitle   { font-size: var(--fs-1); font-weight: 800; color: var(--ink); margin: 0 0 0.2rem; }
+.pageTitle   { font-size: var(--fs-1); font-weight: 800; color: var(--ink); margin: 0 0 0.25rem; }
 .pageSubtitle { font-size: var(--fs-5); color: var(--ink-muted); margin: 0; }
+
+/* Grupo de botones del header — no se encoge ni desborda */
+.headerActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* ── Área de contenido de tabs ─────────────────────────────────────────── */
+.contentArea {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+/* Botón volver arriba — solo visible en mobile */
+.scrollBackBtn {
+  display: none; /* oculto en desktop */
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  transition: transform 0.15s var(--ease), box-shadow 0.15s;
+  margin: 1.5rem auto 0;
+  flex-shrink: 0;
+}
+.scrollBackBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+@media (max-width: 900px) {
+  .scrollBackBtn { display: flex; }
+  .pageHeader { align-items: flex-start; }
+  .headerActions { width: 100%; }
+  .headerActions .btnExport,
+  .headerActions .btnGenerar { flex: 1; justify-content: center; }
+}
 
 .btnGenerar {
   display: flex; align-items: center; gap: 0.4rem;

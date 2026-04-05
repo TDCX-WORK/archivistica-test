@@ -173,7 +173,7 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
         <Sidebar activeTab={activeTab} onTabChange={handleTabChange}
           currentUser={currentUser} onLogout={logout} />
       )}
-      <div className={[styles.main, isTestActive ? styles.mainFull : ''].join(' ')}>
+      <div className={[styles.main, isTestActive ? styles.mainFull : '', isSuperadmin ? styles.mainDark : ''].join(' ')}>
         <Header
   currentUser={currentUser} inTest={isTestActive} modeName={testLabel}
   onGoHome={goHome} onLogout={logout} pageTitle={pageTitle}

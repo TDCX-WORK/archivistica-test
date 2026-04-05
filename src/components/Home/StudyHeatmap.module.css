@@ -218,24 +218,38 @@
   padding-top: 0.25rem;
   position: relative;
   z-index: 2;
+  /* Desktop: limitar anchura y centrar contenido */
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  align-items: center;
 }
 
-/* Pills racha / media — texto más grande */
-.pillRow { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+/* Cards internas ocupan todo el ancho disponible */
+.infoSide > * { width: 100%; }
+
+/* Pills racha / media — centradas en desktop */
+.pillRow { display: flex; gap: 0.45rem; flex-wrap: wrap; justify-content: center; }
 .pill {
   display: inline-flex; align-items: center; gap: 0.35rem;
   font-size: var(--fs-5); font-weight: 700;
   padding: 0.32rem 0.75rem; border-radius: 99px; border: 1px solid;
   white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.5);
 }
 
 /* Stats del mes */
 .mStats {
   display: flex; align-items: center;
-  background: rgba(255,255,255,0.8);
-  border: 1px solid rgba(34,197,94,0.2);
+  background: rgba(255,255,255,0.45);
+  border: 1px solid rgba(34,197,94,0.18);
   border-radius: 10px; overflow: hidden;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 12px rgba(5,150,105,0.06);
 }
 .mStat {
   flex: 1; display: flex; flex-direction: column;
@@ -258,7 +272,12 @@
 .reviewAlert {
   display: flex; align-items: center; gap: 0.7rem;
   padding: 0.75rem 0.9rem;
-  background: var(--amber-lt); border: 1px solid var(--amber-dim); border-radius: 10px;
+  background: rgba(255,251,235,0.6);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 12px rgba(245,158,11,0.07);
 }
 .reviewDot {
   width: 10px; height: 10px; border-radius: 50%;
@@ -275,12 +294,14 @@
 
 /* Panel de detalle del día */
 .detail {
-  background: rgba(255,255,255,0.8);
-  border: 1px solid rgba(34,197,94,0.2);
+  background: rgba(255,255,255,0.45);
+  border: 1px solid rgba(34,197,94,0.18);
   border-radius: 10px; padding: 0.9rem;
   animation: fadeIn 0.18s ease both;
   display: flex; flex-direction: column; gap: 0.7rem;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 12px rgba(5,150,105,0.06);
 }
 @keyframes fadeIn {
   from { opacity:0; transform:translateY(4px); }
@@ -398,7 +419,15 @@
   }
 
   .leg  { justify-content: center; }
-  .infoSide { width: 100%; padding-top: 0; }
+  .infoSide {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-top: 0;
+    align-items: stretch;
+  }
+  .infoSide > * { width: 100%; }
   .pillRow  { justify-content: center; }
   .detail   { padding: 0.75rem; }
 }

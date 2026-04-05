@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import {
   Users, TrendingUp, AlertTriangle, BookOpen, Copy, Check, FileText,
   Plus, RefreshCw, ChevronDown, ChevronUp, Zap, Clock,
@@ -898,6 +898,18 @@ export default function ProfesorPanel({ currentUser }) {
   const nAcciones  = alumnos.filter(a => a.accesoExpirado || a.proximoAExpirar || a.enRiesgo).length
                    + inviteCodes.filter(c => !c.usedBy && new Date(c.expiresAt || c.expires_at) < new Date()).length
 
+  // ── Scroll automático al contenido en mobile ─────────────────────────────
+  const bentoRef   = useRef(null)
+  const contentRef = useRef(null)
+
+  useEffect(() => {
+    if (!tab || !contentRef.current) return
+    if (window.innerWidth > 900) return // solo mobile/tablet
+    setTimeout(() => {
+      contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+  }, [tab])
+
   const alumnosFiltrados = alumnos.filter(a => {
     if (filtro === 'riesgo')    return a.enRiesgo
     if (filtro === 'expirando') return a.proximoAExpirar || a.accesoExpirado
@@ -949,7 +961,7 @@ export default function ProfesorPanel({ currentUser }) {
           <h1 className={styles.pageTitle}>Panel del Profesor</h1>
           <p className={styles.pageSubtitle}>Seguimiento de tu clase en tiempo real</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className={styles.headerActions}>
           <button className={styles.btnExport} onClick={() => exportarInformeProfesor(alumnos, statsClase, currentUser?.academyName, currentUser?.subjectName)}>
             <FileText size={14} /> Exportar PDF
           </button>
@@ -985,15 +997,20 @@ export default function ProfesorPanel({ currentUser }) {
       )}
 
       {/* Bento Nav */}
-      <BentoNav
-        tab={tab}
-        setTab={setTab}
-        statsClase={statsClase}
-        nAcciones={nAcciones}
-        announcements={announcements}
-        preguntas={nPreguntas}
-        alumnos={alumnos}
-      />
+      <div ref={bentoRef}>
+        <BentoNav
+          tab={tab}
+          setTab={setTab}
+          statsClase={statsClase}
+          nAcciones={nAcciones}
+          announcements={announcements}
+          preguntas={nPreguntas}
+          alumnos={alumnos}
+        />
+      </div>
+
+      {/* Contenido de tabs — ref para scroll automático en mobile */}
+      <div ref={contentRef} className={styles.contentArea}>
 
       {/* Tab: Evolución */}
       {tab === 'evolucion' && (
@@ -1107,6 +1124,19 @@ export default function ProfesorPanel({ currentUser }) {
           )}
         </div>
       )}
+
+      {/* Botón volver arriba — solo visible en mobile cuando hay tab activo */}
+      {tab && (
+        <button
+          className={styles.scrollBackBtn}
+          onClick={() => bentoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          aria-label="Volver arriba"
+        >
+          <ChevronUp size={18} strokeWidth={2.5} />
+        </button>
+      )}
+
+      </div>{/* /contentArea */}
     </div>
   )
 }

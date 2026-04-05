@@ -1,10 +1,11 @@
+import { useState, useCallback } from 'react'
 import { Home, BarChart2, BookOpen, LogOut, GraduationCap, User, Building2, ShieldCheck, Trash2, CreditCard, Settings2, Receipt } from 'lucide-react'
 import styles from './Sidebar.module.css'
 
 const NAV_ALUMNO = [
-  { id: 'inicio',       icon: Home,          label: 'Inicio'   },
-  { id: 'estudio',      icon: BookOpen,      label: 'Estudio'  },
-  { id: 'estadisticas', icon: BarChart2,     label: 'Stats'    },
+  { id: 'inicio',       icon: Home,          label: 'Inicio'        },
+  { id: 'estudio',      icon: BookOpen,      label: 'Estudio'       },
+  { id: 'estadisticas', icon: BarChart2,     label: 'Stats'         },
 ]
 
 const NAV_PROFESOR = [
@@ -20,10 +21,10 @@ const NAV_SUPERADMIN = [
 ]
 
 const NAV_DIRECTOR = [
-  { id: 'direccion',             icon: Building2, label: 'Academia'     },
-  { id: 'gestion',               icon: Settings2, label: 'Gestión'      },
-  { id: 'facturacion-director',  icon: Receipt,   label: 'Facturación'  },
-  { id: 'perfil',                icon: User,      label: 'Perfil'       },
+  { id: 'direccion',             icon: Building2, label: 'Academia'    },
+  { id: 'gestion',               icon: Settings2, label: 'Gestión'     },
+  { id: 'facturacion-director',  icon: Receipt,   label: 'Facturación' },
+  { id: 'perfil',                icon: User,      label: 'Perfil'      },
 ]
 
 export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout }) {
@@ -32,8 +33,26 @@ export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout 
   const isSuperadmin = currentUser?.role === 'superadmin'
   const navItems     = isSuperadmin ? NAV_SUPERADMIN : isDirector ? NAV_DIRECTOR : isProfesor ? NAV_PROFESOR : NAV_ALUMNO
 
+  const [expanded, setExpanded] = useState(false)
+
+  const handleMouseEnter = useCallback(() => setExpanded(true),  [])
+  const handleMouseLeave = useCallback(() => setExpanded(false), [])
+
+  const handleNav = useCallback((id) => {
+    setExpanded(false)   // contraer al hacer click
+    onTabChange(id)
+  }, [onTabChange])
+
   return (
-    <aside className={[styles.sidebar, isSuperadmin ? styles.sidebarDark : ''].join(' ')}>
+    <aside
+      className={[
+        styles.sidebar,
+        isSuperadmin ? styles.sidebarDark : '',
+        expanded      ? styles.sidebarExpanded : '',
+      ].join(' ')}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className={[styles.logo, isSuperadmin ? styles.logoDark : ''].join(' ')}>
         <div className={[styles.logoIcon, isSuperadmin ? styles.logoIconDark : ''].join(' ')}>
           <BookOpen size={18} strokeWidth={1.8} />
@@ -41,27 +60,32 @@ export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout 
       </div>
 
       <nav className={styles.nav}>
-        {navItems.map(({ id, icon: Icon, label }) => (
-          <button
-            key={id}
-            className={[styles.navItem, activeTab === id ? styles.navActive : ''].join(' ')}
-            onClick={() => onTabChange(id)}
-            data-label={label}
-          >
-            <Icon size={18} strokeWidth={activeTab === id ? 2.2 : 1.8} />
-          </button>
-        ))}
+        {navItems.map(({ id, icon: Icon, label }) => {
+          const isActive = activeTab === id
+          return (
+            <button
+              key={id}
+              className={[styles.navItem, isActive ? styles.navActive : ''].join(' ')}
+              onClick={() => handleNav(id)}
+              data-label={label}
+            >
+              <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} className={styles.navIcon} />
+              <span className={styles.navLabel}>{label}</span>
+            </button>
+          )
+        })}
       </nav>
 
       <div className={styles.footer}>
         {!isSuperadmin && (
           <button
             className={[styles.navItem, activeTab === 'perfil' ? styles.navActive : ''].join(' ')}
-            onClick={() => onTabChange('perfil')}
+            onClick={() => handleNav('perfil')}
             data-label="Perfil"
             style={{ marginBottom: '0.5rem' }}
           >
-            <User size={18} strokeWidth={activeTab === 'perfil' ? 2.2 : 1.8} />
+            <User size={18} strokeWidth={activeTab === 'perfil' ? 2.2 : 1.8} className={styles.navIcon} />
+            <span className={styles.navLabel}>Perfil</span>
           </button>
         )}
         <div className={styles.avatarWrap}>

@@ -85,11 +85,11 @@ function NotifItem({ notif, onRead, onDelete, onNavigate }) {
 }
 
 // ── Panel desplegable ──────────────────────────────────────────────────────────
-function NotifPanel({ notifications, unreadCount, loading, onRead, onMarkAll, onDelete, onDeleteAllRead, onClose, onNavigate }) {
+function NotifPanel({ notifications, unreadCount, loading, onRead, onMarkAll, onDelete, onDeleteAllRead, onClose, onNavigate, isDark }) {
   const hasRead = notifications.some(n => n.read)
 
   return (
-    <div className={styles.panel}>
+    <div className={[styles.panel, isDark ? styles.panelDark : ''].join(' ')}>
       {/* Header del panel */}
       <div className={styles.panelHead}>
         <div className={styles.panelTitle}>
@@ -141,7 +141,7 @@ function NotifPanel({ notifications, unreadCount, loading, onRead, onMarkAll, on
 }
 
 // ── Componente principal exportable ───────────────────────────────────────────
-export default function NotificationBell({ currentUser, onNavigate }) {
+export default function NotificationBell({ currentUser, onNavigate, isDark = false }) {
   const [open, setOpen] = useState(false)
   const ref             = useRef(null)
 
@@ -187,6 +187,7 @@ export default function NotificationBell({ currentUser, onNavigate }) {
           onDeleteAllRead={deleteAllRead}
           onClose={() => setOpen(false)}
           onNavigate={onNavigate}
+          isDark={isDark}
         />
       )}
     </div>

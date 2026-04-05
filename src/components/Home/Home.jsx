@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import {
   BookOpen, Trophy, Flame, FileText, Layers, Zap, Archive,
   Scale, Cpu, Shield, History, Library, CreditCard, AlertTriangle,
-  Clock, ChevronRight, Database, Globe, Users, Star
+  Clock, ChevronRight, Database, Globe, Users, Star,
+  Lock, Check, ClipboardList, TrendingUp, Target, Award,
+  GraduationCap, Bookmark, BarChart2, Medal, Hash, Gem
 } from 'lucide-react'
 import { supabase }        from '../../lib/supabase'
 import config              from '../../data/config.json'
@@ -29,6 +31,61 @@ const LEVELS = [
   { level: 9,  title: 'Experto',            xpRequired: 3800 },
   { level: 10, title: 'Maestro del Archivo',xpRequired: 5000 },
 ]
+
+/* ── Colores por categoría de misión ────────────────────────────────────── */
+const CAT_COLORS = {
+  'Tests':       '#2563EB',
+  'Rendimiento': '#059669',
+  'Simulacros':  '#7C3AED',
+  'Estudio':     '#D97706',
+  'Constancia':  '#DC2626',
+  'Dominio':     '#0891B2',
+}
+
+/* ── Misiones (misma lógica que Profile.jsx) ────────────────────────────── */
+function buildMissions(sessions, wrongAnswers, studyReadTopics, studyBookmarks, totalTopics) {
+  const totalSessions   = sessions.length
+  const totalAnswered   = sessions.reduce((s, x) => s + x.total, 0)
+  const avgScore        = totalSessions ? Math.round(sessions.reduce((s,x)=>s+(x.score||0),0)/totalSessions) : 0
+  const readCount       = studyReadTopics?.size || 0
+  const bookmarkCount   = studyBookmarks?.size  || 0
+  const examSessions    = sessions.filter(s => s.mode_id === 'exam')
+  const examAvg         = examSessions.length ? Math.round(examSessions.reduce((s,x)=>s+(x.score||0),0)/examSessions.length) : 0
+  const streakDays      = (() => {
+    const days = [...new Set(sessions.map(s => s.played_at))].sort().reverse()
+    if (!days.length) return 0
+    let streak = 1
+    for (let i = 1; i < days.length; i++) {
+      const prev = new Date(days[i-1]), curr = new Date(days[i])
+      if ((prev - curr) / 86400000 === 1) streak++
+      else break
+    }
+    return streak
+  })()
+
+  return [
+    { id: 'first_test',    category: 'Tests',       title: 'Primer paso',            current: Math.min(totalSessions, 1),   target: 1,   unlocked: totalSessions >= 1 },
+    { id: 'ten_tests',     category: 'Tests',       title: 'En racha',               current: Math.min(totalSessions, 10),  target: 10,  unlocked: totalSessions >= 10 },
+    { id: 'fifty_tests',   category: 'Tests',       title: 'Incansable',             current: Math.min(totalSessions, 50),  target: 50,  unlocked: totalSessions >= 50 },
+    { id: 'score_60',      category: 'Rendimiento', title: 'Por encima de la media', current: Math.min(avgScore, 60),       target: 60,  unlocked: avgScore >= 60 },
+    { id: 'score_75',      category: 'Rendimiento', title: 'Buen archivero',         current: Math.min(avgScore, 75),       target: 75,  unlocked: avgScore >= 75 },
+    { id: 'score_90',      category: 'Rendimiento', title: 'Maestro de los tests',   current: Math.min(avgScore, 90),       target: 90,  unlocked: avgScore >= 90 },
+    { id: 'exam_first',    category: 'Simulacros',  title: 'Cara al examen',         current: Math.min(examSessions.length,1), target: 1, unlocked: examSessions.length >= 1 },
+    { id: 'exam_pass',     category: 'Simulacros',  title: 'Aprobado',               current: Math.min(examAvg, 50),       target: 50,  unlocked: examAvg >= 50 },
+    { id: 'exam_master',   category: 'Simulacros',  title: 'Nota de corte',          current: Math.min(examAvg, 75),       target: 75,  unlocked: examAvg >= 75 },
+    { id: 'study_first',   category: 'Estudio',     title: 'Primera lectura',        current: Math.min(readCount, 1),       target: 1,   unlocked: readCount >= 1 },
+    { id: 'study_25',      category: 'Estudio',     title: 'Buen comienzo',          current: readCount, target: Math.max(1, Math.round(totalTopics * 0.25)), unlocked: readCount >= Math.round(totalTopics * 0.25) },
+    { id: 'study_50',      category: 'Estudio',     title: 'A mitad de camino',      current: readCount, target: Math.max(1, Math.round(totalTopics * 0.5)),  unlocked: readCount >= Math.round(totalTopics * 0.5) },
+    { id: 'study_100',     category: 'Estudio',     title: 'Temario completado',     current: readCount, target: Math.max(1, totalTopics), unlocked: totalTopics > 0 && readCount >= totalTopics },
+    { id: 'bookmark_5',    category: 'Estudio',     title: 'Lector selectivo',       current: Math.min(bookmarkCount, 5),   target: 5,   unlocked: bookmarkCount >= 5 },
+    { id: 'streak_3',      category: 'Constancia',  title: 'Tres días seguidos',     current: Math.min(streakDays, 3),      target: 3,   unlocked: streakDays >= 3 },
+    { id: 'streak_7',      category: 'Constancia',  title: 'Una semana entera',      current: Math.min(streakDays, 7),      target: 7,   unlocked: streakDays >= 7 },
+    { id: 'streak_30',     category: 'Constancia',  title: 'Un mes sin parar',       current: Math.min(streakDays, 30),     target: 30,  unlocked: streakDays >= 30 },
+    { id: 'no_fails',      category: 'Dominio',     title: 'Sin deudas pendientes',  current: wrongAnswers.length === 0 ? 1 : 0, target: 1, unlocked: wrongAnswers.length === 0 },
+    { id: 'answered_200',  category: 'Dominio',     title: 'Doscientas respondidas', current: Math.min(totalAnswered, 200), target: 200, unlocked: totalAnswered >= 200 },
+    { id: 'answered_500',  category: 'Dominio',     title: 'Medio millar',           current: Math.min(totalAnswered, 500), target: 500, unlocked: totalAnswered >= 500 },
+  ]
+}
 
 function calcXP(sessions, readTopics, wrongAnswers, totalTopics) {
   const readCount     = readTopics?.size || 0
@@ -117,17 +174,18 @@ function PlanWidget({ plan, bloques, titulo, variante }) {
   )
 }
 
-/* ── XP Card ────────────────────────────────────────────────────────────── */
-function XpCard({ xp, streakDays, sessions, levelData, nextLevelData, levelPct }) {
+/* ── XP Card con timeline de misiones ───────────────────────────────────── */
+function XpCard({ xp, streakDays, sessions, levelData, nextLevelData, levelPct, missions, onViewAll }) {
   const levelColor =
     levelData.level <= 3 ? '#059669' :
     levelData.level <= 6 ? '#2563EB' :
     levelData.level <= 8 ? '#7C3AED' : '#D97706'
 
-  const nextTwo = LEVELS.filter(l => l.level > levelData.level).slice(0, 2)
+  const unlockedCount = missions?.filter(m => m.unlocked).length ?? 0
 
   return (
     <div className={styles.xpCard}>
+      {/* ── Info nivel ── */}
       <div className={styles.xpTop}>
         <div className={styles.xpBadge} style={{ background: levelColor + '18', color: levelColor, borderColor: levelColor + '30' }}>
           <Star size={11} strokeWidth={2.5} />
@@ -136,6 +194,7 @@ function XpCard({ xp, streakDays, sessions, levelData, nextLevelData, levelPct }
         <span className={styles.xpPoints}>{xp} XP</span>
       </div>
       <div className={styles.xpTitle}>{levelData.title}</div>
+
       {nextLevelData && (
         <div className={styles.xpBarWrap}>
           <div className={styles.xpBarTrack}>
@@ -147,7 +206,9 @@ function XpCard({ xp, streakDays, sessions, levelData, nextLevelData, levelPct }
           </div>
         </div>
       )}
+
       <div className={styles.xpDivider} />
+
       <div className={styles.xpStats}>
         <div className={styles.xpStat}>
           <Flame size={14} style={{ color: streakDays >= 3 ? '#D97706' : 'var(--ink-subtle)' }} />
@@ -160,20 +221,69 @@ function XpCard({ xp, streakDays, sessions, levelData, nextLevelData, levelPct }
           <span className={styles.xpStatLabel}>tests</span>
         </div>
       </div>
-      {nextTwo.length > 0 && (
-        <>
+
+      {/* ── Timeline de misiones — solo desktop ── */}
+      {missions && missions.length > 0 && (
+        <div className={styles.missionSection}>
           <div className={styles.xpDivider} />
-          <div className={styles.xpNextLevels}>
-            <span className={styles.xpNextTitle}>Próximos niveles</span>
-            {nextTwo.map(l => (
-              <div key={l.level} className={styles.xpNextRow}>
-                <span className={styles.xpNextName}>Nv.{l.level} · {l.title}</span>
-                <span className={styles.xpNextXp}>{l.xpRequired} XP</span>
-              </div>
-            ))}
+          <div className={styles.missionHeader}>
+            <span className={styles.missionHeaderTitle}>Mis logros</span>
+            <span className={styles.missionHeaderCount}>
+              {unlockedCount}<span style={{ color: 'var(--ink-subtle)' }}>/{missions.length}</span>
+            </span>
           </div>
-        </>
+
+          <div className={styles.missionTimeline}>
+            {missions.map((m, i) => {
+              const color = CAT_COLORS[m.category] || '#6B7280'
+              const isLast = i === missions.length - 1
+              return (
+                <div key={m.id} className={styles.missionGroup}>
+                  <div className={styles.missionRow}>
+                    {/* Círculo */}
+                    <div
+                      className={styles.missionDot}
+                      style={m.unlocked
+                        ? {
+                            borderColor: color,
+                            boxShadow: `0 0 7px ${color}90, inset 0 0 4px ${color}20`,
+                          }
+                        : {}
+                      }
+                    >
+                      {m.unlocked
+                        ? <Check size={9} color={color} strokeWidth={3} />
+                        : <Lock size={8} color="var(--ink-subtle)" strokeWidth={2} />
+                      }
+                    </div>
+                    {/* Título */}
+                    <span
+                      className={styles.missionName}
+                      style={m.unlocked ? { color: 'var(--ink)', fontWeight: 600 } : {}}
+                    >
+                      {m.title}
+                    </span>
+                  </div>
+                  {/* Línea conectora entre círculos */}
+                  {!isLast && (
+                    <div
+                      className={styles.missionConnector}
+                      style={m.unlocked ? { background: color + '50' } : {}}
+                    />
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
       )}
+
+      {/* ── Botón "Ver mis logros" — solo mobile ── */}
+      <button className={styles.viewAllBtn} onClick={onViewAll}>
+        <Trophy size={13} style={{ color: '#7C3AED' }} />
+        <span>Ver mis logros · {unlockedCount}/{missions?.length ?? 0}</span>
+        <ChevronRight size={13} style={{ color: 'var(--ink-subtle)', marginLeft: 'auto' }} />
+      </button>
     </div>
   )
 }
@@ -181,7 +291,6 @@ function XpCard({ xp, streakDays, sessions, levelData, nextLevelData, levelPct }
 /* ── Block Ripple Card ──────────────────────────────────────────────────── */
 function BlockCard({ block, onClick }) {
   const Icon = getBlockIcon(block.label)
-  // Nombre corto — todo lo que va antes de los dos puntos o guión largo
   const shortLabel = block.label.split(/[:\u2014\u2013]/)[0].trim()
 
   return (
@@ -216,6 +325,7 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
   } = progress
 
   const readTopics = studyProgress?.readTopics
+  const bookmarks  = studyProgress?.bookmarks
 
   const [totalQuestions, setTotalQuestions] = useState(0)
   const [blocks,         setBlocks]         = useState([])
@@ -250,6 +360,20 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
       setBlocks(bd)
     })
 
+    // Total topics para calcular XP y misiones
+    const loadTopics = async () => {
+      const { data: blockData } = sid
+        ? await supabase.from('content_blocks').select('id').eq('academy_id',aid).eq('subject_id',sid)
+        : await supabase.from('content_blocks').select('id').eq('academy_id',aid)
+      if (!blockData?.length) return
+      const { count } = await supabase
+        .from('content_topics')
+        .select('id', { count: 'exact', head: true })
+        .in('block_id', blockData.map(b => b.id))
+      setTotalTopics(count || 0)
+    }
+    loadTopics()
+
     const loadSup = async () => {
       let q = supabase.from('supuestos')
         .select('id,slug,title,subtitle,scenario,position,supuesto_questions(id,question,options,answer,explanation,position)')
@@ -283,6 +407,12 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
     [sessions, readTopics, wrongAnswers, totalTopics]
   )
 
+  // Misiones — misma lógica que Profile.jsx
+  const missions = useMemo(
+    () => buildMissions(sessions, wrongAnswers, readTopics, bookmarks, totalTopics),
+    [sessions, wrongAnswers, readTopics, bookmarks, totalTopics]
+  )
+
   const levelData     = [...LEVELS].reverse().find(l => xp >= l.xpRequired) || LEVELS[0]
   const nextLevelData = LEVELS.find(l => l.level === levelData.level + 1)
   const xpInLevel     = xp - levelData.xpRequired
@@ -313,7 +443,7 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
       {/* ── Grid 3 columnas ── */}
       <div className={styles.grid}>
 
-        {/* Columna izquierda — XP */}
+        {/* Columna izquierda — XP + Misiones */}
         <div className={styles.colLeft}>
           <XpCard
             xp={xp}
@@ -322,6 +452,8 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
             levelData={levelData}
             nextLevelData={nextLevelData}
             levelPct={levelPct}
+            missions={missions}
+            onViewAll={() => navigate('/perfil?tab=logros')}
           />
         </div>
 
