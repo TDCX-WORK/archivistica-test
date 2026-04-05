@@ -20,9 +20,9 @@
   flex-shrink: 0;
 }
 .headerIcon  { color: var(--ink-muted); }
-.headerTitle { font-size: 0.85rem; font-weight: 700; color: var(--ink); flex: 1; letter-spacing: -0.02em; }
+.headerTitle { font-size: var(--fs-4); font-weight: 700; color: var(--ink); flex: 1; letter-spacing: -0.02em; }
 .headerBadge {
-  font-size: 0.65rem; font-weight: 700;
+  font-size: var(--fs-7); font-weight: 700;
   background: var(--ink); color: white;
   min-width: 18px; height: 18px; border-radius: 99px;
   display: flex; align-items: center; justify-content: center; padding: 0 4px;
@@ -61,16 +61,16 @@
 .itemBody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.2rem; }
 
 .itemTop { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
-.itemTipo  { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
-.itemFecha { font-size: 0.62rem; color: var(--ink-subtle); white-space: nowrap; }
+.itemTipo  { font-size: var(--fs-7); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.itemFecha { font-size: var(--fs-7); color: var(--ink-subtle); white-space: nowrap; }
 
-.itemTitle { font-size: 0.82rem; font-weight: 700; color: var(--ink); line-height: 1.35; margin: 0; }
-.itemBody2 { font-size: 0.76rem; color: var(--ink-muted); line-height: 1.45; margin: 0; }
+.itemTitle { font-size: var(--fs-5); font-weight: 700; color: var(--ink); line-height: 1.35; margin: 0; }
+.itemBody2 { font-size: var(--fs-5); color: var(--ink-muted); line-height: 1.45; margin: 0; }
 
 .itemExpira {
   display: inline-flex; align-items: center; gap: 0.25rem;
-  font-size: 0.62rem; font-weight: 700; color: #D97706;
-  background: #FFFBEB; padding: 0.1rem 0.45rem;
+  font-size: var(--fs-7); font-weight: 700; color: var(--amber);
+  background: var(--amber-lt); padding: 0.1rem 0.45rem;
   border-radius: 99px; width: fit-content;
 }
 
@@ -80,5 +80,5 @@
   gap: 0.45rem; padding: 2rem 1rem; text-align: center; height: 100%;
   color: var(--ink-subtle);
 }
-.emptyTitle { font-size: 0.82rem; font-weight: 700; color: var(--ink-muted); }
-.emptySub   { font-size: 0.72rem; color: var(--ink-subtle); max-width: 160px; line-height: 1.4; }
+.emptyTitle { font-size: var(--fs-5); font-weight: 700; color: var(--ink-muted); }
+.emptySub   { font-size: var(--fs-6); color: var(--ink-subtle); max-width: 160px; line-height: 1.4; }

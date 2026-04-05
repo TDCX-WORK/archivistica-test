@@ -1,7 +1,7 @@
 .card { display: flex; flex-direction: column; gap: 1rem; }
 
 .questionText {
-  font-size: 1rem; font-weight: 700;
+  font-size: var(--fs-2); font-weight: 700;
   line-height: 1.65; color: var(--ink);
   letter-spacing: -0.02em;
 }
@@ -42,7 +42,7 @@
   flex-shrink: 0; width: 24px; height: 24px;
   border-radius: var(--r-xs);
   background: var(--surface-dim);
-  font-size: 0.7rem; font-weight: 800;
+  font-size: var(--fs-6); font-weight: 800;
   display: flex; align-items: center; justify-content: center;
   color: var(--ink-muted); margin-top: 1px;
 }
@@ -51,7 +51,7 @@
 .option_wrong    .optLetter { background: var(--danger);  color: #fff; }
 
 .optText {
-  flex: 1; font-size: 0.9rem; line-height: 1.5;
+  flex: 1; font-size: var(--fs-3); line-height: 1.5;
   color: var(--ink); font-weight: 500;
 }
 .option_correct .optText { font-weight: 600; color: var(--primary); }
@@ -96,11 +96,11 @@
 }
 
 .feedbackTitle {
-  font-size: 0.85rem; font-weight: 800;
+  font-size: var(--fs-4); font-weight: 800;
   color: var(--ink); letter-spacing: -0.02em;
 }
 .feedbackSub {
-  font-size: 0.78rem; color: var(--ink-muted); margin-top: 0.15rem;
+  font-size: var(--fs-5); color: var(--ink-muted); margin-top: 0.15rem;
   line-height: 1.45;
 }
 .feedbackSub strong { color: var(--danger); font-weight: 700; }
@@ -115,12 +115,12 @@
 }
 .correctCalloutLabel {
   display: flex; align-items: center; gap: 0.3rem;
-  font-size: 0.62rem; font-weight: 800;
+  font-size: var(--fs-7); font-weight: 800;
   text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--primary); margin-bottom: 0.35rem;
 }
 .correctCalloutText {
-  font-size: 0.9rem; font-weight: 600;
+  font-size: var(--fs-3); font-weight: 600;
   color: var(--ink); line-height: 1.5;
   letter-spacing: -0.01em;
 }
@@ -135,12 +135,12 @@
 }
 .explBoxLabel {
   display: flex; align-items: center; gap: 0.3rem;
-  font-size: 0.62rem; font-weight: 800;
+  font-size: var(--fs-7); font-weight: 800;
   text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--amber); margin-bottom: 0.4rem;
 }
 .explBoxText {
-  font-size: 0.85rem; color: var(--ink-soft);
+  font-size: var(--fs-4); color: var(--ink-soft);
   line-height: 1.7; font-weight: 400;
 }
 
@@ -148,13 +148,13 @@
 .explBoxMinimal {
   display: flex; align-items: center; gap: 0.4rem;
   margin: 0 1rem 1rem;
-  font-size: 0.78rem; color: var(--ink-subtle);
+  font-size: var(--fs-5); color: var(--ink-subtle);
   font-weight: 500;
 }
 
 /* Correct + explanation short */
 .feedbackExplShort {
-  font-size: 0.8rem; color: var(--ink-muted);
+  font-size: var(--fs-5); color: var(--ink-muted);
   margin-top: 0.25rem; line-height: 1.6;
 }
 
@@ -165,9 +165,9 @@
 
 /* Mobile */
 @media (max-width: 480px) {
-  .questionText { font-size: 0.95rem; }
+  .questionText { font-size: var(--fs-3); }
   .option { min-height: 50px; padding: 0.8rem; }
-  .optText { font-size: 0.86rem; }
+  .optText { font-size: var(--fs-4); }
   .feedbackHeader { padding: 0.9rem 0.9rem 0.75rem; }
   .correctCallout, .explBox, .explBoxMinimal { margin-left: 0.9rem; margin-right: 0.9rem; }
 }
@@ -175,7 +175,7 @@
 /* AI explanation extras */
 .aiTag {
   margin-left: auto;
-  font-size: 0.58rem; font-weight: 800; letter-spacing: 0.08em;
+  font-size: var(--fs-7); font-weight: 800; letter-spacing: 0.08em;
   background: var(--amber); color: #fff;
   padding: 0.05rem 0.35rem; border-radius: var(--r-full);
 }
@@ -192,12 +192,12 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .loadingText {
-  font-size: 0.82rem; color: var(--ink-muted); font-style: italic;
+  font-size: var(--fs-5); color: var(--ink-muted); font-style: italic;
 }
 
 /* ── Error text for AI explanation ── */
 .errorText {
-  font-size: .82rem; color: var(--ink-muted);
+  font-size: var(--fs-5); color: var(--ink-muted);
   text-align: center; padding: .75rem 1rem;
   font-style: italic; line-height: 1.5;
 }

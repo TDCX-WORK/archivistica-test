@@ -58,6 +58,22 @@
   --font-body:   'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono:   'DM Mono', 'Courier New', monospace;
 
+  /* ── Escala tipográfica — 7 niveles, ningún componente puede salirse de aquí ── */
+  /* fs-1: títulos de página / hero                                               */
+  /* fs-2: títulos de sección / card header                                       */
+  /* fs-3: subtítulos / labels prominentes                                        */
+  /* fs-4: body / texto principal / valores de KPI                                */
+  /* fs-5: body secundario / labels de formulario / metadata                      */
+  /* fs-6: captions / badges / chips / tooltips                                   */
+  /* fs-7: micro / timestamps / copyright / ticks de eje                          */
+  --fs-1:  1.4rem;    /* ~22.4px */
+  --fs-2:  1.1rem;    /* ~17.6px */
+  --fs-3:  0.95rem;   /* ~15.2px */
+  --fs-4:  0.875rem;  /* ~14px   */
+  --fs-5:  0.82rem;   /* ~13.1px */
+  --fs-6:  0.72rem;   /* ~11.5px */
+  --fs-7:  0.65rem;   /* ~10.4px */
+
   /* ── Radii ── */
   --r-xs:   6px;
   --r-sm:   8px;
@@ -73,6 +89,8 @@
   --shadow-md:   0 4px 6px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.04);
   --shadow-card: 0 10px 30px rgba(0,0,0,0.05);
   --shadow-lg:   0 20px 40px rgba(0,0,0,0.08);
+  --shadow-xl:   0 32px 64px rgba(0,0,0,0.12);
+
 
   /* ── Motion ── */
   --t:      150ms;
@@ -89,24 +107,11 @@
 }
 
 /* ── Transición de tema ── */
+/* Solo html — no propagar a todos los componentes */
 html {
   transition:
-    background-color 0.4s ease,
-    color 0.4s ease;
-}
-body,
-.surface-transition,
-[class*="card"],
-[class*="Card"],
-[class*="sidebar"],
-[class*="Sidebar"],
-[class*="header"],
-[class*="Header"] {
-  transition:
-    background-color 0.4s ease,
-    border-color 0.35s ease,
-    color 0.3s ease,
-    box-shadow 0.35s ease;
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 html {

@@ -19,11 +19,11 @@
   flex-wrap: wrap;
 }
 .headerLeft { display: flex; flex-direction: column; gap: 0.2rem; flex-shrink: 0; }
-.title { font-size: 0.9rem; font-weight: 700; color: var(--ink); margin: 0; letter-spacing: -0.02em; }
+.title { font-size: var(--fs-3); font-weight: 700; color: var(--ink); margin: 0; letter-spacing: -0.02em; }
 .tendenciaRow { display: flex; align-items: center; gap: 0.3rem; }
-.tendenciaPos    { font-size: 0.7rem; font-weight: 700; color: #059669; }
-.tendenciaNeg    { font-size: 0.7rem; font-weight: 700; color: #DC2626; }
-.tendenciaNeutral{ font-size: 0.7rem; font-weight: 600; color: #6B7280; }
+.tendenciaPos    { font-size: var(--fs-6); font-weight: 700; color: var(--accent); }
+.tendenciaNeg    { font-size: var(--fs-6); font-weight: 700; color: var(--danger); }
+.tendenciaNeutral{ font-size: var(--fs-6); font-weight: 600; color: var(--ink-muted); }
 
 /* ── Filtros ───────────────────────────────────────────────────────────────── */
 .filtrosWrap {
@@ -48,7 +48,7 @@
   border: 1px solid var(--line);
   background: var(--surface-dim);
   color: var(--ink-muted);
-  font-size: 0.7rem;
+  font-size: var(--fs-6);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
@@ -93,7 +93,7 @@
   border: none;
   background: transparent;
   text-align: left;
-  font-size: 0.8rem;
+  font-size: var(--fs-5);
   font-weight: 500;
   color: var(--ink-soft);
   cursor: pointer;
@@ -114,7 +114,7 @@
   border: none;
   border-top: 1px solid var(--line);
   background: var(--surface-off);
-  font-size: 0.72rem;
+  font-size: var(--fs-6);
   font-weight: 600;
   color: var(--ink-subtle);
   cursor: pointer;
@@ -138,7 +138,7 @@
   border: 1px solid var(--line);
   background: transparent;
   color: var(--ink-muted);
-  font-size: 0.68rem;
+  font-size: var(--fs-7);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
@@ -155,12 +155,12 @@
   border: 1px solid var(--line-strong);
   background: var(--surface);
   color: var(--ink);
-  font-size: 0.7rem;
+  font-size: var(--fs-6);
   font-family: var(--font-body);
   cursor: pointer;
 }
 .dateInput:focus { outline: none; border-color: var(--primary); }
-.dateSep { font-size: 0.7rem; color: var(--ink-subtle); }
+.dateSep { font-size: var(--fs-6); color: var(--ink-subtle); }
 .clearBtn {
   width: 22px; height: 22px;
   display: flex; align-items: center; justify-content: center;
@@ -168,7 +168,7 @@
   background: transparent; cursor: pointer; color: var(--ink-subtle);
   transition: all 0.15s;
 }
-.clearBtn:hover { background: #FEF2F2; border-color: #FECACA; color: #DC2626; }
+.clearBtn:hover { background: var(--danger-lt); border-color: var(--danger-dim); color: var(--danger); }
 
 /* ── KPIs ──────────────────────────────────────────────────────────────────── */
 .kpiRow {
@@ -183,8 +183,8 @@
   border-radius: var(--r-md);
   text-align: center;
 }
-.kpiVal   { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
-.kpiLabel { font-size: 0.6rem; color: var(--ink-subtle); text-transform: uppercase; letter-spacing: 0.05em; }
+.kpiVal   { font-size: var(--fs-2); font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+.kpiLabel { font-size: var(--fs-7); color: var(--ink-subtle); text-transform: uppercase; letter-spacing: 0.05em; }
 
 /* ── Gráfico ───────────────────────────────────────────────────────────────── */
 .chartWrap {
@@ -203,8 +203,8 @@
   display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;
   padding-top: 0.25rem; border-top: 1px solid var(--line);
 }
-.leyendaLabel { font-size: 0.63rem; font-weight: 700; color: var(--ink-subtle); text-transform: uppercase; letter-spacing: 0.05em; }
-.leyendaItem  { display: flex; align-items: center; gap: 0.28rem; font-size: 0.7rem; color: var(--ink-muted); }
+.leyendaLabel { font-size: var(--fs-7); font-weight: 700; color: var(--ink-subtle); text-transform: uppercase; letter-spacing: 0.05em; }
+.leyendaItem  { display: flex; align-items: center; gap: 0.28rem; font-size: var(--fs-6); color: var(--ink-muted); }
 .leyendaDot   { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .leyendaLinea { width: 14px; height: 2.5px; border-radius: 99px; flex-shrink: 0; }
 
@@ -213,8 +213,8 @@
   display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
   padding: 2.5rem 1rem; color: var(--ink-subtle); text-align: center;
 }
-.empty p    { font-size: 0.85rem; font-weight: 600; color: var(--ink-muted); margin: 0; }
-.empty span { font-size: 0.75rem; }
+.empty p    { font-size: var(--fs-4); font-weight: 600; color: var(--ink-muted); margin: 0; }
+.empty span { font-size: var(--fs-5); }
 
 /* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 700px) {

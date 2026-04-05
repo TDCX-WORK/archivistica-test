@@ -33,9 +33,9 @@ export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout 
   const navItems     = isSuperadmin ? NAV_SUPERADMIN : isDirector ? NAV_DIRECTOR : isProfesor ? NAV_PROFESOR : NAV_ALUMNO
 
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.logo}>
-        <div className={styles.logoIcon}>
+    <aside className={[styles.sidebar, isSuperadmin ? styles.sidebarDark : ''].join(' ')}>
+      <div className={[styles.logo, isSuperadmin ? styles.logoDark : ''].join(' ')}>
+        <div className={[styles.logoIcon, isSuperadmin ? styles.logoIconDark : ''].join(' ')}>
           <BookOpen size={18} strokeWidth={1.8} />
         </div>
       </div>

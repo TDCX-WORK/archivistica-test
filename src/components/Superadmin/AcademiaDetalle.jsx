@@ -558,6 +558,7 @@ export default function AcademiaDetalle({ academia, onBack }) {
         </div>
       </motion.div>
 
+      <div className={styles.inner2}>
       {loading ? (
         <div className={styles.loadState2}>
           <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
@@ -702,6 +703,7 @@ export default function AcademiaDetalle({ academia, onBack }) {
           </motion.div>
         </>
       )}
+      </div>{/* /inner2 */}
     </div>
   )
 }

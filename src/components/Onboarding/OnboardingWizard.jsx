@@ -149,7 +149,7 @@ function Paso3({ datos }) {
 }
 
 /* ─── Wizard principal ────────────────────────────────────────────────────── */
-export default function OnboardingWizard({ currentUser, onComplete }) {
+export default function OnboardingWizard({ currentUser, onComplete, onLogout }) {
   const [paso,    setPaso]    = useState(1)
   const [saving,  setSaving]  = useState(false)
   const [datos,   setDatos]   = useState({
@@ -176,24 +176,25 @@ export default function OnboardingWizard({ currentUser, onComplete }) {
 
   const handleFinish = async () => {
     setSaving(true)
-    try {
-      await supabase.from('student_profiles').upsert({
-        id:                  currentUser.id,
-        full_name:           datos.full_name.trim() || null,
-        phone:               datos.phone.trim()     || null,
-        city:                datos.city.trim()       || null,
-        email_contact:       datos.email_contact.trim() || null,
-        exam_date:           datos.exam_date         || null,
-        mascota:             datos.mascota            || null,
-        onboarding_completed: true,
-        updated_at:          new Date().toISOString(),
-      }, { onConflict: 'id' })
+    const { error } = await supabase.from('student_profiles').upsert({
+      id:                  currentUser.id,
+      full_name:           datos.full_name.trim() || null,
+      phone:               datos.phone.trim()     || null,
+      city:                datos.city.trim()       || null,
+      email_contact:       datos.email_contact.trim() || null,
+      exam_date:           datos.exam_date         || null,
+      mascota:             datos.mascota            || null,
+      onboarding_completed: true,
+      updated_at:          new Date().toISOString(),
+    }, { onConflict: 'id' })
 
-      onComplete()
-    } catch (err) {
-      console.error('Error guardando onboarding:', err)
+    if (error) {
+      console.error('Error guardando onboarding:', error)
       setSaving(false)
+      return
     }
+
+    onComplete()
   }
 
   const PASOS_LABEL = ['Tus datos', 'Tu mascota', '¡Listo!']
@@ -204,8 +205,15 @@ export default function OnboardingWizard({ currentUser, onComplete }) {
 
         {/* Header con logo */}
         <div className={styles.wizardHeader}>
-          <span className={styles.wizardBrand}>🦊 FrostFox Academy</span>
-          <span className={styles.wizardSub}>Configuración inicial</span>
+          <div className={styles.wizardHeaderLeft}>
+            <span className={styles.wizardBrand}>🦊 FrostFox Academy</span>
+            <span className={styles.wizardSub}>Configuración inicial</span>
+          </div>
+          {onLogout && (
+            <button className={styles.wizardLogout} onClick={onLogout}>
+              Cerrar sesión
+            </button>
+          )}
         </div>
 
         {/* Stepper */}

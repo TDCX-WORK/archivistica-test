@@ -42,10 +42,11 @@ export default function Header({
   onNavigate,
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const isSuperadmin = currentUser?.role === 'superadmin'
 
   return (
     <>
-      <header className={styles.header}>
+      <header className={[styles.header, isSuperadmin ? styles.headerDark : ''].join(' ')}>
         {/* Left */}
         <div className={styles.left}>
           {inTest ? (
@@ -55,21 +56,31 @@ export default function Header({
             </div>
           ) : (
             <>
-              <div className={styles.pageTitle}>{pageTitle || 'Inicio'}</div>
-              <div className={styles.pageTitleInstitutional}>
-                {currentUser?.academyName || 'Plataforma de Oposiciones'}
-              </div>
+              {!isSuperadmin && (
+                <>
+                  <div className={styles.pageTitle}>{pageTitle || 'Inicio'}</div>
+                  <div className={styles.pageTitleInstitutional}>
+                    {currentUser?.academyName || 'Plataforma de Oposiciones'}
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>
 
         {/* Center */}
-        {!inTest && (
+        {!inTest && !isSuperadmin && (
           <div className={styles.center}>
             <span className={styles.centerTitle}>
               {currentUser?.academyName || 'Plataforma de Oposiciones'}
             </span>
             <span className={styles.centerSub}>{currentUser?.subjectName || ''}</span>
+          </div>
+        )}
+        {!inTest && isSuperadmin && (
+          <div className={styles.centerDark}>
+            <span className={styles.centerDarkTitle}>FrostFox Academy</span>
+            <span className={styles.centerDarkSub}>Control Center</span>
           </div>
         )}
 

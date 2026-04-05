@@ -171,33 +171,53 @@ function HighlightableContent({ topic, highlights, onAdd, onRemove, highlightMod
   const [tooltip, setTooltip] = useState(null) // {x, y, text}
   const pendingRef        = useRef(null) // guarda la selección mientras se elige color
 
-  const handleMouseUp = useCallback((e) => {
+  // Lógica compartida entre mouseup y touchend
+  const handleSelectionEnd = useCallback((clientY = null) => {
     if (!highlightMode) return
 
-    const sel = window.getSelection()
-    if (!sel || sel.isCollapsed) return
-    const selectedText = sel.toString().trim()
-    if (!selectedText || selectedText.length < 2) return
+    // En iOS la selección puede tardar un tick en confirmarse tras touchend
+    const process = () => {
+      const sel = window.getSelection()
+      if (!sel || sel.isCollapsed) return
+      const selectedText = sel.toString().trim()
+      if (!selectedText || selectedText.length < 2) return
 
-    const range         = sel.getRangeAt(0)
-    const container     = containerRef.current
-    if (!container?.contains(range.commonAncestorContainer)) return
+      const range         = sel.getRangeAt(0)
+      const container     = containerRef.current
+      if (!container?.contains(range.commonAncestorContainer)) return
 
-    const rect          = range.getBoundingClientRect()
-    const containerRect = container.getBoundingClientRect()
+      const rect          = range.getBoundingClientRect()
+      const containerRect = container.getBoundingClientRect()
 
-    // Guardar el texto seleccionado para usarlo al elegir color
-    pendingRef.current = selectedText
+      pendingRef.current = selectedText
 
-    setTooltip({
-      x: Math.max(70, Math.min(
-        rect.left - containerRect.left + rect.width / 2,
-        containerRect.width - 70
-      )),
-      y: rect.top - containerRect.top - 58,
-      text: selectedText,
-    })
+      // En táctil usamos la posición Y del touch si está disponible
+      const tooltipY = clientY != null
+        ? clientY - containerRect.top - 68
+        : rect.top - containerRect.top - 58
+
+      setTooltip({
+        x: Math.max(70, Math.min(
+          rect.left - containerRect.left + rect.width / 2,
+          containerRect.width - 70
+        )),
+        y: tooltipY,
+        text: selectedText,
+      })
+    }
+
+    // Pequeño delay para iOS — la selección se confirma tras el touchend
+    setTimeout(process, 30)
   }, [highlightMode])
+
+  const handleMouseUp = useCallback((e) => {
+    handleSelectionEnd()
+  }, [handleSelectionEnd])
+
+  const handleTouchEnd = useCallback((e) => {
+    const touch = e.changedTouches?.[0]
+    handleSelectionEnd(touch?.clientY ?? null)
+  }, [handleSelectionEnd])
 
   const handlePickColor = useCallback(async (colorEntry, e) => {
     e.preventDefault()
@@ -207,7 +227,7 @@ function HighlightableContent({ topic, highlights, onAdd, onRemove, highlightMod
 
     await onAdd({
       topicId:     topic.id,
-      startOffset: 0,     // no usamos offsets — guardamos el texto directamente
+      startOffset: 0,
       endOffset:   0,
       text,
       color: colorEntry.bg,
@@ -316,6 +336,7 @@ function HighlightableContent({ topic, highlights, onAdd, onRemove, highlightMod
       ref={containerRef}
       className={[styles.highlightableContent, highlightMode ? styles.highlightModeActive : ''].join(' ')}
       onMouseUp={handleMouseUp}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Paleta de colores flotante */}
       {tooltip && highlightMode && (
@@ -323,6 +344,7 @@ function HighlightableContent({ topic, highlights, onAdd, onRemove, highlightMod
           className={styles.colorPicker}
           style={{ left: tooltip.x, top: tooltip.y }}
           onMouseDown={e => e.preventDefault()}
+          onTouchStart={e => e.preventDefault()}
           onClick={e => e.stopPropagation()}
         >
           <span className={styles.colorPickerLabel}>Color:</span>
@@ -332,6 +354,7 @@ function HighlightableContent({ topic, highlights, onAdd, onRemove, highlightMod
               className={styles.colorDot}
               style={{ background: c.bg }}
               onMouseDown={e => { e.preventDefault(); e.stopPropagation() }}
+              onTouchStart={e => { e.preventDefault(); e.stopPropagation() }}
               onClick={e => handlePickColor(c, e)}
               title={c.label}
             />
@@ -356,6 +379,7 @@ function HighlightableContent({ topic, highlights, onAdd, onRemove, highlightMod
               </span>
               <button className={styles.highlightPillRemove}
                 onMouseDown={e => e.preventDefault()}
+                onTouchStart={e => e.preventDefault()}
                 onClick={e => { e.stopPropagation(); onRemove(h.id) }}>×</button>
             </div>
           ))}

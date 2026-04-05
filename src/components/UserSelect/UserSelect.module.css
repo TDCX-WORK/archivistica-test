@@ -15,7 +15,7 @@
   border: 1px solid rgba(0,0,0,0.08);
   border-radius: var(--r-2xl);
   padding: 2.5rem 2rem;
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -27,28 +27,28 @@
 
 .topIcon {
   width: 56px; height: 56px;
-  background: var(--green-lt);
-  color: var(--green);
+  background: var(--accent-lt);
+  color: var(--accent);
   border-radius: var(--r-lg);
   display: flex; align-items: center; justify-content: center;
   margin-bottom: 0.75rem;
 }
 
 .title {
-  font-family: var(--font-display);
-  font-size: 1.75rem; font-weight: 700;
-  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--fs-1); font-weight: 700;
+  color: var(--ink);
 }
 
 .sub {
-  font-size: 0.75rem; color: var(--text-muted);
+  font-size: var(--fs-6); color: var(--ink-muted);
   letter-spacing: 0.05em; margin-bottom: 0.5rem;
 }
 
 .pick {
-  font-size: 0.8rem; font-weight: 700;
+  font-size: var(--fs-6); font-weight: 700;
   letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--text-subtle);
+  color: var(--ink-subtle);
   margin-top: 1.25rem;
   align-self: flex-start;
 }
@@ -72,7 +72,7 @@
   display: flex; align-items: center; gap: 0.875rem;
   padding: 0.7rem 0.9rem;
   background: rgba(255,255,255,0.6);
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--line);
   border-radius: var(--r-md);
   cursor: pointer;
   transition: all var(--t) var(--ease);
@@ -80,8 +80,8 @@
 }
 
 .userBtn:hover {
-  border-color: var(--green);
-  background: var(--green-lt);
+  border-color: var(--accent);
+  background: var(--accent-lt);
   transform: translateX(3px);
 }
 
@@ -89,18 +89,18 @@
   width: 36px; height: 36px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.72rem; font-weight: 800;
+  font-size: var(--fs-6); font-weight: 800;
   color: #fff; flex-shrink: 0;
   letter-spacing: 0.03em;
 }
 
 .userName {
-  font-size: 0.9rem; font-weight: 600;
-  color: var(--text); flex: 1;
+  font-size: var(--fs-4); font-weight: 600;
+  color: var(--ink); flex: 1;
 }
 
 .arrow {
-  color: var(--text-subtle);
+  color: var(--ink-subtle);
   opacity: 0;
   transition: opacity var(--t) var(--ease), transform var(--t) var(--ease);
 }
@@ -115,7 +115,7 @@
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--r-sm);
-  color: var(--text-subtle);
+  color: var(--ink-subtle);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: all var(--t) var(--ease);
@@ -123,23 +123,23 @@
 }
 
 .deleteBtn:hover {
-  background: var(--terra-lt);
-  border-color: rgba(184,74,56,0.2);
-  color: var(--terra);
+  background: var(--danger-lt);
+  border-color: var(--danger-dim);
+  color: var(--danger);
 }
 
 .confirmRow {
   flex: 1;
   display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
   padding: 0.5rem 0.75rem;
-  background: var(--terra-lt);
-  border: 1px solid rgba(184,74,56,0.2);
+  background: var(--danger-lt);
+  border: 1px solid var(--danger-dim);
   border-radius: var(--r-md);
 }
 
 .confirmText {
   flex: 1;
-  font-size: 0.8rem; color: var(--terra); font-weight: 600;
+  font-size: var(--fs-5); color: var(--danger); font-weight: 600;
 }
 
 .addBtn {
@@ -147,20 +147,20 @@
   display: flex; align-items: center; justify-content: center; gap: 0.5rem;
   padding: 0.8rem;
   background: transparent;
-  border: 1.5px dashed var(--border-strong);
+  border: 1.5px dashed var(--line-strong);
   border-radius: var(--r-md);
-  color: var(--text-muted);
+  color: var(--ink-muted);
   font-family: var(--font-body);
-  font-size: 0.875rem; font-weight: 600;
+  font-size: var(--fs-5); font-weight: 600;
   cursor: pointer;
   margin-top: 0.5rem;
   transition: all var(--t) var(--ease);
 }
 
 .addBtn:hover {
-  border-color: var(--green);
-  color: var(--green);
-  background: var(--green-lt);
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-lt);
 }
 
 .addForm {
@@ -175,16 +175,16 @@
   width: 100%;
   padding: 0.75rem 1rem;
   background: rgba(255,255,255,0.7);
-  border: 1.5px solid var(--border-strong);
+  border: 1.5px solid var(--line-strong);
   border-radius: var(--r-md);
   font-family: var(--font-body);
-  font-size: 0.9rem;
-  color: var(--text);
+  font-size: var(--fs-4);
+  color: var(--ink);
   outline: none;
   transition: border-color var(--t) var(--ease);
 }
 
-.input:focus { border-color: var(--green); }
+.input:focus { border-color: var(--accent); }
 
 .addActions {
   display: flex;
@@ -195,39 +195,39 @@
   flex: 1;
   display: flex; align-items: center; justify-content: center; gap: 0.4rem;
   padding: 0.65rem 1rem;
-  background: var(--green);
+  background: var(--accent);
   color: #fff;
   border: none; border-radius: var(--r-md);
   font-family: var(--font-body);
-  font-size: 0.875rem; font-weight: 700;
+  font-size: var(--fs-5); font-weight: 700;
   cursor: pointer;
   transition: all var(--t) var(--ease);
 }
 
-.btnPrimary:hover:not(:disabled) { background: #255c2c; }
+.btnPrimary:hover:not(:disabled) { background: #047857; }
 .btnPrimary:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .btnDanger {
   padding: 0.4rem 0.75rem;
-  background: var(--terra);
+  background: var(--danger);
   color: #fff; border: none;
   border-radius: var(--r-sm);
   font-family: var(--font-body);
-  font-size: 0.78rem; font-weight: 700;
+  font-size: var(--fs-6); font-weight: 700;
   cursor: pointer;
   transition: background var(--t) var(--ease);
 }
 
-.btnDanger:hover { background: #a03428; }
+.btnDanger:hover { background: #b91c1c; }
 
 .btnCancel {
   padding: 0.4rem 0.75rem;
   background: transparent;
-  color: var(--text-muted);
-  border: 1px solid var(--border-strong);
+  color: var(--ink-muted);
+  border: 1px solid var(--line-strong);
   border-radius: var(--r-sm);
   font-family: var(--font-body);
-  font-size: 0.78rem; font-weight: 600;
+  font-size: var(--fs-6); font-weight: 600;
   cursor: pointer;
   transition: all var(--t) var(--ease);
 }
@@ -236,7 +236,7 @@
 
 .note {
   display: flex; align-items: center; gap: 0.35rem;
-  font-size: 0.7rem;
-  color: var(--text-subtle);
+  font-size: var(--fs-7);
+  color: var(--ink-subtle);
   margin-top: 1rem;
 }

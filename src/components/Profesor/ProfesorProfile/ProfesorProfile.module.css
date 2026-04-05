@@ -12,7 +12,7 @@
 .tab {
   display:flex;align-items:center;gap:.4rem;padding:.55rem .9rem;
   border-radius:var(--r-md) var(--r-md) 0 0;border:none;background:transparent;
-  font-size:.78rem;font-weight:600;color:var(--ink-muted);cursor:pointer;
+  font-size: var(--fs-5);font-weight:600;color:var(--ink-muted);cursor:pointer;
   font-family:var(--font-body);transition:all .15s;white-space:nowrap;
   border-bottom:2px solid transparent;margin-bottom:-1px
 }
@@ -31,28 +31,28 @@
 .avatarBig {
   width:64px;height:64px;border-radius:50%;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-size:1.3rem;font-weight:800;letter-spacing:-0.02em
+  font-size: var(--fs-1);font-weight:800;letter-spacing:-0.02em
 }
 .perfilHeaderInfo { flex:1 }
-.perfilNombre { font-size:1.1rem;font-weight:800;color:var(--ink);margin:0 0 .4rem;letter-spacing:-0.03em }
+.perfilNombre { font-size: var(--fs-2);font-weight:800;color:var(--ink);margin:0 0 .4rem;letter-spacing:-0.03em }
 .perfilBadges { display:flex;align-items:center;gap:.4rem;flex-wrap:wrap }
 .roleBadge {
   display:inline-flex;align-items:center;gap:.3rem;
-  font-size:.68rem;font-weight:700;padding:.2rem .6rem;border-radius:99px
+  font-size: var(--fs-7);font-weight:700;padding:.2rem .6rem;border-radius:99px
 }
 .academiaBadge {
-  font-size:.68rem;color:var(--ink-muted);background:var(--surface-dim);
+  font-size: var(--fs-7);color:var(--ink-muted);background:var(--surface-dim);
   padding:.2rem .6rem;border-radius:99px
 }
 .perfilBio {
-  font-size:.78rem;color:var(--ink-muted);margin:.6rem 0 0;line-height:1.5;
+  font-size: var(--fs-5);color:var(--ink-muted);margin:.6rem 0 0;line-height:1.5;
   font-style:italic
 }
 
 .btnEditar {
   display:flex;align-items:center;gap:.35rem;padding:.4rem .85rem;
   border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface);
-  font-size:.75rem;font-weight:600;color:var(--ink-muted);cursor:pointer;
+  font-size: var(--fs-5);font-weight:600;color:var(--ink-muted);cursor:pointer;
   font-family:var(--font-body);transition:all .15s;flex-shrink:0;white-space:nowrap
 }
 .btnEditar:hover { background:var(--surface-dim);color:var(--ink) }
@@ -66,18 +66,18 @@
 .editGrid { display:grid;grid-template-columns:1fr 1fr;gap:.75rem }
 .editCampo { display:flex;flex-direction:column;gap:.3rem }
 .editLabel {
-  font-size:.68rem;font-weight:700;color:var(--ink-muted);
+  font-size: var(--fs-7);font-weight:700;color:var(--ink-muted);
   text-transform:uppercase;letter-spacing:.04em
 }
 .editInput {
   padding:.58rem .8rem;border:1px solid var(--line-strong);border-radius:var(--r-md);
-  background:var(--surface);color:var(--ink);font-size:.85rem;font-family:var(--font-body);
+  background:var(--surface);color:var(--ink);font-size: var(--fs-4);font-family:var(--font-body);
   transition:border-color .15s
 }
 .editInput:focus { outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 12%,transparent) }
 .editTextarea {
   padding:.58rem .8rem;border:1px solid var(--line-strong);border-radius:var(--r-md);
-  background:var(--surface);color:var(--ink);font-size:.85rem;font-family:var(--font-body);
+  background:var(--surface);color:var(--ink);font-size: var(--fs-4);font-family:var(--font-body);
   resize:vertical;min-height:72px;transition:border-color .15s
 }
 .editTextarea:focus { outline:none;border-color:var(--primary) }
@@ -85,10 +85,10 @@
 .btnGuardar {
   display:flex;align-items:center;gap:.4rem;padding:.58rem 1.25rem;
   border-radius:var(--r-md);background:var(--ink);color:white;border:none;
-  font-size:.85rem;font-weight:700;cursor:pointer;font-family:var(--font-body);
+  font-size: var(--fs-4);font-weight:700;cursor:pointer;font-family:var(--font-body);
   transition:background .15s;width:fit-content
 }
-.btnGuardar:hover:not(:disabled) { background:#374151 }
+.btnGuardar:hover:not(:disabled) { background:var(--ink-soft) }
 .btnGuardar:disabled { opacity:.5;cursor:not-allowed }
 
 /* ── Info card (vista, no edición) ────────────────────────────────────────── */
@@ -99,8 +99,8 @@
 }
 .infoRow  { display:flex;align-items:center;gap:.5rem }
 .infoIcon { color:var(--ink-subtle);flex-shrink:0 }
-.infoLabel{ font-size:.72rem;color:var(--ink-muted);min-width:85px;flex-shrink:0 }
-.infoValue{ font-size:.82rem;font-weight:600;color:var(--ink) }
+.infoLabel{ font-size: var(--fs-6);color:var(--ink-muted);min-width:85px;flex-shrink:0 }
+.infoValue{ font-size: var(--fs-5);font-weight:600;color:var(--ink) }
 
 /* ── Cambiar contraseña ────────────────────────────────────────────────────── */
 .passCard {
@@ -109,18 +109,18 @@
   display:flex;flex-direction:column;gap:.85rem
 }
 .passCardHead { display:flex;align-items:center;justify-content:space-between;gap:.75rem }
-.passCardTitle { display:flex;align-items:center;gap:.4rem;font-size:.85rem;font-weight:700;color:var(--ink) }
+.passCardTitle { display:flex;align-items:center;gap:.4rem;font-size: var(--fs-4);font-weight:700;color:var(--ink) }
 .btnCambiarPass {
-  font-size:.72rem;font-weight:600;color:var(--primary);background:none;border:none;
+  font-size: var(--fs-6);font-weight:600;color:var(--primary);background:none;border:none;
   cursor:pointer;font-family:var(--font-body);text-decoration:underline;text-underline-offset:2px
 }
 .passForm { display:flex;flex-direction:column;gap:.65rem }
 .passMsg {
   display:flex;align-items:center;gap:.4rem;padding:.5rem .75rem;
-  border-radius:var(--r-md);font-size:.78rem;font-weight:600
+  border-radius:var(--r-md);font-size: var(--fs-5);font-weight:600
 }
-.passMsgError { background:#FEF2F2;color:#DC2626;border:1px solid #FECACA }
-.passMsgOk    { background:#ECFDF5;color:#059669;border:1px solid #86EFAC }
+.passMsgError { background:var(--danger-lt);color:var(--danger);border:1px solid var(--danger-dim) }
+.passMsgOk    { background:var(--accent-lt);color:var(--accent);border:1px solid var(--accent-dim) }
 
 /* ── Stats del profesor ────────────────────────────────────────────────────── */
 .statsRow {
@@ -132,50 +132,50 @@
   display:flex;flex-direction:column;align-items:center;gap:.3rem
 }
 .statIcon  { }
-.statVal   { font-size:1.25rem;font-weight:800;color:var(--ink);letter-spacing:-0.04em;line-height:1 }
-.statLabel { font-size:.62rem;color:var(--ink-subtle);text-transform:uppercase;letter-spacing:.05em }
+.statVal   { font-size: var(--fs-2);font-weight:800;color:var(--ink);letter-spacing:-0.04em;line-height:1 }
+.statLabel { font-size: var(--fs-7);color:var(--ink-subtle);text-transform:uppercase;letter-spacing:.05em }
 
 /* ── Semana ────────────────────────────────────────────────────────────────── */
 .weekCard, .planCard {
   background:var(--surface);border:1px solid var(--line);
   border-radius:var(--r-lg);padding:1.1rem 1.25rem;box-shadow:var(--shadow-card)
 }
-.cardTitle { font-size:.85rem;font-weight:700;color:var(--ink);margin:0 0 .85rem;letter-spacing:-0.02em }
+.cardTitle { font-size: var(--fs-4);font-weight:700;color:var(--ink);margin:0 0 .85rem;letter-spacing:-0.02em }
 .weekRow   { display:flex;gap:.4rem }
 .dayCol    { display:flex;flex-direction:column;align-items:center;flex:1;padding:.5rem .25rem;border-radius:var(--r-md);transition:background .12s }
 .dayToday  { background:var(--ink) }
-.dayName   { font-size:.62rem;font-weight:700;color:var(--ink-subtle);text-transform:uppercase }
-.dayNum    { font-size:1rem;font-weight:800;color:var(--ink);line-height:1.2 }
-.dayMonth  { font-size:.6rem;color:var(--ink-subtle) }
+.dayName   { font-size: var(--fs-7);font-weight:700;color:var(--ink-subtle);text-transform:uppercase }
+.dayNum    { font-size: var(--fs-2);font-weight:800;color:var(--ink);line-height:1.2 }
+.dayMonth  { font-size: var(--fs-7);color:var(--ink-subtle) }
 .dayToday .dayName, .dayToday .dayNum, .dayToday .dayMonth { color:white }
 
 /* ── Plan ──────────────────────────────────────────────────────────────────── */
-.planNota   { font-size:.8rem;color:var(--ink-muted);background:var(--surface-off);padding:.55rem .75rem;border-radius:var(--r-md);margin:0 0 .75rem }
+.planNota   { font-size: var(--fs-5);color:var(--ink-muted);background:var(--surface-off);padding:.55rem .75rem;border-radius:var(--r-md);margin:0 0 .75rem }
 .planBloques{ display:flex;flex-direction:column;gap:.5rem }
 .planBloque { display:flex;align-items:flex-start;gap:.65rem }
 .planDot    { width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px }
 .planInfo   { display:flex;flex-direction:column;gap:.15rem }
-.planLabel  { font-size:.82rem;font-weight:700;color:var(--ink) }
-.planDesc   { font-size:.72rem;color:var(--ink-muted) }
+.planLabel  { font-size: var(--fs-5);font-weight:700;color:var(--ink) }
+.planDesc   { font-size: var(--fs-6);color:var(--ink-muted) }
 
 .emptyPlan {
   display:flex;flex-direction:column;align-items:center;gap:.5rem;
   padding:2.5rem 1rem;text-align:center;color:var(--ink-subtle)
 }
-.emptyPlan p    { font-size:.88rem;font-weight:600;color:var(--ink-muted);margin:0 }
-.emptyPlan span { font-size:.75rem }
+.emptyPlan p    { font-size: var(--fs-3);font-weight:600;color:var(--ink-muted);margin:0 }
+.emptyPlan span { font-size: var(--fs-5) }
 
 /* ── Ajustes ───────────────────────────────────────────────────────────────── */
 .settingCard {
   background:var(--surface);border:1px solid var(--line);
   border-radius:var(--r-lg);padding:1.1rem 1.25rem;box-shadow:var(--shadow-card)
 }
-.settingTitle { font-size:.85rem;font-weight:700;color:var(--ink);margin:0 0 .85rem }
+.settingTitle { font-size: var(--fs-4);font-weight:700;color:var(--ink);margin:0 0 .85rem }
 .themeRow { display:flex;gap:.5rem }
 .themeBtn {
   display:flex;align-items:center;gap:.4rem;padding:.5rem .9rem;
   border-radius:var(--r-md);border:1px solid var(--line);background:var(--surface-dim);
-  font-size:.78rem;font-weight:600;color:var(--ink-muted);cursor:pointer;
+  font-size: var(--fs-5);font-weight:600;color:var(--ink-muted);cursor:pointer;
   font-family:var(--font-body);transition:all .15s;flex:1;justify-content:center
 }
 .themeBtn:hover { background:var(--surface-off);color:var(--ink) }
@@ -183,8 +183,8 @@
 
 .btnLogout {
   display:flex;align-items:center;gap:.5rem;padding:.65rem 1.25rem;
-  border-radius:var(--r-md);border:1px solid #FECACA;background:#FEF2F2;
-  color:#DC2626;font-size:.85rem;font-weight:700;cursor:pointer;
+  border-radius:var(--r-md);border:1px solid var(--danger-dim);background:var(--danger-lt);
+  color:var(--danger);font-size: var(--fs-4);font-weight:700;cursor:pointer;
   font-family:var(--font-body);transition:all .15s;width:fit-content
 }
 .btnLogout:hover { background:#FEE2E2 }

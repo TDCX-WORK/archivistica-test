@@ -18,33 +18,33 @@
 .gaugeWrap  { position: relative; width: 110px; height: 110px; }
 .gauge      { width: 110px; height: 110px; transform: rotate(-90deg); }
 .gaugePct   { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.gaugeNum   { font-family: var(--font-mono); font-size: 1.6rem; font-weight: 700; color: var(--ink); line-height: 1; }
-.gaugePctLbl { font-size: 0.6rem; font-weight: 700; color: var(--ink-subtle); }
+.gaugeNum   { font-family: var(--font-mono); font-size: var(--fs-1); font-weight: 700; color: var(--ink); line-height: 1; }
+.gaugePctLbl { font-size: var(--fs-7); font-weight: 700; color: var(--ink-subtle); }
 
 /* ── Clasificacion ──────────────────────────────────────────────────────────── */
 .clf {
   padding: 0.3rem 1rem; border-radius: 99px;
-  font-size: 0.82rem; font-weight: 800;
+  font-size: var(--fs-5); font-weight: 800;
   letter-spacing: 0.02em;
 }
 
 /* ── Titulos ────────────────────────────────────────────────────────────────── */
-.scoreTitle { font-size: 1.25rem; font-weight: 800; color: var(--ink); letter-spacing: -0.04em; }
-.scoreDesc  { font-size: 0.83rem; color: var(--ink-muted); }
+.scoreTitle { font-size: var(--fs-2); font-weight: 800; color: var(--ink); letter-spacing: -0.04em; }
+.scoreDesc  { font-size: var(--fs-4); color: var(--ink-muted); }
 
 /* ── Comparativa clase ──────────────────────────────────────────────────────── */
 .comparativa {
   display: flex; align-items: center; gap: 0.5rem;
   padding: 0.5rem 0.85rem;
   background: var(--surface-dim); border-radius: 8px;
-  font-size: 0.82rem; color: var(--ink-muted);
+  font-size: var(--fs-5); color: var(--ink-muted);
   width: 100%;
 }
 .comparativaIcon { color: var(--ink-muted); flex-shrink: 0; }
 .comparativaText { flex: 1; text-align: left; }
 .comparativaDiff {
   padding: 0.18rem 0.5rem; border-radius: 6px;
-  font-size: 0.76rem; font-weight: 700;
+  font-size: var(--fs-5); font-weight: 700;
   flex-shrink: 0;
 }
 
@@ -55,11 +55,11 @@
   width: 100%; justify-content: center;
 }
 .stat { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; min-width: 52px; }
-.statIconGreen { color: #059669; }
-.statIconRed   { color: #DC2626; }
+.statIconGreen { color: var(--accent); }
+.statIconRed   { color: var(--danger); }
 .statIconMuted { color: var(--ink-subtle); }
-.statNum   { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--ink); }
-.statLabel { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-subtle); }
+.statNum   { font-family: var(--font-mono); font-size: var(--fs-2); font-weight: 700; color: var(--ink); }
+.statLabel { font-size: var(--fs-7); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-subtle); }
 
 /* ── Rendimiento por bloque ─────────────────────────────────────────────────── */
 .blockStats {
@@ -69,7 +69,7 @@
 }
 .blockStatsTitle {
   display: flex; align-items: center; gap: 0.35rem;
-  font-size: 0.72rem; font-weight: 700; color: var(--ink-muted);
+  font-size: var(--fs-6); font-weight: 700; color: var(--ink-muted);
   text-transform: uppercase; letter-spacing: 0.05em;
   margin-bottom: 0.25rem;
 }
@@ -77,7 +77,7 @@
   display: flex; align-items: center; gap: 0.6rem;
 }
 .blockLabel {
-  font-size: 0.76rem; color: var(--ink-soft);
+  font-size: var(--fs-5); color: var(--ink-soft);
   width: 120px; flex-shrink: 0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   text-align: left;
@@ -91,7 +91,7 @@
   transition: width 0.6s ease;
 }
 .blockPct {
-  font-size: 0.75rem; font-weight: 700;
+  font-size: var(--fs-5); font-weight: 700;
   width: 34px; text-align: right; flex-shrink: 0;
 }
 
@@ -100,7 +100,7 @@
 .btnHome, .btnRepeat {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.45rem;
   padding: 0.75rem; border-radius: var(--r-full); min-height: 48px;
-  font-family: var(--font-body); font-size: 0.87rem; font-weight: 800;
+  font-family: var(--font-body); font-size: var(--fs-4); font-weight: 800;
   cursor: pointer; transition: all var(--t) var(--ease);
 }
 .btnHome   { background: none; border: 1.5px solid var(--line-strong); color: var(--ink-muted); }
@@ -113,12 +113,12 @@
   display: flex; align-items: center; gap: 0.45rem;
   padding: 0.65rem 1rem; width: 100%; min-height: 46px;
   background: none; border: 1.5px solid; border-radius: var(--r-full);
-  font-family: var(--font-body); font-size: 0.82rem; font-weight: 700;
+  font-family: var(--font-body); font-size: var(--fs-5); font-weight: 700;
   cursor: pointer; transition: all var(--t) var(--ease);
 }
 .sectionToggle:hover { opacity: 0.8; }
 .sectionHint {
-  font-size: 0.76rem; font-weight: 500; opacity: 0.7;
+  font-size: var(--fs-5); font-weight: 500; opacity: 0.7;
 }
 
 /* ── Fail list ──────────────────────────────────────────────────────────────── */
@@ -127,9 +127,9 @@
 .failItem {
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--r-lg); overflow: hidden;
-  border-left: 3px solid #DC2626;
+  border-left: 3px solid var(--danger);
 }
-.failItemCorrect { border-left-color: #059669; }
+.failItemCorrect { border-left-color: var(--accent); }
 
 .failHeader {
   display: flex; align-items: flex-start; gap: 0.5rem;
@@ -141,11 +141,11 @@
 .failHeader:hover { background: var(--surface-off); }
 
 .failNum {
-  font-family: var(--font-mono); font-size: 0.68rem;
+  font-family: var(--font-mono); font-size: var(--fs-7);
   color: var(--ink-subtle); flex-shrink: 0; margin-top: 2px;
 }
 .failQ {
-  flex: 1; font-size: 0.86rem; font-weight: 600;
+  flex: 1; font-size: var(--fs-4); font-weight: 600;
   color: var(--ink); line-height: 1.4;
 }
 .failChevron { flex-shrink: 0; color: var(--ink-subtle); margin-top: 2px; }
@@ -154,10 +154,10 @@
   padding: 0 1rem 1rem 2.2rem;
   display: flex; flex-direction: column; gap: 0.35rem;
 }
-.failWrongAns   { font-size: 0.8rem; color: #DC2626; font-weight: 600; }
-.failCorrectAns { font-size: 0.8rem; color: #059669; font-weight: 700; }
+.failWrongAns   { font-size: var(--fs-5); color: var(--danger); font-weight: 600; }
+.failCorrectAns { font-size: var(--fs-5); color: var(--accent); font-weight: 700; }
 .failExpl {
-  font-size: 0.78rem; color: var(--ink-muted); line-height: 1.6;
+  font-size: var(--fs-5); color: var(--ink-muted); line-height: 1.6;
   border-top: 1px solid var(--line); padding-top: 0.4rem;
 }
 
@@ -166,24 +166,28 @@
   display: inline-flex; align-items: center; gap: 0.35rem;
   margin-top: 0.25rem; padding: 0.35rem 0.85rem;
   background: var(--surface-dim); border: 1px solid var(--line-strong);
-  border-radius: 99px; font-size: 0.77rem; font-weight: 600;
+  border-radius: 99px; font-size: var(--fs-5); font-weight: 600;
   color: var(--ink-muted); cursor: pointer;
   font-family: var(--font-body); transition: all 0.15s;
   width: fit-content;
 }
-.btnAddRepaso:hover { background: #EFF6FF; border-color: #93C5FD; color: #1D4ED8; }
+.btnAddRepaso:hover { background: var(--tint-blue); border-color: #93C5FD; color: #1D4ED8; }
 .btnAddRepasoAdded {
-  background: #ECFDF5; border-color: #A7F3D0;
-  color: #059669; cursor: default;
+  background: var(--accent-lt); border-color: var(--accent-dim);
+  color: var(--accent); cursor: default;
 }
-.btnAddRepasoAdded:hover { background: #ECFDF5; border-color: #A7F3D0; color: #059669; }
+.btnAddRepasoAdded:hover { background: var(--accent-lt); border-color: var(--accent-dim); color: var(--accent); }
 
 /* ── Iconos ─────────────────────────────────────────────────────────────────── */
-.iconGreen { color: #059669; flex-shrink: 0; }
-.iconRed   { color: #DC2626; flex-shrink: 0; }
+.iconGreen { color: var(--accent); flex-shrink: 0; }
+.iconRed   { color: var(--danger); flex-shrink: 0; }
 
 @media (max-width: 480px) {
   .wrapper { padding: 1.25rem 1rem 5rem; }
   .statsRow { gap: 0.9rem; }
   .blockLabel { width: 80px; }
 }
+
+/* ── Fixes modo oscuro ── */
+[data-theme="oscuro"] .btnRepeat { background: #fff; color: #18181B; box-shadow: none; }
+[data-theme="calido"] .btnRepeat { background: #2C1E0F; color: #FEFAF6; }

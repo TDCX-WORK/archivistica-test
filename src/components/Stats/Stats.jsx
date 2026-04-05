@@ -50,13 +50,13 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 // ── Comparativa anonima con la clase ──────────────────────────────────────
-function ComparativaClaseCard({ avgScore, academyId, subjectId }) {
+function ComparativaClaseCard({ avgScore, academyId, subjectId, userId }) {
   const [mediaClase,    setMediaClase]    = useState(null)
   const [totalSesiones, setTotalSesiones] = useState(0)
   const [loading,       setLoading]       = useState(true)
 
   useEffect(() => {
-    if (!academyId || !avgScore) { setLoading(false); return }
+    if (!academyId || !userId) { setLoading(false); return }  // avgScore puede ser 0
     const fetch = async () => {
       const hace30 = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
       let q = supabase
@@ -64,20 +64,63 @@ function ComparativaClaseCard({ avgScore, academyId, subjectId }) {
         .select('score, user_id')
         .eq('academy_id', academyId)
         .gte('played_at', hace30)
-      if (subjectId) q = q.eq('subject_id', subjectId)
+        .neq('user_id', userId)
+      // Si hay subjectId, buscar sesiones de ese subject O sin subject asignado
+      // (alumnos sin subject_id en profiles guardan sesiones con subject_id null)
+      if (subjectId) q = q.or(`subject_id.eq.${subjectId},subject_id.is.null`)
       const { data } = await q
-      if (data?.length > 1) {
-        const media = Math.round(data.reduce((s, x) => s + x.score, 0) / data.length)
-        const usuarios = new Set(data.map(x => x.user_id)).size
+      if (data?.length > 0) {
+        const porAlumno = {}
+        for (const s of data) {
+          if (!porAlumno[s.user_id]) porAlumno[s.user_id] = []
+          porAlumno[s.user_id].push(s.score)
+        }
+        const mediasAlumnos = Object.values(porAlumno).map(
+          scores => scores.reduce((a, b) => a + b, 0) / scores.length
+        )
+        const media = Math.round(mediasAlumnos.reduce((a, b) => a + b, 0) / mediasAlumnos.length)
         setMediaClase(media)
-        setTotalSesiones(usuarios)
+        setTotalSesiones(mediasAlumnos.length)
+      } else {
+        // Sin datos de compañeros — mostrar card con mensaje
+        setMediaClase(-1)
+        setTotalSesiones(0)
       }
       setLoading(false)
     }
     fetch()
-  }, [academyId, subjectId, avgScore])
+  }, [academyId, subjectId, avgScore, userId])
 
-  if (loading || mediaClase === null || avgScore === 0) return null
+  if (loading || mediaClase === null) return null
+
+  // Sin compañeros activos en los últimos 30 días
+  if (mediaClase === -1) {
+    return (
+      <div className={styles.comparativaCard}>
+        <div className={styles.comparativaHeader}>
+          <Users size={14} className={styles.comparativaIcon} />
+          <span className={styles.comparativaTitle}>Comparativa con la clase</span>
+          <span className={styles.comparativaSub}>Sin datos aún</span>
+        </div>
+        <div className={styles.comparativaBody}>
+          <div className={styles.comparativaStat}>
+            <span className={styles.comparativaStatVal} style={{ color: '#2563EB' }}>{avgScore}%</span>
+            <span className={styles.comparativaStatLabel}>Tu nota media</span>
+          </div>
+          <div className={styles.comparativaSep}>
+            <Minus size={20} className={styles.comparativaIgual} />
+          </div>
+          <div className={styles.comparativaStat}>
+            <span className={styles.comparativaStatVal} style={{ color: '#9CA3AF' }}>—</span>
+            <span className={styles.comparativaStatLabel}>Media de la clase</span>
+          </div>
+        </div>
+        <p className={styles.comparativaMsg} style={{ color: '#6B7280' }}>
+          Ningún compañero ha hecho tests en los últimos 30 días
+        </p>
+      </div>
+    )
+  }
 
   const diff  = avgScore - mediaClase
   const mejor = diff > 0
@@ -301,7 +344,7 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
     <div className={styles.page} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
       <div style={{ textAlign: 'center' }}>
         <Loader2 size={28} strokeWidth={1.5} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)' }} />
-        <p style={{ marginTop: '1rem', color: 'var(--ink-light)', fontSize: '0.88rem' }}>Cargando estadísticas…</p>
+        <p style={{ marginTop: '1rem', color: 'var(--ink-muted)', fontSize: '0.88rem' }}>Cargando estadísticas…</p>
       </div>
     </div>
   )
@@ -356,6 +399,7 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
               avgScore={avgScore}
               academyId={currentUser?.academy_id}
               subjectId={currentUser?.subject_id}
+              userId={currentUser?.id}
             />
           )}
 
@@ -456,8 +500,10 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
                         style={{background:(block?.color||'#6B7280')+'20',color:block?.color||'#6B7280'}}>
                         {block?.label||'General'}
                       </div>
-                      <p className={styles.wrongQ}>{q.question}</p>
-                      <span className={styles.wrongCount}>{w.fail_count}x</span>
+                      <div className={styles.wrongItemBottom}>
+                        <p className={styles.wrongQ}>{q.question}</p>
+                        <span className={styles.wrongCount}>{w.fail_count}x</span>
+                      </div>
                     </div>
                   )
                 })}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
 // ── Notificaciones automaticas al hacer login (solo alumnos activos) ──────────
@@ -67,9 +67,22 @@ export function useAuth() {
   const [error,        setError]        = useState('')
   const [recoveryMode, setRecoveryMode] = useState(false)
 
+  // Flag para ignorar eventos de auth mientras register() está ejecutándose
+  // El signUp() dispara onAuthStateChange antes de que profiles/student_profiles existan
+  const isRegisteringRef = useRef(false)
+
   useEffect(() => {
+    let loadingProfileId = null
+
+    async function safeLoadProfile(user) {
+      if (loadingProfileId === user.id) return
+      loadingProfileId = user.id
+      await loadProfile(user)
+      loadingProfileId = null
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) loadProfile(session.user)
+      if (session?.user) safeLoadProfile(session.user)
       else { setCurrentUser(null); setLoading(false) }
     })
 
@@ -79,7 +92,9 @@ export function useAuth() {
         setLoading(false)
         return
       }
-      if (session?.user) loadProfile(session.user)
+      // Ignorar eventos mientras register() está creando los registros en BD
+      if (isRegisteringRef.current) return
+      if (session?.user) safeLoadProfile(session.user)
       else { setCurrentUser(null); setLoading(false) }
     })
 
@@ -96,11 +111,20 @@ export function useAuth() {
     // Cargar onboarding_completed solo para alumnos
     let onboardingCompleted = true
     if (profile?.role === 'alumno') {
-      const { data: sp } = await supabase
-        .from('student_profiles')
-        .select('onboarding_completed')
-        .eq('id', user.id)
-        .maybeSingle()
+      // Retry hasta 3 veces con 500ms de espera — en registro nuevo el student_profile
+      // puede no existir aún cuando onAuthStateChange se dispara
+      let sp = null
+      for (let i = 0; i < 3; i++) {
+        const { data } = await supabase
+          .from('student_profiles')
+          .select('onboarding_completed')
+          .eq('id', user.id)
+          .maybeSingle()
+        sp = data
+        if (sp !== null) break
+        await new Promise(r => setTimeout(r, 500))
+      }
+      // Si student_profile no existe o onboarding_completed no es true → mostrar wizard
       onboardingCompleted = sp?.onboarding_completed === true
     }
 
@@ -146,6 +170,10 @@ export function useAuth() {
       setError('Necesitas un codigo de academia para registrarte'); return false
     }
 
+    // Bloquear el listener de onAuthStateChange — signUp lo dispara antes
+    // de que profiles/student_profiles existan, lo que rompe el onboarding
+    isRegisteringRef.current = true
+
     // 1. Validar codigo — ahora incluye created_by para notificar al profesor
     const { data: codeData, error: codeErr } = await supabase
       .from('invite_codes')
@@ -165,12 +193,13 @@ export function useAuth() {
     const { data, error: signUpError } = await supabase.auth.signUp({ email: fakeEmail, password })
 
     if (signUpError) {
+      isRegisteringRef.current = false
       setError(signUpError.message.includes('already registered')
         ? `El nombre de usuario "${username.trim().toLowerCase()}" ya esta en uso. Prueba anadiendo un apellido o numero.`
         : signUpError.message)
       return false
     }
-    if (!data.user) { setError('Error creando la cuenta'); return false }
+    if (!data.user) { isRegisteringRef.current = false; setError('Error creando la cuenta'); return false }
 
     // 3. Calcular fecha de expiracion
     const accessUntil = new Date()
@@ -187,6 +216,7 @@ export function useAuth() {
     })
 
     if (profileErr) {
+      isRegisteringRef.current = false
       const msg = profileErr.message || ''
       setError(msg.includes('duplicate') || msg.includes('unique')
         ? `El nombre de usuario "${username.trim().toLowerCase()}" ya esta en uso. Elige otro.`
@@ -240,6 +270,12 @@ export function useAuth() {
     } catch (_) {
       // Las notificaciones no deben bloquear el registro
     }
+
+    // Todo listo — desbloquear el listener y cargar el perfil manualmente
+    // En este punto profiles y student_profiles ya existen en BD
+    isRegisteringRef.current = false
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.user) await loadProfile(session.user)
 
     return true
   }, [])

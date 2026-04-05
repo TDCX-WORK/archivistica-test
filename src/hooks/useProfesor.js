@@ -139,9 +139,8 @@ export function useProfesor(currentUser) {
       try {
         const porExpirar = alumnosConStats.filter(a => a.proximoAExpirar)
         if (porExpirar.length > 0 && currentUser?.id) {
-          // Anti-spam: una vez cada 3 días por usuario
-          const hace3dias  = new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10)
-          const cacheKey   = `notif_expira_${currentUser.id}_${hace3dias}`
+          // Anti-spam: una vez al día por usuario
+          const cacheKey   = `notif_expira_${currentUser.id}_${hoy}`
           const yaEnviado  = localStorage.getItem(cacheKey)
 
           if (!yaEnviado) {

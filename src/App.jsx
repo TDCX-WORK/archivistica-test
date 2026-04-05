@@ -26,6 +26,8 @@ import OnboardingWizard   from './components/Onboarding/OnboardingWizard'
 import GestionAcademia        from './components/Director/GestionAcademia/GestionAcademia'
 import FacturacionDirector    from './components/Director/FacturacionDirector/FacturacionDirector'
 import styles             from './App.module.css'
+import { useSuperadmin } from './hooks/useSuperadmin'
+import ManualBillingTab  from './components/Superadmin/ManualBillingTab'
 
 const homeRoute = (user) => {
   const role = user?.role
@@ -262,16 +264,88 @@ function AppShell({ currentUser, logout, progress, studyProgress }) {
 }
 
 // Wrapper que carga academias y las pasa al panel de billing
-import { useSuperadmin } from './hooks/useSuperadmin'
-
 function BillingWrapper({ currentUser }) {
   const { academias, loading, recargar } = useSuperadmin(currentUser)
+  const [tab, setTab] = useState('manual')
+
   if (loading) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', padding:'5rem', color:'var(--ink-muted)' }}>
+    <div style={{
+      minHeight: '60vh', display:'flex', alignItems:'center', justifyContent:'center',
+      background:'#080c10', color:'rgba(232,244,248,0.4)', fontSize:'var(--fs-4)'
+    }}>
       Cargando…
     </div>
   )
-  return <StripeBillingPanel academias={academias} onRecargar={recargar} />
+
+  return (
+    <div style={{
+      minHeight:'100vh',
+      background:'linear-gradient(135deg,#080c10 0%,#0d1520 40%,#080c10 100%)',
+      color:'#e8f4f8'
+    }}>
+      {/* Tabs de facturación */}
+      <div style={{
+        display:'flex', alignItems:'center', gap:'0.5rem',
+        padding:'1.5rem 2rem 0',
+        maxWidth:'1100px', margin:'0 auto'
+      }}>
+        {[
+          { id:'manual', label:'Facturación manual', badge:'Activo' },
+          { id:'stripe', label:'Stripe', badge:'Próximamente' },
+        ].map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)} style={{
+            display:'inline-flex', alignItems:'center', gap:'0.45rem',
+            padding:'0.5rem 1.1rem',
+            background: tab===t.id ? 'rgba(93,228,255,0.1)' : 'rgba(255,255,255,0.03)',
+            border: tab===t.id ? '1px solid rgba(93,228,255,0.3)' : '1px solid rgba(255,255,255,0.07)',
+            borderRadius:'999px',
+            fontSize:'var(--fs-5)', fontWeight: tab===t.id ? 700 : 500,
+            color: tab===t.id ? '#5de4ff' : 'rgba(232,244,248,0.35)',
+            cursor:'pointer', transition:'all 0.15s',
+          }}>
+            {t.label}
+            <span style={{
+              fontSize:'9px', fontWeight:800, padding:'1px 6px',
+              background: tab===t.id ? 'rgba(93,228,255,0.15)' : 'rgba(255,255,255,0.06)',
+              border:`1px solid ${tab===t.id ? 'rgba(93,228,255,0.25)' : 'rgba(255,255,255,0.08)'}`,
+              borderRadius:'999px', color: tab===t.id ? '#5de4ff' : 'rgba(232,244,248,0.25)',
+              letterSpacing:'0.05em', textTransform:'uppercase',
+            }}>{t.badge}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Contenido */}
+      <div style={{maxWidth:'1100px', margin:'0 auto', padding:'1.5rem 2rem 4rem'}}>
+        {tab === 'manual' && <ManualBillingTab academias={academias}/>}
+        {tab === 'stripe' && (
+          <div style={{
+            display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+            gap:'1rem', padding:'5rem', textAlign:'center',
+            background:'rgba(13,20,32,0.95)', border:'1px solid rgba(93,228,255,0.08)',
+            borderRadius:'20px',
+          }}>
+            <div style={{fontSize:'2.5rem'}}>⚡</div>
+            <div style={{fontSize:'var(--fs-2)', fontWeight:700, color:'#e8f4f8'}}>Stripe · Próximamente</div>
+            <div style={{fontSize:'var(--fs-5)', color:'rgba(232,244,248,0.35)', maxWidth:400, lineHeight:1.6}}>
+              La integración con Stripe está lista pero se activará con el primer cliente real.
+              Hasta entonces, usa la facturación manual.
+            </div>
+            <button onClick={() => setTab('manual')} style={{
+              display:'inline-flex', alignItems:'center', gap:'0.4rem',
+              padding:'0.55rem 1.1rem',
+              background:'linear-gradient(135deg,#1d4ed8,#5de4ff)',
+              border:'none', borderRadius:'999px',
+              fontSize:'var(--fs-5)', fontWeight:700, color:'#fff',
+              cursor:'pointer', marginTop:'0.5rem',
+            }}>
+              Ir a facturación manual
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 
@@ -302,6 +376,7 @@ function AppInner() {
       <OnboardingWizard
         currentUser={currentUser}
         onComplete={completeOnboarding}
+        onLogout={logout}
       />
     )
   }

@@ -3,18 +3,18 @@
 .introLayout { display: grid; grid-template-columns: 1fr 260px; gap: 1.25rem; align-items: start; }
 .introBadge {
   display: inline-flex; align-items: center; gap: 0.35rem;
-  font-size: 0.62rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase;
+  font-size: var(--fs-7); font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase;
   color: #1e4e8a; background: var(--tint-blue);
   padding: 0.2rem 0.55rem; border-radius: var(--r-full); margin-bottom: 0.65rem;
 }
-.introTitle    { font-size: 1.4rem; font-weight: 800; color: var(--ink); letter-spacing: -0.04em; margin-bottom: 0.25rem; }
-.introSubtitle { font-size: 0.85rem; color: var(--ink-muted); margin-bottom: 0.9rem; }
+.introTitle    { font-size: var(--fs-1); font-weight: 800; color: var(--ink); letter-spacing: -0.04em; margin-bottom: 0.25rem; }
+.introSubtitle { font-size: var(--fs-4); color: var(--ink-muted); margin-bottom: 0.9rem; }
 .scenarioBox {
   background: var(--surface); border: 1px solid var(--line-strong);
   border-radius: var(--r-xl); padding: 1.35rem;
   max-height: 65vh; overflow-y: auto; box-shadow: var(--shadow-sm);
 }
-.scenarioText { font-size: 0.87rem; line-height: 1.8; color: var(--ink-soft); white-space: pre-wrap; }
+.scenarioText { font-size: var(--fs-4); line-height: 1.8; color: var(--ink-soft); white-space: pre-wrap; }
 
 .introSide { position: sticky; top: 68px; }
 .introInfo {
@@ -22,12 +22,12 @@
   border-radius: var(--r-xl); padding: 1.35rem;
   display: flex; flex-direction: column; gap: 0.7rem; box-shadow: var(--shadow-sm);
 }
-.introMeta { font-size: 0.8rem; color: var(--ink-muted); line-height: 1.55; font-weight: 500; }
+.introMeta { font-size: var(--fs-5); color: var(--ink-muted); line-height: 1.55; font-weight: 500; }
 .startBtn {
   display: flex; align-items: center; justify-content: center; gap: 0.45rem;
   padding: 0.82rem; background: var(--primary); color: #fff;
   border: none; border-radius: var(--r-full); cursor: pointer; min-height: 48px;
-  font-family: var(--font-body); font-size: 0.88rem; font-weight: 800;
+  font-family: var(--font-body); font-size: var(--fs-3); font-weight: 800;
   box-shadow: 0 3px 10px rgba(26,92,53,0.25);
   transition: all var(--t) var(--ease);
 }
@@ -35,7 +35,7 @@
 .backBtn {
   display: flex; align-items: center; justify-content: center; gap: 0.4rem;
   padding: 0.65rem; background: none; border: 1.5px solid var(--line); border-radius: var(--r-full);
-  cursor: pointer; font-family: var(--font-body); font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; font-family: var(--font-body); font-size: var(--fs-5); font-weight: 700;
   color: var(--ink-muted); min-height: 44px;
   transition: all var(--t) var(--ease);
 }
@@ -53,16 +53,16 @@
 .finishGaugeWrap { position: relative; width: 96px; height: 96px; }
 .finishGauge     { width: 96px; height: 96px; transform: rotate(-90deg); }
 .finishGaugePct  { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.finishGaugeNum  { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 600; color: var(--ink); line-height: 1; }
-.finishGaugeLbl  { font-size: 0.6rem; font-weight: 700; color: var(--ink-subtle); }
-.finishTitle  { font-size: 1.3rem; font-weight: 800; color: var(--ink); letter-spacing: -0.04em; }
-.finishSub    { font-size: 0.85rem; color: var(--ink-muted); }
+.finishGaugeNum  { font-family: var(--font-mono); font-size: var(--fs-1); font-weight: 600; color: var(--ink); line-height: 1; }
+.finishGaugeLbl  { font-size: var(--fs-7); font-weight: 700; color: var(--ink-subtle); }
+.finishTitle  { font-size: var(--fs-1); font-weight: 800; color: var(--ink); letter-spacing: -0.04em; }
+.finishSub    { font-size: var(--fs-4); color: var(--ink-muted); }
 .finishActions { display: flex; gap: 0.55rem; width: 100%; margin-top: 0.2rem; }
 .finishBtn {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.4rem;
   padding: 0.75rem; border-radius: var(--r-full);
   background: var(--primary); color: #fff; border: none; cursor: pointer; min-height: 48px;
-  font-family: var(--font-body); font-size: 0.85rem; font-weight: 800;
+  font-family: var(--font-body); font-size: var(--fs-4); font-weight: 800;
   transition: all var(--t) var(--ease);
 }
 .finishBtn:hover { background: var(--primary-mid); }
@@ -80,21 +80,21 @@
 }
 .scenarioBadge {
   display: inline-flex; align-items: center; gap: 0.3rem;
-  font-size: 0.6rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase;
+  font-size: var(--fs-7); font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase;
   color: #1e4e8a; background: rgba(255,255,255,0.65);
   padding: 0.15rem 0.5rem; border-radius: var(--r-full); align-self: flex-start;
 }
-.scenarioTitle  { font-size: 0.9rem; font-weight: 800; color: var(--ink); letter-spacing: -0.03em; }
+.scenarioTitle  { font-size: var(--fs-3); font-weight: 800; color: var(--ink); letter-spacing: -0.03em; }
 .scenarioScroll { flex: 1; overflow-y: auto; padding-right: 0.25rem; }
-.scenarioBody   { font-size: 0.8rem; line-height: 1.8; color: var(--ink-soft); white-space: pre-wrap; }
+.scenarioBody   { font-size: var(--fs-5); line-height: 1.8; color: var(--ink-soft); white-space: pre-wrap; }
 
 .qPanel  { padding: 1.5rem 1.75rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
 .qHeader { display: flex; align-items: center; gap: 0.85rem; }
-.qNum    { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-subtle); white-space: nowrap; }
+.qNum    { font-size: var(--fs-7); font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-subtle); white-space: nowrap; }
 .qBar    { flex: 1; height: 2.5px; background: var(--line-strong); border-radius: 99px; overflow: hidden; }
 .qBarFill { height: 100%; background: var(--primary); border-radius: 99px; transition: width 0.3s var(--ease); }
 
-.qText  { font-size: 0.97rem; font-weight: 700; line-height: 1.65; color: var(--ink); letter-spacing: -0.02em; }
+.qText  { font-size: var(--fs-3); font-weight: 700; line-height: 1.65; color: var(--ink); letter-spacing: -0.02em; }
 .qOptions { display: flex; flex-direction: column; gap: 0.4rem; }
 
 .qOpt {
@@ -112,14 +112,14 @@
 
 .qLetter {
   width: 22px; height: 22px; border-radius: var(--r-xs);
-  background: var(--surface-dim); font-size: 0.67rem; font-weight: 800;
+  background: var(--surface-dim); font-size: var(--fs-7); font-weight: 800;
   display: flex; align-items: center; justify-content: center;
   color: var(--ink-muted); flex-shrink: 0; margin-top: 1px;
 }
 .qOpt_selected .qLetter { background: var(--primary); color: #fff; }
 .qOpt_correct  .qLetter { background: var(--primary); color: #fff; }
 .qOpt_wrong    .qLetter { background: var(--danger);  color: #fff; }
-.qOptText { flex: 1; font-size: 0.87rem; line-height: 1.5; color: var(--ink); font-weight: 500; }
+.qOptText { flex: 1; font-size: var(--fs-4); line-height: 1.5; color: var(--ink); font-weight: 500; }
 .qOpt_correct .qOptText { color: var(--primary); font-weight: 600; }
 .qOpt_wrong   .qOptText { color: var(--danger); }
 .iconCheck { flex-shrink: 0; color: var(--primary); margin-top: 3px; }
@@ -139,24 +139,24 @@
 .fbHeader { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.9rem 1rem 0.75rem; }
 .fbIconWrong { width: 26px; height: 26px; border-radius: 50%; background: var(--danger); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .fbIconOk    { width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.fbTitle { font-size: 0.83rem; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
-.fbSub   { font-size: 0.76rem; color: var(--ink-muted); margin-top: 0.12rem; line-height: 1.45; }
+.fbTitle { font-size: var(--fs-4); font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
+.fbSub   { font-size: var(--fs-5); color: var(--ink-muted); margin-top: 0.12rem; line-height: 1.45; }
 .fbSub strong { color: var(--danger); font-weight: 700; }
 .fbCorrectBox { margin: 0 1rem 0.85rem; padding: 0.8rem 0.9rem; background: var(--tint-green); border: 1px solid var(--primary-dim); border-radius: var(--r-md); }
-.fbCorrectLbl { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--primary); display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.3rem; }
-.fbCorrectTxt { font-size: 0.88rem; font-weight: 600; color: var(--ink); line-height: 1.5; }
+.fbCorrectLbl { font-size: var(--fs-7); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--primary); display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.3rem; }
+.fbCorrectTxt { font-size: var(--fs-3); font-weight: 600; color: var(--ink); line-height: 1.5; }
 .fbExplBox { margin: 0 1rem 1rem; padding: 0.8rem 0.9rem; background: var(--amber-lt); border: 1px solid var(--amber-dim); border-radius: var(--r-md); }
-.fbExplLbl { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--amber); display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.3rem; }
-.fbExplTxt { font-size: 0.83rem; color: var(--ink-soft); line-height: 1.7; }
-.fbMinimal { display: flex; align-items: center; gap: 0.4rem; margin: 0 1rem 1rem; font-size: 0.77rem; color: var(--ink-subtle); }
-.fbOkExpl  { font-size: 0.79rem; color: var(--ink-muted); margin-top: 0.2rem; line-height: 1.6; }
+.fbExplLbl { font-size: var(--fs-7); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--amber); display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.3rem; }
+.fbExplTxt { font-size: var(--fs-4); color: var(--ink-soft); line-height: 1.7; }
+.fbMinimal { display: flex; align-items: center; gap: 0.4rem; margin: 0 1rem 1rem; font-size: var(--fs-5); color: var(--ink-subtle); }
+.fbOkExpl  { font-size: var(--fs-5); color: var(--ink-muted); margin-top: 0.2rem; line-height: 1.6; }
 
 .qNav { display: flex; justify-content: space-between; gap: 0.7rem; padding-top: 0.5rem; }
 .qNavBtn {
   display: flex; align-items: center; gap: 0.4rem;
   padding: 0.6rem 1rem; border: 1.5px solid var(--line-strong);
   border-radius: var(--r-full); background: var(--surface); cursor: pointer; min-height: 44px;
-  font-family: var(--font-body); font-size: 0.82rem; font-weight: 800;
+  font-family: var(--font-body); font-size: var(--fs-5); font-weight: 800;
   color: var(--ink-muted); transition: all var(--t) var(--ease);
 }
 .qNavBtn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); background: var(--primary-xlt); }
@@ -190,4 +190,9 @@
   animation: spin 0.8s linear infinite; flex-shrink: 0;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.fbLoadingText { font-size: 0.8rem; color: var(--ink-muted); font-style: italic; }
+.fbLoadingText { font-size: var(--fs-5); color: var(--ink-muted); font-style: italic; }
+
+/* ── Fixes modo oscuro ── */
+[data-theme="oscuro"] .qNavBtnFinish       { background: #fff; color: #18181B; border-color: #fff; }
+[data-theme="oscuro"] .qNavBtnFinish:hover { background: #E5E5EA; color: #18181B; }
+[data-theme="calido"] .qNavBtnFinish       { background: #2C1E0F; color: #FEFAF6; border-color: #2C1E0F; }

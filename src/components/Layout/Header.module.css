@@ -16,14 +16,14 @@
 .left { flex: 1; min-width: 0; }
 
 .pageTitle {
-  font-size: 0.85rem;
+  font-size: var(--fs-4);
   font-weight: 600;
   color: var(--ink-muted);
   letter-spacing: -0.01em;
 }
 .pageTitleInstitutional {
   display: none;
-  font-size: 0.62rem;
+  font-size: var(--fs-7);
   color: var(--ink-subtle);
   font-weight: 400;
   margin-top: 1px;
@@ -32,9 +32,7 @@
   text-overflow: ellipsis;
 }
 
-.testLabel {
-  display: flex; align-items: center; gap: 0.5rem;
-}
+.testLabel { display: flex; align-items: center; gap: 0.5rem; }
 .testDot {
   width: 7px; height: 7px;
   background: var(--accent);
@@ -45,9 +43,7 @@
   0%,100% { opacity: 1; transform: scale(1); }
   50%      { opacity: 0.5; transform: scale(0.8); }
 }
-.testName {
-  font-size: 0.82rem; font-weight: 600; color: var(--ink-soft);
-}
+.testName { font-size: var(--fs-5); font-weight: 600; color: var(--ink-soft); }
 
 /* Center */
 .center {
@@ -61,14 +57,14 @@
   pointer-events: none;
 }
 .centerTitle {
-  font-size: 0.88rem;
+  font-size: var(--fs-3);
   font-weight: 700;
   color: var(--ink);
   letter-spacing: -0.03em;
   white-space: nowrap;
 }
 .centerSub {
-  font-size: 0.65rem;
+  font-size: var(--fs-7);
   font-weight: 400;
   color: var(--ink-subtle);
   letter-spacing: 0.01em;
@@ -104,7 +100,7 @@
 .searchInput {
   border: none; outline: none;
   background: transparent;
-  font-size: 0.76rem; color: var(--ink);
+  font-size: var(--fs-5); color: var(--ink);
   width: 100%;
 }
 .searchInput::placeholder { color: var(--ink-subtle); }
@@ -121,7 +117,7 @@
 }
 .iconBtn:hover { background: var(--surface-dim); color: var(--ink); }
 
-/* Avatar pill — clickable */
+/* Avatar pill */
 .avatarPill {
   display: flex; align-items: center; gap: 0.45rem;
   background: var(--surface-off);
@@ -132,21 +128,18 @@
   min-height: unset;
   transition: all var(--t) var(--ease);
 }
-.avatarPill:hover {
-  background: var(--surface-dim);
-  border-color: var(--line-strong);
-}
+.avatarPill:hover { background: var(--surface-dim); border-color: var(--line-strong); }
 .avatar {
   width: 26px; height: 26px;
-  background: var(--primary);
+  background: #18181B;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.68rem; font-weight: 700; color: #fff;
+  font-size: var(--fs-7); font-weight: 700; color: #fff;
   flex-shrink: 0;
 }
-.avatarName {
-  font-size: 0.76rem; font-weight: 500; color: var(--ink-soft);
-}
+[data-theme="oscuro"] .avatar { background: #fff; color: #18181B; }
+[data-theme="calido"] .avatar { background: #2C1E0F; color: #FEFAF6; }
+.avatarName { font-size: var(--fs-5); font-weight: 500; color: var(--ink-soft); }
 
 /* Exit button */
 .exitBtn {
@@ -155,22 +148,14 @@
   background: var(--surface-dim);
   border: 1px solid var(--line-strong);
   border-radius: var(--r-full);
-  font-size: 0.76rem; font-weight: 600; color: var(--ink-soft);
+  font-size: var(--fs-5); font-weight: 600; color: var(--ink-soft);
   transition: all var(--t) var(--ease);
   min-height: unset;
 }
-.exitBtn:hover {
-  background: var(--danger-lt);
-  border-color: var(--danger-dim);
-  color: var(--danger);
-}
+.exitBtn:hover { background: var(--danger-lt); border-color: var(--danger-dim); color: var(--danger); }
 
-/* ── USER MENU DROPDOWN ── */
-.userMenuOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-}
+/* User menu */
+.userMenuOverlay { position: fixed; inset: 0; z-index: 200; }
 .userMenu {
   position: fixed;
   top: calc(var(--header-h) + 6px);
@@ -188,56 +173,190 @@
   from { opacity: 0; transform: translateY(-6px) scale(0.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-.userMenuTop {
-  display: flex; align-items: center; gap: 0.65rem;
-  padding: 0.6rem 0.5rem 0.7rem;
-}
+.userMenuTop { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem 0.5rem 0.7rem; }
 .userMenuAvatar {
   width: 36px; height: 36px;
-  background: var(--primary);
+  background: #18181B;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.85rem; font-weight: 700; color: #fff;
+  font-size: var(--fs-4); font-weight: 700; color: #fff;
   flex-shrink: 0;
 }
-.userMenuName {
-  font-size: 0.82rem; font-weight: 700; color: var(--ink);
-  letter-spacing: -0.02em;
-}
-.userMenuSub {
-  font-size: 0.68rem; color: var(--ink-subtle); margin-top: 1px;
-}
-.userMenuDivider {
-  height: 1px; background: var(--line); margin: 0.35rem 0;
-}
+[data-theme="oscuro"] .userMenuAvatar { background: #fff; color: #18181B; }
+[data-theme="calido"] .userMenuAvatar { background: #2C1E0F; color: #FEFAF6; }
+.userMenuName { font-size: var(--fs-5); font-weight: 700; color: var(--ink); letter-spacing: -0.02em; }
+.userMenuSub  { font-size: var(--fs-7); color: var(--ink-subtle); margin-top: 1px; }
+.userMenuDivider { height: 1px; background: var(--line); margin: 0.35rem 0; }
 .userMenuItem {
   display: flex; align-items: center; gap: 0.55rem;
   width: 100%; padding: 0.55rem 0.65rem;
   border-radius: var(--r-sm);
-  font-size: 0.8rem; font-weight: 500; color: var(--ink-soft);
+  font-size: var(--fs-5); font-weight: 500; color: var(--ink-soft);
   background: none; border: none; cursor: pointer;
   transition: all var(--t) var(--ease);
-  min-height: unset;
-  text-align: left;
+  min-height: unset; text-align: left;
 }
-.userMenuItem:hover {
-  background: var(--surface-dim);
-  color: var(--ink);
-}
+.userMenuItem:hover { background: var(--surface-dim); color: var(--ink); }
 .userMenuLogout { color: var(--danger); }
 .userMenuLogout:hover { background: var(--danger-lt); color: var(--danger); }
 
-/* Mobile */
+/* ── MÓVIL — una fila, tres pills ── */
 @media (max-width: 768px) {
-  .header { 
-    padding: 0 1rem; 
+  .header {
+    height: var(--header-h);
+    padding: 0 0.75rem;
     width: 100%;
     box-sizing: border-box;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    position: relative;
+  }
+
+  .searchWrap { display: none; }
+
+  /* Pill 1 — título en negro, flex-shrink controlado */
+  .left {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+  .pageTitle {
+    font-size: var(--fs-5);
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    background: #18181B;
+    border-radius: var(--r-full);
+    padding: 0.32rem 0.85rem;
+    display: inline-block;
+  }
+  [data-theme="oscuro"] .pageTitle { background: #fff; color: #18181B; }
+  [data-theme="calido"]  .pageTitle { background: #2C1E0F; color: #FEFAF6; }
+  .pageTitleInstitutional { display: none; }
+
+  /* Pill 2 — academia, crece para llenar espacio disponible */
+  .center {
+    position: static;
+    transform: none;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+    background: var(--surface-off);
+    border: 1px solid var(--line);
+    border-radius: var(--r-full);
+    padding: 0.32rem 0.85rem;
     overflow: hidden;
   }
-  .searchWrap { display: none; }
+  .centerTitle {
+    font-size: var(--fs-6);
+    font-weight: 500;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: transparent;
+    border: none;
+    padding: 0;
+    letter-spacing: 0;
+    width: 100%;
+    text-align: center;
+  }
+  .centerSub { display: none; }
+
+  /* Pills 3+4 — bell y avatar circulares */
+  .right {
+    flex: 0 0 auto;
+    gap: 0.4rem;
+    align-items: center;
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+
+  .avatarPill {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Forzar campana cuadrada en móvil para que border-radius:50% funcione */
+  .right > * { flex-shrink: 0; }
   .avatarName { display: none; }
-  .center { display: none; }
-  .pageTitleInstitutional { display: block; }
-  .userMenu { right: 1rem; width: calc(100vw - 2rem); max-width: 260px; }
+  .avatar {
+    width: 34px;
+    height: 34px;
+    font-size: var(--fs-6);
+    font-weight: 700;
+    border-radius: 50%;
+  }
+
+  .userMenu { right: 0.75rem; width: calc(100vw - 1.5rem); max-width: 260px; }
+}
+
+/* ── SUPERADMIN DARK HEADER ─────────────────────────── */
+.headerDark {
+  background: rgba(8,12,16,0.95) !important;
+  border-bottom: 1px solid rgba(93,228,255,0.1) !important;
+  backdrop-filter: blur(16px);
+}
+
+.pageTitleDark {
+  color: #e8f4f8 !important;
+  background: rgba(93,228,255,0.08) !important;
+  border: 1px solid rgba(93,228,255,0.18) !important;
+  border-radius: var(--r-full) !important;
+}
+
+.centerDark {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  pointer-events: none;
+}
+
+.centerDarkTitle {
+  font-size: var(--fs-5);
+  font-weight: 700;
+  color: #e8f4f8;
+  letter-spacing: -0.01em;
+}
+
+.centerDarkSub {
+  font-size: var(--fs-7);
+  color: rgba(93,228,255,0.45);
+  letter-spacing: 0.04em;
+}
+
+/* Avatar y campanita en dark */
+.headerDark .avatarPill {
+  background: rgba(93,228,255,0.06) !important;
+  border-color: rgba(93,228,255,0.15) !important;
+}
+.headerDark .avatarPill:hover {
+  background: rgba(93,228,255,0.12) !important;
+  border-color: rgba(93,228,255,0.3) !important;
+}
+.headerDark .avatar {
+  background: rgba(93,228,255,0.15) !important;
+  color: #5de4ff !important;
+}
+.headerDark .avatarName {
+  color: rgba(232,244,248,0.6) !important;
+}
+.headerDark .searchWrap {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(93,228,255,0.12) !important;
+}
+.headerDark .searchInput {
+  color: rgba(232,244,248,0.5) !important;
 }

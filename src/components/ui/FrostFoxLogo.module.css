@@ -1,0 +1,47 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.img {
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Modo claro: negroline visible, blancoline oculta */
+.imgLight { display: block; }
+.imgDark  { display: none; }
+
+[data-theme="oscuro"] .imgLight { display: none; }
+[data-theme="oscuro"] .imgDark  { display: block; }
+
+/* Divisor vertical */
+.divider {
+  width: 2px;
+  background: var(--line-strong);
+  flex-shrink: 0;
+  height: 40px;
+}
+
+/* Texto */
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.name {
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.sub {
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}

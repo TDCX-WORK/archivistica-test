@@ -25,8 +25,9 @@ export function useProgress(userId, academyId, subjectId) {
   useEffect(() => {
     if (!userId) { setSessions([]); setWrongAnswers([]); return }
     setLoadingData(true)
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10)
     Promise.all([
-      supabase.from('sessions').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      supabase.from('sessions').select('*').eq('user_id', userId).gte('played_at', ninetyDaysAgo).order('created_at', { ascending: false }),
       supabase.from('wrong_answers').select('*').eq('user_id', userId),
     ]).then(([{ data: sess }, { data: wrong }]) => {
       setSessions(sess || [])

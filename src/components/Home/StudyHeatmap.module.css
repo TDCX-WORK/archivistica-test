@@ -7,10 +7,10 @@
   display: flex;
   gap: 2rem;
   align-items: flex-start;
-  background: #f0fdf4;
-  border-radius: 16px;
+  background: var(--accent-lt);
+  border-radius: var(--r-lg);
   border: none;
-  padding: 1.5rem 1.5rem 1.25rem;
+  padding: 1.5rem 1.75rem 1.25rem;
 }
 
 /* SVG del grid se extiende 50px fuera en todos los lados
@@ -35,22 +35,22 @@
 .edgeFadeTop {
   inset: -50px -50px auto -50px;
   height: 220px;
-  background: linear-gradient(to bottom, #f0fdf4 30%, transparent 100%);
+  background: linear-gradient(to bottom, var(--accent-lt) 30%, transparent 100%);
 }
 .edgeFadeBottom {
   inset: auto -50px -50px -50px;
   height: 220px;
-  background: linear-gradient(to top, #f0fdf4 30%, transparent 100%);
+  background: linear-gradient(to top, var(--accent-lt) 30%, transparent 100%);
 }
 .edgeFadeLeft {
   inset: -50px auto -50px -50px;
   width: 220px;
-  background: linear-gradient(to right, #f0fdf4 30%, transparent 100%);
+  background: linear-gradient(to right, var(--accent-lt) 30%, transparent 100%);
 }
 .edgeFadeRight {
   inset: -50px -50px -50px auto;
   width: 220px;
-  background: linear-gradient(to left, #f0fdf4 30%, transparent 100%);
+  background: linear-gradient(to left, var(--accent-lt) 30%, transparent 100%);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -71,16 +71,16 @@
 .mhdrRight { display: flex; align-items: center; gap: 0.3rem; }
 
 .mName {
-  font-size: 1.45rem; font-weight: 800; color: var(--ink);
+  font-size: var(--fs-1); font-weight: 800; color: var(--ink);
   letter-spacing: -0.04em; line-height: 1;
 }
 .mYear {
-  font-size: 1rem; font-weight: 400; color: var(--ink-muted);
+  font-size: var(--fs-2); font-weight: 400; color: var(--ink-muted);
   letter-spacing: -0.02em;
 }
 
 .todayBtn {
-  font-size: 0.68rem; font-weight: 600; color: var(--ink-muted);
+  font-size: var(--fs-7); font-weight: 600; color: var(--ink-muted);
   background: var(--surface-dim); border: 1px solid var(--line-strong);
   border-radius: 99px; padding: 0.18rem 0.6rem; cursor: pointer;
   transition: all 0.15s; margin-right: 0.1rem;
@@ -102,7 +102,7 @@
 }
 .dname {
   width: 40px; text-align: center;
-  font-size: 0.62rem; font-weight: 700;
+  font-size: var(--fs-7); font-weight: 700;
   color: var(--ink-subtle); letter-spacing: 0.04em; text-transform: uppercase;
   padding-bottom: 0.2rem;
 }
@@ -126,14 +126,14 @@
               transform 0.12s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.15s;
 }
 .cell:not(:disabled):hover {
-  background: #f0fdf4;
+  background: var(--accent-lt);
   border-color: rgba(34, 197, 94, 0.6);
   transform: scale(1.1); z-index: 3;
 }
 .cell:disabled { cursor: default; }
 
 .cNum {
-  font-size: 0.82rem; font-weight: 600; color: var(--ink-soft);
+  font-size: var(--fs-5); font-weight: 600; color: var(--ink-soft);
   line-height: 1; position: relative; z-index: 1;
   transition: color 0.15s, font-weight 0.15s;
 }
@@ -157,17 +157,17 @@
 
 /* Seleccionado */
 .cSel {
-  border-color: #059669 !important;
+  border-color: var(--accent) !important;
   box-shadow: 0 0 0 3px rgba(5,150,105,0.18) !important;
 }
 
 /* ── Niveles de actividad — sobre el fondo blanco base ── */
 .lv0 { /* base: blanco puro */ }
 
-.lv1 { background: #dcfce7; border-color: #86efac; }
+.lv1 { background: #dcfce7; border-color: var(--accent-dim); }
 .lv1 .cNum { color: #166534; }
 
-.lv2 { background: #86efac; border-color: #4ade80; }
+.lv2 { background: var(--accent-dim); border-color: #4ade80; }
 .lv2 .cNum { color: #14532d; font-weight: 700; }
 
 .lv3 {
@@ -192,19 +192,19 @@
 .noteDot {
   position: absolute; bottom: 2px; right: 2px;
   width: 5px; height: 5px; border-radius: 50%;
-  background: #f59e0b; border: 1px solid white; z-index: 3;
+  background: var(--amber); border: 1px solid white; z-index: 3;
 }
 
 /* Leyenda */
 .leg { display: flex; align-items: center; gap: 5px; }
-.legLbl  { font-size: 0.6rem; color: var(--ink-subtle); }
+.legLbl  { font-size: var(--fs-7); color: var(--ink-subtle); }
 .legCell {
   width: 12px; height: 12px; border-radius: 50%;
   flex-shrink: 0; border: 1.5px solid transparent;
 }
 .leg .lv0 { background: #ffffff;  border-color: rgba(34,197,94,0.3); }
-.leg .lv1 { background: #dcfce7;  border-color: #86efac; }
-.leg .lv2 { background: #86efac;  border-color: #4ade80; }
+.leg .lv1 { background: #dcfce7;  border-color: var(--accent-dim); }
+.leg .lv2 { background: var(--accent-dim);  border-color: #4ade80; }
 .leg .lv3 { background: #22c55e;  border-color: #16a34a; }
 .leg .lv4 { background: #15803d;  border-color: #166534; }
 
@@ -224,7 +224,7 @@
 .pillRow { display: flex; gap: 0.45rem; flex-wrap: wrap; }
 .pill {
   display: inline-flex; align-items: center; gap: 0.35rem;
-  font-size: 0.82rem; font-weight: 700;
+  font-size: var(--fs-5); font-weight: 700;
   padding: 0.32rem 0.75rem; border-radius: 99px; border: 1px solid;
   white-space: nowrap;
 }
@@ -243,12 +243,12 @@
 }
 /* Número grande */
 .mStatV {
-  font-size: 1.25rem; font-weight: 800;
+  font-size: var(--fs-2); font-weight: 800;
   color: var(--ink); letter-spacing: -0.04em; line-height: 1;
 }
 /* Etiqueta más legible */
 .mStatL {
-  font-size: 0.68rem; font-weight: 500;
+  font-size: var(--fs-7); font-weight: 500;
   color: var(--ink-subtle); text-transform: uppercase;
   letter-spacing: 0.05em; white-space: nowrap;
 }
@@ -258,11 +258,11 @@
 .reviewAlert {
   display: flex; align-items: center; gap: 0.7rem;
   padding: 0.75rem 0.9rem;
-  background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px;
+  background: var(--amber-lt); border: 1px solid var(--amber-dim); border-radius: 10px;
 }
 .reviewDot {
   width: 10px; height: 10px; border-radius: 50%;
-  background: #F59E0B; flex-shrink: 0;
+  background: var(--amber); flex-shrink: 0;
   animation: pulse 2s ease infinite;
 }
 @keyframes pulse {
@@ -270,8 +270,8 @@
   50%      { box-shadow: 0 0 0 5px rgba(245,158,11,0);   }
 }
 /* Texto más grande en la alerta */
-.reviewTitle { font-size: 0.9rem; font-weight: 700; color: #78350F; }
-.reviewSub   { font-size: 0.76rem; color: #92400E; margin-top: 0.1rem; }
+.reviewTitle { font-size: var(--fs-3); font-weight: 700; color: var(--amber); }
+.reviewSub   { font-size: var(--fs-5); color: var(--amber); margin-top: 0.1rem; }
 
 /* Panel de detalle del día */
 .detail {
@@ -290,7 +290,7 @@
 .detailHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
 /* Fecha del día seleccionado — más grande */
 .detailDate {
-  font-size: 0.92rem; font-weight: 700;
+  font-size: var(--fs-3); font-weight: 700;
   color: var(--ink); text-transform: capitalize; line-height: 1.3;
 }
 .detailX {
@@ -304,7 +304,7 @@
 
 .planTag {
   display: inline-flex; align-items: center; gap: 0.3rem;
-  font-size: 0.72rem; font-weight: 600; color: #7c3aed;
+  font-size: var(--fs-6); font-weight: 600; color: #7c3aed;
   background: #f5f3ff; border: 1px solid #ede9fe;
   border-radius: 99px; padding: 0.14rem 0.55rem; width: fit-content;
 }
@@ -317,66 +317,86 @@
 }
 .dStat:last-child { border-right: none; }
 /* Número del stat del día — más grande */
-.dStatV { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+.dStatV { font-size: var(--fs-2); font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
 /* Etiqueta del stat del día — más legible */
-.dStatL { font-size: 0.65rem; font-weight: 500; color: var(--ink-subtle); text-transform: uppercase; letter-spacing: 0.04em; }
+.dStatL { font-size: var(--fs-7); font-weight: 500; color: var(--ink-subtle); text-transform: uppercase; letter-spacing: 0.04em; }
 
 /* Texto "sin actividad" */
-.detailEmpty { font-size: 0.82rem; color: var(--ink-subtle); text-align: center; padding: 0.25rem 0; }
+.detailEmpty { font-size: var(--fs-5); color: var(--ink-subtle); text-align: center; padding: 0.25rem 0; }
 
 /* "Pulsa un día para ver el detalle" — más grande y visible */
 .detailEmpty2 {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 0.5rem; color: var(--ink-subtle); font-size: 0.88rem;
+  gap: 0.5rem; color: var(--ink-subtle); font-size: var(--fs-3);
   text-align: center; padding: 1.5rem 0; opacity: 0.75;
 }
 
 /* Área de notas */
 .noteArea { border-top: 1px solid var(--line); padding-top: 0.6rem; }
 .noteTA {
-  width: 100%; resize: none; font-size: 0.82rem; font-family: var(--font-body);
+  width: 100%; resize: none; font-size: var(--fs-5); font-family: var(--font-body);
   color: var(--ink); background: var(--surface); line-height: 1.5;
   border: 1px solid var(--line-strong); border-radius: 7px;
   padding: 0.4rem 0.55rem; transition: border-color 0.15s;
 }
-.noteTA:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 2px rgba(5,150,105,0.1); }
+.noteTA:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(5,150,105,0.1); }
 .noteBtns { display: flex; gap: 0.35rem; justify-content: flex-end; margin-top: 0.35rem; }
 .noteCancel {
-  padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.76rem; font-weight: 600;
+  padding: 0.3rem 0.7rem; border-radius: 6px; font-size: var(--fs-5); font-weight: 600;
   background: var(--surface-dim); color: var(--ink-muted);
   border: 1px solid var(--line); cursor: pointer;
 }
 .noteSave {
   display: flex; align-items: center; gap: 0.25rem;
-  padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.76rem; font-weight: 700;
-  background: #059669; color: white; border: none; cursor: pointer;
+  padding: 0.3rem 0.7rem; border-radius: 6px; font-size: var(--fs-5); font-weight: 700;
+  background: var(--accent); color: white; border: none; cursor: pointer;
   box-shadow: 0 2px 5px rgba(5,150,105,0.3); transition: all 0.15s;
 }
 .noteSave:hover { background: #047857; }
 .noteShow {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 0.4rem;
   padding: 0.4rem 0.55rem; background: var(--surface); border: 1px solid var(--line);
-  border-radius: 7px; font-size: 0.82rem; color: var(--ink-soft); cursor: pointer;
+  border-radius: 7px; font-size: var(--fs-5); color: var(--ink-soft); cursor: pointer;
 }
 .noteShow:hover { border-color: var(--line-strong); }
-.noteHint { font-size: 0.7rem; color: var(--ink-subtle); white-space: nowrap; flex-shrink: 0; }
+.noteHint { font-size: var(--fs-6); color: var(--ink-subtle); white-space: nowrap; flex-shrink: 0; }
 /* "Añadir nota personal" — más grande */
 .noteAdd {
   display: flex; align-items: center; gap: 0.35rem; width: 100%;
-  padding: 0.4rem 0.55rem; border-radius: 7px; font-size: 0.8rem; font-weight: 600;
+  padding: 0.4rem 0.55rem; border-radius: 7px; font-size: var(--fs-5); font-weight: 600;
   border: 1.5px dashed var(--line-strong); background: transparent; cursor: pointer;
   color: var(--ink-muted); font-family: var(--font-body); transition: all 0.15s;
 }
-.noteAdd:hover { border-color: #059669; color: #059669; background: rgba(5,150,105,0.04); }
+.noteAdd:hover { border-color: var(--accent); color: var(--accent); background: rgba(5,150,105,0.04); }
 
 /* ═══════════════════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 700px) {
-  .root { flex-direction: column; gap: 1.1rem; align-items: stretch; }
+  .root { flex-direction: column; gap: 1.1rem; align-items: stretch; padding: 1.25rem 1rem 1rem; }
   .calSide { width: 100%; align-items: stretch; }
   .mhdr { width: 100%; }
-  .dnames, .grid { margin-left: auto; margin-right: auto; }
+
+  /* Grid fluido: 7 columnas que se adaptan al ancho disponible */
+  .dnames,
+  .grid {
+    grid-template-columns: repeat(7, 1fr);
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* Celda cuadrada usando aspect-ratio */
+  .dname {
+    width: auto;
+    text-align: center;
+  }
+  .cell {
+    width: auto;
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
   .leg  { justify-content: center; }
   .infoSide { width: 100%; padding-top: 0; }
   .pillRow  { justify-content: center; }
@@ -384,9 +404,7 @@
 }
 
 @media (max-width: 380px) {
-  .dnames, .grid { grid-template-columns: repeat(7, 34px); gap: 3px; }
-  .dname, .cell  { width: 34px; }
-  .cell  { height: 34px; }
-  .cNum  { font-size: 0.74rem; }
-  .mName { font-size: 1.2rem; }
+  .root { padding: 1rem 0.75rem; }
+  .cNum  { font-size: var(--fs-6); }
+  .mName { font-size: var(--fs-2); }
 }

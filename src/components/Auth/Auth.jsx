@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { BookOpen, User, Lock, ArrowRight, UserPlus, ChevronLeft, Eye, EyeOff, AlertCircle, Key, Mail, Check } from 'lucide-react'
-import GobiernoLogo from '../ui/GobiernoLogo'
+import FrostFoxLogo from '../ui/FrostFoxLogo'
 import styles from './Auth.module.css'
 
 export default function AuthPage({ onLogin, onRegister, onRequestReset, error, clearError }) {
@@ -42,7 +42,7 @@ export default function AuthPage({ onLogin, onRegister, onRequestReset, error, c
 
   return (
     <div className={styles.page}>
-      <GobiernoLogo size="md" className={styles.brand} />
+      <FrostFoxLogo size="md" className={styles.brand} />
 
       <div className={styles.card}>
         <div className={styles.cardHeader}>

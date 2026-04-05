@@ -4,13 +4,15 @@
   flex-direction: column;
   gap: 1.75rem;
   max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 /* ── Header ── */
 .header { display: flex; align-items: flex-start; justify-content: space-between; }
-.eyebrow { font-size: 0.72rem; font-weight: 700; color: var(--primary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
-.title { font-size: 1.4rem; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; margin-bottom: 4px; }
-.subtitle { font-size: 0.85rem; color: var(--ink-muted); }
+.eyebrow { font-size: var(--fs-6); font-weight: 700; color: var(--primary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+.title { font-size: var(--fs-1); font-weight: 800; color: var(--ink); letter-spacing: -0.02em; margin-bottom: 4px; }
+.subtitle { font-size: var(--fs-4); color: var(--ink-muted); }
 
 /* ── KPIs ── */
 .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
@@ -33,13 +35,13 @@
 }
 
 .kpiVal {
-  font-size: 1.35rem; font-weight: 800;
+  font-size: var(--fs-1); font-weight: 800;
   color: var(--ink); letter-spacing: -0.02em;
   line-height: 1;
 }
 
 .kpiLabel {
-  font-size: 0.76rem; color: var(--ink-muted);
+  font-size: var(--fs-5); color: var(--ink-muted);
 }
 
 /* ── Tabla ── */
@@ -53,7 +55,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.84rem;
+  font-size: var(--fs-4);
 }
 
 .table thead {
@@ -63,7 +65,7 @@
 
 .table thead th {
   padding: 0.75rem 1rem;
-  font-size: 0.72rem;
+  font-size: var(--fs-6);
   font-weight: 700;
   color: var(--ink-muted);
   text-align: left;
@@ -88,7 +90,7 @@
 
 .invoiceNum {
   font-family: var(--font-mono, 'DM Mono', monospace);
-  font-size: 0.8rem;
+  font-size: var(--fs-5);
   font-weight: 600;
   color: var(--primary) !important;
   white-space: nowrap;
@@ -102,10 +104,10 @@
 .dateCell {
   white-space: nowrap;
   color: var(--ink-muted) !important;
-  font-size: 0.82rem;
+  font-size: var(--fs-5);
 }
 
-.overdue { color: var(--error, #dc2626) !important; font-weight: 600; }
+.overdue { color: var(--error, var(--danger)) !important; font-weight: 600; }
 
 .amountCell {
   text-align: right;
@@ -120,14 +122,14 @@
 .badge {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 3px 9px; border-radius: 6px;
-  font-size: 0.72rem; font-weight: 700;
+  font-size: var(--fs-6); font-weight: 700;
   white-space: nowrap;
 }
 
-.badgePaid      { background: rgba(5,150,105,0.1);  color: #059669; }
-.badgePending   { background: rgba(245,158,11,0.1); color: #d97706; }
-.badgeCancelled { background: rgba(107,114,128,0.1);color: #6b7280; }
-.badgeOverdue   { background: rgba(220,38,38,0.1);  color: #dc2626; }
+.badgePaid      { background: rgba(5,150,105,0.1);  color: var(--accent); }
+.badgePending   { background: rgba(245,158,11,0.1); color: var(--amber); }
+.badgeCancelled { background: rgba(107,114,128,0.1);color: var(--ink-muted); }
+.badgeOverdue   { background: rgba(220,38,38,0.1);  color: var(--danger); }
 
 /* ── Download button ── */
 .downloadBtn {
@@ -154,8 +156,8 @@
 }
 
 .emptyIcon { color: var(--ink-subtle); }
-.emptyText { font-size: 0.95rem; font-weight: 600; color: var(--ink-muted); }
-.emptySubtext { font-size: 0.82rem; color: var(--ink-subtle); max-width: 340px; line-height: 1.5; }
+.emptyText { font-size: var(--fs-3); font-weight: 600; color: var(--ink-muted); }
+.emptySubtext { font-size: var(--fs-5); color: var(--ink-subtle); max-width: 340px; line-height: 1.5; }
 
 /* ── Loading ── */
 .loadingWrap {
@@ -175,7 +177,7 @@
 
 /* ── Nota legal ── */
 .legalNote {
-  font-size: 0.72rem;
+  font-size: var(--fs-6);
   color: var(--ink-subtle);
   line-height: 1.6;
   padding: 1rem 1.25rem;

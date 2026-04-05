@@ -1,0 +1,22 @@
+# Normalizar line endings a LF en todos los entornos
+* text=auto eol=lf
+
+*.jsx  text eol=lf
+*.js   text eol=lf
+*.css  text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+*.html text eol=lf
+*.ts   text eol=lf
+*.tsx  text eol=lf
+
+# Binarios — no tocar
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.svg  binary
+*.ico  binary
+*.woff binary
+*.woff2 binary

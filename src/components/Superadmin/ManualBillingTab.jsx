@@ -4,11 +4,11 @@ import {
   Plus, Euro, FileText, Check, X, ChevronDown, ChevronUp,
   AlertTriangle, Clock, CheckCircle, XCircle, Download,
   Building2, Calendar, RefreshCw, Edit3, Ban, RotateCcw,
-  Info, Printer
+  Info, CreditCard, TrendingUp, Zap
 } from 'lucide-react'
 import styles from './ManualBillingTab.module.css'
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────
 function fmt(cents) {
   return (cents / 100).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
@@ -16,49 +16,33 @@ function fmtDate(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
 }
-function today() {
-  return new Date().toISOString().slice(0, 10)
-}
+function today() { return new Date().toISOString().slice(0, 10) }
 function addDays(days) {
-  const d = new Date()
-  d.setDate(d.getDate() + days)
+  const d = new Date(); d.setDate(d.getDate() + days)
   return d.toISOString().slice(0, 10)
 }
 
 const STATUS = {
-  paid:      { label: 'Pagada',    color: '#059669', bg: '#ECFDF5', icon: CheckCircle },
-  pending:   { label: 'Pendiente', color: '#D97706', bg: '#FFFBEB', icon: Clock },
-  overdue:   { label: 'Vencida',   color: '#DC2626', bg: '#FEF2F2', icon: AlertTriangle },
-  cancelled: { label: 'Anulada',   color: '#9CA3AF', bg: '#F3F4F6', icon: Ban },
+  paid:      { label: 'Pagada',    color: '#22C55E', bg: 'rgba(34,197,94,0.1)',   border: 'rgba(34,197,94,0.25)',  icon: CheckCircle },
+  pending:   { label: 'Pendiente', color: '#F59E0B', bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.25)', icon: Clock },
+  overdue:   { label: 'Vencida',   color: '#EF4444', bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.25)',  icon: AlertTriangle },
+  cancelled: { label: 'Anulada',   color: 'rgba(232,244,248,0.25)', bg: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)', icon: Ban },
 }
 
-const METHODS = ['transferencia', 'bizum', 'tarjeta', 'domiciliación']
-const CONCEPTS = [
-  'Alta de plataforma',
-  'Mensualidad',
-  'Cuota trimestral',
-  'Cuota anual',
-  'Otros',
-]
+const METHODS  = ['transferencia', 'bizum', 'tarjeta', 'domiciliación']
+const CONCEPTS = ['Alta de plataforma', 'Mensualidad', 'Cuota trimestral', 'Cuota anual', 'Otros']
 
-// ── Hook de datos ──────────────────────────────────────────────────────────────
+// ── Hook de datos ──────────────────────────────────────
 function useManualBilling(academias) {
-  const [invoices,  setInvoices]  = useState([])
-  const [company,   setCompany]   = useState(null)
-  const [loading,   setLoading]   = useState(true)
+  const [invoices, setInvoices] = useState([])
+  const [company,  setCompany]  = useState(null)
+  const [loading,  setLoading]  = useState(true)
 
   const load = useCallback(async () => {
     setLoading(true)
     const [{ data: invData }, { data: compData }] = await Promise.all([
-      supabase
-        .from('invoices')
-        .select('*')
-        .eq('is_manual', true)
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('company_settings')
-        .select('*')
-        .maybeSingle(),
+      supabase.from('invoices').select('*').eq('is_manual', true).order('created_at', { ascending: false }),
+      supabase.from('company_settings').select('*').maybeSingle(),
     ])
     setInvoices(invData || [])
     setCompany(compData)
@@ -68,48 +52,29 @@ function useManualBilling(academias) {
   useEffect(() => { load() }, [load])
 
   const createInvoice = useCallback(async (data) => {
-    // Generar número de factura
-    const { data: numData } = await supabase
-      .rpc('next_invoice_number', { prefix: company?.invoice_prefix || 'FF' })
-
+    const { data: numData } = await supabase.rpc('next_invoice_number', { prefix: company?.invoice_prefix || 'FF' })
     const { data: { user } } = await supabase.auth.getUser()
     const academia = academias.find(a => a.id === data.academy_id)
+    const base     = Math.round(parseFloat(data.base_amount) * 100)
+    const vatRate  = parseFloat(data.vat_rate || 21)
+    const vat      = Math.round(base * vatRate / 100)
+    const total    = base + vat
 
-    const base    = Math.round(parseFloat(data.base_amount) * 100)
-    const vatRate = parseFloat(data.vat_rate || 21)
-    const vat     = Math.round(base * vatRate / 100)
-    const total   = base + vat
-
-    const { data: inv, error } = await supabase
-      .from('invoices')
-      .insert({
-        academy_id:      data.academy_id,
-        invoice_number:  numData,
-        concept:         data.concept,
-        base_amount:     base,
-        vat_rate:        vatRate,
-        vat_amount:      vat,
-        amount_cents:    total,
-        currency:        'eur',
-        status:          data.status || 'pending',
-        payment_method:  data.payment_method,
-        due_date:        data.due_date,
-        notes:           data.notes || null,
-        is_manual:       true,
-        created_by:      user?.id,
-        paid_at:         data.status === 'paid' ? today() : null,
-        period_start:    data.period_start || null,
-        period_end:      data.period_end   || null,
-        // Snapshot fiscal
-        issuer_name:     company?.legal_name    || null,
-        issuer_nif:      company?.nif           || null,
-        issuer_address:  company?.address       || null,
-        client_name:     academia?.billing_name || academia?.name || null,
-        client_nif:      academia?.billing_nif  || null,
-        client_address:  academia?.billing_address || null,
-      })
-      .select()
-      .maybeSingle()
+    const { data: inv, error } = await supabase.from('invoices').insert({
+      academy_id: data.academy_id, invoice_number: numData,
+      concept: data.concept, base_amount: base, vat_rate: vatRate,
+      vat_amount: vat, amount_cents: total, currency: 'eur',
+      status: data.status || 'pending', payment_method: data.payment_method,
+      due_date: data.due_date, notes: data.notes || null, is_manual: true,
+      created_by: user?.id,
+      paid_at: data.status === 'paid' ? today() : null,
+      period_start: data.period_start || null, period_end: data.period_end || null,
+      issuer_name: company?.legal_name || null, issuer_nif: company?.nif || null,
+      issuer_address: company?.address || null,
+      client_name: academia?.billing_name || academia?.name || null,
+      client_nif: academia?.billing_nif || null,
+      client_address: academia?.billing_address || null,
+    }).select().maybeSingle()
 
     if (error) return { error: error.message }
     await load()
@@ -117,51 +82,26 @@ function useManualBilling(academias) {
   }, [academias, company, load])
 
   const markPaid = useCallback(async (id) => {
-    const { error } = await supabase
-      .from('invoices')
-      .update({ status: 'paid', paid_at: today() })
-      .eq('id', id)
+    const { error } = await supabase.from('invoices').update({ status: 'paid', paid_at: today() }).eq('id', id)
     if (!error) await load()
     return !error
   }, [load])
 
   const cancelInvoice = useCallback(async (id, invoiceNumber) => {
-    // Crear factura rectificativa
     const { data: { user } } = await supabase.auth.getUser()
-    const { data: numData } = await supabase
-      .rpc('next_invoice_number', { prefix: company?.invoice_prefix || 'FF' })
-
+    const { data: numData } = await supabase.rpc('next_invoice_number', { prefix: company?.invoice_prefix || 'FF' })
     const orig = invoices.find(i => i.id === id)
     if (!orig) return false
-
-    // Marcar original como cancelada
-    await supabase
-      .from('invoices')
-      .update({ cancelled_at: new Date().toISOString(), status: 'cancelled' })
-      .eq('id', id)
-
-    // Insertar rectificativa con importes negativos
+    await supabase.from('invoices').update({ cancelled_at: new Date().toISOString(), status: 'cancelled' }).eq('id', id)
     await supabase.from('invoices').insert({
-      academy_id:       orig.academy_id,
-      invoice_number:   numData,
-      concept:          `Factura rectificativa de ${invoiceNumber}`,
-      base_amount:      -orig.base_amount,
-      vat_rate:         orig.vat_rate,
-      vat_amount:       -orig.vat_amount,
-      amount_cents:     -orig.amount_cents,
-      currency:         'eur',
-      status:           'cancelled',
-      is_manual:        true,
-      cancels_invoice:  invoiceNumber,
-      created_by:       user?.id,
-      issuer_name:      orig.issuer_name,
-      issuer_nif:       orig.issuer_nif,
-      issuer_address:   orig.issuer_address,
-      client_name:      orig.client_name,
-      client_nif:       orig.client_nif,
-      client_address:   orig.client_address,
+      academy_id: orig.academy_id, invoice_number: numData,
+      concept: `Factura rectificativa de ${invoiceNumber}`,
+      base_amount: -orig.base_amount, vat_rate: orig.vat_rate, vat_amount: -orig.vat_amount,
+      amount_cents: -orig.amount_cents, currency: 'eur', status: 'cancelled',
+      is_manual: true, cancels_invoice: invoiceNumber, created_by: user?.id,
+      issuer_name: orig.issuer_name, issuer_nif: orig.issuer_nif, issuer_address: orig.issuer_address,
+      client_name: orig.client_name, client_nif: orig.client_nif, client_address: orig.client_address,
     })
-
     await load()
     return true
   }, [invoices, company, load])
@@ -169,74 +109,57 @@ function useManualBilling(academias) {
   return { invoices, company, loading, createInvoice, markPaid, cancelInvoice, reload: load }
 }
 
-// ── KPI card ───────────────────────────────────────────────────────────────────
-function KPI({ label, value, sub, color, icon: Icon }) {
+// ── KPI Card ───────────────────────────────────────────
+function KpiCard({ label, value, sub, color, icon: Icon }) {
   return (
-    <div className={styles.kpi}>
-      <div className={styles.kpiIcon} style={{ color }}>
-        <Icon size={15} strokeWidth={1.8} />
+    <div className={styles.kpiCard} style={{'--kc': color}}>
+      <div className={styles.kpiIcon} style={{background:`${color}18`, border:`1px solid ${color}28`}}>
+        <Icon size={15} style={{color}}/>
       </div>
-      <div className={styles.kpiVal} style={{ color }}>{value}</div>
+      <div className={styles.kpiVal} style={{color}}>{value}</div>
       <div className={styles.kpiLabel}>{label}</div>
       {sub && <div className={styles.kpiSub}>{sub}</div>}
     </div>
   )
 }
 
-// ── Fila de factura ────────────────────────────────────────────────────────────
+// ── Fila de factura ────────────────────────────────────
 function InvoiceRow({ inv, onMarkPaid, onCancel }) {
-  const [open, setOpen]   = useState(false)
-  const [busy, setBusy]   = useState(false)
-  const st = STATUS[inv.cancelled_at ? 'cancelled' : inv.status] || STATUS.pending
-  const Icon = st.icon
+  const [open, setOpen] = useState(false)
+  const [busy, setBusy] = useState(false)
   const isOverdue = inv.status === 'pending' && inv.due_date && inv.due_date < today()
-  const effectiveSt = isOverdue ? STATUS.overdue : st
+  const stKey = inv.cancelled_at ? 'cancelled' : isOverdue ? 'overdue' : inv.status
+  const st = STATUS[stKey] || STATUS.pending
 
-  const handlePaid = async () => {
-    setBusy(true)
-    await onMarkPaid(inv.id)
-    setBusy(false)
-  }
+  const handlePaid = async () => { setBusy(true); await onMarkPaid(inv.id); setBusy(false) }
   const handleCancel = async () => {
     if (!confirm(`¿Anular la factura ${inv.invoice_number}? Se generará una factura rectificativa.`)) return
-    setBusy(true)
-    await onCancel(inv.id, inv.invoice_number)
-    setBusy(false)
+    setBusy(true); await onCancel(inv.id, inv.invoice_number); setBusy(false)
   }
 
   return (
     <div className={[styles.row, open ? styles.rowOpen : ''].join(' ')}>
       <button className={styles.rowHead} onClick={() => setOpen(o => !o)}>
-        {/* Número */}
         <span className={styles.rowNum}>{inv.invoice_number || '—'}</span>
-
-        {/* Concepto */}
         <span className={styles.rowConcept}>{inv.concept || '—'}</span>
-
-        {/* Fecha */}
         <span className={styles.rowDate}>{fmtDate(inv.created_at)}</span>
-
-        {/* Importe */}
-        <span className={styles.rowAmount}>
+        <span className={styles.rowAmount} style={{color: inv.amount_cents < 0 ? '#EF4444' : '#e8f4f8'}}>
           {inv.amount_cents < 0 ? '−' : ''}€{fmt(Math.abs(inv.amount_cents || 0))}
         </span>
-
-        {/* Estado */}
         <span className={styles.rowStatus}
-          style={{ color: effectiveSt.color, background: effectiveSt.bg }}>
-          <effectiveSt.icon size={11} />
-          {isOverdue ? 'Vencida' : effectiveSt.label}
+          style={{color: st.color, background: st.bg, border:`1px solid ${st.border}`}}>
+          <st.icon size={10}/>
+          {isOverdue ? 'Vencida' : st.label}
         </span>
-
         <span className={styles.rowChevron}>
-          {open ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+          {open ? <ChevronUp size={13}/> : <ChevronDown size={13}/>}
         </span>
       </button>
 
       {open && (
         <div className={styles.rowBody}>
           <div className={styles.rowGrid}>
-            {/* Columna izquierda — detalle fiscal */}
+            {/* Detalle fiscal */}
             <div className={styles.rowCol}>
               <div className={styles.rowColTitle}>Detalle fiscal</div>
               <div className={styles.rowField}>
@@ -249,55 +172,48 @@ function InvoiceRow({ inv, onMarkPaid, onCancel }) {
               </div>
               <div className={[styles.rowField, styles.rowFieldTotal].join(' ')}>
                 <span className={styles.rowFieldLabel}>Total</span>
-                <span className={styles.rowFieldVal}>€{fmt(inv.amount_cents || 0)}</span>
+                <span className={styles.rowFieldVal} style={{color:'#5de4ff'}}>€{fmt(inv.amount_cents || 0)}</span>
               </div>
               {inv.period_start && (
                 <div className={styles.rowField}>
                   <span className={styles.rowFieldLabel}>Período</span>
-                  <span className={styles.rowFieldVal}>
-                    {fmtDate(inv.period_start)} — {fmtDate(inv.period_end)}
-                  </span>
+                  <span className={styles.rowFieldVal}>{fmtDate(inv.period_start)} — {fmtDate(inv.period_end)}</span>
                 </div>
               )}
             </div>
 
-            {/* Columna central — datos emisor/receptor */}
+            {/* Partes */}
             <div className={styles.rowCol}>
               <div className={styles.rowColTitle}>Partes</div>
               {inv.issuer_name ? (
                 <div className={styles.rowParty}>
                   <span className={styles.rowPartyRole}>Emisor</span>
                   <span className={styles.rowPartyName}>{inv.issuer_name}</span>
-                  {inv.issuer_nif && <span className={styles.rowPartyNif}>NIF {inv.issuer_nif}</span>}
-                  {inv.issuer_address && <span className={styles.rowPartyAddr}>{inv.issuer_address}</span>}
+                  {inv.issuer_nif && <span className={styles.rowPartyMeta}>NIF {inv.issuer_nif}</span>}
+                  {inv.issuer_address && <span className={styles.rowPartyMeta}>{inv.issuer_address}</span>}
                 </div>
               ) : (
-                <div className={styles.rowNoData}>
-                  <Info size={12} /> Sin datos fiscales del emisor. Completa los datos de FrostFox.
-                </div>
+                <div className={styles.rowNoData}><Info size={12}/> Sin datos fiscales del emisor</div>
               )}
-              <div className={styles.rowParty} style={{ marginTop: '0.75rem' }}>
+              <div className={styles.rowParty} style={{marginTop:'0.75rem'}}>
                 <span className={styles.rowPartyRole}>Receptor</span>
                 <span className={styles.rowPartyName}>{inv.client_name || '—'}</span>
-                {inv.client_nif && <span className={styles.rowPartyNif}>NIF {inv.client_nif}</span>}
-                {inv.client_address && <span className={styles.rowPartyAddr}>{inv.client_address}</span>}
+                {inv.client_nif && <span className={styles.rowPartyMeta}>NIF {inv.client_nif}</span>}
+                {inv.client_address && <span className={styles.rowPartyMeta}>{inv.client_address}</span>}
               </div>
             </div>
 
-            {/* Columna derecha — pago y acciones */}
+            {/* Pago y acciones */}
             <div className={styles.rowCol}>
               <div className={styles.rowColTitle}>Pago</div>
               <div className={styles.rowField}>
                 <span className={styles.rowFieldLabel}>Método</span>
-                <span className={styles.rowFieldVal} style={{ textTransform: 'capitalize' }}>
-                  {inv.payment_method || '—'}
-                </span>
+                <span className={styles.rowFieldVal} style={{textTransform:'capitalize'}}>{inv.payment_method || '—'}</span>
               </div>
               {inv.due_date && (
                 <div className={styles.rowField}>
                   <span className={styles.rowFieldLabel}>Vencimiento</span>
-                  <span className={styles.rowFieldVal}
-                    style={{ color: isOverdue ? '#DC2626' : 'inherit', fontWeight: isOverdue ? 600 : 400 }}>
+                  <span className={styles.rowFieldVal} style={{color: isOverdue ? '#EF4444' : 'inherit', fontWeight: isOverdue ? 600 : 400}}>
                     {fmtDate(inv.due_date)}
                   </span>
                 </div>
@@ -314,21 +230,17 @@ function InvoiceRow({ inv, onMarkPaid, onCancel }) {
                   <span className={styles.rowFieldVal}>{inv.cancels_invoice}</span>
                 </div>
               )}
-              {inv.notes && (
-                <div className={styles.rowNotes}>{inv.notes}</div>
-              )}
-
-              {/* Acciones */}
+              {inv.notes && <div className={styles.rowNotes}>{inv.notes}</div>}
               {!inv.cancelled_at && (
                 <div className={styles.rowActions}>
                   {inv.status !== 'paid' && (
                     <button className={styles.btnPay} onClick={handlePaid} disabled={busy}>
-                      {busy ? <RefreshCw size={11} className={styles.spin} /> : <Check size={11} />}
+                      {busy ? <RefreshCw size={11} className={styles.spin}/> : <Check size={11}/>}
                       Marcar pagada
                     </button>
                   )}
                   <button className={styles.btnCancel} onClick={handleCancel} disabled={busy}>
-                    <Ban size={11} /> Anular
+                    <Ban size={11}/> Anular
                   </button>
                 </div>
               )}
@@ -340,23 +252,15 @@ function InvoiceRow({ inv, onMarkPaid, onCancel }) {
   )
 }
 
-// ── Modal nueva factura ────────────────────────────────────────────────────────
+// ── Modal nueva factura ────────────────────────────────
 function NewInvoiceModal({ academias, company, onCreate, onClose }) {
   const [form, setForm] = useState({
-    academy_id:     '',
-    concept:        'Mensualidad',
-    base_amount:    '',
-    vat_rate:       '21',
-    payment_method: 'transferencia',
-    status:         'pending',
-    due_date:       addDays(30),
-    period_start:   '',
-    period_end:     '',
-    notes:          '',
+    academy_id: '', concept: 'Mensualidad', base_amount: '',
+    vat_rate: '21', payment_method: 'transferencia', status: 'pending',
+    due_date: addDays(30), period_start: '', period_end: '', notes: '',
   })
-  const [saving, setSaving]   = useState(false)
-  const [error,  setError]    = useState('')
-
+  const [saving, setSaving] = useState(false)
+  const [error,  setError]  = useState('')
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const base  = parseFloat(form.base_amount) || 0
@@ -364,10 +268,10 @@ function NewInvoiceModal({ academias, company, onCreate, onClose }) {
   const total = base + vat
 
   const handleSubmit = async () => {
-    if (!form.academy_id) { setError('Selecciona una academia'); return }
+    if (!form.academy_id)               { setError('Selecciona una academia'); return }
     if (!form.base_amount || base <= 0) { setError('Introduce un importe válido'); return }
-    if (!form.concept) { setError('Introduce un concepto'); return }
-    if (!company?.nif) { setError('Completa primero los datos fiscales de FrostFox en Ajustes'); return }
+    if (!form.concept)                  { setError('Introduce un concepto'); return }
+    if (!company?.nif)                  { setError('Completa primero los datos fiscales de FrostFox'); return }
     setSaving(true); setError('')
     const res = await onCreate(form)
     setSaving(false)
@@ -379,12 +283,14 @@ function NewInvoiceModal({ academias, company, onCreate, onClose }) {
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
         <div className={styles.modalHead}>
-          <span className={styles.modalTitle}>Nueva factura</span>
-          <button className={styles.modalClose} onClick={onClose}><X size={14} /></button>
+          <div className={styles.modalTitleWrap}>
+            <FileText size={16} style={{color:'#5de4ff'}}/>
+            <span className={styles.modalTitle}>Nueva factura</span>
+          </div>
+          <button className={styles.modalClose} onClick={onClose}><X size={14}/></button>
         </div>
 
         <div className={styles.modalBody}>
-          {/* Academia */}
           <div className={styles.field}>
             <label className={styles.label}>Academia *</label>
             <select className={styles.select} value={form.academy_id}
@@ -400,7 +306,6 @@ function NewInvoiceModal({ academias, company, onCreate, onClose }) {
             </select>
           </div>
 
-          {/* Concepto */}
           <div className={styles.field}>
             <label className={styles.label}>Concepto *</label>
             <select className={styles.select} value={form.concept}
@@ -409,31 +314,27 @@ function NewInvoiceModal({ academias, company, onCreate, onClose }) {
             </select>
           </div>
 
-          {/* Importes */}
           <div className={styles.fieldRow}>
             <div className={styles.field}>
               <label className={styles.label}>Base imponible (€) *</label>
               <input className={styles.input} type='number' min='0' step='0.01'
-                value={form.base_amount} onChange={e => set('base_amount', e.target.value)}
-                placeholder='0.00' />
+                value={form.base_amount} onChange={e => set('base_amount', e.target.value)} placeholder='0.00'/>
             </div>
             <div className={styles.field}>
               <label className={styles.label}>IVA (%)</label>
               <input className={styles.input} type='number' min='0' max='100'
-                value={form.vat_rate} onChange={e => set('vat_rate', e.target.value)} />
+                value={form.vat_rate} onChange={e => set('vat_rate', e.target.value)}/>
             </div>
           </div>
 
-          {/* Preview importes */}
           {base > 0 && (
             <div className={styles.preview}>
-              <span>Base: <b>€{base.toFixed(2)}</b></span>
-              <span>IVA {form.vat_rate}%: <b>€{vat.toFixed(2)}</b></span>
-              <span className={styles.previewTotal}>Total: <b>€{total.toFixed(2)}</b></span>
+              <span>Base: <strong>€{base.toFixed(2)}</strong></span>
+              <span>IVA {form.vat_rate}%: <strong>€{vat.toFixed(2)}</strong></span>
+              <span className={styles.previewTotal}>Total: <strong>€{total.toFixed(2)}</strong></span>
             </div>
           )}
 
-          {/* Método y estado */}
           <div className={styles.fieldRow}>
             <div className={styles.field}>
               <label className={styles.label}>Método de pago</label>
@@ -454,44 +355,41 @@ function NewInvoiceModal({ academias, company, onCreate, onClose }) {
             </div>
           </div>
 
-          {/* Vencimiento */}
           <div className={styles.field}>
             <label className={styles.label}>Fecha de vencimiento</label>
             <input className={styles.input} type='date' value={form.due_date}
-              onChange={e => set('due_date', e.target.value)} />
+              onChange={e => set('due_date', e.target.value)}/>
           </div>
 
-          {/* Período (opcional) */}
           <div className={styles.fieldRow}>
             <div className={styles.field}>
               <label className={styles.label}>Período desde</label>
               <input className={styles.input} type='date' value={form.period_start}
-                onChange={e => set('period_start', e.target.value)} />
+                onChange={e => set('period_start', e.target.value)}/>
             </div>
             <div className={styles.field}>
               <label className={styles.label}>Período hasta</label>
               <input className={styles.input} type='date' value={form.period_end}
-                onChange={e => set('period_end', e.target.value)} />
+                onChange={e => set('period_end', e.target.value)}/>
             </div>
           </div>
 
-          {/* Notas */}
           <div className={styles.field}>
             <label className={styles.label}>Notas internas</label>
             <textarea className={styles.textarea} rows={2} value={form.notes}
               onChange={e => set('notes', e.target.value)}
-              placeholder='Observaciones, número de transferencia…' />
+              placeholder='Observaciones, número de transferencia…'/>
           </div>
 
-          {error && <div className={styles.error}><AlertTriangle size={13} />{error}</div>}
+          {error && <div className={styles.error}><AlertTriangle size={13}/>{error}</div>}
         </div>
 
         <div className={styles.modalFoot}>
           <button className={styles.btnSecondary} onClick={onClose}>Cancelar</button>
           <button className={styles.btnPrimary} onClick={handleSubmit} disabled={saving}>
             {saving
-              ? <><RefreshCw size={12} className={styles.spin} /> Generando…</>
-              : <><FileText size={12} /> Generar factura</>
+              ? <><RefreshCw size={12} className={styles.spin}/> Generando…</>
+              : <><FileText size={12}/> Generar factura</>
             }
           </button>
         </div>
@@ -500,68 +398,73 @@ function NewInvoiceModal({ academias, company, onCreate, onClose }) {
   )
 }
 
-// ── Aviso sin datos fiscales ───────────────────────────────────────────────────
+// ── Aviso sin datos fiscales ───────────────────────────
 function CompanyWarning({ company }) {
   if (company?.nif) return null
   return (
     <div className={styles.warning}>
-      <AlertTriangle size={14} />
-      <span>
-        Datos fiscales de FrostFox incompletos — las facturas no incluirán los datos del emisor.
-        Complétalo en cuanto te des de alta como autónomo.
-      </span>
+      <AlertTriangle size={14}/>
+      <span>Datos fiscales de FrostFox incompletos — complétalo al darte de alta como autónomo.</span>
     </div>
   )
 }
 
-// ── Panel principal ────────────────────────────────────────────────────────────
+// ── Panel principal ────────────────────────────────────
 export default function ManualBillingTab({ academias = [] }) {
-  const { invoices, company, loading, createInvoice, markPaid, cancelInvoice } =
-    useManualBilling(academias)
-  const [showNew,   setShowNew]   = useState(false)
-  const [filterAc,  setFilterAc]  = useState('all')
-  const [filterSt,  setFilterSt]  = useState('all')
+  const { invoices, company, loading, createInvoice, markPaid, cancelInvoice } = useManualBilling(academias)
+  const [showNew,  setShowNew]  = useState(false)
+  const [filterAc, setFilterAc] = useState('all')
+  const [filterSt, setFilterSt] = useState('all')
 
-  // KPIs
   const active       = invoices.filter(i => !i.cancelled_at)
   const paid         = active.filter(i => i.status === 'paid')
   const pending      = active.filter(i => i.status === 'pending' && (!i.due_date || i.due_date >= today()))
   const overdue      = active.filter(i => i.status === 'pending' && i.due_date && i.due_date < today())
   const totalCobrado = paid.reduce((s, i) => s + (i.amount_cents || 0), 0)
 
-  // Filtros
   const filtered = invoices.filter(i => {
     if (filterAc !== 'all' && i.academy_id !== filterAc) return false
-    if (filterSt === 'paid'    && i.status !== 'paid') return false
-    if (filterSt === 'pending' && (i.status !== 'pending' || (i.due_date && i.due_date < today()))) return false
-    if (filterSt === 'overdue' && !(i.status === 'pending' && i.due_date && i.due_date < today())) return false
+    if (filterSt === 'paid'      && i.status !== 'paid') return false
+    if (filterSt === 'pending'   && (i.status !== 'pending' || (i.due_date && i.due_date < today()))) return false
+    if (filterSt === 'overdue'   && !(i.status === 'pending' && i.due_date && i.due_date < today())) return false
     if (filterSt === 'cancelled' && !i.cancelled_at) return false
     return true
   })
 
   if (loading) return (
     <div className={styles.loading}>
-      <RefreshCw size={18} className={styles.spin} />
+      <RefreshCw size={18} className={styles.spin}/>
       <span>Cargando facturación…</span>
     </div>
   )
 
   return (
     <div className={styles.wrap}>
-      <CompanyWarning company={company} />
+      <CompanyWarning company={company}/>
 
-      {/* ── KPIs ── */}
-      <div className={styles.kpis}>
-        <KPI label='Cobrado total'    value={`€${fmt(totalCobrado)}`}  color='#059669' icon={Euro}          />
-        <KPI label='Facturas pagadas' value={paid.length}               color='#059669' icon={CheckCircle}   />
-        <KPI label='Pendientes'       value={pending.length}            color='#D97706' icon={Clock}         />
-        <KPI label='Vencidas'         value={overdue.length}            color='#DC2626' icon={AlertTriangle} sub={overdue.length > 0 ? 'Requieren acción' : undefined} />
+      {/* Header de sección */}
+      <div className={styles.sectionHeader}>
+        <div>
+          <h2 className={styles.sectionTitle}>Facturación manual</h2>
+          <p className={styles.sectionSub}>Gestión directa de facturas · activo ahora</p>
+        </div>
+        <button className={styles.btnNew} onClick={() => setShowNew(true)}>
+          <Plus size={14}/> Nueva factura
+        </button>
       </div>
 
-      {/* ── Toolbar ── */}
+      {/* KPIs */}
+      <div className={styles.kpis}>
+        <KpiCard label='Cobrado total'    value={`€${fmt(totalCobrado)}`} color='#22C55E' icon={Euro}/>
+        <KpiCard label='Facturas pagadas' value={paid.length}             color='#22C55E' icon={CheckCircle}/>
+        <KpiCard label='Pendientes'       value={pending.length}          color='#F59E0B' icon={Clock}/>
+        <KpiCard label='Vencidas'         value={overdue.length}          color='#EF4444' icon={AlertTriangle}
+          sub={overdue.length > 0 ? 'Requieren acción' : undefined}/>
+      </div>
+
+      {/* Toolbar */}
       <div className={styles.toolbar}>
         <div className={styles.filters}>
-          {/* Filtro academia */}
           <select className={styles.filterSelect} value={filterAc}
             onChange={e => setFilterAc(e.target.value)}>
             <option value='all'>Todas las academias</option>
@@ -570,7 +473,6 @@ export default function ManualBillingTab({ academias = [] }) {
             ))}
           </select>
 
-          {/* Filtro estado */}
           <div className={styles.filterTabs}>
             {[
               { id: 'all',       label: 'Todas' },
@@ -590,53 +492,40 @@ export default function ManualBillingTab({ academias = [] }) {
             ))}
           </div>
         </div>
-
-        <button className={styles.btnNew} onClick={() => setShowNew(true)}>
-          <Plus size={14} /> Nueva factura
-        </button>
       </div>
 
-      {/* ── Lista de facturas ── */}
+      {/* Lista */}
       <div className={styles.list}>
-        {/* Cabecera */}
         <div className={styles.listHead}>
           <span>Nº factura</span>
           <span>Concepto</span>
           <span>Fecha</span>
           <span>Importe</span>
           <span>Estado</span>
-          <span />
+          <span/>
         </div>
 
         {filtered.length === 0 ? (
           <div className={styles.empty}>
-            <FileText size={28} strokeWidth={1.2} />
+            <FileText size={28} strokeWidth={1.2}/>
             <span>No hay facturas que mostrar</span>
             {invoices.length === 0 && (
               <button className={styles.btnNewEmpty} onClick={() => setShowNew(true)}>
-                <Plus size={13} /> Crear primera factura
+                <Plus size={13}/> Crear primera factura
               </button>
             )}
           </div>
         ) : (
           filtered.map(inv => (
-            <InvoiceRow
-              key={inv.id}
-              inv={inv}
-              onMarkPaid={markPaid}
-              onCancel={cancelInvoice}
-            />
+            <InvoiceRow key={inv.id} inv={inv} onMarkPaid={markPaid} onCancel={cancelInvoice}/>
           ))
         )}
       </div>
 
-      {/* ── Modal nueva factura ── */}
       {showNew && (
         <NewInvoiceModal
-          academias={academias}
-          company={company}
-          onCreate={createInvoice}
-          onClose={() => setShowNew(false)}
+          academias={academias} company={company}
+          onCreate={createInvoice} onClose={() => setShowNew(false)}
         />
       )}
     </div>

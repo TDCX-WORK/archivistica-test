@@ -174,7 +174,7 @@ export function useDirector(currentUser) {
     }
 
     load()
-  }, [isDirector, academyId])
+  }, [isDirector, academyId, currentUser?.subject_id])
 
   return { stats, allProfiles, loading, error }
 }

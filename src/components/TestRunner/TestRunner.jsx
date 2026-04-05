@@ -211,7 +211,7 @@ export default function TestRunner({ modeId, modeLabel, topicId, topicLabel, aca
     <div className={styles.intro}>
       <div className={styles.introCard}>
         <Loader2 size={28} strokeWidth={1.5} style={{ animation: 'spin 1s linear infinite' }} />
-        <p style={{ marginTop: '1rem', color: 'var(--ink-light)' }}>Cargando preguntas…</p>
+        <p style={{ marginTop: '1rem', color: 'var(--ink-muted)' }}>Cargando preguntas…</p>
       </div>
     </div>
   )

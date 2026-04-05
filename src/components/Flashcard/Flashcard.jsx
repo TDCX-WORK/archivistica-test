@@ -80,7 +80,7 @@ export default function Flashcard({ academyId, subjectId, onGoHome }) {
     <div className={styles.center}>
       <div style={{ textAlign: 'center' }}>
         <Loader2 size={28} strokeWidth={1.5} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)' }} />
-        <p style={{ marginTop: '1rem', color: 'var(--ink-light)', fontSize: '0.88rem' }}>Cargando flashcards…</p>
+        <p style={{ marginTop: '1rem', color: 'var(--ink-muted)', fontSize: '0.88rem' }}>Cargando flashcards…</p>
       </div>
     </div>
   )

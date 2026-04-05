@@ -11,7 +11,7 @@
   display:flex;flex-direction:column;align-items:center;gap:.75rem;
   padding:5rem 1rem;color:var(--ink-muted);text-align:center
 }
-.state p { font-size:.88rem;margin:0 }
+.state p { font-size: var(--fs-3);margin:0 }
 .spinner  { animation:spin .9s linear infinite }
 @keyframes spin { to{transform:rotate(360deg)} }
 
@@ -23,15 +23,15 @@
   background:var(--surface-dim);border:1px solid var(--line);
   display:flex;align-items:center;justify-content:center;color:var(--ink-muted)
 }
-.pageTitle    { font-size:1.25rem;font-weight:800;color:var(--ink);margin:0;letter-spacing:-0.03em }
-.pageSubtitle { font-size:.78rem;color:var(--ink-muted);margin:.15rem 0 0 }
+.pageTitle    { font-size: var(--fs-2);font-weight:800;color:var(--ink);margin:0;letter-spacing:-0.03em }
+.pageSubtitle { font-size: var(--fs-5);color:var(--ink-muted);margin:.15rem 0 0 }
 
 /* ── Tabs ──────────────────────────────────────────────────────────────────── */
 .tabs { display:flex;gap:.3rem;border-bottom:1px solid var(--line);padding-bottom:0 }
 .tab {
   display:flex;align-items:center;gap:.4rem;padding:.55rem .9rem;
   border-radius:var(--r-md) var(--r-md) 0 0;border:none;background:transparent;
-  font-size:.78rem;font-weight:600;color:var(--ink-muted);cursor:pointer;
+  font-size: var(--fs-5);font-weight:600;color:var(--ink-muted);cursor:pointer;
   font-family:var(--font-body);transition:all .15s;white-space:nowrap;
   border-bottom:2px solid transparent;margin-bottom:-1px
 }
@@ -45,7 +45,7 @@
 }
 .seccionTitle {
   display:flex;align-items:center;gap:.5rem;
-  font-size:1rem;font-weight:800;color:var(--ink);margin:0;letter-spacing:-0.02em
+  font-size: var(--fs-2);font-weight:800;color:var(--ink);margin:0;letter-spacing:-0.02em
 }
 
 /* Búsqueda */
@@ -53,7 +53,7 @@
 .searchIcon { position:absolute;left:.7rem;color:var(--ink-subtle);pointer-events:none }
 .searchInput {
   padding:.45rem .75rem .45rem 2.1rem;border:1px solid var(--line);border-radius:var(--r-md);
-  background:var(--surface);color:var(--ink);font-size:.82rem;font-family:var(--font-body);
+  background:var(--surface);color:var(--ink);font-size: var(--fs-5);font-family:var(--font-body);
   width:220px;transition:border-color .15s
 }
 .searchInput:focus { outline:none;border-color:var(--primary) }
@@ -66,7 +66,7 @@
 .tablaHead {
   display:grid;grid-template-columns:1.8fr 1.2fr 1.4fr 120px 90px 40px;
   padding:.5rem 1rem;gap:.5rem;background:var(--surface-off);
-  font-size:.63rem;font-weight:700;color:var(--ink-subtle);
+  font-size: var(--fs-7);font-weight:700;color:var(--ink-subtle);
   text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line)
 }
 .tablaRow {
@@ -82,25 +82,25 @@
   width:32px;height:32px;border-radius:50%;flex-shrink:0;
   background:var(--surface-dim);color:var(--ink-muted);
   display:flex;align-items:center;justify-content:center;
-  font-size:.82rem;font-weight:800
+  font-size: var(--fs-5);font-weight:800
 }
-.nombrePrincipal    { font-size:.82rem;font-weight:700;color:var(--ink) }
-.usernameSecundario { font-size:.68rem;color:var(--ink-muted) }
+.nombrePrincipal    { font-size: var(--fs-5);font-weight:700;color:var(--ink) }
+.usernameSecundario { font-size: var(--fs-7);color:var(--ink-muted) }
 
-.subCell { display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--ink-soft) }
+.subCell { display:flex;align-items:center;gap:.35rem;font-size: var(--fs-5);color:var(--ink-soft) }
 .subDot  { width:8px;height:8px;border-radius:50%;flex-shrink:0 }
 
 .contactCell { display:flex;flex-direction:column;gap:.2rem }
-.contactCell span { display:flex;align-items:center;gap:.35rem;font-size:.72rem;color:var(--ink-muted) }
+.contactCell span { display:flex;align-items:center;gap:.35rem;font-size: var(--fs-6);color:var(--ink-muted) }
 
-.accesoChip { font-size:.7rem;font-weight:600;padding:.15rem .55rem;border-radius:99px }
-.accesoOk       { background:#ECFDF5;color:#065F46 }
-.accesoPronto   { background:#FFFBEB;color:#78350F }
-.accesoExpirado { background:#FEF2F2;color:#991B1B }
+.accesoChip { font-size: var(--fs-6);font-weight:600;padding:.15rem .55rem;border-radius:99px }
+.accesoOk       { background:var(--accent-lt);color:var(--accent) }
+.accesoPronto   { background:var(--amber-lt);color:var(--amber) }
+.accesoExpirado { background:var(--danger-lt);color:var(--danger) }
 
-.precioCell { font-size:.82rem }
+.precioCell { font-size: var(--fs-5) }
 .precio     { font-weight:700;color:var(--ink) }
-.muted      { font-size:.72rem;color:var(--ink-subtle) }
+.muted      { font-size: var(--fs-6);color:var(--ink-subtle) }
 
 .editBtn {
   width:30px;height:30px;display:flex;align-items:center;justify-content:center;
@@ -120,23 +120,23 @@
 .profCard:hover { box-shadow:var(--shadow-md) }
 .profAvatar {
   width:44px;height:44px;border-radius:50%;background:#7C3AED22;color:#7C3AED;
-  display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800
+  display:flex;align-items:center;justify-content:center;font-size: var(--fs-2);font-weight:800
 }
 .profInfo     { display:flex;flex-direction:column;gap:.2rem }
-.profNombre   { font-size:.88rem;font-weight:800;color:var(--ink) }
-.profUsername { font-size:.7rem;color:var(--ink-muted) }
-.profSub { display:flex;align-items:center;gap:.35rem;font-size:.72rem;color:var(--ink-muted);margin-top:.15rem }
+.profNombre   { font-size: var(--fs-3);font-weight:800;color:var(--ink) }
+.profUsername { font-size: var(--fs-6);color:var(--ink-muted) }
+.profSub { display:flex;align-items:center;gap:.35rem;font-size: var(--fs-6);color:var(--ink-muted);margin-top:.15rem }
 .profContacto { display:flex;flex-direction:column;gap:.25rem;padding-top:.5rem;border-top:1px solid var(--line) }
-.profContactoRow { display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--ink-muted) }
-.profAltaWrap { font-size:.68rem;color:var(--ink-subtle) }
+.profContactoRow { display:flex;align-items:center;gap:.35rem;font-size: var(--fs-5);color:var(--ink-muted) }
+.profAltaWrap { font-size: var(--fs-7);color:var(--ink-subtle) }
 
 /* ── Códigos de invitación ─────────────────────────────────────────────────── */
 .btnNuevo {
   display:flex;align-items:center;gap:.35rem;padding:.45rem .9rem;border-radius:var(--r-md);
-  background:var(--ink);color:white;border:none;font-size:.78rem;font-weight:700;
+  background:var(--ink);color:white;border:none;font-size: var(--fs-5);font-weight:700;
   cursor:pointer;font-family:var(--font-body);transition:background .15s
 }
-.btnNuevo:hover { background:#374151 }
+.btnNuevo:hover { background:var(--ink-soft) }
 
 .crearCodigo {
   background:var(--surface-off);border:1px solid var(--line);
@@ -147,8 +147,8 @@
 
 .codigoStats { display:flex;gap:1rem }
 .codigoStat  { display:flex;flex-direction:column;align-items:center;gap:.15rem }
-.codigoStatNum   { font-size:1.5rem;font-weight:800;letter-spacing:-0.04em;line-height:1 }
-.codigoStatLabel { font-size:.62rem;color:var(--ink-subtle);text-transform:uppercase;letter-spacing:.05em }
+.codigoStatNum   { font-size: var(--fs-1);font-weight:800;letter-spacing:-0.04em;line-height:1 }
+.codigoStatLabel { font-size: var(--fs-7);color:var(--ink-subtle);text-transform:uppercase;letter-spacing:.05em }
 
 .loadingMini { display:flex;justify-content:center;padding:2rem }
 
@@ -162,7 +162,7 @@
 .codigo_caducado { opacity:.5 }
 
 .codigoMain { display:flex;align-items:center;gap:.5rem }
-.codigoCodigo { font-family:monospace;font-size:1.05rem;font-weight:800;color:var(--ink);letter-spacing:.1em }
+.codigoCodigo { font-family:monospace;font-size: var(--fs-2);font-weight:800;color:var(--ink);letter-spacing:.1em }
 .codigoCopy {
   width:24px;height:24px;display:flex;align-items:center;justify-content:center;
   border:1px solid var(--line);border-radius:6px;background:transparent;
@@ -173,10 +173,10 @@
 .codigoInfo { display:flex;align-items:center;gap:.65rem;flex-wrap:wrap }
 .codigoFecha { text-align:right }
 
-.estadoChip { font-size:.65rem;font-weight:700;padding:.12rem .5rem;border-radius:99px }
-.estadoActivo   { background:#ECFDF5;color:#065F46 }
-.estadoUsado    { background:#EFF6FF;color:#1E40AF }
-.estadoCaducado { background:#F3F4F6;color:#6B7280 }
+.estadoChip { font-size: var(--fs-7);font-weight:700;padding:.12rem .5rem;border-radius:99px }
+.estadoActivo   { background:var(--accent-lt);color:var(--accent) }
+.estadoUsado    { background:var(--tint-blue);color:#1E40AF }
+.estadoCaducado { background:#F3F4F6;color:var(--ink-muted) }
 
 /* ── Configuración ─────────────────────────────────────────────────────────── */
 .configGrid { display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.85rem }
@@ -185,66 +185,66 @@
   padding:1.25rem;box-shadow:var(--shadow-card);
   display:flex;flex-direction:column;gap:.85rem
 }
-.configCardTitle { font-size:.85rem;font-weight:700;color:var(--ink);margin:0;display:flex;align-items:center;gap:.5rem }
+.configCardTitle { font-size: var(--fs-4);font-weight:700;color:var(--ink);margin:0;display:flex;align-items:center;gap:.5rem }
 .planChip {
   display:inline-flex;padding:.3rem .8rem;border-radius:99px;
-  background:var(--surface-dim);color:var(--ink);font-size:.8rem;font-weight:700;
+  background:var(--surface-dim);color:var(--ink);font-size: var(--fs-5);font-weight:700;
   text-transform:capitalize;width:fit-content
 }
 .planInfo { display:flex;flex-direction:column;gap:.5rem }
 .planInfoRow  { display:flex;align-items:center;justify-content:space-between;gap:.5rem }
-.planInfoLabel{ font-size:.72rem;color:var(--ink-muted) }
-.planInfoVal  { font-size:.82rem;color:var(--ink) }
-.planInfoMono { font-family:monospace;font-size:.75rem;color:var(--ink-muted) }
+.planInfoLabel{ font-size: var(--fs-6);color:var(--ink-muted) }
+.planInfoVal  { font-size: var(--fs-5);color:var(--ink) }
+.planInfoMono { font-family:monospace;font-size: var(--fs-5);color:var(--ink-muted) }
 .planUpgrade  { background:var(--surface-off);border-radius:var(--r-md);padding:.75rem }
-.planUpgradeText { font-size:.75rem;color:var(--ink-muted);margin:0 0 .6rem;line-height:1.4 }
+.planUpgradeText { font-size: var(--fs-5);color:var(--ink-muted);margin:0 0 .6rem;line-height:1.4 }
 .planUpgradeBtn {
   display:inline-flex;align-items:center;gap:.35rem;padding:.4rem .85rem;
   border-radius:var(--r-md);background:var(--ink);color:white;
-  font-size:.75rem;font-weight:700;text-decoration:none;
+  font-size: var(--fs-5);font-weight:700;text-decoration:none;
   transition:background .15s
 }
-.planUpgradeBtn:hover { background:#374151 }
+.planUpgradeBtn:hover { background:var(--ink-soft) }
 .proximamente {
-  font-size:.62rem;font-weight:600;background:#EFF6FF;color:#1E40AF;
+  font-size: var(--fs-7);font-weight:600;background:var(--tint-blue);color:#1E40AF;
   padding:.1rem .45rem;border-radius:99px;letter-spacing:.03em
 }
 .facturaPlaceholder {
   display:flex;flex-direction:column;align-items:center;gap:.5rem;
   padding:1.5rem;text-align:center;color:var(--ink-subtle)
 }
-.facturaPlaceholder p { font-size:.78rem;margin:0;line-height:1.5 }
+.facturaPlaceholder p { font-size: var(--fs-5);margin:0;line-height:1.5 }
 
 /* ── Form compartido ───────────────────────────────────────────────────────── */
 .formGrid { display:grid;grid-template-columns:1fr 1fr;gap:.75rem }
 .formField { display:flex;flex-direction:column;gap:.3rem }
 .formLabel {
-  font-size:.68rem;font-weight:700;color:var(--ink-muted);
+  font-size: var(--fs-7);font-weight:700;color:var(--ink-muted);
   text-transform:uppercase;letter-spacing:.04em
 }
 .formInput {
   padding:.55rem .75rem;border:1px solid var(--line-strong);border-radius:var(--r-md);
-  background:var(--surface);color:var(--ink);font-size:.82rem;font-family:var(--font-body);
+  background:var(--surface);color:var(--ink);font-size: var(--fs-5);font-family:var(--font-body);
   transition:border-color .15s
 }
 .formInput:focus { outline:none;border-color:var(--primary) }
 .formSelect {
   padding:.55rem .75rem;border:1px solid var(--line-strong);border-radius:var(--r-md);
-  background:var(--surface);color:var(--ink);font-size:.82rem;font-family:var(--font-body);
+  background:var(--surface);color:var(--ink);font-size: var(--fs-5);font-family:var(--font-body);
   cursor:pointer
 }
 .formSelect:focus { outline:none;border-color:var(--primary) }
 
 .btnGuardar {
   display:flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:var(--r-md);
-  background:var(--ink);color:white;border:none;font-size:.82rem;font-weight:700;
+  background:var(--ink);color:white;border:none;font-size: var(--fs-5);font-weight:700;
   cursor:pointer;font-family:var(--font-body);transition:background .15s
 }
-.btnGuardar:hover:not(:disabled) { background:#374151 }
+.btnGuardar:hover:not(:disabled) { background:var(--ink-soft) }
 .btnGuardar:disabled { opacity:.5;cursor:not-allowed }
 .btnCancelar {
   display:flex;align-items:center;gap:.35rem;padding:.55rem .9rem;border-radius:var(--r-md);
-  border:1px solid var(--line);background:var(--surface);font-size:.8rem;font-weight:600;
+  border:1px solid var(--line);background:var(--surface);font-size: var(--fs-5);font-weight:600;
   color:var(--ink-muted);cursor:pointer;font-family:var(--font-body);transition:all .15s
 }
 .btnCancelar:hover { background:var(--surface-dim);color:var(--ink) }
@@ -267,10 +267,10 @@
 }
 .modalAvatar {
   width:40px;height:40px;border-radius:50%;background:var(--surface-dim);color:var(--ink-muted);
-  display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;flex-shrink:0
+  display:flex;align-items:center;justify-content:center;font-size: var(--fs-2);font-weight:800;flex-shrink:0
 }
-.modalTitle { font-size:.95rem;font-weight:800;color:var(--ink);margin:0 }
-.modalSub   { font-size:.72rem;color:var(--ink-muted) }
+.modalTitle { font-size: var(--fs-3);font-weight:800;color:var(--ink);margin:0 }
+.modalSub   { font-size: var(--fs-6);color:var(--ink-muted) }
 .modalClose {
   width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;
   border:1px solid var(--line);background:var(--surface);color:var(--ink-muted);
@@ -283,13 +283,13 @@
 }
 
 /* ── Empty states ──────────────────────────────────────────────────────────── */
-.empty { font-size:.8rem;color:var(--ink-subtle);text-align:center;padding:2rem 0;margin:0 }
+.empty { font-size: var(--fs-5);color:var(--ink-subtle);text-align:center;padding:2rem 0;margin:0 }
 .emptyState {
   display:flex;flex-direction:column;align-items:center;gap:.6rem;
   padding:3rem 1rem;text-align:center;color:var(--ink-subtle)
 }
-.emptyState p    { font-size:.88rem;font-weight:600;color:var(--ink-muted);margin:0 }
-.emptyState span { font-size:.75rem;max-width:320px;line-height:1.4 }
+.emptyState p    { font-size: var(--fs-3);font-weight:600;color:var(--ink-muted);margin:0 }
+.emptyState span { font-size: var(--fs-5);max-width:320px;line-height:1.4 }
 
 /* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width:900px) {
