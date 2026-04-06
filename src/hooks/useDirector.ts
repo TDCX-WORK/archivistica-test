@@ -1,0 +1,188 @@
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
+import type {
+  CurrentUser, DirectorStats, SubjectStats, SemanaStats,
+  AlumnoEnRiesgoDetalle, AlumnoPorExpirarDetalle, AlumnoConNota,
+  ProfesorStats, Profile
+} from '../types'
+
+export function useDirector(currentUser: CurrentUser | null) {
+  const [stats,       setStats]       = useState<DirectorStats | null>(null)
+  const [allProfiles, setAllProfiles] = useState<Profile[]>([])
+  const [loading,     setLoading]     = useState(true)
+  const [error,       setError]       = useState<string | null>(null)
+
+  const academyId  = currentUser?.academy_id
+  const isDirector = currentUser?.role === 'director'
+
+  useEffect(() => {
+    if (!isDirector || !academyId) { setLoading(false); return }
+
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+
+      const now          = new Date()
+      const sevenAgo     = new Date(now.getTime() - 7  * 86400000).toISOString().slice(0, 10)
+      const thirtyAgo    = new Date(now.getTime() - 30 * 86400000).toISOString().slice(0, 10)
+      const twoMonthsAgo = new Date(now.getTime() - 60 * 86400000).toISOString().slice(0, 10)
+
+      const [
+        { data: subs },
+        { data: profiles },
+        { data: sessions },
+        { data: wrongs },
+      ] = await Promise.all([
+        supabase.from('subjects').select('id, name, slug, color').eq('academy_id', academyId),
+        supabase.from('profiles').select('id, username, role, subject_id, access_until, created_at, academy_id, force_password_change').eq('academy_id', academyId).in('role', ['alumno', 'profesor']),
+        supabase.from('sessions').select('user_id, score, played_at, subject_id').eq('academy_id', academyId).gte('played_at', twoMonthsAgo),
+        supabase.from('wrong_answers').select('user_id, question_id, fail_count, subject_id').eq('academy_id', academyId),
+      ])
+
+      if (!subs) { setError('Error cargando datos'); setLoading(false); return }
+
+      const typedSubs     = subs as { id: string; name: string; slug: string | null; color: string | null }[]
+      const typedProfiles = (profiles ?? []) as Profile[]
+      const typedSessions = (sessions ?? []) as { user_id: string; score: number; played_at: string; subject_id: string | null }[]
+      const typedWrongs   = (wrongs   ?? []) as { user_id: string; question_id: string; fail_count: number; subject_id: string | null }[]
+
+      // Actividad por semana (últimas 8 semanas)
+      const semanas: SemanaStats[] = []
+      for (let i = 7; i >= 0; i--) {
+        const ini = new Date(now.getTime() - (i + 1) * 7 * 86400000).toISOString().slice(0, 10)
+        const fin = new Date(now.getTime() - i       * 7 * 86400000).toISOString().slice(0, 10)
+        const sessSemana = typedSessions.filter(s => s.played_at >= ini && s.played_at < fin)
+        const label = new Date(fin).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+        semanas.push({
+          label,
+          sesiones:       sessSemana.length,
+          alumnosActivos: new Set(sessSemana.map(s => s.user_id)).size,
+          notaMedia:      sessSemana.length
+            ? Math.round(sessSemana.reduce((a, s) => a + s.score, 0) / sessSemana.length)
+            : null,
+        })
+      }
+
+      // Stats por asignatura
+      const subjectStats: SubjectStats[] = typedSubs.map(sub => {
+        const subAlumnos  = typedProfiles.filter(p => p.role === 'alumno'   && p.subject_id === sub.id)
+        const subProfes   = typedProfiles.filter(p => p.role === 'profesor' && p.subject_id === sub.id)
+        const subSessions = typedSessions.filter(s => s.subject_id === sub.id)
+        const subWrongs   = typedWrongs.filter(w => w.subject_id === sub.id)
+
+        const sesThisWeek    = subSessions.filter(s => s.played_at >= sevenAgo)
+        const ses30d         = subSessions.filter(s => s.played_at >= thirtyAgo)
+        const alumnosActivos = new Set(sesThisWeek.map(s => s.user_id)).size
+
+        const notaMedia = ses30d.length
+          ? Math.round(ses30d.reduce((a, s) => a + s.score, 0) / ses30d.length)
+          : null
+
+        const ultimaActividad: Record<string, string> = {}
+        for (const s of subSessions) {
+          if (!ultimaActividad[s.user_id] || s.played_at > ultimaActividad[s.user_id]!)
+            ultimaActividad[s.user_id] = s.played_at
+        }
+
+        const alumnosEnRiesgo: AlumnoEnRiesgoDetalle[] = subAlumnos.filter(a => {
+          const ultima = ultimaActividad[a.id]
+          if (!ultima) return true
+          return Math.floor((now.getTime() - new Date(ultima).getTime()) / 86400000) > 3
+        }).map(a => ({
+          id:           a.id,
+          username:     a.username,
+          diasInactivo: ultimaActividad[a.id]
+            ? Math.floor((now.getTime() - new Date(ultimaActividad[a.id]!).getTime()) / 86400000)
+            : null,
+          accessUntil: a.access_until,
+        }))
+
+        const alumnosPorExpirar: AlumnoPorExpirarDetalle[] = subAlumnos.filter(a => {
+          if (!a.access_until) return false
+          const dias = Math.ceil((new Date(a.access_until).getTime() - now.getTime()) / 86400000)
+          return dias > 0 && dias <= 14
+        }).map(a => ({
+          id:            a.id,
+          username:      a.username,
+          diasRestantes: Math.ceil((new Date(a.access_until!).getTime() - now.getTime()) / 86400000),
+        }))
+
+        const fallosPorAlumno: Record<string, number> = {}
+        for (const w of subWrongs) {
+          fallosPorAlumno[w.user_id] = (fallosPorAlumno[w.user_id] ?? 0) + w.fail_count
+        }
+
+        const profesoresStats: ProfesorStats[] = subProfes.map(prof => ({
+          id:               prof.id,
+          username:         prof.username,
+          alumnos:          subAlumnos.length,
+          sesionesThisWeek: sesThisWeek.filter(s =>
+            subAlumnos.some(a => a.id === s.user_id)
+          ).length,
+          notaMedia,
+        }))
+
+        const alumnosConNota: AlumnoConNota[] = subAlumnos.map(a => {
+          const sesSub = ses30d.filter(s => s.user_id === a.id)
+          const nota   = sesSub.length
+            ? Math.round(sesSub.reduce((acc, s) => acc + s.score, 0) / sesSub.length)
+            : null
+          return {
+            id:       a.id,
+            username: a.username,
+            nota,
+            sesiones: sesSub.length,
+            fallos:   fallosPorAlumno[a.id] ?? 0,
+          }
+        }).sort((a, b) => (b.nota ?? -1) - (a.nota ?? -1))
+
+        return {
+          id:                sub.id,
+          name:              sub.name,
+          slug:              sub.slug,
+          color:             sub.color,
+          totalAlumnos:      subAlumnos.length,
+          alumnosActivos,
+          enRiesgo:          alumnosEnRiesgo.length,
+          porExpirar:        alumnosPorExpirar.length,
+          notaMedia,
+          sesiones30d:       ses30d.length,
+          profesores:        profesoresStats,
+          alumnosEnRiesgo,
+          alumnosPorExpirar,
+          alumnosConNota,
+        }
+      })
+
+      // Stats globales
+      const alumnos       = typedProfiles.filter(p => p.role === 'alumno')
+      const profesores    = typedProfiles.filter(p => p.role === 'profesor')
+      const ses7d         = typedSessions.filter(s => s.played_at >= sevenAgo)
+      const ses30d        = typedSessions.filter(s => s.played_at >= thirtyAgo)
+      const totalActivos  = new Set(ses7d.map(s => s.user_id)).size
+      const totalEnRiesgo = subjectStats.reduce((a, s) => a + s.enRiesgo, 0)
+      const totalPorExpirar = subjectStats.reduce((a, s) => a + s.porExpirar, 0)
+      const notaGlobal    = ses30d.length
+        ? Math.round(ses30d.reduce((a, s) => a + s.score, 0) / ses30d.length)
+        : null
+
+      setAllProfiles(typedProfiles)
+      setStats({
+        totalAlumnos:    alumnos.length,
+        totalProfesores: profesores.length,
+        totalActivos,
+        totalEnRiesgo,
+        totalPorExpirar,
+        notaGlobal,
+        sesiones30d:     ses30d.length,
+        bySubject:       subjectStats,
+        semanas,
+      })
+      setLoading(false)
+    }
+
+    load()
+  }, [isDirector, academyId, currentUser?.subject_id])
+
+  return { stats, allProfiles, loading, error }
+}
