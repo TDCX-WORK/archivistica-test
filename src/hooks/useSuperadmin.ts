@@ -67,7 +67,7 @@ export function useSuperadmin(currentUser: CurrentUser | null) {
       { data: profiles },
       { data: sessions },
     ] = await Promise.all([
-      supabase.from('subjects').select('id, academy_id, name, slug, color, created_at').in('academy_id', acadIds),
+      supabase.from('subjects').select('id, academy_id, name, slug, color, created_at, exam_config').in('academy_id', acadIds),
       supabase.from('profiles').select('id, username, role, academy_id, subject_id, created_at, access_until, force_password_change').in('academy_id', acadIds),
       supabase.from('sessions').select('id, user_id, academy_id, score, played_at').in('academy_id', acadIds),
     ])
@@ -135,8 +135,10 @@ export function useSuperadmin(currentUser: CurrentUser | null) {
 
     const totalAcademias = typedAcads.filter(a => !a.deleted_at).length
     const acadActivas    = typedAcads.filter(a => !a.suspended && !a.deleted_at).length
-    const totalAlumnos   = typedProfiles.filter(p => p.role === 'alumno').length
-    const totalProfes    = typedProfiles.filter(p => p.role === 'profesor').length
+    // Excluir alumnos de academias eliminadas (en papelera)
+    const acadIdsActivas  = typedAcads.filter(a => !a.deleted_at).map(a => a.id)
+    const totalAlumnos   = typedProfiles.filter(p => p.role === 'alumno' && acadIdsActivas.includes(p.academy_id)).length
+    const totalProfes    = typedProfiles.filter(p => p.role === 'profesor' && acadIdsActivas.includes(p.academy_id)).length
     const alumnosActivos = new Set(typedSessions.filter(s => s.played_at >= sevenDaysAgo).map(s => s.user_id)).size
     const sesiones30d    = typedSessions.filter(s => s.played_at >= thirtyAgo).length
     const mrr            = typedAcads
@@ -175,6 +177,7 @@ export function useSuperadmin(currentUser: CurrentUser | null) {
         contract_start:  data.contract_start || null,
         contract_renews: data.contract_renews || null,
         notes:           data.notes?.trim() || null,
+        trial_ends_at:   data.trial_ends_at || null,
       })
       .select().maybeSingle()
     setSaving(false)

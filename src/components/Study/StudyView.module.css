@@ -319,10 +319,17 @@
   cursor: text;
   user-select: text;
   -webkit-user-select: text;
+  /* Evita que Android Chrome intercepte el gesto antes que nuestro JS */
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .highlightModeActive::selection,
 .highlightModeActive *::selection {
   background: rgba(254, 240, 138, 0.7);
+}
+.highlightModeActive *::selection {
+  -webkit-user-select: text;
+  user-select: text;
 }
 .highlightTooltip {
   position: absolute;

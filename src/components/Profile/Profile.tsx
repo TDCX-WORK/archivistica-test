@@ -169,15 +169,39 @@ function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (
   )
 }
 
-function SettingsTab({ currentUser, settings, updateSetting }: {
-  currentUser:    CurrentUser | null
-  settings:       ReturnType<typeof useSettings>['settings']
-  updateSetting:  ReturnType<typeof useSettings>['updateSetting']
+function SettingsTab({ currentUser, settings, updateSetting, onUpdateDisplayName }: {
+  currentUser:          CurrentUser | null
+  settings:             ReturnType<typeof useSettings>['settings']
+  updateSetting:        ReturnType<typeof useSettings>['updateSetting']
+  onUpdateDisplayName?: (name: string) => void
 }) {
   const [saved,       setSaved]       = useState(false)
+  const [saveError,   setSaveError]   = useState('')
+  const [savingName,  setSavingName]  = useState(false)
   const [displayName, setDisplayName] = useState(currentUser?.displayName ?? '')
 
-  const handleSaveName = () => { setSaved(true); setTimeout(() => setSaved(false), 2000) }
+  const handleSaveName = async () => {
+    if (!currentUser?.id || !displayName.trim()) return
+    const newUsername = displayName.trim().toLowerCase()
+    if (newUsername === currentUser.username) return
+    setSavingName(true)
+    setSaveError('')
+    const { error } = await import('../../lib/supabase').then(({ supabase }) =>
+      supabase.from('profiles').update({ username: newUsername }).eq('id', currentUser.id)
+    )
+    setSavingName(false)
+    if (error) {
+      const msg = error.message ?? ''
+      setSaveError(msg.includes('duplicate') || msg.includes('unique')
+        ? 'Ese nombre de usuario ya está en uso. Elige otro.'
+        : 'No se pudo guardar. Inténtalo de nuevo.')
+      return
+    }
+    // Actualizar también en memoria para que el Header lo refleje inmediatamente
+    onUpdateDisplayName?.(newUsername)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2500)
+  }
   const preguntasOptions = [10, 20, 30, 50]
 
   return (
@@ -191,11 +215,14 @@ function SettingsTab({ currentUser, settings, updateSetting }: {
               <span className={styles.settingsRowDesc}>Se muestra en tu perfil y ranking</span>
             </div>
             <div className={styles.settingsRowControl}>
-              <input className={styles.settingsInput} value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Tu nombre" maxLength={32} />
-              <button className={[styles.settingsSaveBtn, saved ? styles.settingsSaved : ''].join(' ')} onClick={handleSaveName}>
-                {saved ? '✓ Guardado' : 'Guardar'}
+              <input className={styles.settingsInput} value={displayName} onChange={e => { setDisplayName(e.target.value); setSaveError('') }} placeholder="Tu nombre" maxLength={32} />
+              <button className={[styles.settingsSaveBtn, saved ? styles.settingsSaved : ''].join(' ')} onClick={handleSaveName} disabled={savingName}>
+                {savingName ? '…' : saved ? '✓ Guardado' : 'Guardar'}
               </button>
             </div>
+            {saveError && (
+              <p style={{ fontSize: '0.8rem', color: '#DC2626', marginTop: '0.25rem' }}>{saveError}</p>
+            )}
           </div>
           <div className={styles.settingsDivider} />
           <div className={styles.settingsRow}>
@@ -333,13 +360,14 @@ function MisDatosTab({ currentUser }: { currentUser: CurrentUser | null }) {
 }
 
 interface ProfileProps {
-  currentUser:     CurrentUser | null
-  progress:        ReturnType<typeof useProgress>
-  studyReadTopics: Set<string>
-  studyBookmarks:  Set<string>
+  currentUser:          CurrentUser | null
+  progress:             ReturnType<typeof useProgress>
+  studyReadTopics:      Set<string>
+  studyBookmarks:       Set<string>
+  onUpdateDisplayName?: (name: string) => void
 }
 
-export default function Profile({ currentUser, progress, studyReadTopics, studyBookmarks }: ProfileProps) {
+export default function Profile({ currentUser, progress, studyReadTopics, studyBookmarks, onUpdateDisplayName }: ProfileProps) {
   const { sessions = [], wrongAnswers = [], streakDays = 0 } = progress
   const { settings, updateSetting } = useSettings()
   const location   = useLocation()
@@ -532,7 +560,7 @@ export default function Profile({ currentUser, progress, studyReadTopics, studyB
       )}
 
       {activeTab === 'mis-datos' && <MisDatosTab currentUser={currentUser} />}
-      {activeTab === 'ajustes'   && <SettingsTab currentUser={currentUser} settings={settings} updateSetting={updateSetting} />}
+      {activeTab === 'ajustes'   && <SettingsTab currentUser={currentUser} settings={settings} updateSetting={updateSetting} onUpdateDisplayName={onUpdateDisplayName} />}
     </div>
   )
 }

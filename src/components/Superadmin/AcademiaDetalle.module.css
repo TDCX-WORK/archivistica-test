@@ -5,8 +5,8 @@
 /* ── PAGE ─────────────────────────────────────────────── */
 .page2 {
   min-height: 100vh;
-  background: linear-gradient(135deg, #080c10 0%, #0d1520 40%, #080c10 100%);
-  color: #e8f4f8;
+  background: var(--bg);
+  color: var(--ink);
   font-family: var(--font-body);
   padding: 0 0 4rem;
 }
@@ -18,14 +18,14 @@
   justify-content: center;
   min-height: 40vh;
   gap: 1rem;
-  color: rgba(232,244,248,0.3);
+  color: var(--ink-subtle);
   font-size: var(--fs-4);
 }
 
 /* ── HERO HEADER ──────────────────────────────────────── */
 .heroHeader {
   position: relative;
-  background: rgba(13,20,32,0.98);
+  background: var(--surface);
   border-bottom: 1px solid rgba(93,228,255,0.1);
   padding: 1.5rem 2rem;
   overflow: hidden;
@@ -33,23 +33,7 @@
   margin: 0 auto;
 }
 
-.heroHeaderOrb1 {
-  position: absolute;
-  top: -40px; right: -40px;
-  width: 200px; height: 200px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(93,228,255,0.06) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.heroHeaderOrb2 {
-  position: absolute;
-  bottom: -30px; left: 20%;
-  width: 150px; height: 150px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%);
-  pointer-events: none;
-}
+.heroHeaderOrb1, .heroHeaderOrb2 { display: none; }
 
 .btnBack2 {
   display: inline-flex;
@@ -69,7 +53,7 @@
 .btnBack2:hover {
   background: rgba(93,228,255,0.12);
   color: #5de4ff;
-  border-color: rgba(93,228,255,0.3);
+  border-color: #5de4ff;
 }
 
 .heroHeaderContent {
@@ -90,9 +74,9 @@
 }
 
 .heroAcadName {
-  font-size: var(--fs-1);
+  font-size: 2rem;
   font-weight: 900;
-  color: #f0f8ff;
+  color: var(--ink);
   letter-spacing: -0.03em;
   margin: 0 0 0.4rem;
   line-height: 1.1;
@@ -108,8 +92,8 @@
 .heroAcadSlug {
   font-family: var(--font-mono);
   font-size: var(--fs-6);
-  color: rgba(93,228,255,0.4);
-  background: rgba(93,228,255,0.05);
+  color: #5de4ff;
+  background: rgba(93,228,255,0.12);
   padding: 2px 8px;
   border-radius: var(--r-xs);
 }
@@ -145,74 +129,66 @@
 .kpisGrid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .kpi {
-  background: rgba(13,20,32,0.95);
-  border: 1px solid rgba(93,228,255,0.07);
-  border-radius: 16px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
   position: relative;
   overflow: hidden;
-  transition: border-color 0.2s, transform 0.2s;
+  border-radius: var(--r-xl);
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  padding: 1.1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  box-shadow: var(--shadow-sm);
 }
-.kpi:hover { border-color: rgba(93,228,255,0.15); transform: translateY(-1px); }
-
-.kpiDark {
-  background: rgba(93,228,255,0.04);
-  border-color: rgba(93,228,255,0.12);
-}
-
-.kpiOrb {
-  position: absolute;
-  top: -20px; right: -20px;
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(93,228,255,0.08) 0%, transparent 70%);
-  pointer-events: none;
+.kpi:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+  border-color: var(--line-strong);
 }
 
-.kpiGlow {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 40px;
-  background: radial-gradient(ellipse at 50% 100%, rgba(93,228,255,0.06) 0%, transparent 70%);
-  pointer-events: none;
-}
+.kpiDark { background: rgba(93,228,255,0.04); }
+
+.kpiOrb { display: none; }
+.kpiGlow { display: none; }
 
 .kpiTop {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
 }
 
 .kpiIconWrap {
-  width: 30px; height: 30px;
-  border-radius: 9px;
+  width: 34px; height: 34px;
+  border-radius: var(--r-md);
   display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
 
 .kpiVal {
   font-size: var(--fs-2);
   font-weight: 900;
-  letter-spacing: -0.02em;
+  color: var(--ink);
+  letter-spacing: -0.03em;
   line-height: 1;
 }
 
 .kpiLabel {
-  font-size: var(--fs-7);
-  color: rgba(232,244,248,0.35);
+  font-size: var(--fs-5);
+  font-weight: 500;
+  color: var(--ink-muted);
+  line-height: 1.3;
 }
 
 .kpiSub {
-  font-size: var(--fs-7);
-  color: rgba(232,244,248,0.2);
+  font-size: var(--fs-6);
+  color: var(--ink-subtle);
 }
 
 /* ── BENTO ROW ────────────────────────────────────────── */
@@ -221,11 +197,12 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   margin-bottom: 1rem;
+  align-items: stretch;
 }
 
 .bentoCard {
-  background: rgba(13,20,32,0.95);
-  border: 1px solid rgba(93,228,255,0.07);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 16px;
   padding: 1rem 1.1rem;
   display: flex;
@@ -235,48 +212,16 @@
 }
 .bentoCard:hover { border-color: rgba(93,228,255,0.14); }
 
-.bentoCardDark {
-  background: rgba(93,228,255,0.04);
-  border: 1px solid rgba(93,228,255,0.15);
-  border-radius: 16px;
-  padding: 1rem 1.1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  position: relative;
-  overflow: hidden;
-}
-.bentoCardDark::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #1d4ed8, #5de4ff);
-}
 
-.bentoOrb {
-  position: absolute;
-  top: -30px; right: -20px;
-  width: 100px; height: 100px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(93,228,255,0.08) 0%, transparent 70%);
-  pointer-events: none;
-}
 
-.bentoDarkLabel {
-  font-size: var(--fs-7);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(93,228,255,0.35);
-}
 
 .bentoPlanName {
   font-size: var(--fs-2);
   font-weight: 900;
-  color: #f0f8ff;
+  color: var(--ink);
   letter-spacing: -0.02em;
   line-height: 1;
+  margin-top: 0.2rem;
 }
 
 .bentoPlanPrice {
@@ -289,7 +234,7 @@
 .bentoPlanPriceCur {
   font-size: var(--fs-4);
   font-weight: 700;
-  color: rgba(93,228,255,0.4);
+  color: #5de4ff;
 }
 
 .bentoPlanPriceNum {
@@ -298,13 +243,12 @@
   color: #5de4ff;
   letter-spacing: -0.04em;
   line-height: 1;
-  text-shadow: 0 0 20px rgba(93,228,255,0.3);
 }
 
 .bentoPlanPricePer {
   font-size: var(--fs-6);
   font-weight: 600;
-  color: rgba(93,228,255,0.3);
+  color: #5de4ff;
 }
 
 .bentoPayStatus {
@@ -324,28 +268,28 @@
 
 .bentoRenew {
   font-size: var(--fs-7);
-  color: rgba(93,228,255,0.25);
+  color: #5de4ff;
 }
 
 .bentoCardLabel {
-  font-size: var(--fs-7);
+  font-size: var(--fs-6);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(93,228,255,0.3);
-  margin-bottom: 0.15rem;
+  color: var(--ink-subtle);
+  margin-bottom: 0.25rem;
 }
 
 .bentoCardBig {
-  font-size: var(--fs-4);
+  font-size: var(--fs-3);
   font-weight: 700;
-  color: #e8f4f8;
+  color: var(--ink);
   letter-spacing: -0.01em;
 }
 
 .bentoCardSub {
-  font-size: var(--fs-6);
-  color: rgba(232,244,248,0.35);
+  font-size: var(--fs-4);
+  color: var(--ink-subtle);
 }
 
 .bentoCardLink {
@@ -361,11 +305,11 @@
   display: inline-flex;
   padding: 3px 10px;
   border-radius: var(--r-full);
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  font-size: var(--fs-7);
+  background: var(--surface-off);
+  border: 1px solid var(--line);
+  font-size: var(--fs-6);
   font-weight: 600;
-  color: rgba(232,244,248,0.4);
+  color: var(--ink-muted);
   text-transform: capitalize;
   width: fit-content;
   margin-top: 0.15rem;
@@ -384,16 +328,16 @@
 }
 
 .bentoStatNum {
-  font-size: var(--fs-2);
+  font-size: var(--fs-1);
   font-weight: 900;
-  color: #e8f4f8;
+  color: var(--ink);
   letter-spacing: -0.02em;
   line-height: 1;
 }
 
 .bentoStatLabel {
-  font-size: var(--fs-7);
-  color: rgba(232,244,248,0.3);
+  font-size: var(--fs-6);
+  color: var(--ink-subtle);
 }
 
 .bentoNota {
@@ -404,7 +348,7 @@
 
 .bentoNotes {
   font-size: var(--fs-6);
-  color: rgba(232,244,248,0.35);
+  color: var(--ink-subtle);
   font-style: italic;
   padding: 0.4rem 0.6rem;
   border-left: 2px solid rgba(93,228,255,0.2);
@@ -423,13 +367,13 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.6rem;
-  color: rgba(93,228,255,0.4);
+  color: #5de4ff;
 }
 
 .sectionTitle2 {
-  font-size: var(--fs-5);
+  font-size: var(--fs-4);
   font-weight: 800;
-  color: #e8f4f8;
+  color: var(--ink);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin: 0;
@@ -437,7 +381,7 @@
 
 .empty2 {
   font-size: var(--fs-5);
-  color: rgba(232,244,248,0.2);
+  color: var(--ink-subtle);
   padding: 1rem 0;
   margin: 0;
   font-style: italic;
@@ -447,7 +391,7 @@
 .userList2 {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .subjectList2 {
@@ -456,26 +400,19 @@
   gap: 1rem;
 }
 
-/* ── SUBJECT SECTION ──────────────────────────────────── */
-.subjectCard2 {
-  background: rgba(13,20,32,0.95);
-  border: 1px solid rgba(93,228,255,0.07);
-  border-radius: 14px;
-  overflow: hidden;
-}
 
 .subjectHeader2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.85rem 1rem;
-  border-bottom: 1px solid rgba(93,228,255,0.05);
+  border-bottom: 1px solid var(--line);
 }
 
 .subjectName2 {
   font-size: var(--fs-4);
   font-weight: 800;
-  color: #e8f4f8;
+  color: var(--ink);
   display: block;
   margin-bottom: 0.2rem;
 }
@@ -491,7 +428,7 @@
   align-items: center;
   gap: 0.25rem;
   font-size: var(--fs-6);
-  color: rgba(232,244,248,0.3);
+  color: var(--ink-subtle);
 }
 
 /* ── ROLE GROUP ───────────────────────────────────────── */
@@ -503,20 +440,21 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgba(93,228,255,0.3);
+  color: #5de4ff;
   margin-bottom: 0.4rem;
   padding: 0.5rem 1rem 0;
 }
 
 /* ── USER CARD ────────────────────────────────────────── */
 .userCard2 {
-  background: transparent;
-  border-bottom: 1px solid rgba(93,228,255,0.04);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
-.userCard2:last-child { border-bottom: none; }
-.userCard2:hover { background: rgba(93,228,255,0.02); }
+.userCard2:hover { border-color: var(--line-strong); background: var(--surface-off); }
 
 .userCard2Header {
   display: flex;
@@ -526,7 +464,7 @@
 }
 
 .userCard2Avatar {
-  width: 36px; height: 36px;
+  width: 40px; height: 40px;
   border-radius: 50%;
   background: rgba(93,228,255,0.08);
   border: 1px solid rgba(93,228,255,0.15);
@@ -537,22 +475,15 @@
   flex-shrink: 0;
 }
 
-.userCard2Info { flex: 1; min-width: 0; }
 
 .userCard2Name {
-  font-size: var(--fs-5);
+  font-size: var(--fs-4);
   font-weight: 700;
-  color: #e8f4f8;
+  color: var(--ink);
   display: block;
   margin-bottom: 0.15rem;
 }
 
-.userCard2Meta {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-}
 
 .chip {
   display: inline-flex;
@@ -563,8 +494,8 @@
 }
 
 .userCard2Email {
-  font-size: var(--fs-7);
-  color: rgba(232,244,248,0.25);
+  font-size: var(--fs-6);
+  color: var(--ink-subtle);
   font-family: var(--font-mono);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -585,57 +516,18 @@
   letter-spacing: -0.02em;
 }
 
-.userCard2Chevron {
-  color: rgba(232,244,248,0.2);
-  margin-left: 0.5rem;
-  transition: transform 0.2s;
-}
 
 /* ── USER CARD BODY (expandido) ───────────────────────── */
 .userCard2Body {
   padding: 0 1rem 0.75rem;
-  border-top: 1px solid rgba(93,228,255,0.04);
+  border-top: 1px solid var(--line);
 }
 
-.userCard2Grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
-  padding-top: 0.75rem;
-}
 
-.userCard2Section { }
 
-.userCard2SectionTitle {
-  font-size: var(--fs-7);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: rgba(93,228,255,0.3);
-  margin-bottom: 0.4rem;
-}
 
-.userCard2Field {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.5rem;
-  padding: 0.2rem 0;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-.userCard2Field:last-child { border-bottom: none; }
 
-.userCard2FieldLabel {
-  font-size: var(--fs-7);
-  color: rgba(232,244,248,0.25);
-}
 
-.userCard2FieldVal {
-  font-size: var(--fs-6);
-  color: rgba(232,244,248,0.6);
-  font-weight: 500;
-  text-align: right;
-}
 
 .userCard2Actions {
   display: flex;
@@ -644,37 +536,14 @@
   flex-wrap: wrap;
 }
 
-/* ── ACTION BUTTONS ───────────────────────────────────── */
-.actionBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.32rem 0.7rem;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: var(--r-full);
-  font-size: var(--fs-7);
-  font-weight: 600;
-  color: rgba(232,244,248,0.45);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.actionBtn:hover { color: #e8f4f8; border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.07); }
-.actionBtn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-.actionBtnDanger {
-  color: #EF4444;
-  border-color: rgba(239,68,68,0.2);
-  background: rgba(239,68,68,0.06);
-}
-.actionBtnDanger:hover { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.35); color: #EF4444; }
 
 /* ── MODAL ────────────────────────────────────────────── */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(4,8,16,0.85);
-  backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -683,12 +552,12 @@
 }
 
 .modal {
-  background: rgba(13,20,32,0.98);
+  background: var(--surface);
   border: 1px solid rgba(93,228,255,0.12);
   border-radius: 20px;
   width: 100%;
   max-width: 440px;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.12);
   position: relative;
 }
 .modal::before {
@@ -704,13 +573,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(93,228,255,0.07);
+  border-bottom: 1px solid var(--line);
 }
 
 .modalTitle {
   font-size: var(--fs-4);
   font-weight: 700;
-  color: #e8f4f8;
+  color: var(--ink);
 }
 
 .modalClose {
@@ -719,13 +588,13 @@
   justify-content: center;
   width: 26px; height: 26px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: rgba(232,244,248,0.4);
+  background: var(--surface-off);
+  border: 1px solid var(--line);
+  color: var(--ink-muted);
   cursor: pointer;
   transition: all 0.15s;
 }
-.modalClose:hover { color: #e8f4f8; }
+.modalClose:hover { color: var(--ink); }
 
 .modalBody {
   padding: 1rem 1.25rem 1.25rem;
@@ -736,7 +605,7 @@
 
 .modalText {
   font-size: var(--fs-5);
-  color: rgba(232,244,248,0.6);
+  color: var(--ink);
   line-height: 1.5;
   margin: 0;
 }
@@ -756,17 +625,17 @@
 .modalInput {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  background: rgba(255,255,255,0.04);
+  background: var(--surface-off);
   border: 1px solid rgba(93,228,255,0.1);
   border-radius: var(--r-sm);
   font-size: var(--fs-5);
-  color: #e8f4f8;
+  color: var(--ink);
   font-family: var(--font-body);
   outline: none;
   transition: border-color 0.15s;
 }
-.modalInput:focus { border-color: rgba(93,228,255,0.35); }
-.modalInput::placeholder { color: rgba(232,244,248,0.2); }
+.modalInput:focus { border-color: #5de4ff; }
+.modalInput::placeholder { color: var(--ink-subtle); }
 
 .modalActions {
   display: flex;
@@ -776,15 +645,15 @@
 
 .modalBtnCancel {
   padding: 0.45rem 0.9rem;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--surface-off);
+  border: 1px solid var(--line);
   border-radius: var(--r-sm);
   font-size: var(--fs-5);
-  color: rgba(232,244,248,0.4);
+  color: var(--ink-muted);
   cursor: pointer;
   transition: all 0.15s;
 }
-.modalBtnCancel:hover { color: #e8f4f8; }
+.modalBtnCancel:hover { color: var(--ink); }
 
 .modalBtnDanger {
   display: inline-flex;
@@ -847,6 +716,27 @@
 /* ── USER CARD VARIANTS ───────────────────────────────── */
 .userCard2Expired { opacity: 0.55; }
 .userCard2Banned  { opacity: 0.45; }
+
+/* ── Estado expandido — diferencia visual clara ─── */
+.userCard2Open {
+  border-color: #5de4ff !important;
+  border-width: 2px !important;
+  box-shadow: 0 0 0 3px rgba(93,228,255,0.15), 0 8px 24px rgba(93,228,255,0.12) !important;
+  background: var(--surface) !important;
+}
+.userCard2Open .userCard2Header {
+  border-bottom: 2px solid rgba(93,228,255,0.25);
+  background: rgba(93,228,255,0.05);
+}
+.userCard2Open .userCard2Name {
+  color: #5de4ff;
+}
+.userCard2Open .userCard2Avatar {
+  background: rgba(93,228,255,0.18) !important;
+  color: #5de4ff !important;
+  border-color: #5de4ff !important;
+  box-shadow: 0 0 12px rgba(93,228,255,0.3) !important;
+}
 .userCard2Risk    { border-left: 2px solid rgba(245,158,11,0.4); }
 
 /* ── USER CARD HEADER ─────────────────────────────────── */
@@ -855,16 +745,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.9rem 1rem;
+  padding: 1rem 1.25rem;
   background: none;
   border: none;
   cursor: pointer;
   text-align: left;
   color: inherit;
-  transition: background 0.15s;
-  border-radius: 12px;
+  transition: background 0.15s ease;
 }
-.userCard2Header:hover { background: rgba(93,228,255,0.02); }
+.userCard2Header:hover { background: var(--surface-off); }
 
 .userCard2Left {
   display: flex;
@@ -876,11 +765,11 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: rgba(232,244,248,0.2);
+  color: var(--ink-subtle);
 }
 
 .userCard2Score {
-  font-size: var(--fs-3);
+  font-size: var(--fs-2);
   font-weight: 900;
   letter-spacing: -0.02em;
 }
@@ -894,57 +783,59 @@
 }
 
 .userCard2Email {
-  font-size: var(--fs-7);
-  color: rgba(232,244,248,0.3);
+  font-size: var(--fs-6);
+  color: var(--ink-subtle);
   font-family: var(--font-mono);
 }
 
 /* ── USER CARD BODY (expandido) ───────────────────────── */
 .userCard2Body {
-  padding: 0 1rem 1rem 1rem;
-  border-top: 1px solid rgba(93,228,255,0.05);
+  padding: 0.75rem 1.25rem 1.25rem;
+  border-top: 1.5px solid rgba(93,228,255,0.20);
+  background: rgba(93,228,255,0.02);
 }
 
 /* Grid horizontal de datos — 3 columnas legibles */
 .userCard2Stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem 1.5rem;
-  padding: 1rem 0 0.75rem;
+  gap: 0.35rem 2rem;
+  padding: 1rem 0 0.85rem;
 }
 
 .userCard2Stat {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
   font-size: var(--fs-4);
-  color: rgba(232,244,248,0.7);
-  padding: 0.3rem 0;
+  color: var(--ink);
+  padding: 0.35rem 0;
 }
-.userCard2Stat svg { color: rgba(93,228,255,0.4); flex-shrink: 0; }
-.userCard2Stat a { color: rgba(93,228,255,0.6); text-decoration: none; }
-.userCard2Stat a:hover { color: #5de4ff; }
+.userCard2Stat svg { color: #5de4ff; flex-shrink: 0; }
+.userCard2Stat a { color: #5de4ff; text-decoration: none; }
+.userCard2Stat a:hover { opacity: 0.75; }
 
 /* Bloque de perfil extendido dentro del grid */
 .extendedBlock {
   grid-column: 1 / -1;
-  margin-top: 0.5rem;
-  padding: 0.75rem;
-  background: rgba(93,228,255,0.03);
-  border: 1px solid rgba(93,228,255,0.08);
+  margin-top: 0.25rem;
+  padding: 1rem 1.1rem;
+  background: var(--surface-off);
+  border: 1px solid var(--line);
+  border-left: 3px solid #5de4ff;
   border-radius: 10px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.4rem 1.5rem;
+  gap: 0.5rem 2rem;
 }
 
 .extendedTitle {
   grid-column: 1 / -1;
-  font-size: var(--fs-7);
+  font-size: var(--fs-5);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(93,228,255,0.3);
+  color: #5de4ff;
   margin-bottom: 0.25rem;
 }
 
@@ -952,11 +843,12 @@
 .miniChart {
   display: flex;
   align-items: flex-end;
-  gap: 4px;
-  height: 48px;
-  margin: 0.5rem 0;
-  padding: 0.5rem;
-  background: rgba(255,255,255,0.02);
+  gap: 3px;
+  height: 40px;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.4rem 0.5rem;
+  background: var(--surface-off);
+  border: 1px solid var(--line);
   border-radius: 8px;
 }
 
@@ -979,16 +871,17 @@
 
 .miniBarLabel {
   font-size: 8px;
-  color: rgba(232,244,248,0.2);
+  color: var(--ink-subtle);
 }
 
 /* Acciones del usuario */
 .userCard2Actions {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  padding-top: 0.6rem;
-  border-top: 1px solid rgba(93,228,255,0.05);
+  padding-top: 0.85rem;
+  margin-top: 0.25rem;
+  border-top: 1px solid var(--line);
 }
 
 .userCard2Btn {
@@ -996,16 +889,16 @@
   align-items: center;
   gap: 0.3rem;
   padding: 0.4rem 0.85rem;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.09);
+  background: var(--surface-off);
+  border: 1px solid var(--line);
   border-radius: var(--r-full);
   font-size: var(--fs-5);
   font-weight: 600;
-  color: rgba(232,244,248,0.55);
+  color: var(--ink-muted);
   cursor: pointer;
   transition: all 0.15s;
 }
-.userCard2Btn:hover { color: #e8f4f8; border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.07); }
+.userCard2Btn:hover { color: var(--ink); border-color: rgba(255,255,255,0.2); background: var(--surface-off); }
 .userCard2Btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .userCard2BtnWarn {
@@ -1061,7 +954,7 @@
 .modalLabel {
   font-size: var(--fs-6);
   font-weight: 600;
-  color: rgba(232,244,248,0.4);
+  color: var(--ink-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -1079,7 +972,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: rgba(232,244,248,0.3);
+  color: var(--ink-subtle);
   display: flex;
   padding: 0;
   transition: color 0.15s;
@@ -1096,8 +989,8 @@
 
 /* ── SUBJECT SECTION ──────────────────────────────────── */
 .subjectSection2 {
-  background: rgba(13,20,32,0.95);
-  border: 1px solid rgba(93,228,255,0.07);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 14px;
   overflow: hidden;
 }
@@ -1110,7 +1003,7 @@
   padding: 0.85rem 1rem;
   background: none;
   border: none;
-  border-bottom: 1px solid rgba(93,228,255,0.05);
+  border-bottom: 1px solid var(--line);
   cursor: pointer;
   text-align: left;
   color: inherit;
@@ -1130,9 +1023,9 @@
 .subjectInfo2 { flex: 1; }
 
 .subjectName2 {
-  font-size: var(--fs-3);
+  font-size: var(--fs-2);
   font-weight: 800;
-  color: #e8f4f8;
+  color: var(--ink);
   display: block;
   margin-bottom: 0.3rem;
   letter-spacing: -0.01em;
@@ -1148,8 +1041,8 @@
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  font-size: var(--fs-5);
-  color: rgba(232,244,248,0.4);
+  font-size: var(--fs-3);
+  color: var(--ink-muted);
 }
 
 .subjectBody2 {
@@ -1170,11 +1063,11 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: var(--fs-6);
+  font-size: var(--fs-5);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(93,228,255,0.35);
+  color: #5de4ff;
   padding: 0.25rem 0.5rem;
 }
 
@@ -1188,3 +1081,63 @@
   .userCard2BtnActivar,
   .userCard2BtnDanger { font-size: var(--fs-7); padding: 0.28rem 0.55rem; }
 }
+
+/* ── bentoCardEmpty — valor vacío en bento ──────────────── */
+.bentoCardEmpty {
+  font-size: var(--fs-5);
+  color: var(--ink-subtle);
+  font-style: italic;
+}
+
+/* ── Chips de estado ─────────────────────────────────────── */
+.chipDanger {
+  font-size: var(--fs-6);
+  font-weight: 700;
+  color: #DC2626;
+  background: rgba(220,38,38,0.10);
+  border-radius: var(--r-full);
+  padding: 2px 8px;
+}
+
+.chipWarn {
+  font-size: var(--fs-6);
+  font-weight: 700;
+  color: #D97706;
+  background: rgba(217,119,6,0.10);
+  border-radius: var(--r-full);
+  padding: 2px 8px;
+}
+
+.chipOk {
+  font-size: var(--fs-6);
+  font-weight: 700;
+  color: #059669;
+  background: rgba(5,150,105,0.10);
+  border-radius: var(--r-full);
+  padding: 2px 8px;
+}
+
+/* ── Stat link (email clickable) ─────────────────────────── */
+.statLink {
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.statLink:hover { color: #5de4ff; }
+
+/* ── Stat disabled (sin email) ───────────────────────────── */
+.statDisabled { opacity: 0.45; }
+
+/* ── Stat precio mensual ─────────────────────────────────── */
+.statPrice {
+  font-weight: 700;
+  color: #059669;
+}
+
+/* ── Stat bio (alineación top) ───────────────────────────── */
+.statTop { align-items: flex-start !important; }
+.statTopIcon { margin-top: 2px; flex-shrink: 0; }
+.statItalic { font-style: italic; }
+
+/* ── Stat capitalize ─────────────────────────────────────── */
+.statCapitalize { text-transform: capitalize; }

@@ -1,6 +1,6 @@
 import { useSettings }    from './hooks/useSettings'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
-import { useState }       from 'react'
+import { useState, useEffect } from 'react'
 import { ShieldOff, LogOut } from 'lucide-react'
 import useAuth            from './hooks/useAuth'
 import useProgress        from './hooks/useProgress'
@@ -24,10 +24,11 @@ import SuperadminPanel    from './components/Superadmin/SuperadminPanel'
 import OnboardingWizard   from './components/Onboarding/OnboardingWizard'
 import GestionAcademia    from './components/Director/GestionAcademia/GestionAcademia'
 import FacturacionDirector from './components/Director/FacturacionDirector/FacturacionDirector'
+import SimulacroRunner     from './components/Simulacro/SimulacroRunner'
 import styles             from './App.module.css'
 import { useSuperadmin }  from './hooks/useSuperadmin'
 import ManualBillingTab   from './components/Superadmin/ManualBillingTab'
-import type { CurrentUser, AppOverlay, Supuesto } from './types'
+import type { CurrentUser, AppOverlay, Supuesto, ExamConfig } from './types'
 
 const homeRoute = (user: CurrentUser | null): string => {
   const role = user?.role
@@ -70,11 +71,12 @@ function AccesoExpiradoPage({ username, onLogout }: { username: string; onLogout
   )
 }
 
-function AppShell({ currentUser, logout, progress, studyProgress }: {
-  currentUser:   CurrentUser
-  logout:        () => void
-  progress:      ReturnType<typeof useProgress>
-  studyProgress: ReturnType<typeof useStudyProgress>
+function AppShell({ currentUser, logout, progress, studyProgress, updateDisplayName }: {
+  currentUser:        CurrentUser
+  logout:             () => void
+  progress:           ReturnType<typeof useProgress>
+  studyProgress:      ReturnType<typeof useStudyProgress>
+  updateDisplayName:  (name: string) => void
 }) {
   const { settings }  = useSettings()
   const navigate      = useNavigate()
@@ -126,6 +128,9 @@ function AppShell({ currentUser, logout, progress, studyProgress }: {
     if (modeId === 'flashcards') {
       return setOverlay({ type: 'flashcards' })
     }
+    if (modeId === 'simulacro' && thirdArg && typeof thirdArg === 'object') {
+      return setOverlay({ type: 'simulacro', examConfig: thirdArg as ExamConfig })
+    }
     if (thirdArg && typeof thirdArg === 'string') {
       return setOverlay({ type: 'test', modeId, modeLabel, topicId: thirdArg, topicLabel: fourthArg ?? '' })
     }
@@ -134,12 +139,13 @@ function AppShell({ currentUser, logout, progress, studyProgress }: {
 
   const goHome = () => { setOverlay(null); navigate(homeRoute(currentUser)) }
 
-  const isTestActive = overlay && ['test', 'supuesto', 'flashcards'].includes(overlay.type)
+  const isTestActive = overlay && ['test', 'supuesto', 'flashcards', 'simulacro'].includes(overlay.type)
 
   const testLabel =
     overlay?.type === 'test'       ? (overlay.topicLabel ?? overlay.modeLabel ?? overlay.modeId) :
     overlay?.type === 'supuesto'   ? overlay.supuesto?.title :
-    overlay?.type === 'flashcards' ? 'Flashcards' : ''
+    overlay?.type === 'flashcards' ? 'Flashcards' :
+    overlay?.type === 'simulacro'  ? 'Simulacro Oficial' : ''
 
   const pageTitle =
     activeTab === 'estadisticas'         ? 'Estadísticas'      :
@@ -158,7 +164,7 @@ function AppShell({ currentUser, logout, progress, studyProgress }: {
       {!isTestActive && (
         <Sidebar activeTab={activeTab} onTabChange={handleTabChange} currentUser={currentUser} onLogout={logout} />
       )}
-      <div className={[styles.main, isTestActive ? styles.mainFull : '', isSuperadmin ? styles.mainDark : ''].join(' ')}>
+      <div className={[styles.main, isTestActive ? styles.mainFull : ''].join(' ')}>
         <Header
           currentUser={currentUser} inTest={!!isTestActive} modeName={testLabel}
           onGoHome={goHome} onLogout={logout} pageTitle={pageTitle}
@@ -175,6 +181,7 @@ function AppShell({ currentUser, logout, progress, studyProgress }: {
               topicLabel={overlay.topicLabel ?? null}
               academyId={academyId}
               subjectId={currentUser?.subject_id}
+              userId={currentUser?.id}
               penalizacion={settings.penalizacion}
               onGoHome={goHome}
               onRecordSession={progress.recordSession}
@@ -185,6 +192,19 @@ function AppShell({ currentUser, logout, progress, studyProgress }: {
           )}
           {overlay?.type === 'flashcards' && (
             <Flashcard academyId={academyId} subjectId={currentUser?.subject_id} onGoHome={goHome} />
+          )}
+          {overlay?.type === 'simulacro' && (
+            <SimulacroRunner
+              examConfig={overlay.examConfig}
+              academyId={academyId}
+              subjectId={currentUser?.subject_id}
+              userId={currentUser?.id}
+              onGoHome={goHome}
+              onRecordSession={progress.recordSession}
+              onRecordWrong={(questionId, blockId) => progress.recordWrongAnswer(questionId, blockId ?? '')}
+              onRecordCorrectReview={progress.recordCorrectReview}
+              wrongAnswers={progress.wrongAnswers}
+            />
           )}
           {overlay?.type === 'supuesto' && (
             <SupuestoRunner supuesto={overlay.supuesto} onGoHome={goHome} />
@@ -213,7 +233,8 @@ function AppShell({ currentUser, logout, progress, studyProgress }: {
                     ? <ProfesorProfile currentUser={currentUser} onLogout={logout} />
                     : <Profile currentUser={currentUser} progress={progress}
                         studyReadTopics={studyProgress.readTopics}
-                        studyBookmarks={studyProgress.bookmarks} />
+                        studyBookmarks={studyProgress.bookmarks}
+                        onUpdateDisplayName={updateDisplayName} />
               } />
               <Route path="/profesor" element={
                 isProfesor ? <ProfesorPanel currentUser={currentUser} /> : <Navigate to={homeRoute(currentUser)} replace />
@@ -255,13 +276,13 @@ function BillingWrapper({ currentUser }: { currentUser: CurrentUser }) {
   const [tab, setTab] = useState('manual')
 
   if (loading) return (
-    <div style={{ minHeight:'60vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#080c10', color:'rgba(232,244,248,0.4)', fontSize:'var(--fs-4)' }}>
+    <div style={{ minHeight:'60vh', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--bg)', color:'var(--ink-subtle)', fontSize:'var(--fs-4)' }}>
       Cargando…
     </div>
   )
 
   return (
-    <div style={{ minHeight:'100vh', background:'linear-gradient(135deg,#080c10 0%,#0d1520 40%,#080c10 100%)', color:'#e8f4f8' }}>
+    <div style={{ minHeight:'100vh', background:'var(--bg)', color:'var(--ink)' }}>
       <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', padding:'1.5rem 2rem 0', maxWidth:'1100px', margin:'0 auto' }}>
         {[
           { id:'manual', label:'Facturación manual', badge:'Activo' },
@@ -269,17 +290,17 @@ function BillingWrapper({ currentUser }: { currentUser: CurrentUser }) {
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             display:'inline-flex', alignItems:'center', gap:'0.45rem', padding:'0.5rem 1.1rem',
-            background: tab===t.id ? 'rgba(93,228,255,0.1)'  : 'rgba(255,255,255,0.03)',
-            border:     tab===t.id ? '1px solid rgba(93,228,255,0.3)' : '1px solid rgba(255,255,255,0.07)',
+            background: tab===t.id ? 'rgba(93,228,255,0.10)' : 'var(--surface-off)',
+            border:     tab===t.id ? '1px solid rgba(93,228,255,0.40)' : '1px solid var(--line)',
             borderRadius:'999px', fontSize:'var(--fs-5)', fontWeight: tab===t.id ? 700 : 500,
-            color: tab===t.id ? '#5de4ff' : 'rgba(232,244,248,0.35)', cursor:'pointer', transition:'all 0.15s',
+            color: tab===t.id ? '#5de4ff' : 'var(--ink-muted)', cursor:'pointer', transition:'all 0.15s',
           }}>
             {t.label}
             <span style={{
               fontSize:'9px', fontWeight:800, padding:'1px 6px',
-              background: tab===t.id ? 'rgba(93,228,255,0.15)' : 'rgba(255,255,255,0.06)',
-              border: `1px solid ${tab===t.id ? 'rgba(93,228,255,0.25)' : 'rgba(255,255,255,0.08)'}`,
-              borderRadius:'999px', color: tab===t.id ? '#5de4ff' : 'rgba(232,244,248,0.25)',
+              background: tab===t.id ? 'rgba(93,228,255,0.15)' : 'var(--surface-dim)',
+              border: `1px solid ${tab===t.id ? 'rgba(93,228,255,0.30)' : 'var(--line)'}`,
+              borderRadius:'999px', color: tab===t.id ? '#5de4ff' : 'var(--ink-subtle)',
               letterSpacing:'0.05em', textTransform:'uppercase' as const,
             }}>{t.badge}</span>
           </button>
@@ -289,13 +310,13 @@ function BillingWrapper({ currentUser }: { currentUser: CurrentUser }) {
       <div style={{ maxWidth:'1100px', margin:'0 auto', padding:'1.5rem 2rem 4rem' }}>
         {tab === 'manual' && <ManualBillingTab academias={academias} />}
         {tab === 'stripe' && (
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'1rem', padding:'5rem', textAlign:'center', background:'rgba(13,20,32,0.95)', border:'1px solid rgba(93,228,255,0.08)', borderRadius:'20px' }}>
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'1rem', padding:'5rem', textAlign:'center', background:'var(--surface)', border:'1px solid rgba(93,228,255,0.20)', borderRadius:'20px', boxShadow:'0 0 0 3px rgba(93,228,255,0.06)' }}>
             <div style={{ fontSize:'2.5rem' }}>⚡</div>
-            <div style={{ fontSize:'var(--fs-2)', fontWeight:700, color:'#e8f4f8' }}>Stripe · Próximamente</div>
-            <div style={{ fontSize:'var(--fs-5)', color:'rgba(232,244,248,0.35)', maxWidth:400, lineHeight:1.6 }}>
+            <div style={{ fontSize:'var(--fs-2)', fontWeight:700, color:'var(--ink)' }}>Stripe · Próximamente</div>
+            <div style={{ fontSize:'var(--fs-5)', color:'var(--ink-muted)', maxWidth:400, lineHeight:1.6 }}>
               La integración con Stripe está lista pero se activará con el primer cliente real. Hasta entonces, usa la facturación manual.
             </div>
-            <button onClick={() => setTab('manual')} style={{ display:'inline-flex', alignItems:'center', gap:'0.4rem', padding:'0.55rem 1.1rem', background:'linear-gradient(135deg,#1d4ed8,#5de4ff)', border:'none', borderRadius:'999px', fontSize:'var(--fs-5)', fontWeight:700, color:'#fff', cursor:'pointer', marginTop:'0.5rem' }}>
+            <button onClick={() => setTab('manual')} style={{ display:'inline-flex', alignItems:'center', gap:'0.4rem', padding:'0.55rem 1.1rem', background:'var(--ink)', border:'none', borderRadius:'999px', fontSize:'var(--fs-5)', fontWeight:700, color:'#fff', cursor:'pointer', marginTop:'0.5rem' }}>
               Ir a facturación manual
             </button>
           </div>
@@ -317,13 +338,34 @@ function StudyViewWrapper({ currentUser, onSelectMode }: {
 function AppInner() {
   const {
     currentUser, loading, login, register, logout, error, clearError,
-    clearForcePasswordChange, completeOnboarding,
+    clearForcePasswordChange, completeOnboarding, updateDisplayName,
     recoveryMode, requestPasswordReset, confirmPasswordReset,
   } = useAuth()
   const progress      = useProgress(currentUser?.id, currentUser?.academy_id, currentUser?.subject_id)
   const studyProgress = useStudyProgress(currentUser?.id, currentUser?.academy_id, currentUser?.subject_id)
 
-  if (loading)      return <div className={styles.loadingScreen}><div className={styles.loadingSpinner} /></div>
+  // Si tarda más de 12s en cargar, Supabase probablemente no responde
+  const [loadTimeout, setLoadTimeout] = useState(false)
+  useEffect(() => {
+    if (!loading) { setLoadTimeout(false); return }
+    const t = setTimeout(() => setLoadTimeout(true), 12000)
+    return () => clearTimeout(t)
+  }, [loading])
+
+  if (loading && loadTimeout) return (
+    <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'1rem', padding:'2rem', background:'var(--surface-off)', textAlign:'center' }}>
+      <div style={{ fontSize:'2.5rem' }}>⚡</div>
+      <h2 style={{ fontSize:'1.2rem', fontWeight:800, color:'var(--ink)', margin:0 }}>Tardando más de lo normal</h2>
+      <p style={{ fontSize:'0.9rem', color:'var(--ink-muted)', maxWidth:320, margin:0, lineHeight:1.5 }}>
+        El servidor está tardando en responder. Comprueba tu conexión o inténtalo de nuevo.
+      </p>
+      <button onClick={() => window.location.reload()} style={{ marginTop:'0.5rem', padding:'0.6rem 1.4rem', background:'var(--ink)', color:'#fff', border:'none', borderRadius:'8px', fontSize:'0.88rem', fontWeight:700, cursor:'pointer' }}>
+        Reintentar
+      </button>
+    </div>
+  )
+
+  if (loading) return <div className={styles.loadingScreen}><div className={styles.loadingSpinner} /></div>
   if (recoveryMode) return <ForcePasswordChange currentUser={{ username: '' }} onDone={confirmPasswordReset} isRecovery />
   if (!currentUser) return <AuthPage onLogin={login} onRegister={register} onRequestReset={requestPasswordReset} error={error} clearError={clearError} />
   if (currentUser.academyDeleted)      return <AcademiaSuspendidaPage username={currentUser.username} onLogout={logout} />
@@ -334,7 +376,7 @@ function AppInner() {
     return <OnboardingWizard currentUser={currentUser} onComplete={completeOnboarding} onLogout={logout} />
   }
 
-  return <AppShell currentUser={currentUser} logout={logout} progress={progress} studyProgress={studyProgress} />
+  return <AppShell currentUser={currentUser} logout={logout} progress={progress} studyProgress={studyProgress} updateDisplayName={updateDisplayName} />
 }
 
 export default function App() {

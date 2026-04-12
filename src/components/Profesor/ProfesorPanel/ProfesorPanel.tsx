@@ -6,6 +6,7 @@ import {
   TrendingDown, CalendarDays, ExternalLink, Bell, CheckCircle2, ArrowRight,
   Megaphone, Trash2, BookOpen as BookIcon
 } from 'lucide-react'
+import { supabase }              from '../../../lib/supabase'
 import { Ripple }              from '../../magicui/Ripple'
 import { AnimatedGridPattern } from '../../magicui/AnimatedGridPattern'
 import { useProfesor }         from '../../../hooks/useProfesor'
@@ -243,46 +244,163 @@ function ProximosExamenes({ alumnos }: { alumnos: AlumnoConStats[] }) {
   )
 }
 
-function BentoNav({ tab, setTab, statsClase, nAcciones, announcements, preguntas, alumnos }: {
-  tab: string; setTab: (t: string) => void; statsClase: StatsClase | null; nAcciones: number; announcements: Announcement[]; preguntas: number; alumnos: AlumnoConStats[]
+// ── BancoSupuestos ────────────────────────────────────────────────────────────
+const LETRAS_SUP = ['A', 'B', 'C', 'D']
+
+function SupuestoCard({ supuesto }: { supuesto: { id: string; title: string; subtitle: string | null; scenario: string | null; questions: { id: string; question: string; options: string[]; answer: number; explanation: string | null; position: number }[] } }) {
+  const [abierto, setAbierto] = useState(false)
+  const [pregAbierta, setPregAbierta] = useState<string | null>(null)
+
+  return (
+    <div className={styles.supCard}>
+      <button className={styles.supHeader} onClick={() => setAbierto(v => !v)}>
+        <div className={styles.supHeaderLeft}>
+          <span className={styles.supTitle}>{supuesto.title}</span>
+          {supuesto.subtitle && <span className={styles.supSubtitle}>{supuesto.subtitle}</span>}
+        </div>
+        <div className={styles.supHeaderRight}>
+          <span className={styles.supCount}>{supuesto.questions.length} preguntas</span>
+          {abierto ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </div>
+      </button>
+
+      {abierto && (
+        <div className={styles.supBody}>
+          {supuesto.scenario && (
+            <div className={styles.supScenario}>
+              <span className={styles.supScenarioLabel}>Caso práctico</span>
+              <p className={styles.supScenarioText}>{supuesto.scenario}</p>
+            </div>
+          )}
+          <div className={styles.supPreguntas}>
+            {supuesto.questions.map((q, idx) => (
+              <div key={q.id} className={styles.supPregunta}>
+                <button className={styles.supPreguntaHeader} onClick={() => setPregAbierta(pregAbierta === q.id ? null : q.id)}>
+                  <span className={styles.supPreguntaNum}>{idx + 1}</span>
+                  <span className={styles.supPreguntaTexto}>{q.question}</span>
+                  {pregAbierta === q.id ? <ChevronUp size={13} className={styles.chevron} /> : <ChevronDown size={13} className={styles.chevron} />}
+                </button>
+                {pregAbierta === q.id && (
+                  <div className={styles.supPreguntaBody}>
+                    {q.options.map((op, i) => (
+                      <div key={i} className={[styles.supOpcion, i === q.answer ? styles.supOpcionCorrecta : ''].join(' ')}>
+                        <span className={styles.supOpcionLetra}>{LETRAS_SUP[i]}</span>
+                        <span>{op}</span>
+                        {i === q.answer && <span className={styles.supOpcionBadge}>✓</span>}
+                      </div>
+                    ))}
+                    {q.explanation && <p className={styles.supExplicacion}>{q.explanation}</p>}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function BancoSupuestos({ currentUser }: { currentUser: CurrentUser | null }) {
+  const [supuestos, setSupuestos] = useState<{ id: string; title: string; subtitle: string | null; scenario: string | null; position: number; questions: { id: string; question: string; options: string[]; answer: number; explanation: string | null; position: number }[] }[]>([])
+  const [loading,   setLoading]   = useState(true)
+
+  useEffect(() => {
+    const aid = currentUser?.academy_id
+    const sid = currentUser?.subject_id
+    if (!aid) return
+    const load = async () => {
+      setLoading(true)
+      let q = supabase
+        .from('supuestos')
+        .select('id, title, subtitle, scenario, position, supuesto_questions(id, question, options, answer, explanation, position)')
+        .eq('academy_id', aid)
+        .order('position')
+      if (sid) q = q.eq('subject_id', sid)
+      const { data } = await q
+
+      type RawSupQ = { id: string; question: string; options: string[]; answer: number; explanation: string | null; position: number }
+      type RawSup  = { id: string; title: string; subtitle: string | null; scenario: string | null; position: number; supuesto_questions: RawSupQ[] }
+
+      const mapped = ((data ?? []) as RawSup[]).map(s => ({
+        id:        s.id,
+        title:     s.title,
+        subtitle:  s.subtitle ?? null,
+        scenario:  s.scenario ?? null,
+        position:  s.position,
+        questions: (s.supuesto_questions ?? [])
+          .sort((a, b) => a.position - b.position)
+          .map(q => ({
+            id:          q.id,
+            question:    q.question,
+            options:     Array.isArray(q.options) ? q.options : [],
+            answer:      q.answer,
+            explanation: q.explanation ?? null,
+            position:    q.position,
+          }))
+      }))
+      setSupuestos(mapped)
+      setLoading(false)
+    }
+    load()
+  }, [currentUser?.academy_id, currentUser?.subject_id])
+
+  if (loading) return (
+    <div className={styles.loading}>
+      <div className={styles.loadingSpinner} />
+      <p>Cargando supuestos…</p>
+    </div>
+  )
+
+  if (!supuestos.length) return (
+    <div className={styles.empty}>
+      <FileText size={32} strokeWidth={1.2} />
+      <p>No hay supuestos prácticos para esta asignatura.</p>
+    </div>
+  )
+
+  return (
+    <div className={styles.supLista}>
+      {supuestos.map(s => <SupuestoCard key={s.id} supuesto={s} />)}
+    </div>
+  )
+}
+
+// ── BentoNav ──────────────────────────────────────────────────────────────────
+function BentoNav({ tab, setTab, statsClase, nAcciones, announcements, preguntas, supuestos, alumnos }: {
+  tab: string; setTab: (t: string) => void; statsClase: StatsClase | null; nAcciones: number; announcements: Announcement[]; preguntas: number; supuestos: number; alumnos: AlumnoConStats[]
 }) {
+  const bancoDesc      = preguntas > 0 ? `${preguntas} preguntas` : 'Ver temario completo'
+  const bancoDescExtra = supuestos > 0 ? `${supuestos} supuesto${supuestos !== 1 ? 's' : ''} práctico${supuestos !== 1 ? 's' : ''}` : null
+
   const cards = [
-    { id:'clase',    label:'Mi clase',          desc: statsClase?`${statsClase.totalAlumnos} alumnos · ${statsClase.alumnosActivos} activos`:'Ver alumnos', icon:Users,        color:'#2563EB', big:true,  badge:null as number|null },
-    { id:'inbox',    label:'Acciones',           desc: nAcciones>0?`${nAcciones} pendiente${nAcciones!==1?'s':''}`:'Todo al día', icon:Bell, color:nAcciones>0?'#DC2626':'#059669', badge:nAcciones>0?nAcciones:null },
-    { id:'evolucion',label:'Evolución',          desc: statsClase?`Nota media ${statsClase.notaMediaClase??0}%`:'Ver progreso', icon:TrendingUp,  color:'#7C3AED' },
-    { id:'fallos',   label:'Fallos clase',       desc:'Preguntas con más errores', icon:TrendingDown, color:'#DC2626' },
-    { id:'plan',     label:'Plan semanal',       desc:'Organiza el temario', icon:CalendarDays, color:'#D97706' },
-    { id:'tablon',   label:'Tablón',             desc: announcements.length>0?`${announcements.length} aviso${announcements.length!==1?'s':''} activo${announcements.length!==1?'s':''}`:'Sin avisos activos', icon:Megaphone, color:'#059669', badge:announcements.length>0?announcements.length:null },
-    { id:'codigos',  label:'Códigos',            desc:'Invitaciones de acceso', icon:Key, color:'#0891B2' },
-    { id:'banco',    label:'Banco de preguntas', desc: preguntas>0?`${preguntas} preguntas`:'Ver temario completo', icon:BookIcon, color:'#6366F1', big:true },
-    { id:'examenes', label:'Fecha de examen',    desc:'Por alumno', icon:CalendarDays, color:'#0891B2', big:true },
+    { id:'clase',    label:'Mi clase',          desc: statsClase?`${statsClase.totalAlumnos} alumnos · ${statsClase.alumnosActivos} activos`:'Ver alumnos', descExtra: null as string|null, icon:Users,        color:'#2563EB', big:true,  badge:null as number|null },
+    { id:'inbox',    label:'Acciones',           desc: nAcciones>0?`${nAcciones} pendiente${nAcciones!==1?'s':''}`:'Todo al día', descExtra: null, icon:Bell, color:nAcciones>0?'#DC2626':'#059669', badge:nAcciones>0?nAcciones:null },
+    { id:'evolucion',label:'Evolución',          desc: statsClase?`Nota media ${statsClase.notaMediaClase??0}%`:'Ver progreso', descExtra: null, icon:TrendingUp,  color:'#7C3AED' },
+    { id:'fallos',   label:'Fallos clase',       desc:'Preguntas con más errores', descExtra: null, icon:TrendingDown, color:'#DC2626' },
+    { id:'plan',     label:'Plan semanal',       desc:'Organiza el temario', descExtra: null, icon:CalendarDays, color:'#D97706' },
+    { id:'tablon',   label:'Tablón',             desc: announcements.length>0?`${announcements.length} aviso${announcements.length!==1?'s':''} activo${announcements.length!==1?'s':''}`:'Sin avisos activos', descExtra: null, icon:Megaphone, color:'#059669', badge:announcements.length>0?announcements.length:null },
+    { id:'codigos',  label:'Códigos',            desc:'Invitaciones de acceso', descExtra: null, icon:Key, color:'#0891B2' },
+    { id:'banco',    label:'Banco de preguntas', desc: bancoDesc, descExtra: bancoDescExtra, icon:BookIcon, color:'#6366F1', big:true },
+    { id:'examenes', label:'Fecha de examen',    desc:'Ver fechas por alumno', descExtra: null, icon:CalendarDays, color:'#0891B2', big:true,  badge:null as number|null },
   ]
   return (
     <div className={styles.bentoGrid}>
       {cards.map(card => {
-        const Icon = card.icon, active = tab===card.id, isExam = card.id==='examenes'
+        const Icon = card.icon, active = tab===card.id
         return (
-          <button key={card.id} className={[styles.bentoCard, card.big?styles.bentoBig:'', active&&!isExam?styles.bentoActive:'', isExam?styles.bentoExam:''].join(' ')} style={{ ['--bento-color' as string]: card.color }} onClick={() => !isExam && setTab(card.id)}>
-            {card.big && !isExam && <AnimatedGridPattern numSquares={18} maxOpacity={active?0.12:0.06} duration={4} color={card.color} lineColor={card.color+'20'} />}
-            {!isExam && <Ripple mainCircleSize={card.big?60:40} mainCircleOpacity={active?0.25:0.12} numCircles={card.big?5:3} color={card.color} duration={card.big?3:3.5} />}
-            {isExam ? (
-              <div className={styles.bentoContent}>
-                <div className={styles.bentoExamHeader}>
-                  <div className={styles.bentoIconWrap} style={{ background:card.color+'18', color:card.color }}><Icon size={16} strokeWidth={1.8} /></div>
-                  <span className={styles.bentoLabel}>{card.label}</span>
-                </div>
-                <ProximosExamenes alumnos={alumnos} />
+          <button key={card.id} className={[styles.bentoCard, card.big?styles.bentoBig:'', active?styles.bentoActive:''].join(' ')} style={{ ['--bento-color' as string]: card.color }} onClick={() => setTab(card.id)}>
+            {card.big && <AnimatedGridPattern numSquares={18} maxOpacity={active?0.12:0.06} duration={4} color={card.color} lineColor={card.color+'20'} />}
+            <Ripple mainCircleSize={card.big?60:40} mainCircleOpacity={active?0.25:0.12} numCircles={card.big?5:3} color={card.color} duration={card.big?3:3.5} />
+            <div className={styles.bentoContent}>
+              <div className={styles.bentoIconWrap} style={{ background:card.color+'18', color:card.color }}><Icon size={card.big?20:16} strokeWidth={1.8} /></div>
+              <div className={styles.bentoText}>
+                <span className={styles.bentoLabel}>{card.label}</span>
+                <span className={styles.bentoDesc}>{card.desc}</span>
+                {card.descExtra && <span className={styles.bentoDescExtra}>{card.descExtra}</span>}
               </div>
-            ) : (
-              <div className={styles.bentoContent}>
-                <div className={styles.bentoIconWrap} style={{ background:card.color+'18', color:card.color }}><Icon size={card.big?20:16} strokeWidth={1.8} /></div>
-                <div className={styles.bentoText}>
-                  <span className={styles.bentoLabel}>{card.label}</span>
-                  <span className={styles.bentoDesc}>{card.desc}</span>
-                </div>
-                {card.badge!=null && card.badge>0 && <span className={styles.bentoBadge} style={{ background:card.color }}>{card.badge}</span>}
-              </div>
-            )}
+              {card.badge!=null && card.badge>0 && <span className={styles.bentoBadge} style={{ background:card.color }}>{card.badge}</span>}
+            </div>
           </button>
         )
       })}
@@ -401,7 +519,19 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
   const [modalCodigo,   setModalCodigo]   = useState(false)
   const [modalRenovar,  setModalRenovar]  = useState<AlumnoConStats | null>(null)
   const [copied,        setCopied]        = useState<string | null>(null)
+  const [bancoSubtab,   setBancoSubtab]   = useState<'preguntas' | 'supuestos'>('preguntas')
   const [nPreguntas,    setNPreguntas]    = useState(0)
+  const [nSupuestos,    setNSupuestos]    = useState(0)
+
+  // Cargar count de supuestos al montar
+  useEffect(() => {
+    const aid = currentUser?.academy_id
+    const sid = currentUser?.subject_id
+    if (!aid) return
+    let q = supabase.from('supuestos').select('id', { count: 'exact', head: true }).eq('academy_id', aid)
+    if (sid) q = q.eq('subject_id', sid)
+    q.then(({ count }) => setNSupuestos(count ?? 0))
+  }, [currentUser?.academy_id, currentUser?.subject_id])
 
   const handleCopy = useCallback((code: string) => { navigator.clipboard.writeText(code); setCopied(code); setTimeout(()=>setCopied(null),2000) }, [])
 
@@ -413,7 +543,7 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!tab || !contentRef.current || window.innerWidth > 900) return
+    if (!tab || !contentRef.current) return
     setTimeout(() => contentRef.current?.scrollIntoView({ behavior:'smooth', block:'start' }), 80)
   }, [tab])
 
@@ -425,7 +555,7 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
   })
 
   if (loading) return <div className={styles.loading}><RefreshCw size={22} className={styles.spinner}/><p>Cargando datos de la clase…</p></div>
-  if (error)   return <div className={styles.errorState}><AlertTriangle size={22}/><p>{error}</p></div>
+  if (error)   return <ErrorState message={error ?? 'Error cargando los datos de la clase.'} onRetry={() => window.location.reload()} />
 
   if (alumnoDetalle) return <AlumnoDetalle alumno={alumnoDetalle} onBack={()=>setAlumnoDetalle(null)} academyId={currentUser?.academy_id} currentUser={currentUser}/>
 
@@ -454,10 +584,10 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
         </div>
       )}
 
-      <div ref={bentoRef}><BentoNav tab={tab} setTab={setTab} statsClase={statsClase} nAcciones={nAcciones} announcements={announcements} preguntas={nPreguntas} alumnos={alumnos}/></div>
+      <div ref={bentoRef}><BentoNav tab={tab} setTab={setTab} statsClase={statsClase} nAcciones={nAcciones} announcements={announcements} preguntas={nPreguntas} supuestos={nSupuestos} alumnos={alumnos}/></div>
 
       <div ref={contentRef} className={styles.contentArea}>
-        {tab==='evolucion'&&<ClaseEvolucionChart alumnos={alumnos} sessions={allSessions as any} academyId={currentUser?.academy_id} subjectId={currentUser?.subject_id}/>}
+        {tab==='evolucion'&&<ClaseEvolucionChart alumnos={alumnos} sessions={allSessions} academyId={currentUser?.academy_id} subjectId={currentUser?.subject_id}/>}
         {tab==='inbox'&&<InboxPanel alumnos={alumnos} inviteCodes={inviteCodes} onVerAlumno={setAlumnoDetalle} onRenovar={setModalRenovar}/>}
         {tab==='clase'&&(
           <div className={styles.tabContent}>
@@ -478,7 +608,29 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
         {tab==='fallos'&&<div className={styles.tabContent}><FallosClase currentUser={currentUser}/></div>}
         {tab==='plan'&&<div className={styles.tabContent}><PlanSemanal currentUser={currentUser}/></div>}
         {tab==='tablon'&&<TablonPanel announcements={announcements} onAdd={(a) => addAnnouncement({ ...a, authorId: a.authorId ?? '' })} onDelete={deleteAnnouncement} currentUser={currentUser}/>}
-        {tab==='banco'&&<div className={styles.tabContent}><BancoPreguntas currentUser={currentUser} onLoad={setNPreguntas}/></div>}
+        {tab==='banco'&&(
+          <div className={styles.tabContent}>
+            <div className={styles.bancoSubtabs}>
+              <button
+                className={[styles.bancoSubtab, bancoSubtab==='preguntas' ? styles.bancoSubtabActive : ''].join(' ')}
+                onClick={() => setBancoSubtab('preguntas')}
+              >
+                <BookIcon size={14} /> Preguntas {nPreguntas > 0 && <span className={styles.bancoSubtabCount}>{nPreguntas}</span>}
+              </button>
+              <button
+                className={[styles.bancoSubtab, bancoSubtab==='supuestos' ? styles.bancoSubtabActive : ''].join(' ')}
+                onClick={() => setBancoSubtab('supuestos')}
+              >
+                <FileText size={14} /> Supuestos prácticos {nSupuestos > 0 && <span className={styles.bancoSubtabCount}>{nSupuestos}</span>}
+              </button>
+            </div>
+            {bancoSubtab === 'preguntas'
+              ? <BancoPreguntas currentUser={currentUser} onLoad={setNPreguntas} />
+              : <BancoSupuestos currentUser={currentUser} />
+            }
+          </div>
+        )}
+        {tab==='examenes'&&<div className={styles.tabContent}><ProximosExamenes alumnos={alumnos} /></div>}
         {tab==='codigos'&&(
           <div className={styles.tabContent}>
             {inviteCodes.length===0?(<div className={styles.emptyState}><Key size={32} strokeWidth={1.2}/><p>No hay códigos. Pulsa "Nuevo código" para crear uno.</p></div>):(<div className={styles.codesList}>{inviteCodes.map(code=><CodigoCard key={code.id} code={code} onCopy={handleCopy} copied={copied}/>)}</div>)}

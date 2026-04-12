@@ -2,42 +2,15 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import type { CurrentUser, AlumnoConStats, StatsClase, InviteCode, Session } from '../types'
 
-// ── Candado en memoria contra race conditions en notificaciones ──────────────
-const _notifEnviadas = new Set<string>()
-
-function yaEnviadaHoy(cacheKey: string): boolean {
-  if (_notifEnviadas.has(cacheKey)) return true
-  if (localStorage.getItem(cacheKey)) return true
-  return false
-}
-
-function marcarEnviada(cacheKey: string): void {
-  _notifEnviadas.add(cacheKey)
-  try { localStorage.setItem(cacheKey, '1') } catch (_) {}
-}
-
 export function useProfesor(currentUser: CurrentUser | null) {
   const [alumnos,     setAlumnos]     = useState<AlumnoConStats[]>([])
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([])
-  const [allSessions, setAllSessions] = useState<Session[]>([])
+  const [allSessions, setAllSessions] = useState<{ user_id: string; score: number; played_at: string; created_at: string; mode_id: string }[]>([])
   const [loading,     setLoading]     = useState(true)
   const [error,       setError]       = useState<string | null>(null)
 
   const isProfesor = currentUser?.role === 'profesor'
   const academyId  = currentUser?.academy_id
-
-  // Limpieza de keys de localStorage con mas de 7 dias
-  useEffect(() => {
-    if (!currentUser?.id) return
-    const hace7dias = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10)
-    const prefijos  = [`notif_inactivo_${currentUser.id}_`, `notif_expira_${currentUser.id}_`]
-    Object.keys(localStorage).forEach(key => {
-      const prefijo = prefijos.find(p => key.startsWith(p))
-      if (!prefijo) return
-      const fecha = key.replace(prefijo, '')
-      if (fecha < hace7dias) localStorage.removeItem(key)
-    })
-  }, [currentUser?.id])
 
   useEffect(() => {
     if (!isProfesor || !academyId) return
@@ -127,6 +100,7 @@ export function useProfesor(currentUser: CurrentUser | null) {
 
         const ultimaSesion    = sesionesAlumno[0]?.created_at ?? null
         const diasInactivo    = ultimaSesion ? Math.floor((now.getTime() - new Date(ultimaSesion).getTime()) / 86400000) : null
+        const diasDesdeRegistro = Math.floor((now.getTime() - new Date(alumno.created_at).getTime()) / 86400000)
         const accessUntil     = alumno.access_until ? new Date(alumno.access_until) : null
         const accesoExpirado  = accessUntil ? accessUntil < now : false
         const diasParaExpirar = accessUntil ? Math.ceil((accessUntil.getTime() - now.getTime()) / 86400000) : null
@@ -146,7 +120,7 @@ export function useProfesor(currentUser: CurrentUser | null) {
           racha,
           ultimaSesion,
           diasInactivo,
-          enRiesgo:        !accesoExpirado && diasInactivo !== null && diasInactivo >= 3,
+          enRiesgo:        !accesoExpirado && (diasInactivo !== null ? diasInactivo >= 3 : diasDesdeRegistro >= 3),
           accessUntil:     alumno.access_until,
           accesoExpirado,
           diasParaExpirar,
@@ -154,51 +128,40 @@ export function useProfesor(currentUser: CurrentUser | null) {
         }
       })
 
-      setAllSessions(typedSessions as unknown as Session[])
+      setAllSessions(typedSessions)
       setAlumnos(alumnosConStats)
       setLoading(false)
 
-      const hoy = today
-
-      // Notificacion: alumnos en riesgo
+      // Notificaciones — el índice único en BD evita duplicados automáticamente
       try {
         const enRiesgo = alumnosConStats.filter(a => a.enRiesgo)
         if (enRiesgo.length > 0 && currentUser?.id) {
-          const cacheKey = `notif_inactivo_${currentUser.id}_${hoy}`
-          if (!yaEnviadaHoy(cacheKey)) {
-            marcarEnviada(cacheKey)
-            const nombres = enRiesgo.slice(0, 3).map(a => a.username).join(', ')
-            const resto   = enRiesgo.length > 3 ? ` y ${enRiesgo.length - 3} mas` : ''
-            await supabase.from('notifications').insert({
-              user_id: currentUser.id,
-              type:    'alumno_inactivo',
-              title:   `${enRiesgo.length} alumno${enRiesgo.length !== 1 ? 's' : ''} sin actividad`,
-              body:    `${nombres}${resto} llevan mas de 3 dias sin estudiar.`,
-              link:    '/profesor',
-            })
-          }
+          const nombres = enRiesgo.slice(0, 3).map(a => a.username).join(', ')
+          const resto   = enRiesgo.length > 3 ? ` y ${enRiesgo.length - 3} mas` : ''
+          await supabase.from('notifications').insert({
+            user_id: currentUser.id,
+            type:    'alumno_inactivo',
+            title:   `${enRiesgo.length} alumno${enRiesgo.length !== 1 ? 's' : ''} sin actividad`,
+            body:    `${nombres}${resto} llevan mas de 3 dias sin estudiar.`,
+            link:    '/profesor',
+          })
         }
       } catch (_) {}
 
-      // Notificacion: alumnos con acceso proximo a expirar
       try {
         const porExpirar = alumnosConStats.filter(a => a.proximoAExpirar)
         if (porExpirar.length > 0 && currentUser?.id) {
-          const cacheKey = `notif_expira_${currentUser.id}_${hoy}`
-          if (!yaEnviadaHoy(cacheKey)) {
-            marcarEnviada(cacheKey)
-            const nombres = porExpirar.slice(0, 3).map(a =>
-              `${a.username} (${a.diasParaExpirar}d)`
-            ).join(', ')
-            const resto = porExpirar.length > 3 ? ` y ${porExpirar.length - 3} mas` : ''
-            await supabase.from('notifications').insert({
-              user_id: currentUser.id,
-              type:    'alumno_expira',
-              title:   `${porExpirar.length} alumno${porExpirar.length !== 1 ? 's' : ''} con acceso por expirar`,
-              body:    `${nombres}${resto}. Renueva su acceso antes de que expire.`,
-              link:    '/profesor',
-            })
-          }
+          const nombres = porExpirar.slice(0, 3).map(a =>
+            `${a.username} (${a.diasParaExpirar}d)`
+          ).join(', ')
+          const resto = porExpirar.length > 3 ? ` y ${porExpirar.length - 3} mas` : ''
+          await supabase.from('notifications').insert({
+            user_id: currentUser.id,
+            type:    'alumno_expira',
+            title:   `${porExpirar.length} alumno${porExpirar.length !== 1 ? 's' : ''} con acceso por expirar`,
+            body:    `${nombres}${resto}. Renueva su acceso antes de que expire.`,
+            link:    '/profesor',
+          })
         }
       } catch (_) {}
     }
@@ -225,30 +188,16 @@ export function useProfesor(currentUser: CurrentUser | null) {
       )
 
       if (porCaducar.length > 0 && currentUser?.id) {
-        const hoy = ahora.toISOString().slice(0, 10)
         for (const codigo of porCaducar) {
-          const cacheKey = `notif_codigo_${currentUser.id}_${codigo.code}_${hoy}`
-          if (!yaEnviadaHoy(cacheKey)) {
-            const { data: yaEnviada } = await supabase
-              .from('notifications').select('id')
-              .eq('user_id', currentUser.id)
-              .eq('type', 'codigo_caduca')
-              .like('body', `%${codigo.code}%`)
-              .gte('created_at', hoy + 'T00:00:00Z')
-              .maybeSingle()
-
-            if (!yaEnviada) {
-              marcarEnviada(cacheKey)
-              const horas = Math.ceil((new Date(codigo.expires_at).getTime() - ahora.getTime()) / 3600000)
-              await supabase.from('notifications').insert({
-                user_id: currentUser.id,
-                type:    'codigo_caduca',
-                title:   `El codigo ${codigo.code} caduca en ${horas}h`,
-                body:    `El codigo ${codigo.code} no ha sido usado y caduca pronto.`,
-                link:    '/profesor',
-              })
-            }
-          }
+          const horas = Math.ceil((new Date(codigo.expires_at).getTime() - ahora.getTime()) / 3600000)
+          // El índice único en BD evita duplicados automáticamente
+          await supabase.from('notifications').insert({
+            user_id: currentUser.id,
+            type:    'codigo_caduca',
+            title:   `El codigo ${codigo.code} caduca en ${horas}h`,
+            body:    `El codigo ${codigo.code} no ha sido usado y caduca pronto.`,
+            link:    '/profesor',
+          })
         }
       }
     } catch (_) {}
@@ -321,6 +270,7 @@ export function useProfesor(currentUser: CurrentUser | null) {
       (alumnos.filter(a => a.notaMedia !== null).length || 1)
     ),
     mediaTemasLeidos: Math.round(alumnos.reduce((s, a) => s + a.temasLeidos, 0) / alumnos.length),
+    sesiones30d:      allSessions.filter(s => s.played_at >= new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)).length,
   } : null
 
   return { alumnos, inviteCodes, statsClase, allSessions, loading, error, generarCodigo, renovarAcceso, revocarAcceso, recargar: loadCodes }

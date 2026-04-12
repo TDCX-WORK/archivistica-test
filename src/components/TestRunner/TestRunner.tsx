@@ -102,6 +102,7 @@ interface TestRunnerProps {
   topicLabel:            string | null | undefined
   academyId:             string | null | undefined
   subjectId:             string | null | undefined
+  userId?:               string | null
   onGoHome:              () => void
   onRecordSession:       (modeId: string, correct: number, answered: number, elapsed: number) => void
   onRecordWrong:         (questionId: string, blockId: string | null) => void
@@ -112,7 +113,7 @@ interface TestRunnerProps {
 
 export default function TestRunner({
   modeId, modeLabel, topicId, topicLabel,
-  academyId, subjectId, onGoHome,
+  academyId, subjectId, userId, onGoHome,
   onRecordSession, onRecordWrong, onRecordCorrectReview,
   wrongAnswers = [], penalizacion = false,
 }: TestRunnerProps) {
@@ -302,6 +303,7 @@ export default function TestRunner({
       durationSecs={Math.round((Date.now() - startTimeRef.current) / 1000)}
       academyId={academyId}
       subjectId={subjectId}
+      userId={userId}
       onRecordWrong={onRecordWrong}
       wrongAnswers={wrongAnswers}
       blockMap={blockMap}

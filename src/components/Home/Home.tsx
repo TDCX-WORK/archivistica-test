@@ -382,11 +382,15 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
       if (sid) q = q.eq('subject_id', sid)
       const { data } = await q
       if (data?.length) {
-        setSupuestos((data as any[]).map(s => ({
+        type RawSup = {
+          slug: string; title: string; subtitle: string | null; scenario: string | null
+          supuesto_questions: { question: string; options: string[]; answer: number; explanation: string | null; position: number }[]
+        }
+        setSupuestos((data as RawSup[]).map(s => ({
           id: s.slug, title: s.title, subtitle: s.subtitle ?? '', scenario: s.scenario ?? '',
-          questions: ((s.supuesto_questions ?? []) as any[])
+          questions: (s.supuesto_questions ?? [])
             .sort((a, b) => a.position - b.position)
-            .map((q: any) => ({ question: q.question, options: q.options, answer: q.answer, explanation: q.explanation ?? '' }))
+            .map(q => ({ question: q.question, options: q.options, answer: q.answer, explanation: q.explanation ?? '' }))
         })))
       } else setSupuestos([])
     }
@@ -412,7 +416,7 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
   const xpNeeded      = nextLevelData ? nextLevelData.xpRequired - levelData.xpRequired : 1
   const levelPct      = nextLevelData ? Math.min(100, Math.round((xpInLevel / xpNeeded) * 100)) : 100
 
-  const regularModes = Object.values(modes).filter(m => !(m as any).practical)
+  const regularModes = Object.values(modes).filter(m => m.id !== 'simulacro')
 
   return (
     <div className={styles.page}>
@@ -452,6 +456,12 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
               <ModeButton icon={CreditCard} label="Flashcards"
                 desc={`Repaso rápido · ${totalQuestions} tarjetas`}
                 meta={{ color: '#7C3AED', bg: '#F5F3FF' }} onClick={() => onSelectMode('flashcards')} />
+              {currentUser?.examConfig && (
+                <ModeButton icon={GraduationCap} label="Simulacro Oficial"
+                  desc={`${currentUser.examConfig.test_questions} preguntas + supuesto práctico · Formato examen real`}
+                  meta={{ color: '#DC2626', bg: '#FEF2F2' }}
+                  onClick={() => onSelectMode('simulacro', 'Simulacro Oficial', currentUser.examConfig)} />
+              )}
             </div>
           </div>
         </div>

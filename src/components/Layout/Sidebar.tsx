@@ -62,14 +62,13 @@ export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout 
     <aside
       className={[
         styles.sidebar,
-        isSuperadmin ? styles.sidebarDark : '',
-        expanded      ? styles.sidebarExpanded : '',
+        expanded ? styles.sidebarExpanded : '',
       ].join(' ')}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className={[styles.logo, isSuperadmin ? styles.logoDark : ''].join(' ')}>
-        <div className={[styles.logoIcon, isSuperadmin ? styles.logoIconDark : ''].join(' ')}>
+      <div className={styles.logo}>
+        <div className={styles.logoIcon}>
           <BookOpen size={18} strokeWidth={1.8} />
         </div>
       </div>

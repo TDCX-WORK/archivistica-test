@@ -13,6 +13,7 @@ import {
 import { Ripple }              from '../../magicui/Ripple'
 import { AnimatedGridPattern } from '../../magicui/AnimatedGridPattern'
 import type { CurrentUser } from '../../../types'
+import ErrorState      from '../../ui/ErrorState'
 import styles from './DirectorPanel.module.css'
 
 const MASCOTAS: Record<string, { emoji: string; nombre: string }> = {
@@ -842,7 +843,7 @@ export default function DirectorPanel({ currentUser }: { currentUser: CurrentUse
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!tab || !contentRef.current || window.innerWidth > 900) return
+    if (!tab || !contentRef.current) return
     setTimeout(() => contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80)
   }, [tab])
 
@@ -862,7 +863,7 @@ export default function DirectorPanel({ currentUser }: { currentUser: CurrentUse
   }, [updateStudentProfile])
 
   if (loading || loadingProfiles) return <div className={styles.state}><RefreshCw size={22} className={styles.spinner} /><p>Cargando datos…</p></div>
-  if (error)  return <div className={styles.state}><AlertTriangle size={22} /><p>{error}</p></div>
+  if (error)  return <ErrorState message={error ?? 'Error cargando los datos del panel.'} onRetry={() => window.location.reload()} />
   if (!stats) return null
 
   const typedStats = stats as unknown as Stats

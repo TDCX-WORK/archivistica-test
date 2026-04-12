@@ -320,40 +320,4 @@
   .sidebarExpanded .footer { display: none; }
 }
 
-/* ── SUPERADMIN DARK SIDEBAR ─────────────────────────── */
-.sidebarDark {
-  background: rgba(8,12,16,0.97) !important;
-  border-right: 1px solid rgba(93,228,255,0.12) !important;
-  border-radius: 0 20px 20px 0 !important;
-  box-shadow:
-    2px 0 0 rgba(93,228,255,0.25),
-    4px 0 28px rgba(93,228,255,0.12),
-    2px 0 12px rgba(0,0,0,0.4) !important;
-}
-.sidebarDark.sidebarExpanded {
-  box-shadow:
-    2px 0 0 rgba(93,228,255,0.4),
-    6px 0 36px rgba(93,228,255,0.2),
-    2px 0 14px rgba(0,0,0,0.5) !important;
-}
-
-.logoDark { border-bottom: 1px solid rgba(93,228,255,0.08) !important; }
-
-.logoIconDark {
-  background: rgba(93,228,255,0.1) !important;
-  border: 1px solid rgba(93,228,255,0.2) !important;
-  box-shadow: 0 0 12px rgba(93,228,255,0.15) !important;
-  color: #5de4ff !important;
-}
-
-.sidebarDark .navItem       { color: rgba(232,244,248,0.3) !important; }
-.sidebarDark .navItem:hover { background: rgba(93,228,255,0.07) !important; color: #5de4ff !important; }
-.sidebarDark .navActive     {
-  background: rgba(93,228,255,0.12) !important;
-  color: #5de4ff !important;
-  box-shadow: 0 0 16px rgba(93,228,255,0.15) !important;
-}
-.sidebarDark .footer        { border-top: 1px solid rgba(93,228,255,0.08) !important; }
-.sidebarDark .avatar        { background: rgba(93,228,255,0.1) !important; color: #5de4ff !important; border-color: rgba(93,228,255,0.2) !important; }
-.sidebarDark .logoutBtn     { color: rgba(232,244,248,0.25) !important; }
-.sidebarDark .logoutBtn:hover { color: #EF4444 !important; background: rgba(239,68,68,0.1) !important; }
+/* Dark sidebar classes removed — superadmin now uses light theme */

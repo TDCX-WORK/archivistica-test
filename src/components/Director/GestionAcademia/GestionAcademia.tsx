@@ -240,7 +240,7 @@ interface CodigoInvitacion {
   id:           string
   code:         string
   subject_id:   string | null
-  duration_days: number
+  access_months: number
   used_by:      string | null
   expires_at:   string
   created_at:   string | null
@@ -250,7 +250,7 @@ function SeccionCodigos({ academyId, subjects }: { academyId: string | null | un
   const [codigos,   setCodigos]   = useState<CodigoInvitacion[]>([])
   const [loading,   setLoading]   = useState(true)
   const [creando,   setCreando]   = useState(false)
-  const [form,      setForm]      = useState({ subject_id: '', duracion: '365' })
+  const [form,      setForm]      = useState({ subject_id: '', meses: '12' })
   const [copied,    setCopied]    = useState<string | null>(null)
   const [generando, setGenerando] = useState(false)
 
@@ -258,7 +258,7 @@ function SeccionCodigos({ academyId, subjects }: { academyId: string | null | un
     if (!academyId) return
     setLoading(true)
     const { data } = await supabase.from('invite_codes')
-      .select('id, code, subject_id, duration_days, used_by, expires_at, created_at')
+      .select('id, code, subject_id, access_months, used_by, expires_at, created_at')
       .eq('academy_id', academyId).order('created_at', { ascending: false })
     setCodigos((data ?? []) as CodigoInvitacion[])
     setLoading(false)
@@ -269,16 +269,19 @@ function SeccionCodigos({ academyId, subjects }: { academyId: string | null | un
   const generarCodigo = async () => {
     if (!form.subject_id || !academyId) return
     setGenerando(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setGenerando(false); return }
     const code    = Math.random().toString(36).slice(2, 8).toUpperCase()
     const expires = new Date(); expires.setDate(expires.getDate() + 30)
     const { error } = await supabase.from('invite_codes').insert({
       academy_id:    academyId,
       subject_id:    form.subject_id,
+      created_by:    user.id,
       code,
-      duration_days: parseInt(form.duracion),
+      access_months: parseInt(form.meses),
       expires_at:    expires.toISOString(),
     })
-    if (!error) { await load(); setCreando(false); setForm({ subject_id: '', duracion: '365' }) }
+    if (!error) { await load(); setCreando(false); setForm({ subject_id: '', meses: '12' }) }
     setGenerando(false)
   }
 
@@ -309,12 +312,12 @@ function SeccionCodigos({ academyId, subjects }: { academyId: string | null | un
             </div>
             <div className={styles.formField}>
               <label className={styles.formLabel}>Duración del acceso</label>
-              <select className={styles.formSelect} value={form.duracion} onChange={e => setForm(p => ({ ...p, duracion: e.target.value }))}>
-                <option value="30">30 días</option>
-                <option value="90">3 meses</option>
-                <option value="180">6 meses</option>
-                <option value="365">1 año</option>
-                <option value="730">2 años</option>
+              <select className={styles.formSelect} value={form.meses} onChange={e => setForm(p => ({ ...p, meses: e.target.value }))}>
+                <option value="1">1 mes</option>
+                <option value="3">3 meses</option>
+                <option value="6">6 meses</option>
+                <option value="12">1 año</option>
+                <option value="24">2 años</option>
               </select>
             </div>
             <div className={styles.crearBtns}>
@@ -352,7 +355,7 @@ function SeccionCodigos({ academyId, subjects }: { academyId: string | null | un
                 </div>
                 <div className={styles.codigoInfo}>
                   {sub && <span style={{ color:sub.color, fontWeight:700, fontSize:'0.72rem' }}>{sub.name}</span>}
-                  <span className={styles.muted}>{c.duration_days}d de acceso</span>
+                  <span className={styles.muted}>{c.access_months} mes{c.access_months !== 1 ? 'es' : ''} de acceso</span>
                   <span className={[styles.estadoChip, isUsado?styles.estadoUsado:isExpired?styles.estadoCaducado:styles.estadoActivo].join(' ')}>
                     {isUsado ? '✓ Usado' : isExpired ? 'Caducado' : 'Activo'}
                   </span>

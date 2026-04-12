@@ -177,40 +177,76 @@ interface HighlightableContentProps {
 }
 
 function HighlightableContent({ topic, highlights, onAdd, onRemove, highlightMode }: HighlightableContentProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef    = useRef<HTMLDivElement>(null)
   const [tooltip, setTooltip] = useState<Tooltip | null>(null)
-  const pendingRef = useRef<string | null>(null)
+  const pendingRef      = useRef<string | null>(null)
+  const lastTouchY      = useRef<number | null>(null)
 
-  const handleSelectionEnd = useCallback((clientY: number | null = null) => {
+  // Función central que procesa la selección — usada por todos los eventos
+  const processSelection = useCallback((clientY: number | null = null) => {
     if (!highlightMode) return
-    const process = () => {
-      const sel = window.getSelection()
-      if (!sel || sel.isCollapsed) return
-      const selectedText = sel.toString().trim()
-      if (!selectedText || selectedText.length < 2) return
-      const range         = sel.getRangeAt(0)
-      const container     = containerRef.current
-      if (!container?.contains(range.commonAncestorContainer)) return
-      const rect          = range.getBoundingClientRect()
-      const containerRect = container.getBoundingClientRect()
-      pendingRef.current  = selectedText
-      const tooltipY = clientY != null
-        ? clientY - containerRect.top - 68
-        : rect.top - containerRect.top - 58
-      setTooltip({
-        x: Math.max(70, Math.min(rect.left - containerRect.left + rect.width / 2, containerRect.width - 70)),
-        y: tooltipY,
-        text: selectedText,
-      })
-    }
-    setTimeout(process, 30)
+    const sel = window.getSelection()
+    if (!sel || sel.isCollapsed) { setTooltip(null); return }
+    const selectedText = sel.toString().trim()
+    if (!selectedText || selectedText.length < 2) { setTooltip(null); return }
+    const range     = sel.getRangeAt(0)
+    const container = containerRef.current
+    if (!container?.contains(range.commonAncestorContainer)) return
+    const rect          = range.getBoundingClientRect()
+    const containerRect = container.getBoundingClientRect()
+    pendingRef.current  = selectedText
+    const y = clientY != null
+      ? clientY - containerRect.top - 68
+      : rect.top - containerRect.top - 58
+    setTooltip({
+      x: Math.max(70, Math.min(rect.left - containerRect.left + rect.width / 2, containerRect.width - 70)),
+      y,
+      text: selectedText,
+    })
   }, [highlightMode])
 
-  const handleMouseUp  = useCallback(() => { handleSelectionEnd() }, [handleSelectionEnd])
+  // Mouse (escritorio)
+  const handleMouseUp = useCallback(() => {
+    setTimeout(() => processSelection(), 30)
+  }, [processSelection])
+
+  // Touch — guardamos clientY en touchStart para usarlo en touchEnd
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    lastTouchY.current = e.touches[0]?.clientY ?? null
+  }, [])
+
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    const touch = e.changedTouches[0]
-    handleSelectionEnd(touch?.clientY ?? null)
-  }, [handleSelectionEnd])
+    const clientY = e.changedTouches[0]?.clientY ?? lastTouchY.current
+    // Delay mayor en Android para esperar a que la selección se estabilice
+    setTimeout(() => processSelection(clientY), 100)
+  }, [processSelection])
+
+  // selectionchange — evento más fiable en Android Chrome
+  // Se dispara cuando la selección cambia y se estabiliza
+  useEffect(() => {
+    if (!highlightMode) return
+    let timer: ReturnType<typeof setTimeout>
+    const handleSelectionChange = () => {
+      clearTimeout(timer)
+      // Delay para dejar que Android termine de procesar la selección
+      timer = setTimeout(() => processSelection(lastTouchY.current), 150)
+    }
+    document.addEventListener('selectionchange', handleSelectionChange)
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange)
+      clearTimeout(timer)
+    }
+  }, [highlightMode, processSelection])
+
+  // Suprimir el menú contextual nativo de Android cuando estamos en modo subrayado
+  useEffect(() => {
+    if (!highlightMode) return
+    const container = containerRef.current
+    if (!container) return
+    const suppressContextMenu = (e: Event) => e.preventDefault()
+    container.addEventListener('contextmenu', suppressContextMenu)
+    return () => container.removeEventListener('contextmenu', suppressContextMenu)
+  }, [highlightMode])
 
   const handlePickColor = useCallback(async (colorEntry: typeof HIGHLIGHT_COLORS[number], e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault(); e.stopPropagation()
@@ -225,6 +261,7 @@ function HighlightableContent({ topic, highlights, onAdd, onRemove, highlightMod
   useEffect(() => {
     setTooltip(null)
     pendingRef.current = null
+    lastTouchY.current = null
     window.getSelection()?.removeAllRanges()
   }, [highlightMode, topic.id])
 
@@ -307,6 +344,7 @@ function HighlightableContent({ topic, highlights, onAdd, onRemove, highlightMod
       ref={containerRef}
       className={[styles.highlightableContent, highlightMode ? styles.highlightModeActive : ''].join(' ')}
       onMouseUp={handleMouseUp}
+      onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
       {tooltip && highlightMode && (
@@ -438,12 +476,14 @@ function ReadMode({
 
   useEffect(() => { setHL(false) }, [idx])
   useEffect(() => { scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }) }, [idx])
-  useEffect(() => { if (!isRead) onToggleRead(topic.id, block.id) }, [idx]) // eslint-disable-line
 
   return (
     <div className={styles.readOverlay}>
       <div className={styles.readTopBar}>
-        <button className={styles.readBackBtn} onClick={onClose}>
+        <button className={styles.readBackBtn} onClick={() => {
+          if (!isRead) onToggleRead(topic.id, block.id)
+          onClose()
+        }}>
           <ArrowLeft size={16} /> <span>Volver</span>
         </button>
         <div className={styles.readProgressDots}>
@@ -503,11 +543,17 @@ function ReadMode({
       </div>
 
       <div className={styles.readBottomNav}>
-        <button className={styles.readNavBtn} onClick={() => setIdx(i => Math.max(0, i-1))} disabled={idx===0}>
+        <button className={styles.readNavBtn} onClick={() => {
+          if (!isRead) onToggleRead(topic.id, block.id)
+          setIdx(i => Math.max(0, i-1))
+        }} disabled={idx===0}>
           <ChevronLeft size={16} /> Anterior
         </button>
         <span className={styles.readNavLabel}>{idx+1} / {totalTopics}</span>
-        <button className={styles.readNavBtn} onClick={() => setIdx(i => Math.min(totalTopics-1, i+1))} disabled={idx===totalTopics-1}>
+        <button className={styles.readNavBtn} onClick={() => {
+          if (!isRead) onToggleRead(topic.id, block.id)
+          setIdx(i => Math.min(totalTopics-1, i+1))
+        }} disabled={idx===totalTopics-1}>
           Siguiente <ChevronRight size={16} />
         </button>
       </div>

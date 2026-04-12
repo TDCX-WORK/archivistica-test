@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { TrendingUp, TrendingDown, Minus, CalendarDays, X, ChevronDown } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
-import type { AlumnoConStats, Session } from '../../../types'
+import type { AlumnoConStats } from '../../../types'
 import styles from './ClaseEvolucionChart.module.css'
 
 const MODOS_BASE = [
@@ -28,13 +28,18 @@ function scoreColor(s: number): string {
 
 interface Bloque { id: string; label: string; color: string; position: number }
 
-interface SessionConUser extends Session {
-  user_id: string
+// Solo los campos que el gráfico realmente usa
+interface SessionParaGrafico {
+  user_id:    string
+  score:      number
+  played_at:  string
+  created_at: string
+  mode_id:    string
 }
 
 interface ClaseEvolucionChartProps {
   alumnos:    AlumnoConStats[]
-  sessions:   SessionConUser[]
+  sessions:   SessionParaGrafico[]
   academyId:  string | null | undefined
   subjectId:  string | null | undefined
 }

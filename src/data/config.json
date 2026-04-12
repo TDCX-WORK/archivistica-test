@@ -18,10 +18,18 @@
     },
     "exam": {
       "id": "exam",
-      "label": "Simulacro Oficial",
+      "label": "Test Intensivo",
       "questions": 100,
       "timeMinutes": 120,
-      "description": "100 preguntas · 120 min · Formato examen real",
+      "description": "100 preguntas · 120 min · Alta dificultad",
+      "color": "ink"
+    },
+    "simulacro": {
+      "id": "simulacro",
+      "label": "Simulacro Oficial",
+      "questions": 90,
+      "timeMinutes": 90,
+      "description": "90 preguntas + supuesto práctico · Formato examen real UNED",
       "color": "ink"
     }
   }

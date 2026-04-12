@@ -57,12 +57,12 @@ function KpiCard({ icon: Icon, label, value, color, sub, dark, delay = 0 }: {
       {dark && <div className={styles.kpiOrb} />}
       <div className={styles.kpiGlow} />
       <div className={styles.kpiTop}>
-        <div className={styles.kpiIconWrap} style={{ background: dark ? 'rgba(255,255,255,0.08)' : color + '18' }}>
-          <Icon size={15} style={{ color }} />
+        <div className={styles.kpiIconWrap} style={{ background: color + '18', border: `1px solid ${color}30` }}>
+          <Icon size={16} style={{ color }} />
         </div>
       </div>
-      <div className={styles.kpiVal} style={{ color: dark ? (color === '#D7FE03' ? color : 'white') : 'var(--ink)' }}>{disp}</div>
-      <div className={styles.kpiLabel} style={{ color: dark ? 'rgba(255,255,255,0.45)' : 'var(--ink-muted)' }}>{label}</div>
+      <div className={styles.kpiVal} style={{ color: 'var(--ink)' }}>{disp}</div>
+      <div className={styles.kpiLabel}>{label}</div>
       {sub && <div className={styles.kpiSub}>{sub}</div>}
     </motion.div>
   )
@@ -236,6 +236,7 @@ function UsuarioRow({ user, sesiones, emails, extended, expanded, onToggle, onRe
 
       <motion.div layout className={[
         styles.userCard2,
+        expanded ? styles.userCard2Open : '',
         expirado ? styles.userCard2Expired : '',
         banned   ? styles.userCard2Banned  : '',
         isAlumno && (diasInactivo ?? 0) > 5 && !expirado ? styles.userCard2Risk : '',
@@ -484,15 +485,15 @@ export default function AcademiaDetalle({ academia, onBack }: { academia: any; o
               <KpiCard icon={Users}         label="Alumnos"          value={totalAlumnos}    color="#0EA5E9" delay={0.05} />
               <KpiCard icon={GraduationCap} label="Profesores"       value={totalProfes}     color="#7C3AED" delay={0.1}  />
               <KpiCard icon={Building2}     label="Directores"       value={directores.length} color="#10B981" delay={0.15} />
-              <KpiCard icon={Zap}           label="Activos 7d"       value={activos}         color="#D7FE03" delay={0.2} dark />
+              <KpiCard icon={Zap}           label="Activos 7d"       value={activos}         color="#5de4ff" delay={0.2} />
               <KpiCard icon={BarChart2}     label="Nota global"      value={notaGlobal !== null ? `${notaGlobal}%` : '—'} color={scoreColor(notaGlobal)} delay={0.25} />
               <KpiCard icon={TrendingUp}    label="Sesiones totales" value={sesiones.length} color="#F59E0B" delay={0.3} />
             </div>
 
             <motion.div className={styles.bentoRow} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-              <div className={styles.bentoCardDark}>
-                <div className={styles.bentoOrb} />
-                <div className={styles.bentoDarkLabel}>Plan activo</div>
+              {/* Card 1 — Plan activo */}
+              <div className={styles.bentoCard}>
+                <div className={styles.bentoCardLabel}>Plan activo</div>
                 <div className={styles.bentoPlanName}>{plan.charAt(0).toUpperCase() + plan.slice(1)}</div>
                 {academia.price_monthly > 0 && (
                   <div className={styles.bentoPlanPrice}>
@@ -501,37 +502,44 @@ export default function AcademiaDetalle({ academia, onBack }: { academia: any; o
                     <span className={styles.bentoPlanPricePer}>/mes</span>
                   </div>
                 )}
-                <div className={styles.bentoPayStatus} style={{ color: academia.payment_status === 'active' ? '#D7FE03' : academia.payment_status === 'overdue' ? '#EF4444' : '#F59E0B' }}>
-                  <span className={styles.bentoPayDot} style={{ background: academia.payment_status === 'active' ? '#D7FE03' : academia.payment_status === 'overdue' ? '#EF4444' : '#F59E0B' }} />
+                <div className={styles.bentoPayStatus} style={{ color: academia.payment_status === 'active' ? '#059669' : academia.payment_status === 'overdue' ? '#DC2626' : '#D97706' }}>
+                  <span className={styles.bentoPayDot} style={{ background: academia.payment_status === 'active' ? '#059669' : academia.payment_status === 'overdue' ? '#DC2626' : '#D97706' }} />
                   {academia.payment_status === 'active' ? 'Al día' : academia.payment_status === 'overdue' ? 'Moroso' : 'Pendiente'}
                 </div>
                 {academia.contract_renews && <div className={styles.bentoRenew}>Renueva: {new Date(academia.contract_renews).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' })}</div>}
               </div>
 
-              {(academia.billing_name || academia.billing_nif) && (
-                <div className={styles.bentoCard}>
-                  <div className={styles.bentoCardLabel}>Facturación</div>
-                  {academia.billing_name    && <div className={styles.bentoCardBig}>{academia.billing_name}</div>}
-                  {academia.billing_nif     && <div className={styles.bentoCardSub}>{academia.billing_nif}</div>}
-                  {academia.billing_address && <div className={styles.bentoCardSub}>{academia.billing_address}</div>}
-                  {academia.payment_method  && <div className={styles.bentoCardChip}>{academia.payment_method}</div>}
-                </div>
-              )}
-
-              {(academia.contact_email || academia.contact_phone || academia.city) && (
-                <div className={styles.bentoCard}>
-                  <div className={styles.bentoCardLabel}>Contacto</div>
-                  {academia.contact_email && <a href={`mailto:${academia.contact_email}`} className={styles.bentoCardLink}>{academia.contact_email}</a>}
-                  {academia.contact_phone && <div className={styles.bentoCardBig}>{academia.contact_phone}</div>}
-                  {academia.city          && <div className={styles.bentoCardSub}>{academia.city}{academia.province ? `, ${academia.province}` : ''}</div>}
-                </div>
-              )}
-
+              {/* Card 2 — Contacto */}
               <div className={styles.bentoCard}>
-                <div className={styles.bentoCardLabel}>Resumen de actividad</div>
+                <div className={styles.bentoCardLabel}>Contacto</div>
+                {academia.contact_email
+                  ? <a href={`mailto:${academia.contact_email}`} className={styles.bentoCardLink}>{academia.contact_email}</a>
+                  : <div className={styles.bentoCardEmpty}>Sin email</div>}
+                {academia.contact_phone
+                  ? <div className={styles.bentoCardBig}>{academia.contact_phone}</div>
+                  : <div className={styles.bentoCardEmpty}>Sin teléfono</div>}
+                {academia.city
+                  ? <div className={styles.bentoCardSub}>{academia.city}{academia.province ? `, ${academia.province}` : ''}</div>
+                  : <div className={styles.bentoCardEmpty}>Sin ciudad</div>}
+              </div>
+
+              {/* Card 3 — Facturación */}
+              <div className={styles.bentoCard}>
+                <div className={styles.bentoCardLabel}>Facturación</div>
+                {academia.billing_name
+                  ? <div className={styles.bentoCardBig}>{academia.billing_name}</div>
+                  : <div className={styles.bentoCardEmpty}>Sin razón social</div>}
+                {academia.billing_nif     && <div className={styles.bentoCardSub}>{academia.billing_nif}</div>}
+                {academia.billing_address && <div className={styles.bentoCardSub}>{academia.billing_address}</div>}
+                {academia.payment_method  && <div className={styles.bentoCardChip}>{academia.payment_method}</div>}
+              </div>
+
+              {/* Card 4 — Actividad */}
+              <div className={styles.bentoCard}>
+                <div className={styles.bentoCardLabel}>Actividad</div>
                 <div className={styles.bentoStatRow}>
                   <div className={styles.bentoStatItem}><span className={styles.bentoStatNum}>{totalAlumnos}</span><span className={styles.bentoStatLabel}>alumnos</span></div>
-                  <div className={styles.bentoStatItem}><span className={styles.bentoStatNum} style={{ color: '#D7FE03' }}>{activos}</span><span className={styles.bentoStatLabel}>activos 7d</span></div>
+                  <div className={styles.bentoStatItem}><span className={styles.bentoStatNum} style={{ color: '#5de4ff' }}>{activos}</span><span className={styles.bentoStatLabel}>activos</span></div>
                   <div className={styles.bentoStatItem}><span className={styles.bentoStatNum}>{sesiones.length}</span><span className={styles.bentoStatLabel}>sesiones</span></div>
                 </div>
                 {notaGlobal !== null && <div className={styles.bentoNota} style={{ color: scoreColor(notaGlobal) }}>{notaGlobal}% nota media global</div>}

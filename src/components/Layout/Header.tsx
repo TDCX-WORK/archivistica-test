@@ -67,7 +67,7 @@ export default function Header({
 
   return (
     <>
-      <header className={[styles.header, isSuperadmin ? styles.headerDark : ''].join(' ')}>
+      <header className={styles.header}>
         {/* Left */}
         <div className={styles.left}>
           {inTest ? (
@@ -99,9 +99,9 @@ export default function Header({
           </div>
         )}
         {!inTest && isSuperadmin && (
-          <div className={styles.centerDark}>
-            <span className={styles.centerDarkTitle}>FrostFox Academy</span>
-            <span className={styles.centerDarkSub}>Control Center</span>
+          <div className={styles.center}>
+            <span className={styles.centerTitle}>FrostFox Academy</span>
+            <span className={styles.centerSub}>Control Center</span>
           </div>
         )}
 
@@ -121,7 +121,7 @@ export default function Header({
               <NotificationBell
                 currentUser={currentUser}
                 onNavigate={onNavigate}
-                isDark={isSuperadmin}
+                isDark={false}
               />
 
               <button

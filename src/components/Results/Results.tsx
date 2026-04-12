@@ -39,10 +39,11 @@ function CircleGauge({ pct, color }: { pct: number; color: string }) {
   )
 }
 
-function ComparativaClase({ score, academyId, subjectId }: {
+function ComparativaClase({ score, academyId, subjectId, userId }: {
   score:      number
   academyId:  string | null | undefined
   subjectId:  string | null | undefined
+  userId?:    string | null
 }) {
   const [mediaClase, setMediaClase] = useState<number | null>(null)
   const [loading,    setLoading]    = useState(true)
@@ -53,19 +54,27 @@ function ComparativaClase({ score, academyId, subjectId }: {
       const hace30 = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
       let q = supabase
         .from('sessions')
-        .select('score')
+        .select('score, user_id')
         .eq('academy_id', academyId)
         .gte('played_at', hace30)
       if (subjectId) q = q.eq('subject_id', subjectId)
+      if (userId)    q = q.neq('user_id', userId)
       const { data } = await q
-      if (data && data.length > 1) {
-        const media = Math.round((data as { score: number }[]).reduce((s, x) => s + x.score, 0) / data.length)
-        setMediaClase(media)
+      if (data && data.length > 0) {
+        const porAlumno: Record<string, number[]> = {}
+        for (const s of data as { score: number; user_id: string }[]) {
+          if (!porAlumno[s.user_id]) porAlumno[s.user_id] = []
+          porAlumno[s.user_id]!.push(s.score)
+        }
+        const medias = Object.values(porAlumno).map(sc => sc.reduce((a, b) => a + b, 0) / sc.length)
+        if (medias.length > 0) {
+          setMediaClase(Math.round(medias.reduce((a, b) => a + b, 0) / medias.length))
+        }
       }
       setLoading(false)
     }
     fetch30d()
-  }, [academyId, subjectId])
+  }, [academyId, subjectId, userId])
 
   if (loading || mediaClase === null) return null
 
@@ -158,6 +167,7 @@ interface ResultsProps {
   durationSecs:    number
   academyId?:      string | null
   subjectId?:      string | null
+  userId?:         string | null
   onRecordWrong?:  (questionId: string, blockId: string | null) => void
   wrongAnswers?:   WrongAnswer[]
   blockMap?:       Record<string, BlockInfo>
@@ -165,7 +175,7 @@ interface ResultsProps {
 
 export default function Results({
   questions, answers, onGoHome, onRepeat, durationSecs,
-  academyId, subjectId, onRecordWrong, wrongAnswers = [],
+  academyId, subjectId, userId, onRecordWrong, wrongAnswers = [],
   blockMap = {},
 }: ResultsProps) {
   const [showFails,   setShowFails]   = useState(false)
@@ -211,7 +221,7 @@ export default function Results({
         </h2>
         <p className={styles.scoreDesc}>{correct} correctas de {questions.length} preguntas</p>
 
-        <ComparativaClase score={score} academyId={academyId} subjectId={subjectId} />
+        <ComparativaClase score={score} academyId={academyId} subjectId={subjectId} userId={userId} />
 
         <div className={styles.statsRow}>
           <div className={styles.stat}>

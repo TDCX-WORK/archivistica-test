@@ -7,9 +7,10 @@ import {
   AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid
 } from 'recharts'
-import { supabase }   from '../../lib/supabase'
-import ErrorState     from '../ui/ErrorState'
-import { useContent } from '../../hooks/useContent'
+import { supabase }        from '../../lib/supabase'
+import ErrorState          from '../ui/ErrorState'
+import { useContent }      from '../../hooks/useContent'
+import { calcularRacha }   from '../../lib/helpers'
 import type { CurrentUser, WrongAnswer, Session } from '../../types'
 import type { useProgress } from '../../hooks/useProgress'
 import styles from './Stats.module.css'
@@ -279,18 +280,20 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
   const avgScore       = totalSessions ? Math.round(sessions.reduce((s, x) => s + (x.score ?? 0), 0) / totalSessions) : 0
   const globalPct      = totalQuestions ? Math.round((totalCorrect / totalQuestions) * 100) : 0
 
-  const sortedSessions = [...sessions].sort((a, b) => new Date(a.played_at).getTime() - new Date(b.played_at).getTime())
-  let currentStreak = 0, bestStreak = 0, tmp = 0
+  const MODOS_REPASO = ['quick_review', 'review_due', 'all_fails']
+  const sortedSessions = [...sessions]
+    .filter(s => !MODOS_REPASO.includes(s.mode_id))
+    .sort((a, b) => new Date(a.played_at).getTime() - new Date(b.played_at).getTime())
   const dates = [...new Set(sortedSessions.map(s => s.played_at.split('T')[0] ?? s.played_at))]
-  for (let i = dates.length - 1; i >= 0; i--) {
-    const d        = new Date(dates[i]!)
-    const expected = new Date(); expected.setDate(expected.getDate() - (dates.length - 1 - i))
-    if (d.toISOString().split('T')[0] === expected.toISOString().split('T')[0]) {
-      tmp++; if (i === dates.length - 1) currentStreak = tmp
-    } else break
-  }
+
+  // Racha actual — usa la misma función que Inicio para que sean siempre iguales
+  const currentStreak = calcularRacha(dates)
+
+  // Mejor racha histórica
+  let bestStreak = 0, tmp = 0
   for (let i = 0; i < dates.length; i++) {
-    tmp++; bestStreak = Math.max(bestStreak, tmp)
+    tmp++
+    bestStreak = Math.max(bestStreak, tmp)
     if (i < dates.length - 1) {
       const diff = (new Date(dates[i + 1]!).getTime() - new Date(dates[i]!).getTime()) / (1000 * 60 * 60 * 24)
       if (diff > 1) tmp = 0

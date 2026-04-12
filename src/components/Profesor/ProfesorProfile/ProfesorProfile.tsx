@@ -193,7 +193,7 @@ function TabPlan({ currentUser, statsClase }: { currentUser: CurrentUser | null;
           <div className={styles.statCard}><Users    size={16} className={styles.statIcon} style={{ color: '#0891B2' }} /><span className={styles.statVal}>{statsClase.totalAlumnos ?? 0}</span><span className={styles.statLabel}>Alumnos</span></div>
           <div className={styles.statCard}><Zap      size={16} className={styles.statIcon} style={{ color: '#059669' }} /><span className={styles.statVal}>{statsClase.alumnosActivos}</span><span className={styles.statLabel}>Activos 7d</span></div>
           <div className={styles.statCard}><BarChart2 size={16} className={styles.statIcon} style={{ color: '#7C3AED' }} /><span className={styles.statVal}>{statsClase.notaMediaClase !== null ? `${statsClase.notaMediaClase}%` : '—'}</span><span className={styles.statLabel}>Nota media</span></div>
-          <div className={styles.statCard}><CalendarDays size={16} className={styles.statIcon} style={{ color: '#D97706' }} /><span className={styles.statVal}>{(statsClase as any).sesiones30d ?? 0}</span></div>
+          <div className={styles.statCard}><CalendarDays size={16} className={styles.statIcon} style={{ color: '#D97706' }} /><span className={styles.statVal}>{statsClase.sesiones30d ?? 0}</span><span className={styles.statLabel}>Tests 30d</span></div>
         </div>
       )}
 

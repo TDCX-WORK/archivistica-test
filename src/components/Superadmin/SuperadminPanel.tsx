@@ -122,6 +122,7 @@ interface AcademiaFormData {
   city: string; province: string; billing_name: string; billing_nif: string
   billing_address: string; price_monthly: string; payment_method: string
   payment_status: string; contract_start: string; contract_renews: string; notes: string
+  trial: boolean
 }
 
 function ModalAcademia({ academia, onGuardar, onClose }: {
@@ -147,6 +148,7 @@ function ModalAcademia({ academia, onGuardar, onClose }: {
     contract_start:  academia?.contract_start  ?? '',
     contract_renews: academia?.contract_renews ?? '',
     notes:           academia?.notes           ?? '',
+    trial:           false,
   })
   const [error, setError]   = useState('')
   const [saving, setSaving] = useState(false)
@@ -160,7 +162,11 @@ function ModalAcademia({ academia, onGuardar, onClose }: {
     if (!form.name.trim())         { setError('El nombre es obligatorio'); return }
     if (!isEdit && !form.slug.trim()) { setError('El slug es obligatorio'); return }
     setSaving(true)
-    const res = await onGuardar(form)
+    const payload: any = { ...form }
+    if (!isEdit && form.trial) {
+      payload.trial_ends_at = new Date(Date.now() + 60 * 86400000).toISOString()
+    }
+    const res = await onGuardar(payload)
     if (res.error) { setError(res.error); setSaving(false) } else onClose()
   }
 
@@ -182,6 +188,26 @@ function ModalAcademia({ academia, onGuardar, onClose }: {
               {PLANES.map(p => <button key={p} className={[styles.optBtn, form.plan === p ? styles.optBtnActive : ''].join(' ')} onClick={() => set('plan', p)}>{p.charAt(0).toUpperCase() + p.slice(1)}</button>)}
             </div>
           </Field>
+          {!isEdit && (
+            <Field label="Periodo de prueba">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', userSelect: 'none' }}>
+                <input
+                  type="checkbox"
+                  checked={form.trial}
+                  onChange={e => setForm(f => ({ ...f, trial: e.target.checked }))}
+                  style={{ width: 16, height: 16, accentColor: '#5de4ff', cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: 'var(--fs-5)', color: form.trial ? '#5de4ff' : 'var(--ink-muted)', fontWeight: form.trial ? 700 : 400 }}>
+                  Activar 60 días de prueba gratuita
+                </span>
+                {form.trial && (
+                  <span style={{ fontSize: 'var(--fs-7)', color: 'var(--ink-subtle)', marginLeft: 4 }}>
+                    · Expira el {new Date(Date.now() + 60 * 86400000).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </span>
+                )}
+              </label>
+            </Field>
+          )}
         </>)}
         {tab === 'contacto' && (<>
           <Field label="Email de contacto"><input className={styles.input} type="email" value={form.contact_email} onChange={e => set('contact_email', e.target.value)} placeholder="academia@ejemplo.com" /></Field>
@@ -335,7 +361,7 @@ function HeroCard({ stats }: { stats: any }) {
         <div>
           <div className={styles.heroCardPill}><span className={styles.pulseDot} />MRR en tiempo real</div>
           <div className={styles.heroCardVal}>€{(mrr ?? 0).toLocaleString('es-ES')}</div>
-          <div className={styles.heroCardSub}>ARR estimado · <strong style={{ color: '#e8f4f8' }}>€{arr.toLocaleString('es-ES')}</strong></div>
+          <div className={styles.heroCardSub}>ARR estimado · <strong style={{ color: '#5de4ff', fontSize: 'var(--fs-4)', fontWeight: 800 }}>€{arr.toLocaleString('es-ES')}</strong></div>
         </div>
         <img src={logoAzul} alt="FrostFox" className={styles.heroLogo} />
       </div>
@@ -424,6 +450,19 @@ function AcademiaCard({ ac, onVerDetalle, onEditar, onNuevaAsignatura, onNuevoUs
             : <span className={styles.acadPriceFree}>—</span>}
         </div>
         <div className={styles.acadBadges}>
+          {ac.trial_ends_at && (() => {
+            const diasTrial = Math.ceil((new Date(ac.trial_ends_at).getTime() - Date.now()) / 86400000)
+            if (diasTrial > 0) return (
+              <span className={styles.acadStatus} style={{ color: '#5de4ff', background: 'rgba(93,228,255,0.08)', border: '1px solid rgba(93,228,255,0.25)' }}>
+                <span className={styles.acadStatusDot} style={{ background: '#5de4ff' }} />Trial · {diasTrial}d
+              </span>
+            )
+            return (
+              <span className={styles.acadStatus} style={{ color: '#D97706', background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.25)' }}>
+                <span className={styles.acadStatusDot} style={{ background: '#D97706' }} />Trial expirado
+              </span>
+            )
+          })()}
           <span className={styles.acadStatus} style={{ color: st.color, background: `${st.color}15`, border: `1px solid ${st.color}35` }}>
             <span className={styles.acadStatusDot} style={{ background: st.color }} />{st.label}
           </span>
@@ -475,10 +514,20 @@ function AcademiaCard({ ac, onVerDetalle, onEditar, onNuevaAsignatura, onNuevoUs
                     ? <span className={styles.acadCellEmpty}>Sin asignaturas</span>
                     : <div className={styles.acadSubjects}>
                         {ac.subjects.map((s: any) => (
-                          <span key={s.id} className={styles.acadSubjectChip}>
-                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: s.color, display: 'inline-block', flexShrink: 0 }} />
-                            {s.name}
-                          </span>
+                          <div key={s.id} className={styles.acadSubjectChip}>
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: s.color, display: 'inline-block', flexShrink: 0, marginTop: 2 }} />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0 }}>
+                              <span>{s.name}</span>
+                              {s.exam_config
+                                ? <span style={{ fontSize: '10px', color: '#5de4ff', fontWeight: 600 }}>
+                                    ✓ Simulacro: {s.exam_config.test_questions}p · {s.exam_config.test_minutes}min
+                                    {s.exam_config.test_penalty ? ' · −0.25' : ''}
+                                    {s.exam_config.supuestos_count ? ` · ${s.exam_config.supuestos_count} sup.` : ''}
+                                  </span>
+                                : <span style={{ fontSize: '10px', color: '#9CA3AF' }}>Sin simulacro configurado</span>
+                              }
+                            </div>
+                          </div>
                         ))}
                       </div>
                   }

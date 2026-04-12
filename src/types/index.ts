@@ -31,6 +31,7 @@ export interface CurrentUser {
   accesoExpirado:      boolean
   forcePasswordChange: boolean
   onboardingCompleted: boolean
+  examConfig:          ExamConfig | null
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -196,13 +197,22 @@ export interface InviteCode {
   created_at:    string
 }
 
+export interface ExamConfig {
+  test_questions:    number
+  test_minutes:      number
+  test_penalty:      boolean
+  supuestos_count:   number
+  supuestos_minutes: number
+}
+
 export interface Subject {
-  id:         string
-  academy_id: string
-  name:       string
-  slug:       string
-  color:      string | null
-  created_at: string
+  id:          string
+  academy_id:  string
+  name:        string
+  slug:        string
+  color:       string | null
+  created_at:  string
+  exam_config: ExamConfig | null
 }
 
 export interface Academy {
@@ -352,7 +362,12 @@ export interface SupuestoOverlay {
   supuesto: Supuesto
 }
 
-export type AppOverlay = TestOverlay | FlashcardsOverlay | SupuestoOverlay
+export interface SimulacroOverlay {
+  type:       'simulacro'
+  examConfig: ExamConfig
+}
+
+export type AppOverlay = TestOverlay | FlashcardsOverlay | SupuestoOverlay | SimulacroOverlay
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tipos calculados — construidos por los hooks

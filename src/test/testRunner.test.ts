@@ -21,7 +21,8 @@ function isFailMode(modeId: string): boolean {
 
 /** Determina si el modeId es un UUID de bloque temático */
 function isUUID(modeId: string): boolean {
-  return !!modeId && modeId.includes('-') && !['beginner','advanced','exam','quick_review','review_due','all_fails'].includes(modeId)
+  const knownModes = ['beginner','advanced','exam','simulacro','quick_review','review_due','all_fails']
+  return !!modeId && modeId.includes('-') && !knownModes.includes(modeId)
 }
 
 /** Formatea segundos a MM:SS */
@@ -76,6 +77,7 @@ describe('isUUID', () => {
   it('exam → false',                                 () => expect(isUUID('exam')).toBe(false))
   it('review_due → false',                           () => expect(isUUID('review_due')).toBe(false))
   it('string sin guión → false',                     () => expect(isUUID('sinGuion')).toBe(false))
+  it('simulacro → false',                              () => expect(isUUID('simulacro')).toBe(false))
 })
 
 describe('formatTimer', () => {

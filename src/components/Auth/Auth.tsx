@@ -40,9 +40,9 @@ export default function AuthPage({ onLogin, onRegister, onRequestReset, error, c
     setLoading(true)
     await new Promise(r => setTimeout(r, 200))
     if (mode === 'login') {
-      onLogin(username, password)
+      await onLogin(username, password)
     } else if (mode === 'register') {
-      onRegister(displayName, username, password, inviteCode)
+      await onRegister(displayName, username, password, inviteCode)
     } else if (mode === 'forgot') {
       const ok = await onRequestReset(resetEmail)
       if (ok) setResetSent(true)

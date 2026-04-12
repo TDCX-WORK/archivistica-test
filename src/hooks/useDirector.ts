@@ -74,8 +74,15 @@ export function useDirector(currentUser: CurrentUser | null) {
         const ses30d         = subSessions.filter(s => s.played_at >= thirtyAgo)
         const alumnosActivos = new Set(sesThisWeek.map(s => s.user_id)).size
 
-        const notaMedia = ses30d.length
-          ? Math.round(ses30d.reduce((a, s) => a + s.score, 0) / ses30d.length)
+        // Media por alumno (no por sesión) — consistente con panel profesor
+        const notasPorAlumno = subAlumnos
+          .map(a => {
+            const sesSub = ses30d.filter(s => s.user_id === a.id)
+            return sesSub.length ? sesSub.reduce((acc, s) => acc + s.score, 0) / sesSub.length : null
+          })
+          .filter((n): n is number => n !== null)
+        const notaMedia = notasPorAlumno.length
+          ? Math.round(notasPorAlumno.reduce((a, b) => a + b, 0) / notasPorAlumno.length)
           : null
 
         const ultimaActividad: Record<string, string> = {}
@@ -86,7 +93,10 @@ export function useDirector(currentUser: CurrentUser | null) {
 
         const alumnosEnRiesgo: AlumnoEnRiesgoDetalle[] = subAlumnos.filter(a => {
           const ultima = ultimaActividad[a.id]
-          if (!ultima) return true
+          if (!ultima) {
+            const diasDesdeRegistro = Math.floor((now.getTime() - new Date(a.created_at).getTime()) / 86400000)
+            return diasDesdeRegistro >= 3
+          }
           return Math.floor((now.getTime() - new Date(ultima).getTime()) / 86400000) > 3
         }).map(a => ({
           id:           a.id,
@@ -162,8 +172,16 @@ export function useDirector(currentUser: CurrentUser | null) {
       const totalActivos  = new Set(ses7d.map(s => s.user_id)).size
       const totalEnRiesgo = subjectStats.reduce((a, s) => a + s.enRiesgo, 0)
       const totalPorExpirar = subjectStats.reduce((a, s) => a + s.porExpirar, 0)
-      const notaGlobal    = ses30d.length
-        ? Math.round(ses30d.reduce((a, s) => a + s.score, 0) / ses30d.length)
+      // Media global por alumno — consistente con panel profesor
+      const alumnos30d = typedProfiles.filter(p => p.role === 'alumno')
+      const notasPorAlumnoGlobal = alumnos30d
+        .map(a => {
+          const sesA = ses30d.filter(s => s.user_id === a.id)
+          return sesA.length ? sesA.reduce((acc, s) => acc + s.score, 0) / sesA.length : null
+        })
+        .filter((n): n is number => n !== null)
+      const notaGlobal = notasPorAlumnoGlobal.length
+        ? Math.round(notasPorAlumnoGlobal.reduce((a, b) => a + b, 0) / notasPorAlumnoGlobal.length)
         : null
 
       setAllProfiles(typedProfiles)

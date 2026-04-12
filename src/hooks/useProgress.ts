@@ -65,14 +65,24 @@ export function useProgress(
     if (!data) return
 
     const saved = data as Session
-    setSessions(prev => [saved, ...prev])
 
-    const sesionesConNueva = [saved, ...sessions]
+    // Usar el estado previo garantiza que trabajamos con datos frescos
+    // aunque React haya procesado actualizaciones en vuelo
+    let sesionesAnteriores: Session[] = []
+    setSessions(prev => {
+      sesionesAnteriores = prev
+      return [saved, ...prev]
+    })
+
+    const sesionesConNueva = [saved, ...sesionesAnteriores]
 
     try {
-      const mejorNota = sessions.length > 0 ? Math.max(...sessions.map(s => s.score)) : 0
+      const mejorNota = sesionesAnteriores.length > 0
+        ? Math.max(...sesionesAnteriores.map(s => s.score))
+        : 0
 
       if (score > mejorNota && score >= 70 && sesionesConNueva.length >= 3) {
+        // El índice único en BD evita duplicados automáticamente
         await supabase.from('notifications').insert({
           user_id: userId,
           type:    'mejor_nota',
@@ -106,33 +116,24 @@ export function useProgress(
       const hitosRacha = [3, 7, 14, 30]
 
       if (hitosRacha.includes(racha)) {
-        const { data: yaEnviada } = await supabase
-          .from('notifications').select('id')
-          .eq('user_id', userId)
-          .eq('type', 'racha')
-          .like('title', `%${racha} d%`)
-          .gte('created_at', new Date(Date.now() - 2 * 86400000).toISOString())
-          .maybeSingle()
-
-        if (!yaEnviada) {
-          const emojis: Record<number, string>  = { 3: '🔥', 7: '⚡', 14: '🏆', 30: '👑' }
-          const cuerpos: Record<number, string> = {
-            3:  'Llevas 3 dias seguidos estudiando. Buen comienzo.',
-            7:  'Una semana completa de estudio. Eres constante.',
-            14: 'Dos semanas seguidas. Esto ya es un habito.',
-            30: 'Un mes entero de racha. Nivel leyenda.',
-          }
-          await supabase.from('notifications').insert({
-            user_id: userId,
-            type:    'racha',
-            title:   `${emojis[racha]} ${racha} dias de racha`,
-            body:    cuerpos[racha],
-            link:    '/estadisticas',
-          })
+        const emojis: Record<number, string>  = { 3: '🔥', 7: '⚡', 14: '🏆', 30: '👑' }
+        const cuerpos: Record<number, string> = {
+          3:  'Llevas 3 dias seguidos estudiando. Buen comienzo.',
+          7:  'Una semana completa de estudio. Eres constante.',
+          14: 'Dos semanas seguidas. Esto ya es un habito.',
+          30: 'Un mes entero de racha. Nivel leyenda.',
         }
+        // El índice único en BD evita duplicados automáticamente
+        await supabase.from('notifications').insert({
+          user_id: userId,
+          type:    'racha',
+          title:   `${emojis[racha]} ${racha} dias de racha`,
+          body:    cuerpos[racha],
+          link:    '/estadisticas',
+        })
       }
     } catch (_) {}
-  }, [userId, academyId, subjectId, sessions])
+  }, [userId, academyId, subjectId])
 
   const recordWrongAnswer = useCallback(async (questionId: string, block: string) => {
     if (!userId) return

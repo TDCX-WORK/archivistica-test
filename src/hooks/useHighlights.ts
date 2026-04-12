@@ -38,8 +38,13 @@ export function useHighlights(
   }): Promise<StudyHighlight | null> => {
     if (!userId || !topicId || !text?.trim()) return null
 
-    const exists = highlights.find(h => h.topic_id === topicId && h.text === text)
-    if (exists) return exists
+    // Comprobamos duplicado usando prev para no necesitar highlights como dependencia
+    let existente: StudyHighlight | null = null
+    setHighlights(prev => {
+      existente = prev.find(h => h.topic_id === topicId && h.text === text) ?? null
+      return prev
+    })
+    if (existente) return existente
 
     const { data, error } = await supabase
       .from('study_highlights')
@@ -60,7 +65,7 @@ export function useHighlights(
     const nuevo = data as StudyHighlight
     setHighlights(prev => [...prev, nuevo])
     return nuevo
-  }, [userId, academyId, subjectId, highlights])
+  }, [userId, academyId, subjectId])
 
   const removeHighlight = useCallback(async (id: string) => {
     await supabase.from('study_highlights').delete().eq('id', id)

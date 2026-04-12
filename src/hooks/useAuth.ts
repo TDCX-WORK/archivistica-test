@@ -13,51 +13,33 @@ async function generateLoginNotifications(userId: string, accessUntil: string | 
       .lte('next_review', today)
 
     if ((pendientes ?? 0) > 0) {
-      const { data: yaEnviada } = await supabase
-        .from('notifications')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('type', 'repaso_pendiente')
-        .gte('created_at', today + 'T00:00:00Z')
-        .maybeSingle()
-
-      if (!yaEnviada) {
-        await supabase.from('notifications').insert({
-          user_id: userId,
-          type:    'repaso_pendiente',
-          title:   `Tienes ${pendientes} pregunta${pendientes !== 1 ? 's' : ''} pendiente${pendientes !== 1 ? 's' : ''} de repasar`,
-          body:    'Tu sesion de repaso espaciado esta lista. Dedica unos minutos antes de estudiar temario nuevo.',
-          link:    '/',
-        })
-      }
+      // El índice único en BD evita duplicados automáticamente
+      await supabase.from('notifications').insert({
+        user_id: userId,
+        type:    'repaso_pendiente',
+        title:   `Tienes ${pendientes} pregunta${pendientes !== 1 ? 's' : ''} pendiente${pendientes !== 1 ? 's' : ''} de repasar`,
+        body:    'Tu sesion de repaso espaciado esta lista. Dedica unos minutos antes de estudiar temario nuevo.',
+        link:    '/',
+      })
     }
 
     if (accessUntil) {
       const diasRestantes = Math.ceil((new Date(accessUntil).getTime() - new Date().getTime()) / 86400000)
       if (diasRestantes > 0 && diasRestantes <= 7) {
-        const { data: yaEnviada } = await supabase
-          .from('notifications')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('type', 'acceso_expira')
-          .gte('created_at', new Date(Date.now() - 3 * 86400000).toISOString())
-          .maybeSingle()
-
-        if (!yaEnviada) {
-          await supabase.from('notifications').insert({
-            user_id: userId,
-            type:    'acceso_expira',
-            title:   `Tu acceso expira en ${diasRestantes} dia${diasRestantes !== 1 ? 's' : ''}`,
-            body:    'Contacta con tu profesor para renovar el acceso antes de que expire.',
-            link:    '/',
-          })
-        }
+        await supabase.from('notifications').insert({
+          user_id: userId,
+          type:    'acceso_expira',
+          title:   `Tu acceso expira en ${diasRestantes} dia${diasRestantes !== 1 ? 's' : ''}`,
+          body:    'Contacta con tu profesor para renovar el acceso antes de que expire.',
+          link:    '/',
+        })
       }
     }
   } catch (_) {
     // Las notificaciones no deben bloquear el login
   }
 }
+
 
 export function useAuth() {
   const [currentUser,  setCurrentUser]  = useState<CurrentUser | null>(null)
@@ -99,7 +81,7 @@ export function useAuth() {
   async function loadProfile(user: { id: string }) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('username, role, academy_id, subject_id, access_until, force_password_change, academies(name, suspended, deleted_at), subjects(name)')
+      .select('username, role, academy_id, subject_id, access_until, force_password_change, academies(name, suspended, deleted_at), subjects(name, exam_config)')
       .eq('id', user.id)
       .single()
 
@@ -139,6 +121,7 @@ export function useAuth() {
       accesoExpirado:      ['profesor','director','superadmin'].includes(profile?.role ?? '') ? false : accesoExpirado,
       forcePasswordChange: ['profesor','director'].includes(profile?.role ?? '') ? (profile?.force_password_change ?? false) : false,
       onboardingCompleted,
+      examConfig:          (profile?.subjects as { exam_config?: import('../types').ExamConfig | null } | null)?.exam_config ?? null,
     })
     setLoading(false)
 
@@ -331,9 +314,13 @@ export function useAuth() {
     setCurrentUser(u => u ? { ...u, onboardingCompleted: true } : u)
   }, [])
 
+  const updateDisplayName = useCallback((name: string): void => {
+    setCurrentUser(u => u ? { ...u, username: name, displayName: name } : u)
+  }, [])
+
   return {
     currentUser, loading, login, register, logout, error, clearError,
-    clearForcePasswordChange, completeOnboarding,
+    clearForcePasswordChange, completeOnboarding, updateDisplayName,
     recoveryMode, requestPasswordReset, confirmPasswordReset,
   }
 }
