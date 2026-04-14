@@ -1,0 +1,259 @@
+/* Uses CSS custom properties from global theme */
+/* ── Page ──────────────────────────────────────────────────────────────────── */
+.page {
+  padding: 1.5rem 2rem 4rem;
+  max-width: 1100px; margin: 0 auto;
+  display: flex; flex-direction: column; gap: 1.25rem;
+  animation: fadeUp 0.25s var(--ease) both;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+.state { display:flex;flex-direction:column;align-items:center;gap:.75rem;padding:5rem 1rem;color:var(--ink-muted);text-align:center }
+.state p { font-size: var(--fs-3);margin:0 }
+.spinner { animation:spin .9s linear infinite }
+@keyframes spin { to{transform:rotate(360deg)} }
+.empty { font-size: var(--fs-5);color:var(--ink-subtle);text-align:center;padding:2rem 0;margin:0 }
+
+/* ── Header ────────────────────────────────────────────────────────────────── */
+.pageHeader { display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap }
+.pageTitle    { font-size: var(--fs-1);font-weight:800;color:var(--ink);margin:0;letter-spacing:-0.03em }
+.pageSubtitle { font-size: var(--fs-5);color:var(--ink-muted);margin:.25rem 0 0 }
+.btnExport {
+  display:flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:var(--r-md);
+  border:1px solid var(--line);background:var(--surface);font-size: var(--fs-5);font-weight:600;
+  color:var(--ink-muted);cursor:pointer;font-family:var(--font-body);transition:all .15s;white-space:nowrap;
+  flex-shrink: 0;
+}
+.btnExport:hover { background:var(--surface-dim);color:var(--ink) }
+
+/* ── Área de contenido de tabs ─────────────────────────────────────────── */
+.contentArea {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Botón volver arriba — solo visible en mobile */
+.scrollBackBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  transition: transform 0.15s var(--ease), box-shadow 0.15s;
+  margin: 1.5rem auto 0;
+  flex-shrink: 0;
+}
+.scrollBackBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+@media (max-width: 900px) {
+  .scrollBackBtn { display: flex; }
+  .pageHeader { align-items: flex-start; }
+  .btnExport { width: 100%; justify-content: center; }
+}
+
+/* ── Tabs ──────────────────────────────────────────────────────────────────── */
+.tabs { display:flex;gap:.3rem;border-bottom:1px solid var(--line);padding-bottom:0 }
+.tab {
+  display:flex;align-items:center;gap:.4rem;padding:.55rem .9rem;
+  border-radius:var(--r-md) var(--r-md) 0 0;border:none;background:transparent;
+  font-size: var(--fs-5);font-weight:600;color:var(--ink-muted);cursor:pointer;
+  font-family:var(--font-body);transition:all .15s;white-space:nowrap;
+  border-bottom:2px solid transparent;margin-bottom:-1px
+}
+.tab:hover { color:var(--ink);background:var(--surface-off) }
+.tabActive  { color:var(--ink);border-bottom-color:var(--primary);background:var(--surface) }
+
+/* ── Sección ───────────────────────────────────────────────────────────────── */
+.section { display:flex;flex-direction:column;gap:.85rem }
+
+/* ── Gráfico ───────────────────────────────────────────────────────────────── */
+.chartCard {
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:1.25rem;box-shadow:var(--shadow-card)
+}
+.chartCardHead { display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1rem }
+.chartCardTitle { font-size: var(--fs-3);font-weight:700;color:var(--ink);margin:0 }
+.chartCardSub   { font-size: var(--fs-6);color:var(--ink-subtle) }
+.chartWrap { width:100% }
+.chartSvg  { display:block;width:100%;height:auto;overflow:visible }
+
+/* ── Cards asignatura ──────────────────────────────────────────────────────── */
+.subList { display:flex;flex-direction:column;gap:.5rem }
+.subCard {
+  display:flex;align-items:center;gap:.85rem;padding:.9rem 1rem;
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);box-shadow:var(--shadow-card);
+  transition:box-shadow .15s,transform .15s
+}
+.subCard:hover { box-shadow:var(--shadow-lg);transform:translateX(2px) }
+.subCardBar    { width:4px;height:36px;border-radius:99px;background:var(--sc,#888);flex-shrink:0 }
+.subCardInfo   { flex:1;display:flex;flex-direction:column;gap:.25rem }
+.subCardName   { font-size: var(--fs-3);font-weight:700;color:var(--ink) }
+.subCardMeta   { display:flex;gap:.75rem;flex-wrap:wrap }
+.subCardMeta span { display:flex;align-items:center;gap:.25rem;font-size: var(--fs-6);color:var(--ink-muted) }
+.subCardNota   { font-size: var(--fs-2);font-weight:800;letter-spacing:-0.03em }
+
+/* ── Narrativa ─────────────────────────────────────────────────────────────── */
+.narrativa {
+  display:flex;align-items:flex-start;gap:.85rem;padding:.9rem 1.1rem;
+  background:color-mix(in srgb,var(--nc) 8%,var(--surface));
+  border:1px solid color-mix(in srgb,var(--nc) 20%,var(--line));
+  border-radius:var(--r-lg);border-left:4px solid var(--nc)
+}
+.narrativaIcon { color:var(--nc);flex-shrink:0;margin-top:1px }
+.narrativaTexto { font-size: var(--fs-4);color:var(--ink);line-height:1.5;margin:0;font-weight:500 }
+
+/* ── KPIs ──────────────────────────────────────────────────────────────────── */
+.kpisRow { display:grid;grid-template-columns:repeat(6,1fr);gap:.65rem }
+.kpi {
+  position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:1rem .9rem;box-shadow:var(--shadow-card);
+  display:flex;flex-direction:column;align-items:center;gap:.25rem;text-align:center;
+  transition:transform .15s,box-shadow .15s
+}
+.kpi:hover { transform:translateY(-2px);box-shadow:var(--shadow-md) }
+.kpiGlow {
+  position:absolute;top:-30px;left:50%;transform:translateX(-50%);
+  width:80px;height:80px;border-radius:50%;
+  background:radial-gradient(circle,color-mix(in srgb,var(--c) 20%,transparent),transparent 70%);
+  pointer-events:none
+}
+.kpiAlert {
+  position:absolute;top:8px;right:8px;width:7px;height:7px;border-radius:50%;
+  background:var(--danger);box-shadow:0 0 6px var(--danger);animation:pulse 1.5s infinite
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.kpiIcon  { color:var(--c) }
+.kpiVal   { font-size: var(--fs-1);font-weight:800;color:var(--ink);letter-spacing:-0.04em;line-height:1 }
+.kpiLabel { font-size: var(--fs-7);color:var(--ink-muted);text-transform:uppercase;letter-spacing:.05em }
+.kpiSub   { font-size: var(--fs-7);color:var(--ink-subtle) }
+
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width:900px) {
+  .kpisRow { grid-template-columns:repeat(3,1fr) }
+  .rentKpis { grid-template-columns:repeat(2,1fr) }
+  .detalleLayout { grid-template-columns:1fr }
+}
+@media (max-width:640px) {
+  .page { padding:1rem .9rem 4rem }
+  .kpisRow { grid-template-columns:repeat(2,1fr) }
+  .alumnosTableHead,.alumnoRow { grid-template-columns:1fr 80px 80px 32px }
+  .alumnosTableHead span:nth-child(2),.alumnoRow>*:nth-child(2),
+  .alumnosTableHead span:nth-child(5),.alumnoRow>*:nth-child(5) { display:none }
+}
+
+/* ── Bento Grid Director ─────────────────────────────────────────────────── */
+.bentoGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.bentoCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-xl);
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  padding: 1.1rem 1.15rem;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.2s var(--spring), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+  box-shadow: var(--shadow-sm);
+}
+
+.bentoBig { grid-column: span 2; }
+
+.bentoCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+  border-color: var(--bento-color, var(--primary));
+}
+
+.bentoActive {
+  border-color: var(--bento-color, var(--primary));
+  box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+}
+
+.bentoActive::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--bento-color, var(--primary));
+  opacity: 0.04;
+  pointer-events: none;
+}
+
+.bentoContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bentoIconWrap {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bentoBig .bentoIconWrap { width: 42px; height: 42px; }
+
+.bentoText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.bentoLabel {
+  font-size: var(--fs-4);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.bentoBig .bentoLabel { font-size: var(--fs-2); }
+
+.bentoDesc {
+  font-size: var(--fs-6);
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+
+.bentoBadge {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  min-width: 20px;
+  height: 20px;
+  border-radius: var(--r-full);
+  color: #fff;
+  font-size: var(--fs-7);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+@media (max-width: 900px) {
+  .bentoGrid { grid-template-columns: repeat(2, 1fr); }
+  .bentoBig  { grid-column: span 2; }
+}
+
+/* ── Card Asignaturas ────────────────────────────────────────────────────── */

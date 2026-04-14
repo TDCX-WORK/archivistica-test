@@ -59,55 +59,82 @@
 .searchInput:focus { outline:none;border-color:var(--primary) }
 
 /* ── Tabla de alumnos ──────────────────────────────────────────────────────── */
-.tabla {
-  background:var(--surface);border:1px solid var(--line);
-  border-radius:var(--r-lg);box-shadow:var(--shadow-card);overflow:hidden
+/* ── Grid de alumnos ─────────────────────────────────────────────────────── */
+.alumnosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
 }
-.tablaHead {
-  display:grid;grid-template-columns:1.8fr 1.2fr 1.4fr 120px 90px 40px;
-  padding:.5rem 1rem;gap:.5rem;background:var(--surface-off);
-  font-size: var(--fs-7);font-weight:700;color:var(--ink-subtle);
-  text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line)
+
+/* Card alumno */
+.alumnoCard {
+  background: var(--surface); border-radius: 14px;
+  padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 2px solid transparent;
 }
-.tablaRow {
-  display:grid;grid-template-columns:1.8fr 1.2fr 1.4fr 120px 90px 40px;
-  padding:.75rem 1rem;gap:.5rem;align-items:center;
-  border-bottom:1px solid var(--line);transition:background .12s
+.alumnoCard:hover { transform: translateY(-2px); }
+.alumnoCardOk       { border-color: rgba(5,150,105,0.3);  box-shadow: 0 4px 16px rgba(5,150,105,0.08); }
+.alumnoCardPronto   { border-color: rgba(217,119,6,0.35); box-shadow: 0 4px 16px rgba(217,119,6,0.1); }
+.alumnoCardExpirado { border-color: rgba(220,38,38,0.35); box-shadow: 0 4px 16px rgba(220,38,38,0.1); }
+
+.alumnoCardHead {
+  display: flex; align-items: center; gap: 0.65rem;
 }
-.tablaRow:last-child { border-bottom:none }
-.tablaRow:hover { background:var(--surface-off) }
-
-.alumnoCell { display:flex;align-items:center;gap:.55rem }
-.miniAvatar {
-  width:32px;height:32px;border-radius:50%;flex-shrink:0;
-  background:var(--surface-dim);color:var(--ink-muted);
-  display:flex;align-items:center;justify-content:center;
-  font-size: var(--fs-5);font-weight:800
+.alumnoCardAvatar {
+  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  background: var(--surface-off); color: var(--ink-muted);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-4); font-weight: 800;
+  border: 1px solid var(--line);
 }
-.nombrePrincipal    { font-size: var(--fs-5);font-weight:700;color:var(--ink) }
-.usernameSecundario { font-size: var(--fs-7);color:var(--ink-muted) }
+.alumnoCardInfo { flex: 1; min-width: 0; }
+.alumnoCardNombre {
+  display: block; font-size: var(--fs-4); font-weight: 700; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.alumnoCardUsername { font-size: var(--fs-6); color: var(--ink-subtle); }
 
-.subCell { display:flex;align-items:center;gap:.35rem;font-size: var(--fs-5);color:var(--ink-soft) }
-.subDot  { width:8px;height:8px;border-radius:50%;flex-shrink:0 }
+.alumnoCardSub {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: var(--fs-5); color: var(--ink-muted); font-weight: 600;
+}
+.subDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-.contactCell { display:flex;flex-direction:column;gap:.2rem }
-.contactCell span { display:flex;align-items:center;gap:.35rem;font-size: var(--fs-6);color:var(--ink-muted) }
+.alumnoCardMeta {
+  display: flex; gap: 0.5rem;
+  padding: 0.65rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.alumnoCardMetaItem { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
+.alumnoCardMetaLabel {
+  font-size: var(--fs-7); font-weight: 700; color: var(--ink-subtle);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.alumnoCardMetaVal { font-size: var(--fs-5); color: var(--ink); }
 
-.accesoChip { font-size: var(--fs-6);font-weight:600;padding:.15rem .55rem;border-radius:99px }
-.accesoOk       { background:var(--accent-lt);color:var(--accent) }
-.accesoPronto   { background:var(--amber-lt);color:var(--amber) }
-.accesoExpirado { background:var(--danger-lt);color:var(--danger) }
+.accesoChip { font-size: var(--fs-6); font-weight: 700; padding: 2px 8px; border-radius: 99px; width: fit-content; }
+.accesoOk       { background: var(--accent-lt);  color: var(--accent); }
+.accesoPronto   { background: var(--amber-lt);   color: var(--amber); }
+.accesoExpirado { background: var(--danger-lt);  color: var(--danger); }
 
-.precioCell { font-size: var(--fs-5) }
-.precio     { font-weight:700;color:var(--ink) }
-.muted      { font-size: var(--fs-6);color:var(--ink-subtle) }
+.alumnoCardContacto {
+  display: flex; flex-direction: column; gap: 0.25rem;
+}
+.alumnoCardContacto span {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-size: var(--fs-6); color: var(--ink-muted);
+}
+
+.muted  { font-size: var(--fs-6); color: var(--ink-subtle); }
 
 .editBtn {
-  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
-  border:1px solid var(--line);border-radius:var(--r-sm);background:transparent;
-  color:var(--ink-subtle);cursor:pointer;transition:all .15s
+  width: 30px; height: 30px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  background: transparent; color: var(--ink-subtle);
+  cursor: pointer; transition: all 0.15s;
 }
-.editBtn:hover { background:var(--surface-dim);color:var(--ink);border-color:var(--line-strong) }
+.editBtn:hover { background: var(--surface-off); color: var(--ink); border-color: var(--line-strong); }
 
 /* ── Profesores grid ───────────────────────────────────────────────────────── */
 .profesoresGrid { display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem }

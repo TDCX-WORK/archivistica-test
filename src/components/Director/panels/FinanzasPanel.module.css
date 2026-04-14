@@ -1,0 +1,363 @@
+/* Component styles */
+
+/* ── Panel Finanzas ───────────────────────────────────────────────────────── */
+.finanzasWrap {
+  display: flex; flex-direction: column; gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.finanzasKpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.finanzasKpi {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1.1rem 1.15rem;
+  display: flex; flex-direction: column; gap: 0.3rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.finanzasKpi:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+.finanzasKpiIcon {
+  width: 36px; height: 36px; border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 0.35rem;
+}
+.finanzasKpiVal {
+  font-size: var(--fs-1); font-weight: 900; color: var(--ink);
+  letter-spacing: -0.03em; line-height: 1.1;
+}
+.finanzasKpiLabel { font-size: var(--fs-5); font-weight: 600; color: var(--ink-muted); }
+.finanzasKpiSub   { font-size: var(--fs-6); color: var(--ink-subtle); }
+
+.finanzasSection {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.finanzasSectionTitle {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.85rem 1.1rem;
+  font-size: var(--fs-5); font-weight: 700; color: var(--ink);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-off);
+}
+
+.finanzasTable { display: flex; flex-direction: column; }
+.finanzasTableHead {
+  display: grid; grid-template-columns: 1fr 80px 100px 100px;
+  padding: 0.5rem 1.1rem;
+  font-size: var(--fs-7); font-weight: 700; color: var(--ink-subtle);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--line);
+}
+.finanzasTableRow {
+  display: grid; grid-template-columns: 1fr 80px 100px 100px;
+  padding: 0.65rem 1.1rem; border-bottom: 1px solid var(--line);
+  font-size: var(--fs-5); align-items: center;
+  transition: background 0.12s;
+}
+.finanzasTableRow:last-child { border-bottom: none; }
+.finanzasTableRow:hover { background: var(--surface-off); }
+
+.finanzasUsername { font-weight: 600; color: var(--ink); }
+.finanzasFecha    { color: var(--ink-muted); }
+.finanzasPrecio   { font-weight: 700; color: var(--ink); }
+
+.finanzasDias {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 36px; padding: 2px 8px; border-radius: 99px;
+  font-size: var(--fs-6); font-weight: 800;
+}
+.finanzasDiasRed    { background: #FEF2F2; color: #DC2626; }
+.finanzasDiasAmber  { background: #FFFBEB; color: #D97706; }
+.finanzasDiasGreen  { background: #ECFDF5; color: #059669; }
+
+.finanzasAlertList { display: flex; flex-direction: column; }
+.finanzasAlertRow {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.65rem 1.1rem; border-bottom: 1px solid var(--line);
+  font-size: var(--fs-5);
+}
+.finanzasAlertRow:last-child { border-bottom: none; }
+
+@media (max-width: 768px) {
+  .finanzasKpis { grid-template-columns: repeat(2, 1fr); }
+  .finanzasTableHead,
+  .finanzasTableRow { grid-template-columns: 1fr 60px 80px; }
+  .finanzasTableHead span:nth-child(3),
+  .finanzasTableRow  span:nth-child(3) { display: none; }
+}
+
+/* ── Precio base en Finanzas ──────────────────────────────────────────────── */
+.finanzasPrecioBase {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; padding: 0.85rem 1.1rem;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-lg); flex-wrap: wrap;
+}
+.finanzasPrecioBaseInfo {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: var(--fs-5); color: var(--ink-muted);
+}
+.finanzasPrecioBaseActivo {
+  font-size: var(--fs-6); font-weight: 700; color: #059669;
+  background: rgba(5,150,105,0.1); padding: 2px 8px;
+  border-radius: 99px; margin-left: 0.25rem;
+}
+.finanzasPrecioBaseForm {
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.finanzasPrecioInput {
+  width: 80px; padding: 0.35rem 0.6rem;
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  font-size: var(--fs-5); color: var(--ink); background: var(--surface);
+  outline: none; font-family: var(--font-body);
+}
+.finanzasPrecioInput:focus { border-color: var(--primary); }
+.finanzasPrecioBtn {
+  padding: 0.35rem 0.85rem; background: var(--primary); color: white;
+  border: none; border-radius: var(--r-sm); font-size: var(--fs-6);
+  font-weight: 700; cursor: pointer; font-family: var(--font-body);
+}
+.finanzasPrecioBtnCancel {
+  padding: 0.35rem 0.75rem; background: var(--surface-off);
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  font-size: var(--fs-6); color: var(--ink-muted); cursor: pointer;
+}
+.finanzasPrecioEditBtn {
+  padding: 0.35rem 0.85rem; background: none;
+  border: 1px solid var(--line); border-radius: var(--r-full);
+  font-size: var(--fs-6); font-weight: 600; color: var(--ink-muted);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.finanzasPrecioEditBtn:hover { color: var(--ink); border-color: var(--line-strong); }
+
+/* ── Estado de pagos ──────────────────────────────────────────────────────── */
+.pagosResumen {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+}
+.pagosKpi {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0.75rem; border: 1px solid var(--line); border-radius: var(--r-md);
+  gap: 0.2rem;
+}
+.pagosKpiVal   { font-size: var(--fs-1); font-weight: 900; line-height: 1; }
+.pagosKpiLabel { font-size: var(--fs-6); color: var(--ink-muted); font-weight: 600; }
+.pagosKpiMrr   { font-size: var(--fs-6); color: var(--ink-subtle); }
+
+.pagosBadge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 99px;
+  font-size: var(--fs-7); font-weight: 700;
+}
+
+.pagosAcciones { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+.pagosBtn {
+  padding: 2px 8px; border-radius: 99px;
+  border: 1px solid; background: none;
+  font-size: var(--fs-7); font-weight: 600; cursor: pointer;
+  transition: opacity 0.15s; font-family: var(--font-body);
+}
+.pagosBtn:hover { opacity: 0.7; }
+
+/* ── Animación confirmación pago ─────────────────────────────────────────── */
+.pagosBadgeConfirm {
+  animation: pagoConfirm 0.3s ease both;
+}
+@keyframes pagoConfirm {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.spinnerSmall {
+  animation: spinAnim 0.7s linear infinite;
+  display: inline-block;
+}
+
+/* ── PagosSection rediseñado ─────────────────────────────────────────────── */
+.pagosSectionHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.85rem 1.1rem; border-bottom: 1px solid var(--line);
+  background: var(--surface-off);
+}
+.pagosSectionTitle {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: var(--fs-5); font-weight: 700; color: var(--ink);
+}
+.pagosMesSelector {
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.pagosMesBtn {
+  width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+  font-size: 14px; cursor: pointer; color: var(--ink-muted); transition: all 0.12s;
+}
+.pagosMesBtn:hover:not(:disabled) { background: var(--surface-off); color: var(--ink); }
+.pagosMesBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+.pagosMesLabel {
+  font-size: var(--fs-5); font-weight: 700; color: var(--ink);
+  display: flex; align-items: center; gap: 0.4rem;
+  min-width: 130px; justify-content: center;
+}
+.pagosMesActual {
+  font-size: var(--fs-7); font-weight: 700; color: #2563EB;
+  background: rgba(37,99,235,0.1); padding: 1px 7px; border-radius: 99px;
+}
+
+/* KPIs de pagos reactivos */
+.pagosKpisRow {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+  padding: 1rem 1.1rem; border-bottom: 1px solid var(--line);
+}
+.pagosKpiCard {
+  border-radius: 12px; padding: 0.85rem 1rem;
+  display: flex; flex-direction: column; gap: 0.3rem;
+  transition: transform 0.15s, box-shadow 0.2s;
+  background: var(--surface);
+}
+.pagosKpiCard.pagosCardPaid {
+  border: 2px solid rgba(5,150,105,0.35);
+  box-shadow: 0 2px 12px rgba(5,150,105,0.12);
+}
+.pagosKpiCard.pagosCardPending {
+  border: 2px solid rgba(217,119,6,0.35);
+  box-shadow: 0 2px 12px rgba(217,119,6,0.12);
+}
+.pagosKpiCard.pagosCardOverdue {
+  border: 2px solid rgba(220,38,38,0.35);
+  box-shadow: 0 2px 12px rgba(220,38,38,0.12);
+}
+.pagosKpiCard:hover { transform: translateY(-2px); }
+
+.pagosKpiTop {
+  display: flex; align-items: baseline; justify-content: space-between;
+}
+.pagosKpiNum    { font-size: var(--fs-1); font-weight: 900; line-height: 1; }
+.pagosKpiImporte{ font-size: var(--fs-5); font-weight: 700; color: var(--ink-muted); }
+.pagosKpiNombre { font-size: var(--fs-6); color: var(--ink-subtle); font-weight: 600; }
+
+/* Barra de progreso animada con gradiente */
+.pagosKpiBar {
+  height: 6px; background: var(--line);
+  border-radius: 99px; margin-top: 0.5rem;
+  overflow: hidden; position: relative;
+}
+.pagosKpiBarFill {
+  height: 100%; border-radius: 99px;
+  transition: width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background-size: 200% 100%;
+  animation: barShimmer 2.5s linear infinite;
+}
+.pagosCardPaid    .pagosKpiBarFill {
+  background-image: linear-gradient(90deg, #059669 0%, #34d399 50%, #059669 100%);
+  box-shadow: 0 0 8px rgba(5,150,105,0.5);
+}
+.pagosCardPending .pagosKpiBarFill {
+  background-image: linear-gradient(90deg, #D97706 0%, #fbbf24 50%, #D97706 100%);
+  box-shadow: 0 0 8px rgba(217,119,6,0.45);
+}
+.pagosCardOverdue .pagosKpiBarFill {
+  background-image: linear-gradient(90deg, #DC2626 0%, #f87171 50%, #DC2626 100%);
+  box-shadow: 0 0 8px rgba(220,38,38,0.45);
+}
+@keyframes barShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Cards por alumno */
+.pagosAlumnosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px; padding: 1rem 1.1rem;
+}
+.pagosAlumnoCard {
+  border-radius: 12px; padding: 0.85rem;
+  display: flex; flex-direction: column; gap: 0.6rem;
+  transition: box-shadow 0.25s, transform 0.2s;
+  background: var(--surface);
+}
+.pagosAlumnoCard.pagosCardPaid {
+  border: 2px solid rgba(5,150,105,0.4);
+  box-shadow: 0 4px 16px rgba(5,150,105,0.15), 0 1px 3px rgba(0,0,0,0.04);
+}
+.pagosAlumnoCard.pagosCardPending {
+  border: 2px solid rgba(217,119,6,0.4);
+  box-shadow: 0 4px 16px rgba(217,119,6,0.15), 0 1px 3px rgba(0,0,0,0.04);
+}
+.pagosAlumnoCard.pagosCardOverdue {
+  border: 2px solid rgba(220,38,38,0.4);
+  box-shadow: 0 4px 16px rgba(220,38,38,0.15), 0 1px 3px rgba(0,0,0,0.04);
+}
+.pagosAlumnoCard:hover {
+  transform: translateY(-3px);
+}
+.pagosAlumnoCard.pagosCardPaid:hover    { box-shadow: 0 8px 24px rgba(5,150,105,0.25); }
+.pagosAlumnoCard.pagosCardPending:hover { box-shadow: 0 8px 24px rgba(217,119,6,0.25); }
+.pagosAlumnoCard.pagosCardOverdue:hover { box-shadow: 0 8px 24px rgba(220,38,38,0.25); }
+
+.pagosAlumnoHead {
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.pagosAlumnoAvatar {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-5); font-weight: 800;
+}
+.pagosAlumnoInfo { flex: 1; min-width: 0; }
+.pagosAlumnoNombre {
+  display: block; font-size: var(--fs-5); font-weight: 700;
+  color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pagosAlumnoPrecio {
+  font-size: var(--fs-4); font-weight: 900; color: var(--ink); letter-spacing: -0.03em;
+}
+.pagosAlumnoPrecio span { font-size: var(--fs-6); font-weight: 400; color: var(--ink-subtle); }
+
+.pagosEstadoBadge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 3px 8px; border-radius: 99px; flex-shrink: 0;
+  font-size: var(--fs-7); font-weight: 700; white-space: nowrap;
+}
+.pagosBadgeConfirm { animation: pagoConfirm 0.3s ease both; }
+@keyframes pagoConfirm {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.pagosAlumnoBtns {
+  display: flex; gap: 0.35rem; flex-wrap: wrap;
+  padding-top: 0.4rem; border-top: 1px solid var(--line);
+}
+.pagosAlumnoBtn {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.25rem; padding: 0.3rem 0.5rem;
+  background: color-mix(in srgb, var(--btn-c) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--btn-c) 30%, transparent);
+  border-radius: 7px; font-size: var(--fs-7); font-weight: 700;
+  color: var(--btn-c); cursor: pointer; transition: all 0.15s;
+  font-family: var(--font-body);
+}
+.pagosAlumnoBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--btn-c) 16%, transparent);
+  transform: translateY(-1px);
+}
+.pagosAlumnoBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.spinnerSmall { animation: spinAnim 0.7s linear infinite; display: inline-block; }
+
+@media (max-width: 600px) {
+  .pagosKpisRow { grid-template-columns: repeat(3,1fr); gap: 6px; }
+  .pagosAlumnosGrid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Precio base ──────────────────────────────────────────────────────────── */
+

@@ -19,8 +19,9 @@ import Profile            from './components/Profile/Profile'
 import ProfesorPanel      from './components/Profesor/ProfesorPanel/ProfesorPanel'
 import StatsClase         from './components/Profesor/StatsClase/StatsClase'
 import ProfesorProfile    from './components/Profesor/ProfesorProfile/ProfesorProfile'
-import DirectorPanel      from './components/Profesor/DirectorPanel/DirectorPanel'
+import DirectorPanel      from './components/Director/DirectorPanel/DirectorPanel'
 import SuperadminPanel    from './components/Superadmin/SuperadminPanel'
+import Pipeline           from './components/Superadmin/Pipeline'
 import OnboardingWizard   from './components/Onboarding/OnboardingWizard'
 import GestionAcademia    from './components/Director/GestionAcademia/GestionAcademia'
 import FacturacionDirector from './components/Director/FacturacionDirector/FacturacionDirector'
@@ -100,6 +101,7 @@ function AppShell({ currentUser, logout, progress, studyProgress, updateDisplayN
     location.pathname.startsWith('/facturacion-director') ? 'facturacion-director' :
     location.pathname.startsWith('/papelera')             ? 'papelera'             :
     location.pathname.startsWith('/billing')              ? 'billing'              :
+    location.pathname.startsWith('/pipeline')             ? 'pipeline'             :
     location.pathname.startsWith('/admin')                ? 'superadmin'           : 'inicio'
 
   const handleTabChange = (t: string) => {
@@ -117,6 +119,7 @@ function AppShell({ currentUser, logout, progress, studyProgress, updateDisplayN
       superadmin:             '/admin',
       papelera:               '/papelera',
       billing:                '/billing',
+      pipeline:               '/pipeline',
     }
     navigate(routes[t] ?? homeRoute(currentUser))
   }
@@ -157,7 +160,8 @@ function AppShell({ currentUser, logout, progress, studyProgress, updateDisplayN
     activeTab === 'facturacion-director' ? 'Facturación'        :
     activeTab === 'superadmin'           ? 'Superadmin'         :
     activeTab === 'papelera'             ? 'Papelera'           :
-    activeTab === 'billing'              ? 'Facturación'        : 'Inicio'
+    activeTab === 'billing'              ? 'Facturación'        :
+    activeTab === 'pipeline'             ? 'Prospección'        : 'Inicio'
 
   return (
     <div className={styles.shell}>
@@ -253,6 +257,9 @@ function AppShell({ currentUser, logout, progress, studyProgress, updateDisplayN
               } />
               <Route path="/admin" element={
                 isSuperadmin ? <SuperadminPanel currentUser={currentUser} /> : <Navigate to={homeRoute(currentUser)} replace />
+              } />
+              <Route path="/pipeline" element={
+                isSuperadmin ? <Pipeline /> : <Navigate to={homeRoute(currentUser)} replace />
               } />
               <Route path="/papelera" element={
                 isSuperadmin ? <SuperadminPanel currentUser={currentUser} modoPapelera /> : <Navigate to={homeRoute(currentUser)} replace />

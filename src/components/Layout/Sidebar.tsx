@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { Home, BarChart2, BookOpen, LogOut, GraduationCap, User, Building2, ShieldCheck, Trash2, CreditCard, Settings2, Receipt } from 'lucide-react'
+import { Home, BarChart2, BookOpen, LogOut, GraduationCap, User, Building2, ShieldCheck, Trash2, CreditCard, Settings2, Receipt, Target } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { CurrentUser } from '../../types'
 import styles from './Sidebar.module.css'
@@ -24,6 +24,7 @@ const NAV_PROFESOR: NavItem[] = [
 
 const NAV_SUPERADMIN: NavItem[] = [
   { id: 'superadmin', icon: ShieldCheck, label: 'Admin'       },
+  { id: 'pipeline',   icon: Target,      label: 'Prospección' },
   { id: 'billing',    icon: CreditCard,  label: 'Facturación' },
   { id: 'papelera',   icon: Trash2,      label: 'Papelera'    },
 ]

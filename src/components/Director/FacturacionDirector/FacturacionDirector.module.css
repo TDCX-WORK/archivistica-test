@@ -192,3 +192,24 @@
   .kpis { grid-template-columns: repeat(2, 1fr); }
   .tableWrap { overflow-x: auto; }
 }
+
+/* ── Tabs ── */
+.tabs {
+  display: flex; gap: 4px;
+  padding: 4px; background: var(--surface-off);
+  border: 1px solid var(--line); border-radius: 12px;
+  width: fit-content;
+}
+.tab {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.5rem 1.1rem; border-radius: 9px;
+  font-size: var(--fs-5); font-weight: 600;
+  color: var(--ink-muted); background: none; border: none;
+  cursor: pointer; transition: all 0.15s; font-family: var(--font-body);
+}
+.tab:hover { color: var(--ink); background: var(--surface); }
+.tabActive {
+  color: var(--ink); background: var(--surface);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  font-weight: 700;
+}

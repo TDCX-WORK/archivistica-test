@@ -1,15 +1,18 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Users, TrendingUp, AlertTriangle, BookOpen, Copy, Check, FileText,
   Plus, RefreshCw, ChevronDown, ChevronUp, Zap, Clock,
   UserX, BarChart2, Key, Calendar, Shield, ShieldOff, RotateCcw, XCircle,
   TrendingDown, CalendarDays, ExternalLink, Bell, CheckCircle2, ArrowRight,
-  Megaphone, Trash2, BookOpen as BookIcon
+  Megaphone, Trash2, BookOpen as BookIcon, MessageSquare, Send, X, CornerDownLeft
 } from 'lucide-react'
 import { supabase }              from '../../../lib/supabase'
 import { Ripple }              from '../../magicui/Ripple'
 import { AnimatedGridPattern } from '../../magicui/AnimatedGridPattern'
 import { useProfesor }         from '../../../hooks/useProfesor'
+import { useProfesorMessages } from '../../../hooks/useDirectMessages'
+import type { DirectMessage }  from '../../../hooks/useDirectMessages'
 import { useAnnouncements }    from '../../../hooks/useAnnouncements'
 import FallosClase             from '../FallosClase/FallosClase'
 import PlanSemanal             from '../PlanSemanal/PlanSemanal'
@@ -17,6 +20,7 @@ import AlumnoDetalle           from '../AlumnoDetalle/AlumnoDetalle'
 import ClaseEvolucionChart     from '../ClaseEvolucionChart/ClaseEvolucionChart'
 import BancoPreguntas          from '../BancoPreguntas/BancoPreguntas'
 import type { CurrentUser, AlumnoConStats, InviteCode, Announcement, StatsClase } from '../../../types'
+import ErrorState     from '../../ui/ErrorState'
 import styles from './ProfesorPanel.module.css'
 
 function formatDias(n: number | null): string {
@@ -130,9 +134,10 @@ function GenerarCodigoModal({ onGenerar, onClose }: { onGenerar: (dias: number, 
   )
 }
 
-function AlumnoRow({ alumno, expanded, onToggle, onRenovar, onRevocar, onDetalle }: {
+function AlumnoRow({ alumno, expanded, onToggle, onRenovar, onRevocar, onDetalle, onMensaje }: {
   alumno: AlumnoConStats; expanded: boolean; onToggle: () => void
-  onRenovar: (a: AlumnoConStats) => void; onRevocar: (id: string) => Promise<boolean | void>; onDetalle: (a: AlumnoConStats) => void
+  onRenovar: (a: AlumnoConStats) => void; onRevocar: (id: string) => Promise<boolean | void>
+  onDetalle: (a: AlumnoConStats) => void; onMensaje: (a: AlumnoConStats) => void
 }) {
   const [revocando, setRevocando] = useState(false)
   const handleRevocar = async () => {
@@ -183,6 +188,7 @@ function AlumnoRow({ alumno, expanded, onToggle, onRenovar, onRevocar, onDetalle
             </button>
             <button className={styles.btnRenovarSmall2} onClick={() => onRenovar(alumno)}><RotateCcw size={12} /> Renovar acceso</button>
             <button className={styles.btnDetalleSmall} onClick={() => onDetalle(alumno)}><ExternalLink size={12} /> Ver detalle</button>
+            <button className={styles.btnMensajeSmall} onClick={() => onMensaje(alumno)}><MessageSquare size={12} /> Mensaje</button>
           </div>
         </div>
       )}
@@ -465,45 +471,167 @@ function TablonPanel({ announcements, onAdd, onDelete, currentUser }: {
   )
 }
 
-interface AccionInbox { id:string; tipo:string; titulo:string; subtitulo:string; alumno?:AlumnoConStats; acciones:{label:string;tipo:string;variant:'primary'|'secondary'}[] }
+// ── InboxPanel — Grid de alumnos con acciones y mensajes ─────────────────────
+// Colores por posición para los bocadillos
+const ALUMNO_COLORS = [
+  '#2563EB','#7C3AED','#059669','#DC2626','#D97706',
+  '#0891B2','#BE185D','#065F46','#92400E','#1D4ED8',
+]
 
-function InboxPanel({ alumnos, inviteCodes, onVerAlumno, onRenovar }: {
-  alumnos:AlumnoConStats[]; inviteCodes:InviteCode[]; onVerAlumno:(a:AlumnoConStats)=>void; onRenovar:(a:AlumnoConStats)=>void
+function AlumnoBocadillo({ alumno, colorIdx, mensajes, onRenovar, onVerAlumno, onEnviarMensaje, onLeidoMsg, onDeleteMsg }: {
+  alumno:          AlumnoConStats
+  colorIdx:        number
+  mensajes:        DirectMessage[]
+  onRenovar:       (a: AlumnoConStats) => void
+  onVerAlumno:     (a: AlumnoConStats) => void
+  onEnviarMensaje: (a: AlumnoConStats) => void
+  onLeidoMsg:      (id: string) => void
+  onDeleteMsg:     (id: string) => void
 }) {
-  const acciones: AccionInbox[] = []
-  alumnos.filter(a=>a.accesoExpirado).forEach(a=>acciones.push({ id:`exp-${a.id}`, tipo:'acceso_expirado', titulo:`Acceso expirado — ${a.username}`, subtitulo:`Expiró hace ${a.diasParaExpirar!==null?Math.abs(a.diasParaExpirar):'?'} días`, alumno:a, acciones:[{label:'Renovar acceso',tipo:'renovar',variant:'primary'},{label:'Ver alumno',tipo:'ver',variant:'secondary'}] }))
-  alumnos.filter(a=>a.proximoAExpirar&&!a.accesoExpirado).sort((a,b)=>(a.diasParaExpirar??99)-(b.diasParaExpirar??99)).forEach(a=>acciones.push({ id:`proxexp-${a.id}`, tipo:'acceso_pronto', titulo:`Acceso expira pronto — ${a.username}`, subtitulo:`Le quedan ${a.diasParaExpirar} días de acceso`, alumno:a, acciones:[{label:'Renovar ahora',tipo:'renovar',variant:'primary'},{label:'Ver alumno',tipo:'ver',variant:'secondary'}] }))
-  alumnos.filter(a=>a.enRiesgo&&!a.accesoExpirado).sort((a,b)=>(b.diasInactivo??0)-(a.diasInactivo??0)).forEach(a=>acciones.push({ id:`inactivo-${a.id}`, tipo:'inactivo', titulo:`Sin actividad — ${a.username}`, subtitulo:`Lleva ${a.diasInactivo} días sin estudiar`, alumno:a, acciones:[{label:'Ver alumno',tipo:'ver',variant:'primary'}] }))
-  inviteCodes.filter(c=>!c.used_by&&new Date(c.expires_at)<new Date()).forEach(c=>acciones.push({ id:`cod-${c.id??c.code}`, tipo:'codigo_expirado', titulo:`Código caducado — ${c.code}`, subtitulo:'Expiró sin que nadie lo usara', acciones:[{label:'Generar nuevo',tipo:'nuevo_codigo',variant:'primary'}] }))
+  const [expanded, setExpanded] = useState(false)
+  const color = ALUMNO_COLORS[colorIdx % ALUMNO_COLORS.length]!
 
-  const TIPO_META: Record<string,{color:string;bg:string;icon:React.ElementType}> = {
-    acceso_expirado:{color:'#DC2626',bg:'#FEF2F2',icon:ShieldOff}, acceso_pronto:{color:'#D97706',bg:'#FFFBEB',icon:Clock},
-    inactivo:{color:'#7C3AED',bg:'#F5F3FF',icon:UserX}, codigo_expirado:{color:'#6B7280',bg:'#F3F4F6',icon:Key},
-  }
-  const handleAccion = (accion:{tipo:string}, item:AccionInbox) => {
-    if (accion.tipo==='renovar'&&item.alumno) onRenovar(item.alumno)
-    if (accion.tipo==='ver'&&item.alumno) onVerAlumno(item.alumno)
-  }
-  if (acciones.length===0) return (
-    <div className={styles.inboxEmpty}>
-      <CheckCircle2 size={40} strokeWidth={1.4} style={{color:'#059669'}}/>
-      <p className={styles.inboxEmptyTitle}>Todo al día</p>
-      <span className={styles.inboxEmptySub}>No hay acciones pendientes. ¡Buen trabajo!</span>
+  // Alertas del alumno
+  const tieneAccesoExpirado  = alumno.accesoExpirado
+  const proximoAExpirar      = alumno.proximoAExpirar && !alumno.accesoExpirado
+  const inactivo             = alumno.enRiesgo && !alumno.accesoExpirado
+  const tieneAlerta          = tieneAccesoExpirado || proximoAExpirar || inactivo
+
+  // Mensajes con respuesta no leída
+  const msgsPendientes = mensajes.filter(m => m.to_id === alumno.id && m.reply_body)
+  const msgsEnviados   = mensajes.filter(m => m.to_id === alumno.id)
+  const nBadge         = msgsPendientes.length + (tieneAlerta ? 1 : 0)
+
+  return (
+    <div className={[styles.bocadillo, expanded ? styles.bocadilloExpanded : ''].join(' ')}
+      style={{ ['--bc' as string]: color }}>
+
+      {/* Cabecera siempre visible */}
+      <button className={styles.bocadilloHeader} onClick={() => setExpanded(v => !v)}>
+        <div className={styles.bocadilloAvatar} style={{ background: color + '18', border: `2px solid ${color}`, color }}>
+          {alumno.username[0]!.toUpperCase()}
+        </div>
+        <span className={styles.bocadilloNombre}>{alumno.username}</span>
+        {nBadge > 0 && (
+          <span className={styles.bocadilloBadge} style={{ background: msgsPendientes.length > 0 ? '#059669' : '#DC2626' }}>
+            {nBadge}
+          </span>
+        )}
+      </button>
+
+      {/* Panel expandido */}
+      {expanded && (
+        <div className={styles.bocadilloBody}>
+
+          {/* Alertas */}
+          {tieneAccesoExpirado && (
+            <div className={styles.bocadilloAlerta} style={{ borderColor:'#DC2626', background:'#FEF2F2' }}>
+              <ShieldOff size={13} style={{color:'#DC2626',flexShrink:0}}/>
+              <span style={{color:'#DC2626',flex:1}}>Acceso expirado hace {alumno.diasParaExpirar!==null?Math.abs(alumno.diasParaExpirar):'?'}d</span>
+              <button className={styles.bocadilloAlertaBtn} onClick={() => onRenovar(alumno)}>Renovar</button>
+            </div>
+          )}
+          {proximoAExpirar && (
+            <div className={styles.bocadilloAlerta} style={{ borderColor:'#D97706', background:'#FFFBEB' }}>
+              <Clock size={13} style={{color:'#D97706',flexShrink:0}}/>
+              <span style={{color:'#D97706',flex:1}}>Expira en {alumno.diasParaExpirar}d</span>
+              <button className={styles.bocadilloAlertaBtn} onClick={() => onRenovar(alumno)}>Renovar</button>
+            </div>
+          )}
+          {inactivo && (
+            <div className={styles.bocadilloAlerta} style={{ borderColor:'#7C3AED', background:'#F5F3FF' }}>
+              <UserX size={13} style={{color:'#7C3AED',flexShrink:0}}/>
+              <span style={{color:'#7C3AED',flex:1}}>Inactivo {alumno.diasInactivo}d</span>
+            </div>
+          )}
+
+          {/* Historial de mensajes */}
+          {msgsEnviados.length > 0 && (
+            <div className={styles.bocadilloMsgs}>
+              {msgsEnviados.map(m => (
+                <div key={m.id} className={styles.bocadilloMsg}>
+                  <div className={styles.inboxMsgBubbleProfe}>
+                    <span className={styles.inboxMsgLabel}>Tú enviaste</span>
+                    <p className={styles.inboxMsgText}>{m.body}</p>
+                  </div>
+                  {m.reply_body && (
+                    <div className={styles.inboxMsgBubbleAlumno}>
+                      <div className={styles.inboxMsgAlumnoHead}>
+                        <span className={styles.inboxMsgLabel} style={{color:'#059669'}}>{alumno.username} respondió</span>
+                        <span className={styles.inboxMsgFecha}>{m.reply_at ? new Date(m.reply_at).toLocaleDateString('es-ES',{day:'2-digit',month:'short'}) : ''}</span>
+                      </div>
+                      <p className={styles.inboxMsgText}>{m.reply_body}</p>
+                    </div>
+                  )}
+                  <div className={styles.bocadilloMsgActions}>
+                    {m.reply_body && (
+                      <button className={styles.inboxMsgBtnLeido} onClick={() => onLeidoMsg(m.id)}>
+                        <Check size={11}/> Leído
+                      </button>
+                    )}
+                    <button className={styles.inboxMsgBtnEliminar} onClick={() => onDeleteMsg(m.id)}>
+                      <Trash2 size={11}/> Eliminar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Acciones */}
+          <div className={styles.bocadilloAcciones}>
+            <button className={styles.bocadilloActBtn} onClick={() => onEnviarMensaje(alumno)}>
+              <MessageSquare size={12}/> Mensaje
+            </button>
+            <button className={styles.bocadilloActBtn} onClick={() => onVerAlumno(alumno)}>
+              <ExternalLink size={12}/> Ver detalle
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
+}
+
+function InboxPanel({ alumnos, inviteCodes, onVerAlumno, onRenovar, onEnviarMensaje, mensajes, onMensajeLeido, onDeleteMensaje }: {
+  alumnos:AlumnoConStats[]; inviteCodes:InviteCode[]; onVerAlumno:(a:AlumnoConStats)=>void; onRenovar:(a:AlumnoConStats)=>void
+  onEnviarMensaje:(a:AlumnoConStats)=>void
+  mensajes: DirectMessage[]; onMensajeLeido: (id: string) => void; onDeleteMensaje: (id: string) => void
+}) {
+  // Códigos caducados — se muestran separados
+  const codigosCaducados = inviteCodes.filter(c => !c.used_by && new Date(c.expires_at) < new Date())
+
   return (
-    <div className={styles.inboxList}>
-      {acciones.map(item=>{const meta=TIPO_META[item.tipo]!;const Icon=meta.icon;return(
-        <div key={item.id} className={styles.inboxItem} style={{borderLeftColor:meta.color}}>
-          <div className={styles.inboxItemIcon} style={{background:meta.bg,color:meta.color}}><Icon size={16} strokeWidth={2}/></div>
-          <div className={styles.inboxItemBody}><div className={styles.inboxItemTitulo}>{item.titulo}</div><div className={styles.inboxItemSub}>{item.subtitulo}</div></div>
-          <div className={styles.inboxItemAcciones}>{item.acciones.map((a,i)=>(
-            <button key={i} className={a.variant==='primary'?styles.inboxBtnPrimary:styles.inboxBtnSecondary} onClick={()=>handleAccion(a,item)}>
-              {a.label}{a.variant==='primary'&&<ArrowRight size={12}/>}
-            </button>
-          ))}</div>
+    <div className={styles.inboxNuevo}>
+      {/* Grid de bocadillos */}
+      <div className={styles.bocadillosGrid}>
+        {alumnos.map((alumno, i) => (
+          <AlumnoBocadillo
+            key={alumno.id}
+            alumno={alumno}
+            colorIdx={i}
+            mensajes={mensajes.filter(m => m.to_id === alumno.id)}
+            onRenovar={onRenovar}
+            onVerAlumno={onVerAlumno}
+            onEnviarMensaje={onEnviarMensaje}
+            onLeidoMsg={onMensajeLeido}
+            onDeleteMsg={onDeleteMensaje}
+          />
+        ))}
+      </div>
+
+      {/* Códigos caducados */}
+      {codigosCaducados.length > 0 && (
+        <div className={styles.inboxCodigosCaducados}>
+          <div className={styles.inboxMensajesSectionTitle}><Key size={13}/> Códigos caducados sin usar ({codigosCaducados.length})</div>
+          {codigosCaducados.map(c => (
+            <div key={c.id} className={styles.inboxItem} style={{borderLeftColor:'#6B7280'}}>
+              <div className={styles.inboxItemIcon} style={{background:'#F3F4F6',color:'#6B7280'}}><Key size={16} strokeWidth={2}/></div>
+              <div className={styles.inboxItemBody}><div className={styles.inboxItemTitulo}>Código caducado — {c.code}</div><div className={styles.inboxItemSub}>Expiró sin que nadie lo usara</div></div>
+            </div>
+          ))}
         </div>
-      )})}
+      )}
     </div>
   )
 }
@@ -512,7 +640,35 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
   const { alumnos, inviteCodes, statsClase, allSessions, loading, error, generarCodigo, renovarAcceso, revocarAcceso } = useProfesor(currentUser)
   const { announcements, addAnnouncement, deleteAnnouncement } = useAnnouncements(currentUser?.academy_id, currentUser?.subject_id)
 
-  const [tab,           setTab]           = useState('inbox')
+  const { sent: dmSent, sendMessage: dmSend, deleteSentMessage: dmDeleteSent } = useProfesorMessages(
+    currentUser?.id, currentUser?.academy_id, currentUser?.subject_id
+  )
+  const [modalMensaje,  setModalMensaje]  = useState<AlumnoConStats | null>(null)
+  const [msgTexto,      setMsgTexto]      = useState('')
+  const [msgSending,    setMsgSending]    = useState(false)
+  const [msgSent,       setMsgSent]       = useState(false)
+  const [dmLeidos,      setDmLeidos]      = useState<Set<string>>(new Set())
+
+  const handleEnviarMensaje = async () => {
+    if (!modalMensaje || !msgTexto.trim()) return
+    setMsgSending(true)
+    const ok = await dmSend(modalMensaje.id, msgTexto)
+    setMsgSending(false)
+    if (ok) {
+      setMsgSent(true)
+      setTimeout(() => { setModalMensaje(null); setMsgTexto(''); setMsgSent(false) }, 1500)
+    }
+  }
+
+  const handleMensajeLeido = (id: string) => {
+    setDmLeidos(prev => new Set([...prev, id]))
+  }
+
+  const handleDeleteMensaje = useCallback(async (id: string) => {
+    await dmDeleteSent(id)
+  }, [dmDeleteSent])
+
+  const [tab,           setTab]           = useState('')
   const [alumnoDetalle, setAlumnoDetalle] = useState<AlumnoConStats | null>(null)
   const [expandedId,    setExpandedId]    = useState<string | null>(null)
   const [filtro,        setFiltro]        = useState('todos')
@@ -535,9 +691,11 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
 
   const handleCopy = useCallback((code: string) => { navigator.clipboard.writeText(code); setCopied(code); setTimeout(()=>setCopied(null),2000) }, [])
 
-  const nExpirando = alumnos.filter(a => a.proximoAExpirar || a.accesoExpirado).length
-  const nAcciones  = alumnos.filter(a => a.accesoExpirado || a.proximoAExpirar || a.enRiesgo).length
-                   + inviteCodes.filter(c => !c.used_by && new Date(c.expires_at) < new Date()).length
+  const nExpirando     = alumnos.filter(a => a.proximoAExpirar || a.accesoExpirado).length
+  const nMsgRespuestas = dmSent.filter(m => m.reply_body).length
+  const nAcciones      = alumnos.filter(a => a.accesoExpirado || a.proximoAExpirar || a.enRiesgo).length
+                       + inviteCodes.filter(c => !c.used_by && new Date(c.expires_at) < new Date()).length
+                       + nMsgRespuestas
 
   const bentoRef   = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -588,7 +746,7 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
 
       <div ref={contentRef} className={styles.contentArea}>
         {tab==='evolucion'&&<ClaseEvolucionChart alumnos={alumnos} sessions={allSessions} academyId={currentUser?.academy_id} subjectId={currentUser?.subject_id}/>}
-        {tab==='inbox'&&<InboxPanel alumnos={alumnos} inviteCodes={inviteCodes} onVerAlumno={setAlumnoDetalle} onRenovar={setModalRenovar}/>}
+        {tab==='inbox'&&<InboxPanel alumnos={alumnos} inviteCodes={inviteCodes} onVerAlumno={setAlumnoDetalle} onRenovar={setModalRenovar} onEnviarMensaje={setModalMensaje} mensajes={dmSent} onMensajeLeido={handleMensajeLeido} onDeleteMensaje={handleDeleteMensaje}/>}
         {tab==='clase'&&(
           <div className={styles.tabContent}>
             <div className={styles.filtros}>
@@ -600,7 +758,7 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
               <div className={styles.emptyState}><Users size={32} strokeWidth={1.2}/><p>{filtro==='riesgo'?'Ningún alumno en riesgo. ¡Bien!':filtro==='expirando'?'Ningún acceso próximo a expirar.':'No hay alumnos en este filtro.'}</p></div>
             ):(
               <div className={styles.alumnosList}>
-                {alumnosFiltrados.map(alumno=><AlumnoRow key={alumno.id} alumno={alumno} expanded={expandedId===alumno.id} onToggle={()=>setExpandedId(prev=>prev===alumno.id?null:alumno.id)} onRenovar={setModalRenovar} onRevocar={revocarAcceso} onDetalle={setAlumnoDetalle}/>)}
+                {alumnosFiltrados.map(alumno=><AlumnoRow key={alumno.id} alumno={alumno} expanded={expandedId===alumno.id} onToggle={()=>setExpandedId(prev=>prev===alumno.id?null:alumno.id)} onRenovar={setModalRenovar} onRevocar={revocarAcceso} onDetalle={setAlumnoDetalle} onMensaje={setModalMensaje}/>)}
               </div>
             )}
           </div>
@@ -638,6 +796,33 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
         )}
         {tab&&<button className={styles.scrollBackBtn} onClick={()=>bentoRef.current?.scrollIntoView({behavior:'smooth',block:'start'})} aria-label="Volver arriba"><ChevronUp size={18} strokeWidth={2.5}/></button>}
       </div>
+
+      {/* Modal enviar mensaje desde Mi Clase */}
+      {modalMensaje && createPortal(
+        <div className={styles.msgOverlay} onClick={() => { setModalMensaje(null); setMsgTexto(''); setMsgSent(false) }}>
+          <div className={styles.msgModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.msgModalHead}>
+              <span className={styles.msgModalTitle}>Mensaje para {modalMensaje.username}</span>
+              <button className={styles.msgModalClose} onClick={() => { setModalMensaje(null); setMsgTexto(''); setMsgSent(false) }}><X size={14} /></button>
+            </div>
+            {msgSent ? (
+              <div className={styles.msgSent}><CheckCircle2 size={20} style={{color:'#059669'}}/><span>Mensaje enviado</span></div>
+            ) : (
+              <>
+                <textarea className={styles.msgTextarea} placeholder={`Escribe un mensaje para ${modalMensaje.username}...`}
+                  value={msgTexto} onChange={e => setMsgTexto(e.target.value)} rows={4} autoFocus />
+                <div className={styles.msgModalFoot}>
+                  <span className={styles.msgHint}>El alumno lo verá en su tablón de mensajes</span>
+                  <button className={styles.msgBtnEnviar} onClick={handleEnviarMensaje} disabled={msgSending || !msgTexto.trim()}>
+                    {msgSending ? <RefreshCw size={13} className={styles.spinner} /> : <Send size={13} />} Enviar
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }

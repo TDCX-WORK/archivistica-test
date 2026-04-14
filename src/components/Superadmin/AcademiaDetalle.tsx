@@ -485,7 +485,7 @@ export default function AcademiaDetalle({ academia, onBack }: { academia: any; o
               <KpiCard icon={Users}         label="Alumnos"          value={totalAlumnos}    color="#0EA5E9" delay={0.05} />
               <KpiCard icon={GraduationCap} label="Profesores"       value={totalProfes}     color="#7C3AED" delay={0.1}  />
               <KpiCard icon={Building2}     label="Directores"       value={directores.length} color="#10B981" delay={0.15} />
-              <KpiCard icon={Zap}           label="Activos 7d"       value={activos}         color="#5de4ff" delay={0.2} />
+              <KpiCard icon={Zap}           label="Activos 7d"       value={activos}         color="#2563EB" delay={0.2} />
               <KpiCard icon={BarChart2}     label="Nota global"      value={notaGlobal !== null ? `${notaGlobal}%` : '—'} color={scoreColor(notaGlobal)} delay={0.25} />
               <KpiCard icon={TrendingUp}    label="Sesiones totales" value={sesiones.length} color="#F59E0B" delay={0.3} />
             </div>
@@ -539,7 +539,7 @@ export default function AcademiaDetalle({ academia, onBack }: { academia: any; o
                 <div className={styles.bentoCardLabel}>Actividad</div>
                 <div className={styles.bentoStatRow}>
                   <div className={styles.bentoStatItem}><span className={styles.bentoStatNum}>{totalAlumnos}</span><span className={styles.bentoStatLabel}>alumnos</span></div>
-                  <div className={styles.bentoStatItem}><span className={styles.bentoStatNum} style={{ color: '#5de4ff' }}>{activos}</span><span className={styles.bentoStatLabel}>activos</span></div>
+                  <div className={styles.bentoStatItem}><span className={styles.bentoStatNum} style={{ color: '#2563EB' }}>{activos}</span><span className={styles.bentoStatLabel}>activos</span></div>
                   <div className={styles.bentoStatItem}><span className={styles.bentoStatNum}>{sesiones.length}</span><span className={styles.bentoStatLabel}>sesiones</span></div>
                 </div>
                 {notaGlobal !== null && <div className={styles.bentoNota} style={{ color: scoreColor(notaGlobal) }}>{notaGlobal}% nota media global</div>}

@@ -112,15 +112,19 @@ function SeccionAlumnos({ studentProfiles, subjects, updateStudentProfile }: {
   for (const s of subjects) subMap[s.id] = s
 
   const handleSave = async (userId: string, form: AlumnoForm) => {
+    // Get academy_id from the profile
+    const { data: profile } = await supabase.from('profiles').select('academy_id').eq('id', userId).single()
     await supabase.from('student_profiles').upsert({
-      id: userId,
-      full_name:     form.full_name     || null,
-      phone:         form.phone         || null,
-      email_contact: form.email_contact || null,
-      city:          form.city          || null,
-      exam_date:     form.exam_date     || null,
-      monthly_price: form.monthly_price ? parseFloat(form.monthly_price) : null,
-      updated_at:    new Date().toISOString(),
+      id:             userId,
+      academy_id:     (profile as any)?.academy_id ?? null,
+      full_name:      form.full_name     || null,
+      phone:          form.phone         || null,
+      email_contact:  form.email_contact || null,
+      city:           form.city          || null,
+      exam_date:      form.exam_date     || null,
+      monthly_price:  form.monthly_price ? parseFloat(form.monthly_price) : null,
+      payment_status: 'pending',
+      updated_at:     new Date().toISOString(),
     }, { onConflict: 'id' })
     if (form.access_until) {
       await supabase.from('profiles').update({ access_until: new Date(form.access_until + 'T23:59:59').toISOString() }).eq('id', userId)
@@ -145,46 +149,82 @@ function SeccionAlumnos({ studentProfiles, subjects, updateStudentProfile }: {
         </div>
       </div>
 
-      <div className={styles.tabla}>
-        <div className={styles.tablaHead}>
-          <span>Alumno</span><span>Asignatura</span><span>Contacto</span><span>Acceso hasta</span><span>Precio/mes</span><span></span>
-        </div>
-        {filtrados.length === 0 ? <p className={styles.empty}>No se encontraron alumnos</p> : filtrados.map(a => {
-          const ext      = a.extended ?? {}
-          const sub      = a.subject_id ? subMap[a.subject_id] : null
-          const exp      = a.access_until ? new Date(a.access_until) : null
-          const expirado = exp && exp < new Date()
-          const pronto   = exp && !expirado && (exp.getTime() - new Date().getTime()) < 14 * 86400000
-          return (
-            <div key={a.id} className={styles.tablaRow}>
-              <div className={styles.alumnoCell}>
-                <div className={styles.miniAvatar}>{(String(ext.full_name ?? '') || a.username)[0]!.toUpperCase()}</div>
-                <div>
-                  <div className={styles.nombrePrincipal}>{String(ext.full_name ?? '') || a.username}</div>
-                  {ext.full_name && <div className={styles.usernameSecundario}>@{a.username}</div>}
+      {filtrados.length === 0
+        ? <p className={styles.empty}>No se encontraron alumnos</p>
+        : <div className={styles.alumnosGrid}>
+            {filtrados.map(a => {
+              const ext      = a.extended ?? {}
+              const sub      = a.subject_id ? subMap[a.subject_id] : null
+              const exp      = a.access_until ? new Date(a.access_until) : null
+              const expirado = exp ? exp < new Date() : false
+              const pronto   = exp && !expirado && (exp.getTime() - new Date().getTime()) < 14 * 86400000
+              const nombre   = String(ext.full_name ?? '') || a.username
+              const diasRestantes = exp ? Math.ceil((exp.getTime() - new Date().getTime()) / 86400000) : null
+
+              return (
+                <div key={a.id} className={[
+                  styles.alumnoCard,
+                  expirado ? styles.alumnoCardExpirado : pronto ? styles.alumnoCardPronto : styles.alumnoCardOk
+                ].join(' ')}>
+
+                  {/* Cabecera */}
+                  <div className={styles.alumnoCardHead}>
+                    <div className={styles.alumnoCardAvatar}>
+                      {nombre[0]!.toUpperCase()}
+                    </div>
+                    <div className={styles.alumnoCardInfo}>
+                      <span className={styles.alumnoCardNombre}>{nombre}</span>
+                      {ext.full_name && <span className={styles.alumnoCardUsername}>@{a.username}</span>}
+                    </div>
+                    <button className={styles.editBtn} onClick={() => setEditAlumno(a)}>
+                      <Edit3 size={13}/>
+                    </button>
+                  </div>
+
+                  {/* Asignatura */}
+                  {sub && (
+                    <div className={styles.alumnoCardSub}>
+                      <div className={styles.subDot} style={{background: sub.color}}/>
+                      <span>{sub.name}</span>
+                    </div>
+                  )}
+
+                  {/* Precio + acceso */}
+                  <div className={styles.alumnoCardMeta}>
+                    <div className={styles.alumnoCardMetaItem}>
+                      <span className={styles.alumnoCardMetaLabel}>Precio/mes</span>
+                      <span className={styles.alumnoCardMetaVal}>
+                        {ext.monthly_price
+                          ? <strong>{String(ext.monthly_price)} €</strong>
+                          : <span className={styles.muted}>Sin precio</span>}
+                      </span>
+                    </div>
+                    <div className={styles.alumnoCardMetaItem}>
+                      <span className={styles.alumnoCardMetaLabel}>Acceso</span>
+                      <span className={[styles.accesoChip, expirado ? styles.accesoExpirado : pronto ? styles.accesoPronto : styles.accesoOk].join(' ')}>
+                        {a.access_until
+                          ? expirado
+                            ? 'Expirado'
+                            : diasRestantes !== null && diasRestantes <= 30
+                              ? `${diasRestantes}d`
+                              : fmt(a.access_until)
+                          : 'Sin límite'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Contacto */}
+                  {(ext.phone || ext.email_contact) && (
+                    <div className={styles.alumnoCardContacto}>
+                      {ext.phone         && <span><Phone size={11}/> {String(ext.phone)}</span>}
+                      {ext.email_contact && <span><Mail  size={11}/> {String(ext.email_contact)}</span>}
+                    </div>
+                  )}
                 </div>
-              </div>
-              <div className={styles.subCell}>
-                {sub ? (<><div className={styles.subDot} style={{ background: sub.color }} /><span>{sub.name}</span></>) : <span className={styles.muted}>—</span>}
-              </div>
-              <div className={styles.contactCell}>
-                {ext.phone         && <span><Phone size={11} /> {String(ext.phone)}</span>}
-                {ext.email_contact && <span><Mail  size={11} /> {String(ext.email_contact)}</span>}
-                {!ext.phone && !ext.email_contact && <span className={styles.muted}>Sin datos</span>}
-              </div>
-              <div>
-                <span className={[styles.accesoChip, expirado ? styles.accesoExpirado : pronto ? styles.accesoPronto : styles.accesoOk].join(' ')}>
-                  {a.access_until ? fmt(a.access_until) : 'Sin límite'}
-                </span>
-              </div>
-              <div className={styles.precioCell}>
-                {ext.monthly_price ? <span className={styles.precio}>{String(ext.monthly_price)} €</span> : <span className={styles.muted}>—</span>}
-              </div>
-              <button className={styles.editBtn} onClick={() => setEditAlumno(a)}><Edit3 size={13} /></button>
-            </div>
-          )
-        })}
-      </div>
+              )
+            })}
+          </div>
+      }
 
       {editAlumno && <EditAlumnoModal alumno={editAlumno} onSave={handleSave} onClose={() => setEditAlumno(null)} />}
     </div>

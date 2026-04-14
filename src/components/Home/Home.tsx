@@ -13,6 +13,7 @@ import { usePlanSemanal }    from '../../hooks/usePlanSemanal'
 import StudyHeatmap          from './StudyHeatmap'
 import { Ripple }            from '../magicui/Ripple'
 import { useAnnouncements }  from '../../hooks/useAnnouncements'
+import { useAlumnoMessages } from '../../hooks/useDirectMessages'
 import { useStudentProfile } from '../../hooks/useStudentProfile'
 import AnnouncementsCard     from './AnnouncementsCard'
 import type { CurrentUser, Session, WrongAnswer, BloqueConTemas, StudyPlan } from '../../types'
@@ -324,6 +325,7 @@ interface HomeProps {
 
 export default function Home({ onSelectMode, progress, currentUser, studyProgress }: HomeProps) {
   const { announcements, loading: loadingAnn } = useAnnouncements(currentUser?.academy_id, currentUser?.subject_id)
+  const { messages: dmMessages, unread: dmUnread, markRead: dmMarkRead, replyToMessage: dmReply, deleteMessage: dmDelete } = useAlumnoMessages(currentUser?.id)
   const { profile: studentProfile }            = useStudentProfile(currentUser?.id)
   const navigate = useNavigate()
 
@@ -520,7 +522,15 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
           </div>
 
           <div className={styles.cardTall}>
-            <AnnouncementsCard announcements={announcements} loading={loadingAnn} />
+            <AnnouncementsCard
+              announcements={announcements}
+              loading={loadingAnn}
+              messages={dmMessages}
+              unreadMessages={dmUnread}
+              onMarkRead={dmMarkRead}
+              onReply={dmReply}
+              onDeleteMessage={dmDelete}
+            />
           </div>
 
           {studentProfile && (studentProfile.monthly_price || studentProfile.exam_date || currentUser?.access_until) && (

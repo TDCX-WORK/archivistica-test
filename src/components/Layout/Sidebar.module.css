@@ -22,8 +22,8 @@
     2px 0 8px rgba(0,0,0,0.06);
   /* Transición de expansión suave */
   transition:
-    width 0.28s cubic-bezier(0.34,1.4,0.64,1),
-    box-shadow 0.2s ease;
+    width 0.45s cubic-bezier(0.25,0.1,0.25,1),
+    box-shadow 0.35s ease;
 }
 
 /* ── ESTADO EXPANDIDO (hover) ────────────────────────────── */
@@ -66,7 +66,7 @@
   gap: 4px;
   padding: 1rem 0;
   width: 100%;
-  transition: align-items 0.28s ease, padding 0.28s ease;
+  transition: align-items 0.45s ease, padding 0.45s ease;
 }
 
 /* ── NAV ITEM ────────────────────────────────────────────── */
@@ -126,7 +126,7 @@
   background: currentColor;
   border-radius: 99px;
   opacity: 0.7;
-  transition: width 0.22s cubic-bezier(0.34,1.56,0.64,1) 0.08s;
+  transition: width 0.4s cubic-bezier(0.25,0.1,0.25,1) 0.1s;
 }
 
 /* ── ESTILOS CUANDO EL SIDEBAR ESTÁ EXPANDIDO ────────────── */
@@ -197,7 +197,7 @@
   gap: 8px;
   padding: 1rem 0 1.25rem;
   border-top: 1px solid var(--line);
-  transition: align-items 0.28s ease, padding 0.28s ease;
+  transition: align-items 0.45s ease, padding 0.45s ease;
 }
 
 .avatar {
@@ -218,7 +218,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease;
+  transition: color 0.22s ease, background 0.22s ease;
   min-height: unset;
 }
 .logoutBtn:hover { color: var(--danger); background: var(--danger-lt); }

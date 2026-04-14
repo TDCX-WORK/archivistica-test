@@ -8,6 +8,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  max-height: 480px;
 }
 
 /* Header */
@@ -82,3 +83,163 @@
 }
 .emptyTitle { font-size: var(--fs-5); font-weight: 700; color: var(--ink-muted); }
 .emptySub   { font-size: var(--fs-6); color: var(--ink-subtle); max-width: 160px; line-height: 1.4; }
+
+/* ── Header tabs ─────────────────────────────────────────────────────────── */
+.headerTabs {
+  display: flex;
+  gap: 0.25rem;
+  width: 100%;
+}
+.headerTab {
+  display: flex; align-items: center; gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  background: none; border: none; border-radius: var(--r-sm);
+  font-size: var(--fs-5); font-weight: 600; color: var(--ink-muted);
+  cursor: pointer; transition: all 0.15s; flex: 1; justify-content: center;
+}
+.headerTab:hover { background: var(--surface-off); color: var(--ink); }
+.headerTabActive { background: var(--surface-off); color: var(--ink); font-weight: 700; }
+.tabBadge {
+  font-size: var(--fs-7); font-weight: 700;
+  background: var(--ink); color: white;
+  min-width: 16px; height: 16px; border-radius: 99px;
+  display: flex; align-items: center; justify-content: center; padding: 0 3px;
+}
+.tabBadgeUnread {
+  font-size: var(--fs-7); font-weight: 700;
+  background: #DC2626; color: white;
+  min-width: 16px; height: 16px; border-radius: 99px;
+  display: flex; align-items: center; justify-content: center; padding: 0 3px;
+}
+
+/* ── Mensajes directos ───────────────────────────────────────────────────── */
+.msgItem {
+  display: flex; flex-direction: column; gap: 0.5rem;
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.12s; cursor: pointer;
+}
+.msgItem:last-child { border-bottom: none; }
+.msgItem:hover { background: var(--surface-off); }
+.msgItemUnread { background: rgba(8,145,178,0.03); }
+
+.msgBubble {
+  background: var(--surface-off);
+  border: 1px solid var(--line);
+  border-left: 3px solid #0891B2;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  padding: 0.6rem 0.85rem;
+}
+.msgReplyBubble {
+  background: rgba(5,150,105,0.05);
+  border: 1px solid rgba(5,150,105,0.2);
+  border-left: 3px solid #059669;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  padding: 0.6rem 0.85rem;
+  margin-left: 1rem;
+}
+.msgBubbleHead {
+  display: flex; align-items: center; gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+.msgBubbleLabel {
+  font-size: var(--fs-7); font-weight: 700;
+  color: #0891B2; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.msgBubbleText {
+  font-size: var(--fs-5); color: var(--ink); line-height: 1.45; margin: 0;
+}
+.msgUnreadDot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #DC2626; margin-left: auto; flex-shrink: 0;
+}
+.msgBtnResponder {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.3rem 0.75rem;
+  background: none; border: 1px solid var(--line);
+  border-radius: var(--r-full); font-size: var(--fs-6); font-weight: 600;
+  color: var(--ink-muted); cursor: pointer; transition: all 0.15s;
+  align-self: flex-start;
+}
+.msgBtnResponder:hover { color: #0891B2; border-color: #0891B2; background: rgba(8,145,178,0.06); }
+
+/* ── Reply modal ─────────────────────────────────────────────────────────── */
+.replyOverlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; backdrop-filter: blur(2px); padding: 1rem;
+}
+.replyModal {
+  background: var(--surface); border-radius: var(--r-xl);
+  border: 1px solid var(--line); box-shadow: var(--shadow-xl);
+  width: min(480px, 100%); overflow: hidden;
+}
+.replyHead {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem; border-bottom: 1px solid var(--line);
+}
+.replyTitle { font-size: var(--fs-4); font-weight: 700; color: var(--ink); }
+.replyClose {
+  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  border-radius: 7px; border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink-muted); cursor: pointer;
+}
+.replyOriginal {
+  padding: 0.85rem 1.25rem;
+  background: var(--surface-off);
+  border-bottom: 1px solid var(--line);
+}
+.replyOriginalLabel {
+  display: block; font-size: var(--fs-7); font-weight: 700;
+  color: #0891B2; text-transform: uppercase; letter-spacing: 0.04em;
+  margin-bottom: 0.3rem;
+}
+.replyOriginalText {
+  font-size: var(--fs-5); color: var(--ink-muted); line-height: 1.45; margin: 0;
+}
+.replyTextarea {
+  display: block; width: 100%; padding: 1rem 1.25rem;
+  border: none; border-bottom: 1px solid var(--line);
+  resize: none; font-size: max(16px, var(--fs-4)); font-family: var(--font-body);
+  color: var(--ink); background: var(--surface); outline: none;
+  line-height: 1.55; min-height: 90px; box-sizing: border-box;
+}
+.replyFoot {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 0.5rem; padding: 0.75rem 1.25rem;
+}
+.replyBtnCancelar {
+  padding: 0.45rem 0.9rem; background: var(--surface-off);
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  font-size: var(--fs-5); color: var(--ink-muted); cursor: pointer;
+}
+.replyBtnEnviar {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.5rem 1.1rem; border-radius: var(--r-md);
+  background: #0891B2; color: white; border: none;
+  font-size: var(--fs-5); font-weight: 700; cursor: pointer;
+  font-family: var(--font-body); transition: background 0.15s;
+}
+.replyBtnEnviar:disabled { opacity: 0.5; cursor: not-allowed; }
+.replySent {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 1.25rem; font-size: var(--fs-4); font-weight: 600; color: #059669;
+  justify-content: center;
+}
+.spinner { animation: spinAnim 0.8s linear infinite; }
+@keyframes spinAnim { to { transform: rotate(360deg); } }
+
+@media (max-width: 600px) {
+  .replyOverlay { align-items: flex-end; padding: 0; }
+  .replyModal { width: 100%; border-radius: var(--r-xl) var(--r-xl) 0 0; }
+}
+
+/* ── Botón eliminar mensaje ───────────────────────────────────────────────── */
+.msgBtnEliminar {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; margin-left: auto; flex-shrink: 0;
+  background: none; border: none; border-radius: 4px;
+  color: var(--ink-subtle); cursor: pointer; transition: all 0.15s;
+  padding: 0;
+}
+.msgBtnEliminar:hover { color: #DC2626; background: rgba(220,38,38,0.08); }

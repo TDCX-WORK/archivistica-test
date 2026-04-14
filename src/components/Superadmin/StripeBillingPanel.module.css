@@ -91,7 +91,7 @@
   font-size: .72rem; font-weight: 700; color: #888;
   cursor: pointer; font-family: var(--font-body); transition: all .15s;
 }
-.btnSmall:hover { border-color: #5de4ff; color: #0891B2; background: rgba(93,228,255,0.08); }
+.btnSmall:hover { border-color: #2563EB; color: #0891B2; background: rgba(37,99,235,0.08); }
 
 .btnRestaurar {
   display: flex; align-items: center; gap: .3rem;
@@ -108,14 +108,14 @@
 .tickerDark { height: 1.5px; background: var(--line); position: relative; overflow: hidden; border-radius: 2px; margin: 12px 0; }
 .tickerFill {
   position: absolute; left: -100%; width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, #5de4ff, transparent);
+  background: linear-gradient(90deg, transparent, #2563EB, transparent);
   animation: tickerSlide 2.2s linear infinite;
 }
 /* Float orbs */
 .floatOrb1 {
   position: absolute; top: -50px; left: -30px;
   width: 160px; height: 160px;
-  background: #5de4ff; border-radius: 50%; pointer-events: none;
+  background: #2563EB; border-radius: 50%; pointer-events: none;
   animation: floatOrb 5s ease-in-out infinite;
 }
 .floatOrb2 {
@@ -128,12 +128,12 @@
 /* Pulse dot */
 .pulseDot {
   width: 7px; height: 7px; border-radius: 50%;
-  background: var(--pd, #5de4ff); position: relative;
+  background: var(--pd, #2563EB); position: relative;
   flex-shrink: 0; display: inline-block;
 }
 .pulseDotRing {
   position: absolute; inset: -3px; border-radius: 50%;
-  background: var(--pd, #5de4ff); opacity: .3;
+  background: var(--pd, #2563EB); opacity: .3;
   animation: pulseRing 2s ease-in-out infinite;
 }
 /* Spark */
@@ -169,7 +169,7 @@
 .bannerOk {
   display: flex; align-items: center; gap: .6rem;
   padding: .7rem 1rem; border-radius: 10px; margin-bottom: 1rem;
-  background: rgba(93,228,255,0.08); border: 1px solid rgba(93,228,255,0.25);
+  background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.25);
   color: #0891B2; font-size: .84rem; font-weight: 500;
 }
 .bannerErr {
@@ -191,7 +191,7 @@
 
 /* ── HERO CARD (negro) ──────────────────────────────────────────────────────── */
 .heroCard {
-  background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 0 0 3px rgba(93,228,255,0.08);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
   padding: 1.5rem 1.5rem 1.25rem;
   position: relative; overflow: hidden;
   box-shadow: 0 8px 32px rgba(0,0,0,.15);
@@ -242,7 +242,7 @@
 
 /* ── HEALTH CARD ────────────────────────────────────────────────────────────── */
 .healthCard {
-  background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 0 0 3px rgba(93,228,255,0.08); padding: 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 0 0 3px rgba(37,99,235,0.08); padding: 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem;
   position: relative; overflow: hidden;
   box-shadow: 0 8px 32px rgba(0,0,0,.15);
 }
@@ -821,7 +821,7 @@
 }
 .extraCardTickerFill {
   position: absolute; left: -60%; top: 0; width: 60%; height: 100%;
-  background: linear-gradient(90deg, transparent, #5de4ff, transparent);
+  background: linear-gradient(90deg, transparent, #2563EB, transparent);
   animation: tickerSlide 2.4s linear infinite;
 }
 @keyframes tickerSlide { from{left:-60%} to{left:100%} }

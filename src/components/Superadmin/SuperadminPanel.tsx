@@ -31,7 +31,7 @@ const PLAN_CFG: Record<string, { color: string; bg: string; label: string }> = {
   starter: { color: '#6366F1', bg: 'rgba(99,102,241,0.15)',  label: 'STARTER' },
   growth:  { color: '#F59E0B', bg: 'rgba(245,158,11,0.15)',  label: 'GROWTH'  },
   academy: { color: '#10B981', bg: 'rgba(16,185,129,0.15)',  label: 'ACADEMY' },
-  pro:     { color: '#5de4ff', bg: 'rgba(93,228,255,0.12)',  label: 'PRO'     },
+  pro:     { color: '#2563EB', bg: 'rgba(37,99,235,0.12)',  label: 'PRO'     },
 }
 const statusLabel = (s: string) => PAYMENT_STATUS.find(p => p.id === s) ?? PAYMENT_STATUS[0]!
 
@@ -54,7 +54,7 @@ function useCountUp(target: number | null, duration = 1100) {
 }
 
 // ── Sparkline ──────────────────────────────────────────────────────────────
-function Sparkline({ data = [] as number[], color = '#5de4ff', width = 80, height = 32 }) {
+function Sparkline({ data = [] as number[], color = '#2563EB', width = 80, height = 32 }) {
   if (!data.length) return null
   const max = Math.max(...data), min = Math.min(...data), range = max - min || 1
   const pts = data.map((v, i) => ({ x: (i / (data.length - 1)) * width, y: height - ((v - min) / range) * (height - 4) - 2 }))
@@ -195,9 +195,9 @@ function ModalAcademia({ academia, onGuardar, onClose }: {
                   type="checkbox"
                   checked={form.trial}
                   onChange={e => setForm(f => ({ ...f, trial: e.target.checked }))}
-                  style={{ width: 16, height: 16, accentColor: '#5de4ff', cursor: 'pointer' }}
+                  style={{ width: 16, height: 16, accentColor: '#2563EB', cursor: 'pointer' }}
                 />
-                <span style={{ fontSize: 'var(--fs-5)', color: form.trial ? '#5de4ff' : 'var(--ink-muted)', fontWeight: form.trial ? 700 : 400 }}>
+                <span style={{ fontSize: 'var(--fs-5)', color: form.trial ? '#2563EB' : 'var(--ink-muted)', fontWeight: form.trial ? 700 : 400 }}>
                   Activar 60 días de prueba gratuita
                 </span>
                 {form.trial && (
@@ -361,7 +361,7 @@ function HeroCard({ stats }: { stats: any }) {
         <div>
           <div className={styles.heroCardPill}><span className={styles.pulseDot} />MRR en tiempo real</div>
           <div className={styles.heroCardVal}>€{(mrr ?? 0).toLocaleString('es-ES')}</div>
-          <div className={styles.heroCardSub}>ARR estimado · <strong style={{ color: '#5de4ff', fontSize: 'var(--fs-4)', fontWeight: 800 }}>€{arr.toLocaleString('es-ES')}</strong></div>
+          <div className={styles.heroCardSub}>ARR estimado · <strong style={{ color: '#2563EB', fontSize: 'var(--fs-4)', fontWeight: 800 }}>€{arr.toLocaleString('es-ES')}</strong></div>
         </div>
         <img src={logoAzul} alt="FrostFox" className={styles.heroLogo} />
       </div>
@@ -441,7 +441,7 @@ function AcademiaCard({ ac, onVerDetalle, onEditar, onNuevaAsignatura, onNuevoUs
         <div className={styles.acadStats}>
           <div className={styles.acadStat}><span className={styles.acadStatNum}>{ac.totalAlumnos}</span><span className={styles.acadStatLabel}>alumnos</span></div>
           <div className={styles.acadStatDivider} />
-          <div className={styles.acadStat}><span className={styles.acadStatNum} style={{ color: ac.alumnosActivos > 0 ? '#5de4ff' : 'inherit' }}>{ac.alumnosActivos}</span><span className={styles.acadStatLabel}>activos</span></div>
+          <div className={styles.acadStat}><span className={styles.acadStatNum} style={{ color: ac.alumnosActivos > 0 ? '#2563EB' : 'inherit' }}>{ac.alumnosActivos}</span><span className={styles.acadStatLabel}>activos</span></div>
           {ac.sesiones30d > 0 && (<><div className={styles.acadStatDivider} /><div className={styles.acadStat}><span className={styles.acadStatNum}>{ac.sesiones30d}</span><span className={styles.acadStatLabel}>sesiones</span></div></>)}
         </div>
         <div className={styles.acadPrice}>
@@ -453,8 +453,8 @@ function AcademiaCard({ ac, onVerDetalle, onEditar, onNuevaAsignatura, onNuevoUs
           {ac.trial_ends_at && (() => {
             const diasTrial = Math.ceil((new Date(ac.trial_ends_at).getTime() - Date.now()) / 86400000)
             if (diasTrial > 0) return (
-              <span className={styles.acadStatus} style={{ color: '#5de4ff', background: 'rgba(93,228,255,0.08)', border: '1px solid rgba(93,228,255,0.25)' }}>
-                <span className={styles.acadStatusDot} style={{ background: '#5de4ff' }} />Trial · {diasTrial}d
+              <span className={styles.acadStatus} style={{ color: '#2563EB', background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.25)' }}>
+                <span className={styles.acadStatusDot} style={{ background: '#2563EB' }} />Trial · {diasTrial}d
               </span>
             )
             return (
@@ -502,7 +502,7 @@ function AcademiaCard({ ac, onVerDetalle, onEditar, onNuevaAsignatura, onNuevoUs
                   <div className={styles.acadCellLabel}>Facturación</div>
                   {ac.billing_name && <span className={styles.acadCellBig}>{ac.billing_name}</span>}
                   {ac.billing_nif  && <span className={styles.acadCellLine}><FileText size={11} /> {ac.billing_nif}</span>}
-                  {ac.contract_renews && <span className={styles.acadCellLine} style={{ color: 'rgba(93,228,255,0.4)' }}>Renueva: {new Date(ac.contract_renews).toLocaleDateString('es-ES')}</span>}
+                  {ac.contract_renews && <span className={styles.acadCellLine} style={{ color: 'rgba(37,99,235,0.4)' }}>Renueva: {new Date(ac.contract_renews).toLocaleDateString('es-ES')}</span>}
                   {!ac.billing_name && !ac.billing_nif && <span className={styles.acadCellEmpty}>Sin datos</span>}
                 </div>
                 <div className={styles.acadCell}>
@@ -519,7 +519,7 @@ function AcademiaCard({ ac, onVerDetalle, onEditar, onNuevaAsignatura, onNuevoUs
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0 }}>
                               <span>{s.name}</span>
                               {s.exam_config
-                                ? <span style={{ fontSize: '10px', color: '#5de4ff', fontWeight: 600 }}>
+                                ? <span style={{ fontSize: '10px', color: '#2563EB', fontWeight: 600 }}>
                                     ✓ Simulacro: {s.exam_config.test_questions}p · {s.exam_config.test_minutes}min
                                     {s.exam_config.test_penalty ? ' · −0.25' : ''}
                                     {s.exam_config.supuestos_count ? ` · ${s.exam_config.supuestos_count} sup.` : ''}
@@ -609,7 +609,7 @@ export default function SuperadminPanel({ currentUser, modoPapelera = false }: {
   if (loading) return (
     <div className={styles.loadState}>
       <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
-        <RefreshCw size={22} style={{ color: '#5de4ff' }} />
+        <RefreshCw size={22} style={{ color: '#2563EB' }} />
       </motion.div>
       <p>Cargando plataforma…</p>
     </div>
@@ -665,7 +665,7 @@ export default function SuperadminPanel({ currentUser, modoPapelera = false }: {
           </div>
           <div className={styles.kpiRow}>
             <KpiCard icon={Building2}  label="Academias"    value={stats?.totalAcademias} color="#6366F1" delay={0.1}  chart={[3,3,4,4,5,5,stats?.totalAcademias??0]} />
-            <KpiCard icon={Users}      label="Alumnos"      value={stats?.totalAlumnos}   color="#5de4ff" delay={0.15} chart={[12,18,22,25,28,32,stats?.totalAlumnos??0]} />
+            <KpiCard icon={Users}      label="Alumnos"      value={stats?.totalAlumnos}   color="#2563EB" delay={0.15} chart={[12,18,22,25,28,32,stats?.totalAlumnos??0]} />
             <KpiCard icon={BarChart2}  label="Sesiones 30d" value={stats?.sesiones30d}    color="#10B981" delay={0.2}  chart={[40,55,48,62,70,65,stats?.sesiones30d??0]} sub="últimos 30 días" />
             <KpiCard icon={CreditCard} label="Facturación"  value={`€${(stats?.mrr??0).toFixed(0)}`} color="#F59E0B" delay={0.25} chart={[120,135,128,145,160,155,stats?.mrr??0]} />
           </div>

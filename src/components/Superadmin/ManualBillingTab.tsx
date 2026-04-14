@@ -172,7 +172,7 @@ function InvoiceRow({ inv, onMarkPaid, onCancel }: {
               <div className={styles.rowColTitle}>Detalle fiscal</div>
               <div className={styles.rowField}><span className={styles.rowFieldLabel}>Base imponible</span><span className={styles.rowFieldVal}>€{fmt(inv.base_amount ?? 0)}</span></div>
               <div className={styles.rowField}><span className={styles.rowFieldLabel}>IVA ({inv.vat_rate ?? 21}%)</span><span className={styles.rowFieldVal}>€{fmt(inv.vat_amount ?? 0)}</span></div>
-              <div className={[styles.rowField, styles.rowFieldTotal].join(' ')}><span className={styles.rowFieldLabel}>Total</span><span className={styles.rowFieldVal} style={{ color: '#5de4ff' }}>€{fmt(inv.amount_cents ?? 0)}</span></div>
+              <div className={[styles.rowField, styles.rowFieldTotal].join(' ')}><span className={styles.rowFieldLabel}>Total</span><span className={styles.rowFieldVal} style={{ color: '#2563EB' }}>€{fmt(inv.amount_cents ?? 0)}</span></div>
               {inv.period_start && <div className={styles.rowField}><span className={styles.rowFieldLabel}>Período</span><span className={styles.rowFieldVal}>{fmtDate(inv.period_start)} — {fmtDate(inv.period_end)}</span></div>}
             </div>
 
@@ -260,7 +260,7 @@ function NewInvoiceModal({ academias, company, onCreate, onClose }: {
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
         <div className={styles.modalHead}>
-          <div className={styles.modalTitleWrap}><FileText size={16} style={{ color: '#5de4ff' }} /><span className={styles.modalTitle}>Nueva factura</span></div>
+          <div className={styles.modalTitleWrap}><FileText size={16} style={{ color: '#2563EB' }} /><span className={styles.modalTitle}>Nueva factura</span></div>
           <button className={styles.modalClose} onClick={onClose}><X size={14} /></button>
         </div>
         <div className={styles.modalBody}>

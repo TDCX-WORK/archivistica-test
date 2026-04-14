@@ -1,0 +1,81 @@
+/* Component styles */
+
+/* ── Panel Vencimientos ───────────────────────────────────────────────────── */
+.vencWrap { display: flex; flex-direction: column; gap: 1.25rem; padding: 1rem 0; }
+
+.vencKpis {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 10px;
+}
+.vencKpi {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 14px; padding: 1rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+  transition: transform 0.15s;
+}
+.vencKpi:hover { transform: translateY(-2px); }
+.vencKpiVal   { font-size: var(--fs-1); font-weight: 900; color: var(--ink); line-height: 1; }
+.vencKpiLabel { font-size: var(--fs-6); color: var(--ink-subtle); font-weight: 600; }
+
+.vencOk {
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  padding: 2rem; color: var(--ink-subtle); font-size: var(--fs-5);
+}
+
+.vencGrupo { display: flex; flex-direction: column; gap: 0.5rem; }
+.vencGrupoTitulo {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: var(--fs-5); font-weight: 700;
+  padding: 0 0.25rem;
+}
+.vencGrupoDot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.vencGrupoCount {
+  margin-left: auto; font-size: var(--fs-6); font-weight: 700;
+  background: var(--surface-off); padding: 1px 8px;
+  border-radius: 99px; color: var(--ink-muted);
+}
+
+.vencCardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+}
+.vencCard {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: 0.85rem;
+  display: flex; flex-direction: column; gap: 0.6rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.vencCard:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+.vencCardHead { display: flex; align-items: center; gap: 0.6rem; }
+.vencAvatar {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-5); font-weight: 800;
+}
+.vencInfo { flex: 1; min-width: 0; }
+.vencNombre { display: block; font-size: var(--fs-5); font-weight: 700; color: var(--ink); }
+.vencFecha  { display: block; font-size: var(--fs-6); color: var(--ink-subtle); }
+.vencDiasBadge {
+  padding: 3px 9px; border-radius: 99px;
+  font-size: var(--fs-6); font-weight: 800; flex-shrink: 0; white-space: nowrap;
+}
+
+.vencBtnRenovar {
+  display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+  padding: 0.35rem; border-radius: 8px;
+  background: color-mix(in srgb, var(--vc) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--vc) 25%, transparent);
+  font-size: var(--fs-6); font-weight: 700; color: var(--vc);
+  cursor: pointer; transition: all 0.15s; font-family: var(--font-body);
+}
+.vencBtnRenovar:hover {
+  background: color-mix(in srgb, var(--vc) 16%, transparent);
+}
+
+@media (max-width: 768px) {
+  .vencKpis { grid-template-columns: repeat(2,1fr); }
+  .vencCardsGrid { grid-template-columns: 1fr 1fr; }
+}

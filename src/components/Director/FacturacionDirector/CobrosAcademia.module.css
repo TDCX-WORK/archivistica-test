@@ -1,0 +1,255 @@
+/* ── CobrosAcademia — alineado con FacturacionDirector ───────────────────── */
+.cobrosWrap { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.loadingWrap { display: flex; justify-content: center; padding: 4rem; }
+.spinner {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 3px solid var(--line); border-top-color: var(--primary);
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinnerSm { animation: spin 0.7s linear infinite; display: inline-block; }
+
+/* Selector de mes */
+.mesRow {
+  display: flex; align-items: center; gap: 0.75rem;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: 0.85rem 1.1rem;
+}
+.mesBtnNav {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1px solid var(--line); background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--ink-muted); transition: all 0.12s;
+}
+.mesBtnNav:hover:not(:disabled) { background: var(--surface-off); color: var(--ink); }
+.mesBtnNav:disabled { opacity: 0.35; cursor: not-allowed; }
+.mesInfo { flex: 1; display: flex; align-items: center; gap: 0.6rem; }
+.mesNombre { font-size: 1.1rem; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
+.mesActualBadge {
+  font-size: 0.7rem; font-weight: 700; color: #2563EB;
+  background: rgba(37,99,235,0.1); padding: 2px 8px; border-radius: 99px;
+}
+.mesAcciones { display: flex; gap: 0.5rem; }
+.btnGenerar {
+  display: flex; align-items: center; gap: 0.35rem;
+  padding: 0.45rem 0.9rem; border-radius: 8px;
+  background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.2);
+  color: #2563EB; font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; font-family: var(--font-body);
+}
+.btnGenerar:hover { background: rgba(37,99,235,0.14); }
+.btnSecundario {
+  display: flex; align-items: center; gap: 0.35rem;
+  padding: 0.45rem 0.9rem; border-radius: 8px;
+  background: transparent; border: 1px solid var(--line);
+  color: var(--ink-muted); font-size: 0.8rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; font-family: var(--font-body);
+}
+.btnSecundario:hover { background: var(--surface-off); color: var(--ink); }
+
+/* KPIs — mismo estilo que FacturacionDirector */
+.kpis {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem;
+}
+.kpiCard {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 16px; padding: 1.25rem;
+  display: flex; flex-direction: column; gap: 0.35rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.kpiCard:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.kpiIcon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 0.25rem;
+}
+.kpiVal   { font-size: 1.75rem; font-weight: 900; color: var(--ink); letter-spacing: -0.03em; line-height: 1.1; }
+.kpiLabel { font-size: 0.82rem; font-weight: 600; color: var(--ink-muted); }
+.kpiSub   { font-size: 0.75rem; color: var(--ink-subtle); }
+
+/* Alerta churn */
+.alertaChurn {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  padding: 0.9rem 1.1rem; background: #FEF2F2;
+  border: 1px solid rgba(220,38,38,0.2); border-radius: 12px;
+  font-size: 0.85rem; color: var(--ink); line-height: 1.5;
+}
+
+/* Empty state — igual que FacturacionDirector */
+.emptyState {
+  display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+  padding: 3rem 2rem; text-align: center;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+}
+.emptyIcon  { color: var(--ink-subtle); }
+.emptyText  { font-size: 0.95rem; font-weight: 600; color: var(--ink-muted); margin: 0; }
+.emptySubtext { font-size: 0.82rem; color: var(--ink-subtle); margin: 0; }
+
+/* Gráfico */
+.grafico {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 16px; padding: 1.25rem;
+}
+.graficoTitle {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.88rem; font-weight: 700; color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+.graficoSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 120px;
+  overflow: visible;
+}
+
+/* Grid de cards */
+.alumnosGrid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+}
+
+/* Card alumno */
+.alumnoCard {
+  background: var(--surface);
+  border-radius: 14px; padding: 1rem;
+  display: flex; flex-direction: column; gap: 0.65rem;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.alumnoCard:hover { transform: translateY(-3px); }
+
+/* Glow animado por estado — aplicado via inline style */
+.alumnoCardPaid {
+  border: 2px solid rgba(5,150,105,0.45);
+  box-shadow: 0 4px 16px rgba(5,150,105,0.15), 0 1px 3px rgba(0,0,0,0.04);
+  animation: glowPaid 3s ease-in-out infinite;
+}
+.alumnoCardPending {
+  border: 2px solid rgba(217,119,6,0.45);
+  box-shadow: 0 4px 16px rgba(217,119,6,0.15), 0 1px 3px rgba(0,0,0,0.04);
+  animation: glowPending 3s ease-in-out infinite;
+}
+.alumnoCardOverdue {
+  border: 2px solid rgba(220,38,38,0.45);
+  box-shadow: 0 4px 16px rgba(220,38,38,0.15), 0 1px 3px rgba(0,0,0,0.04);
+  animation: glowOverdue 3s ease-in-out infinite;
+}
+.alumnoCardPaid:hover    { box-shadow: 0 8px 24px rgba(5,150,105,0.28); }
+.alumnoCardPending:hover { box-shadow: 0 8px 24px rgba(217,119,6,0.28); }
+.alumnoCardOverdue:hover { box-shadow: 0 8px 24px rgba(220,38,38,0.28); }
+
+@keyframes glowPaid {
+  0%,100% { box-shadow: 0 4px 16px rgba(5,150,105,0.12), 0 1px 3px rgba(0,0,0,0.04); }
+  50%      { box-shadow: 0 4px 22px rgba(5,150,105,0.28), 0 1px 3px rgba(0,0,0,0.04); }
+}
+@keyframes glowPending {
+  0%,100% { box-shadow: 0 4px 16px rgba(217,119,6,0.12), 0 1px 3px rgba(0,0,0,0.04); }
+  50%      { box-shadow: 0 4px 22px rgba(217,119,6,0.28), 0 1px 3px rgba(0,0,0,0.04); }
+}
+@keyframes glowOverdue {
+  0%,100% { box-shadow: 0 4px 16px rgba(220,38,38,0.12), 0 1px 3px rgba(0,0,0,0.04); }
+  50%      { box-shadow: 0 4px 22px rgba(220,38,38,0.28), 0 1px 3px rgba(0,0,0,0.04); }
+}
+
+.alumnoCardTop {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem;
+}
+.alumnoCardLeft { display: flex; align-items: center; gap: 0.6rem; }
+.alumnoAvatar {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; font-weight: 800;
+}
+.alumnoNombre  { font-size: 0.88rem; font-weight: 700; color: var(--ink); }
+.alumnoUsername{ font-size: 0.72rem; color: var(--ink-subtle); }
+.alumnoCardRight { display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem; }
+.alumnoPrecio {
+  font-size: 1.15rem; font-weight: 900; color: var(--ink); letter-spacing: -0.02em; white-space: nowrap;
+}
+.alumnoPrecio span { font-size: 0.72rem; font-weight: 400; color: var(--ink-subtle); }
+
+.estadoBadge {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 3px 8px; border-radius: 99px;
+  font-size: 0.72rem; font-weight: 700; white-space: nowrap;
+}
+.badgeConfirm { animation: confirmPop 0.3s ease both; }
+@keyframes confirmPop { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+
+.alumnoFechaPago { font-size: 0.75rem; color: #059669; font-weight: 600; }
+
+/* Notas */
+.alumnoNota {}
+.notaBtn {
+  display: flex; align-items: center; gap: 0.3rem;
+  background: none; border: none; cursor: pointer;
+  font-size: 0.75rem; color: var(--ink-subtle);
+  font-family: var(--font-body); padding: 0; text-align: left;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  transition: color 0.12s;
+}
+.notaBtn:hover { color: var(--ink-muted); }
+.notaEdit { display: flex; gap: 0.3rem; align-items: center; }
+.notaInput {
+  flex: 1; padding: 0.3rem 0.5rem;
+  border: 1px solid var(--line); border-radius: 6px;
+  font-size: 0.75rem; font-family: var(--font-body);
+  color: var(--ink); background: var(--surface); outline: none;
+}
+.notaInput:focus { border-color: var(--primary); }
+.notaGuardar, .notaCancelar {
+  width: 26px; height: 26px; border-radius: 6px; border: none; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.notaGuardar  { background: #059669; color: white; }
+.notaCancelar { background: var(--surface-off); color: var(--ink-muted); }
+
+.alumnoBtns {
+  display: flex; gap: 0.3rem; flex-wrap: wrap;
+  padding-top: 0.5rem; border-top: 1px solid var(--line);
+}
+.alumnoBtn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.25rem;
+  padding: 0.35rem 0.5rem; border-radius: 7px;
+  background: color-mix(in srgb, var(--bc) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--bc) 25%, transparent);
+  color: var(--bc); font-size: 0.75rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; font-family: var(--font-body);
+}
+.alumnoBtn:hover:not(:disabled) { background: color-mix(in srgb, var(--bc) 16%, transparent); }
+.alumnoBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Resumen anual — mismo estilo que tabla de facturas */
+.resumenWrap {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 16px; overflow: hidden;
+}
+.resumenHeader {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 1rem 1.25rem; font-size: 0.88rem; font-weight: 700; color: var(--ink);
+  border-bottom: 1px solid var(--line); background: var(--surface-off);
+}
+.resumenTableWrap { overflow-x: auto; }
+.resumenTable { width: 100%; border-collapse: collapse; }
+.resumenTable thead { background: var(--surface-off); }
+.resumenTable thead th {
+  padding: 0.6rem 1.25rem; font-size: 0.75rem; font-weight: 700;
+  color: var(--ink-muted); text-align: left;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--line);
+}
+.resumenTable tbody td {
+  padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--line);
+  font-size: 0.85rem; vertical-align: middle;
+}
+.resumenTable tbody tr:last-child td { border-bottom: none; }
+.resumenTable tbody tr:hover td { background: var(--surface-off); }
+.resumenMes { font-weight: 700; color: var(--ink); }
+.resumenBarRow { display: flex; align-items: center; gap: 0.5rem; }
+.resumenBar { flex: 1; height: 5px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.resumenBarFill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+
+@media (max-width: 768px) {
+  .kpis { grid-template-columns: repeat(2,1fr); }
+  .alumnosGrid { grid-template-columns: 1fr 1fr; }
+}

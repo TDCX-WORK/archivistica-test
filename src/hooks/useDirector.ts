@@ -32,11 +32,15 @@ export function useDirector(currentUser: CurrentUser | null) {
         { data: profiles },
         { data: sessions },
         { data: wrongs },
+        { data: studentProfs },
+        { data: announcements },
       ] = await Promise.all([
         supabase.from('subjects').select('id, name, slug, color').eq('academy_id', academyId),
         supabase.from('profiles').select('id, username, role, subject_id, access_until, created_at, academy_id, force_password_change').eq('academy_id', academyId).in('role', ['alumno', 'profesor']),
         supabase.from('sessions').select('user_id, score, played_at, subject_id').eq('academy_id', academyId).gte('played_at', twoMonthsAgo),
         supabase.from('wrong_answers').select('user_id, question_id, fail_count, subject_id').eq('academy_id', academyId),
+        supabase.from('student_profiles').select('id, monthly_price, exam_date, full_name, city, onboarding_completed, payment_status'),
+        supabase.from('announcements').select('id, author_id, created_at, title, subject_id').eq('academy_id', academyId).order('created_at', { ascending: false }),
       ])
 
       if (!subs) { setError('Error cargando datos'); setLoading(false); return }
@@ -45,6 +49,39 @@ export function useDirector(currentUser: CurrentUser | null) {
       const typedProfiles = (profiles ?? []) as Profile[]
       const typedSessions = (sessions ?? []) as { user_id: string; score: number; played_at: string; subject_id: string | null }[]
       const typedWrongs   = (wrongs   ?? []) as { user_id: string; question_id: string; fail_count: number; subject_id: string | null }[]
+
+      // Map de student_profiles por id
+      const typedSP = (studentProfs ?? []) as { id: string; monthly_price: number | null; exam_date: string | null; full_name: string | null; city: string | null; onboarding_completed: boolean | null; payment_status: string }[]
+      const spMap: Record<string, typeof typedSP[0]> = {}
+      for (const sp of typedSP) spMap[sp.id] = sp
+
+      // Actividad de profesores — último aviso por autor
+      type AnnRow = { id: string; author_id: string; created_at: string; title: string; subject_id: string | null }
+      const typedAnn = (announcements ?? []) as AnnRow[]
+      const lastAvisoByProfesor: Record<string, { created_at: string; title: string }> = {}
+      for (const ann of typedAnn) {
+        if (!lastAvisoByProfesor[ann.author_id]) {
+          lastAvisoByProfesor[ann.author_id] = { created_at: ann.created_at, title: ann.title }
+        }
+      }
+      const totalAvisosByProfesor: Record<string, number> = {}
+      for (const ann of typedAnn) {
+        totalAvisosByProfesor[ann.author_id] = (totalAvisosByProfesor[ann.author_id] ?? 0) + 1
+      }
+
+      // Finanzas: ingresos mensuales de la academia
+      const alumnosConPrecio  = typedProfiles.filter(p => p.role === 'alumno' && spMap[p.id]?.monthly_price)
+      const mrrAcademia       = alumnosConPrecio.reduce((sum, a) => sum + (spMap[a.id]?.monthly_price ?? 0), 0)
+      const alumnosSinPrecio  = typedProfiles.filter(p => p.role === 'alumno' && !spMap[p.id]?.monthly_price).length
+      const alumnosActivos30d = new Set(typedSessions.filter(s => s.played_at >= new Date(now.getTime() - 30 * 86400000).toISOString().slice(0, 10)).map(s => s.user_id))
+      const mrrActivos        = alumnosConPrecio.filter(a => alumnosActivos30d.has(a.id)).reduce((sum, a) => sum + (spMap[a.id]?.monthly_price ?? 0), 0)
+      // Pagos del mes actual
+      const alumnosPagados    = typedProfiles.filter(p => p.role === 'alumno' && spMap[p.id]?.payment_status === 'paid')
+      const alumnosPendientes = typedProfiles.filter(p => p.role === 'alumno' && spMap[p.id]?.payment_status === 'pending')
+      const alumnosVencidos   = typedProfiles.filter(p => p.role === 'alumno' && spMap[p.id]?.payment_status === 'overdue')
+      const mrrCobrado        = alumnosPagados.reduce((sum, a) => sum + (spMap[a.id]?.monthly_price ?? 0), 0)
+      const mrrPendiente      = alumnosPendientes.reduce((sum, a) => sum + (spMap[a.id]?.monthly_price ?? 0), 0)
+      const mrrVencido        = alumnosVencidos.reduce((sum, a) => sum + (spMap[a.id]?.monthly_price ?? 0), 0)
 
       // Actividad por semana (últimas 8 semanas)
       const semanas: SemanaStats[] = []
@@ -195,6 +232,22 @@ export function useDirector(currentUser: CurrentUser | null) {
         sesiones30d:     ses30d.length,
         bySubject:       subjectStats,
         semanas,
+        profesorActivity: { lastAvisoByProfesor, totalAvisosByProfesor },
+        finanzas: {
+          mrrAcademia,
+          mrrActivos,
+          alumnosSinPrecio,
+          totalAlumnosConPrecio: alumnosConPrecio.length,
+          spMap,
+          pagos: {
+            pagados:    alumnosPagados.length,
+            pendientes: alumnosPendientes.length,
+            vencidos:   alumnosVencidos.length,
+            mrrCobrado,
+            mrrPendiente,
+            mrrVencido,
+          },
+        },
       })
       setLoading(false)
     }

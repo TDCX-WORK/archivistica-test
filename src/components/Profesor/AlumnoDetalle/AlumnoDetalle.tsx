@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import {
   ArrowLeft, BookOpen, Zap, AlertTriangle, TrendingUp,
   Calendar, BarChart2, RefreshCw, Shield, Download,
@@ -423,7 +424,7 @@ export default function AlumnoDetalle({ alumno, onBack, academyId }: AlumnoDetal
         </div>
       )}
 
-      {showMsgModal && (
+      {showMsgModal && createPortal(
         <div className={styles.msgOverlay} onClick={() => setShowMsgModal(false)}>
           <div className={styles.msgModal} onClick={e => e.stopPropagation()}>
             <div className={styles.msgModalHead}>
@@ -456,7 +457,8 @@ export default function AlumnoDetalle({ alumno, onBack, academyId }: AlumnoDetal
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

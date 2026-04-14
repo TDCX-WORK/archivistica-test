@@ -1,0 +1,96 @@
+/* Component styles */
+
+/* ── Rentabilidad ──────────────────────────────────────────────────────────── */
+.rentCard {
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:1.25rem;box-shadow:var(--shadow-card);
+  display:flex;flex-direction:column;gap:1rem
+}
+.rentHeader    { display:flex;align-items:center;justify-content:space-between;gap:.75rem }
+.rentTitle     { display:flex;align-items:center;gap:.4rem;font-size: var(--fs-3);font-weight:700;color:var(--ink);margin:0 }
+.rentEditBtn   { font-size: var(--fs-6);font-weight:600;color:var(--primary);background:none;border:none;cursor:pointer;font-family:var(--font-body);padding:0;text-decoration:underline;text-underline-offset:2px }
+.rentInfo      { font-size: var(--fs-5);color:var(--ink-muted);line-height:1.5 }
+.rentSub       { font-size: var(--fs-5);color:var(--ink-muted);margin:0 }
+.rentForm      { display:flex;align-items:center;gap:.75rem;flex-wrap:wrap }
+.rentFormLabel { font-size: var(--fs-5);font-weight:600;color:var(--ink-muted);white-space:nowrap }
+.rentInput {
+  width:120px;padding:.45rem .65rem;border:1px solid var(--line-strong);border-radius:var(--r-md);
+  background:var(--surface);color:var(--ink);font-size: var(--fs-4);font-family:var(--font-body)
+}
+.rentInput:focus { outline:none;border-color:var(--primary) }
+.rentGuardar {
+  padding:.45rem 1rem;border-radius:var(--r-md);background:var(--ink);color:white;border:none;
+  font-size: var(--fs-5);font-weight:700;cursor:pointer;font-family:var(--font-body);transition:background .15s
+}
+.rentGuardar:hover { background:var(--ink-soft) }
+.rentKpis { display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem }
+.rentKpi  { background:var(--surface-off);border-radius:var(--r-md);padding:.85rem;text-align:center }
+.rentKpiVal   { display:block;font-size: var(--fs-1);font-weight:800;letter-spacing:-0.03em;color:var(--ink);line-height:1;margin-bottom:.3rem }
+.rentKpiLabel { font-size: var(--fs-7);color:var(--ink-subtle);text-transform:uppercase;letter-spacing:.04em }
+
+/* ── Alertas ───────────────────────────────────────────────────────────────── */
+.riesgoOk {
+  display:flex;align-items:center;gap:.6rem;padding:1.5rem;background:var(--accent-lt);
+  border:1px solid var(--accent-dim);border-radius:var(--r-lg);font-size: var(--fs-4);color:var(--accent);font-weight:600
+}
+.riesgoWrap  { display:flex;flex-direction:column;gap:.75rem }
+.riesgoGrupo { background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-card) }
+.riesgoGrupoTitle {
+  display:flex;align-items:center;gap:.5rem;padding:.75rem 1rem;background:var(--surface-off);
+  border-bottom:1px solid var(--line);font-size: var(--fs-5);font-weight:700;color:var(--ink)
+}
+.riesgoItem {
+  display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-bottom:1px solid var(--line);
+  transition:background .12s;cursor:pointer
+}
+.riesgoItem:last-child { border-bottom:none }
+.riesgoItem:hover { background:var(--surface-off) }
+.riesgoAvatar {
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;background:var(--surface-dim);
+  color:var(--ink-muted);display:flex;align-items:center;justify-content:center;
+  font-size: var(--fs-5);font-weight:800
+}
+.riesgoBody    { flex:1;display:flex;flex-direction:column;gap:.1rem }
+.riesgoUsername{ font-size: var(--fs-5);font-weight:700;color:var(--ink) }
+.riesgoSub     { font-size: var(--fs-7);font-weight:600 }
+.riesgoBadgeRed   { font-size: var(--fs-7);font-weight:700;color:var(--danger);background:var(--danger-lt);padding:.15rem .55rem;border-radius:99px;white-space:nowrap }
+.riesgoBadgeAmber { font-size: var(--fs-7);font-weight:700;color:var(--amber);background:var(--amber-lt);padding:.15rem .55rem;border-radius:99px;white-space:nowrap }
+
+/* ── Onboarding ────────────────────────────────────────────────────────────── */
+.onboarding {
+  background:linear-gradient(135deg,var(--accent-lt),var(--accent-lt));border:1px solid var(--accent-dim);
+  border-radius:var(--r-lg);padding:1rem 1.1rem;overflow:hidden
+}
+.onboardingHead { display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem }
+.onboardingTitle{ display:flex;align-items:center;gap:.5rem;font-size: var(--fs-5);font-weight:700;color:var(--accent) }
+.onboardingPct  { font-size: var(--fs-7);font-weight:700;color:var(--accent);background:white;padding:.1rem .5rem;border-radius:99px }
+.onboardingDismiss { width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;border:1px solid var(--accent-dim);background:white;color:var(--accent);cursor:pointer }
+.onboardingBar     { height:4px;background:#D1FAE5;border-radius:99px;margin-bottom:.85rem }
+.onboardingBarFill { height:100%;background:var(--accent);border-radius:99px;transition:width .5s ease }
+.onboardingSteps   { display:flex;gap:.4rem;flex-wrap:wrap }
+.onboardingStep {
+  display:flex;align-items:center;gap:.35rem;padding:.25rem .6rem;border-radius:99px;
+  border:1px solid #D1FAE5;background:white;opacity:.5
+}
+.onboardingStepDone { opacity:1;background:var(--accent-lt);border-color:var(--accent-dim) }
+.onboardingStepIcon {
+  width:16px;height:16px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;background:#D1FAE5;color:var(--accent)
+}
+.onboardingStepDone .onboardingStepIcon { background:var(--accent);color:white }
+.onboardingStepLabel { font-size: var(--fs-7);font-weight:600;color:var(--accent);white-space:nowrap }
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width:900px) {
+  .kpisRow { grid-template-columns:repeat(3,1fr) }
+  .rentKpis { grid-template-columns:repeat(2,1fr) }
+  .detalleLayout { grid-template-columns:1fr }
+}
+@media (max-width:640px) {
+  .page { padding:1rem .9rem 4rem }
+  .kpisRow { grid-template-columns:repeat(2,1fr) }
+  .alumnosTableHead,.alumnoRow { grid-template-columns:1fr 80px 80px 32px }
+  .alumnosTableHead span:nth-child(2),.alumnoRow>*:nth-child(2),
+  .alumnosTableHead span:nth-child(5),.alumnoRow>*:nth-child(5) { display:none }
+}
+

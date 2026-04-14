@@ -458,6 +458,22 @@ export interface SemanaStats {
   notaMedia:      number | null
 }
 
+export interface DirectorFinanzas {
+  mrrAcademia:           number
+  mrrActivos:            number
+  alumnosSinPrecio:      number
+  totalAlumnosConPrecio: number
+  spMap:                 Record<string, { monthly_price: number | null; exam_date: string | null; full_name: string | null; city: string | null; payment_status: string }>
+  pagos: {
+    pagados:     number
+    pendientes:  number
+    vencidos:    number
+    mrrCobrado:  number
+    mrrPendiente:number
+    mrrVencido:  number
+  }
+}
+
 export interface DirectorStats {
   totalAlumnos:    number
   totalProfesores: number
@@ -468,6 +484,11 @@ export interface DirectorStats {
   sesiones30d:     number
   bySubject:       SubjectStats[]
   semanas:         SemanaStats[]
+  finanzas?:       DirectorFinanzas
+  profesorActivity?: {
+    lastAvisoByProfesor:   Record<string, { created_at: string; title: string }>
+    totalAvisosByProfesor: Record<string, number>
+  }
 }
 
 export interface AlumnoConExtended extends Profile {
