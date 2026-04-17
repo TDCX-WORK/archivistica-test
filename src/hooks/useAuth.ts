@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import type { CurrentUser } from '../types'
 
+const EDGE_RESET_PASSWORD = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-password`
+
 async function generateLoginNotifications(userId: string, accessUntil: string | null): Promise<void> {
   try {
     const today = new Date().toISOString().slice(0, 10)
@@ -134,53 +136,102 @@ export function useAuth() {
     displayName: string,
     username:    string,
     password:    string,
-    inviteCode:  string
+    inviteCode:  string,
+    email:       string
   ): Promise<boolean> => {
     setError('')
 
     if (!displayName.trim() || !username.trim() || !password) {
       setError('Rellena todos los campos'); return false
     }
-    if (password.length < 4) {
-      setError('La contrasena debe tener al menos 4 caracteres'); return false
+    if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres'); return false
     }
     if (!inviteCode?.trim()) {
-      setError('Necesitas un codigo de academia para registrarte'); return false
+      setError('Necesitas un código de academia para registrarte'); return false
+    }
+    if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError('Introduce un email válido para poder recuperar tu contraseña'); return false
     }
 
     isRegisteringRef.current = true
+    const cleanUsername = username.trim().toLowerCase()
+    const realEmail     = email.trim().toLowerCase()
 
+    // ── 1. Validar código de invitación ─────────────────────────────────
     const { data: codeData, error: codeErr } = await supabase
       .from('invite_codes')
       .select('id, academy_id, subject_id, used_by, expires_at, access_months, created_by')
       .eq('code', inviteCode.trim().toUpperCase())
       .maybeSingle()
 
-    if (codeErr || !codeData) { setError('Codigo de academia invalido'); return false }
-    if (codeData.used_by)     { setError('Este codigo ya ha sido utilizado'); return false }
+    if (codeErr || !codeData) {
+      isRegisteringRef.current = false
+      setError('Código de academia inválido')
+      return false
+    }
+    if (codeData.used_by) {
+      isRegisteringRef.current = false
+      setError('Este código ya ha sido utilizado')
+      return false
+    }
     if (new Date(codeData.expires_at) < new Date()) {
-      setError('Este codigo ha expirado. Pide uno nuevo a tu profesor'); return false
+      isRegisteringRef.current = false
+      setError('Este código ha expirado. Pide uno nuevo a tu profesor')
+      return false
     }
 
-    const uid       = Math.random().toString(36).substring(2, 8)
-    const fakeEmail = `${username.trim().toLowerCase()}.${uid}@app.alumno`
-    const { data, error: signUpError } = await supabase.auth.signUp({ email: fakeEmail, password })
+    // ── 2. Validar username no duplicado ────────────────────────────────
+    const { data: existingUser } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', cleanUsername)
+      .maybeSingle()
+
+    if (existingUser) {
+      isRegisteringRef.current = false
+      setError(`El nombre de usuario "${cleanUsername}" ya está en uso. Elige otro.`)
+      return false
+    }
+
+    // ── 3. Validar email no duplicado ───────────────────────────────────
+    // Comprueba en student_profiles y staff_profiles (no en auth.users,
+    // que se comprobará al hacer signUp)
+    const { data: emailAvailable } = await supabase
+      .rpc('check_email_available', { p_email: realEmail, p_user_id: '00000000-0000-0000-0000-000000000000' })
+
+    if (emailAvailable === false) {
+      isRegisteringRef.current = false
+      setError('Este email ya está en uso en la plataforma. Usa otro.')
+      return false
+    }
+
+    // ── 4. Crear cuenta en auth.users con email REAL ────────────────────
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email: realEmail,
+      password,
+    })
 
     if (signUpError) {
       isRegisteringRef.current = false
       setError(signUpError.message.includes('already registered')
-        ? `El nombre de usuario "${username.trim().toLowerCase()}" ya esta en uso.`
+        ? 'Este email ya tiene una cuenta asociada. Usa otro email o inicia sesión.'
         : signUpError.message)
       return false
     }
-    if (!data.user) { isRegisteringRef.current = false; setError('Error creando la cuenta'); return false }
+    if (!data.user) {
+      isRegisteringRef.current = false
+      setError('Error creando la cuenta')
+      return false
+    }
 
+    // ── 5. Crear perfil ─────────────────────────────────────────────────
     const accessUntil = new Date()
     accessUntil.setMonth(accessUntil.getMonth() + (codeData.access_months || 3))
 
     const { error: profileErr } = await supabase.from('profiles').insert({
       id:           data.user.id,
-      username:     username.trim().toLowerCase(),
+      username:     cleanUsername,
       role:         'alumno',
       academy_id:   codeData.academy_id,
       subject_id:   codeData.subject_id ?? null,
@@ -191,36 +242,38 @@ export function useAuth() {
       isRegisteringRef.current = false
       const msg = profileErr.message || ''
       setError(msg.includes('duplicate') || msg.includes('unique')
-        ? `El nombre de usuario "${username.trim().toLowerCase()}" ya esta en uso. Elige otro.`
-        : 'Error creando el perfil. Intentalo de nuevo.')
+        ? `El nombre de usuario "${cleanUsername}" ya está en uso. Elige otro.`
+        : 'Error creando el perfil. Inténtalo de nuevo.')
       return false
     }
 
-    await supabase
-      .from('invite_codes')
-      .update({ used_by: data.user.id, used_at: new Date().toISOString() })
-      .eq('id', codeData.id)
+    // ── 6. Crear student_profiles vacío (wizard lo rellenará) ───────────
+    await supabase.from('student_profiles').insert({
+      id:                   data.user.id,
+      email_contact:        realEmail,
+      onboarding_completed: false,
+    })
 
+    // ── 7. Marcar código como usado (RPC segura) ────────────────────────
+    await supabase.rpc('mark_invite_code_used', {
+      p_code: inviteCode.trim().toUpperCase(),
+    })
+
+    // ── 8. Notificaciones al profesor y director (individuales) ─────────
+    const uname = cleanUsername
     try {
-      const notifs: {
-        user_id: string
-        type:    string
-        title:   string
-        body:    string
-        link:    string
-      }[] = []
-      const uname = username.trim().toLowerCase()
-
       if (codeData.created_by) {
-        notifs.push({
+        await supabase.from('notifications').insert({
           user_id: codeData.created_by,
           type:    'nuevo_alumno',
           title:   `Nuevo alumno: ${uname}`,
-          body:    'Se ha registrado con tu codigo de invitacion.',
+          body:    'Se ha registrado con tu código de invitación.',
           link:    '/profesor',
         })
       }
+    } catch (_) {}
 
+    try {
       const { data: director } = await supabase
         .from('profiles')
         .select('id')
@@ -229,20 +282,17 @@ export function useAuth() {
         .maybeSingle()
 
       if (director) {
-        notifs.push({
+        await supabase.from('notifications').insert({
           user_id: director.id,
           type:    'nuevo_alumno',
           title:   `Nuevo alumno en tu academia: ${uname}`,
-          body:    'Un alumno acaba de registrarse con un codigo de invitacion.',
+          body:    'Un alumno acaba de registrarse con un código de invitación.',
           link:    '/direccion',
         })
       }
-
-      if (notifs.length > 0) {
-        await supabase.from('notifications').insert(notifs)
-      }
     } catch (_) {}
 
+    // ── 9. Cargar perfil y entrar ───────────────────────────────────────
     isRegisteringRef.current = false
     const { data: { session } } = await supabase.auth.getSession()
     if (session?.user) await loadProfile(session.user)
@@ -266,7 +316,7 @@ export function useAuth() {
     }
 
     if (!success) {
-      setError('Usuario o contrasena incorrectos')
+      setError('Usuario o contraseña incorrectos')
       return false
     }
     return true
@@ -290,14 +340,40 @@ export function useAuth() {
     setCurrentUser(u => u ? { ...u, forcePasswordChange: false } : u)
   }, [])
 
-  const requestPasswordReset = useCallback(async (email: string): Promise<boolean> => {
+  const requestPasswordReset = useCallback(async (usernameInput: string): Promise<boolean> => {
     setError('')
-    const { error: resetErr } = await supabase.auth.resetPasswordForEmail(
-      email.trim().toLowerCase(),
-      { redirectTo: window.location.origin }
-    )
-    if (resetErr) { setError(resetErr.message); return false }
-    return true
+    const cleanUsername = usernameInput.trim().toLowerCase()
+
+    if (!cleanUsername) {
+      setError('Introduce tu nombre de usuario')
+      return false
+    }
+
+    try {
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+      const res = await fetch(EDGE_RESET_PASSWORD, {
+        method: 'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'apikey':         supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({ username: cleanUsername }),
+      })
+
+      const result = await res.json()
+
+      if (result.no_email) {
+        setError('No tienes un email asociado a tu cuenta. Contacta con tu academia para recuperar tu contraseña.')
+        return false
+      }
+
+      // Siempre devolvemos true para no revelar si el username existe o no
+      return true
+    } catch (_) {
+      setError('Error de conexión. Inténtalo de nuevo.')
+      return false
+    }
   }, [])
 
   const confirmPasswordReset = useCallback(async (newPassword: string): Promise<boolean> => {

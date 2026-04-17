@@ -129,12 +129,21 @@ export function useAcademyProfiles(academyId: string | null | undefined) {
     const { error } = await supabase
       .from('student_profiles')
       .upsert({ id: userId, ...fields, updated_at: new Date().toISOString() }, { onConflict: 'id' })
-    if (!error) {
-      setStudentProfiles(prev => prev.map(p =>
-        p.id === userId ? { ...p, extended: p.extended ? { ...p.extended, ...fields } : p.extended } : p
-      ))
-    }
-    return !error
+
+    if (error) return false
+
+    // Releer el perfil recién guardado para tener el estado real de BD
+    const { data: fresh } = await supabase
+      .from('student_profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle()
+
+    setStudentProfiles(prev => prev.map(p =>
+      p.id === userId ? { ...p, extended: (fresh as StudentProfile) ?? p.extended } : p
+    ))
+
+    return true
   }, [])
 
   return { studentProfiles, staffProfiles, loading, reload: load, updateStudentProfile }

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { calcularRacha } from '../lib/helpers'
+import { generateInviteCode } from '../lib/inviteCodes'
 import type { CurrentUser, AlumnoConStats, StatsClase, InviteCode, Session } from '../types'
 
 export function useProfesor(currentUser: CurrentUser | null) {
@@ -86,17 +88,7 @@ export function useProfesor(currentUser: CurrentUser | null) {
           ? Math.round(sesionesAlumno.reduce((s, x) => s + x.score, 0) / sesionesAlumno.length)
           : null
 
-        const dias = [...new Set(sesionesAlumno.map(s => s.played_at))].sort().reverse()
-        let racha = 0
-        if (dias[0] === today || dias[0] === yesterday) {
-          racha = 1
-          for (let i = 1; i < dias.length; i++) {
-            const prev = new Date(dias[i - 1]!)
-            const curr = new Date(dias[i]!)
-            if ((prev.getTime() - curr.getTime()) / 86400000 === 1) racha++
-            else break
-          }
-        }
+        const racha = calcularRacha(sesionesAlumno.map(s => s.played_at))
 
         const ultimaSesion    = sesionesAlumno[0]?.created_at ?? null
         const diasInactivo    = ultimaSesion ? Math.floor((now.getTime() - new Date(ultimaSesion).getTime()) / 86400000) : null
@@ -210,9 +202,7 @@ export function useProfesor(currentUser: CurrentUser | null) {
     accessMonths: number = 3
   ): Promise<string | null> => {
     if (!isProfesor || !academyId || !currentUser) return null
-    const suffix = Math.random().toString(36).substring(2, 6).toUpperCase()
-    const prefix = (currentUser.academyName || 'ACAD').toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 4).padEnd(4, 'X')
-    const code   = `${prefix}-${suffix}`
+    const code = generateInviteCode(currentUser.academyName)
     const { data, error: err } = await supabase.from('invite_codes').insert({
       code,
       academy_id:    academyId,

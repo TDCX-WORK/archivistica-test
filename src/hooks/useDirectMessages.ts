@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
 export interface DirectMessage {
@@ -52,6 +52,9 @@ export function useAlumnoMessages(userId: string | null | undefined) {
 
   useEffect(() => { load() }, [load])
 
+  // Cache de roles para no hacer query extra por cada mensaje realtime
+  const roleCache = useRef<Record<string, string>>({})
+
   useEffect(() => {
     if (!userId) return
     const channel = supabase
@@ -61,10 +64,18 @@ export function useAlumnoMessages(userId: string | null | undefined) {
         filter: `to_id=eq.${userId}`,
       }, async (payload) => {
         const nuevo = payload.new as DirectMessage
-        // Fetch from_role for the new message
-        const { data: sender } = await supabase
-          .from('profiles').select('role').eq('id', nuevo.from_id).maybeSingle()
-        nuevo.from_role = (sender as {role:string}|null)?.role ?? 'profesor'
+
+        // Intentar resolver from_role desde cache
+        if (roleCache.current[nuevo.from_id]) {
+          nuevo.from_role = roleCache.current[nuevo.from_id]
+        } else {
+          const { data: sender } = await supabase
+            .from('profiles').select('role').eq('id', nuevo.from_id).maybeSingle()
+          const role = (sender as {role:string}|null)?.role ?? 'profesor'
+          roleCache.current[nuevo.from_id] = role
+          nuevo.from_role = role
+        }
+
         setMessages(prev => [nuevo, ...prev])
         setUnread(prev => prev + 1)
       })

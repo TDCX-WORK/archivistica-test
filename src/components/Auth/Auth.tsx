@@ -5,7 +5,7 @@ import styles from './Auth.module.css'
 
 interface AuthPageProps {
   onLogin:        (username: string, password: string) => Promise<boolean>
-  onRegister:     (displayName: string, username: string, password: string, inviteCode: string) => Promise<boolean>
+  onRegister:     (displayName: string, username: string, password: string, inviteCode: string, email: string) => Promise<boolean>
   onRequestReset: (email: string) => Promise<boolean>
   error:          string
   clearError:     () => void
@@ -20,6 +20,7 @@ export default function AuthPage({ onLogin, onRegister, onRequestReset, error, c
   const [password,    setPassword]    = useState('')
   const [inviteCode,  setInviteCode]  = useState('')
   const [resetEmail,  setResetEmail]  = useState('')
+  const [email,       setEmail]       = useState('')
   const [resetSent,   setResetSent]   = useState(false)
   const [showPw,      setShowPw]      = useState(false)
   const [loading,     setLoading]     = useState(false)
@@ -32,6 +33,7 @@ export default function AuthPage({ onLogin, onRegister, onRequestReset, error, c
     setDisplayName('')
     setInviteCode('')
     setResetEmail('')
+    setEmail('')
     setResetSent(false)
   }
 
@@ -42,7 +44,7 @@ export default function AuthPage({ onLogin, onRegister, onRequestReset, error, c
     if (mode === 'login') {
       await onLogin(username, password)
     } else if (mode === 'register') {
-      await onRegister(displayName, username, password, inviteCode)
+      await onRegister(displayName, username, password, inviteCode, email)
     } else if (mode === 'forgot') {
       const ok = await onRequestReset(resetEmail)
       if (ok) setResetSent(true)
@@ -69,7 +71,7 @@ export default function AuthPage({ onLogin, onRegister, onRequestReset, error, c
           <p className={styles.subtitle}>
             {mode === 'login'    ? 'Accede a tu progreso de estudio'                      :
              mode === 'register' ? 'Necesitas un código de tu academia para registrarte'  :
-                                   'Te enviaremos un enlace a tu email para restablecerla'}
+            'Introduce tu usuario para recuperar tu contraseña'}
           </p>
         </div>
 
@@ -97,26 +99,40 @@ export default function AuthPage({ onLogin, onRegister, onRequestReset, error, c
           <form className={styles.form} onSubmit={handleSubmit} noValidate>
 
             {mode === 'register' && (
-              <div className={styles.field}>
-                <label className={styles.label}>Nombre completo</label>
-                <div className={styles.inputWrap}>
-                  <User size={16} className={styles.inputIcon} />
-                  <input className={styles.input} type="text" placeholder="Tu nombre"
-                    value={displayName} onChange={e => { setDisplayName(e.target.value); clearError() }}
-                    autoComplete="name" autoFocus />
+              <>
+                <div className={styles.field}>
+                  <label className={styles.label}>Nombre completo</label>
+                  <div className={styles.inputWrap}>
+                    <User size={16} className={styles.inputIcon} />
+                    <input className={styles.input} type="text" placeholder="Tu nombre"
+                      value={displayName} onChange={e => { setDisplayName(e.target.value); clearError() }}
+                      autoComplete="name" autoFocus />
+                  </div>
                 </div>
-              </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>Tu email</label>
+                  <div className={styles.inputWrap}>
+                    <Mail size={16} className={styles.inputIcon} />
+                    <input className={styles.input} type="email" placeholder="tu@email.com"
+                      value={email} onChange={e => { setEmail(e.target.value); clearError() }}
+                      autoComplete="email" />
+                  </div>
+                  <p style={{fontSize:'0.75rem',color:'var(--ink-subtle)',marginTop:'0.25rem'}}>
+                    Lo usarás para recuperar tu contraseña si la olvidas.
+                  </p>
+                </div>
+              </>
             )}
 
             {mode !== 'forgot' && (
               <div className={styles.field}>
                 <label className={styles.label}>
-                  {mode === 'login' ? 'Usuario o email' : 'Usuario'}
+                  {mode === 'login' ? 'Usuario' : 'Usuario'}
                 </label>
                 <div className={styles.inputWrap}>
                   <User size={16} className={styles.inputIcon} />
                   <input className={styles.input} type="text"
-                    placeholder={mode === 'login' ? 'Tu usuario o email' : 'Elige un usuario'}
+                    placeholder={mode === 'login' ? 'Tu usuario' : 'Elige un usuario'}
                     value={username} onChange={e => { setUsername(e.target.value); clearError() }}
                     autoComplete="username" autoFocus={mode === 'login'} />
                 </div>
@@ -125,14 +141,17 @@ export default function AuthPage({ onLogin, onRegister, onRequestReset, error, c
 
             {mode === 'forgot' && (
               <div className={styles.field}>
-                <label className={styles.label}>Tu email</label>
+                <label className={styles.label}>Tu nombre de usuario</label>
                 <div className={styles.inputWrap}>
-                  <Mail size={16} className={styles.inputIcon} />
-                  <input className={styles.input} type="email"
-                    placeholder="el@email.que.pusiste"
+                  <User size={16} className={styles.inputIcon} />
+                  <input className={styles.input} type="text"
+                    placeholder="Tu usuario"
                     value={resetEmail} onChange={e => { setResetEmail(e.target.value); clearError() }}
-                    autoFocus autoComplete="email" />
+                    autoFocus autoComplete="username" />
                 </div>
+                <p style={{fontSize:'0.78rem', color:'var(--ink-subtle)', marginTop:'0.4rem', lineHeight:'1.5'}}>
+                  Te enviaremos un enlace de recuperación al email asociado a tu cuenta. Si no tienes email asociado, contacta con tu academia.
+                </p>
               </div>
             )}
 
@@ -191,7 +210,7 @@ export default function AuthPage({ onLogin, onRegister, onRequestReset, error, c
               {loading ? (
                 <span className={styles.spinner} />
               ) : mode === 'forgot' ? (
-                <><Mail size={16} /> Enviar enlace de recuperación</>
+                <><Mail size={16} /> Recuperar contraseña</>
               ) : mode === 'login' ? (
                 <>Entrar <ArrowRight size={16} /></>
               ) : (

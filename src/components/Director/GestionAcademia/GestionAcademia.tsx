@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../../lib/supabase'
 import { useAcademyProfiles } from '../../../hooks/useStudentProfile'
+import { generateInviteCode } from '../../../lib/inviteCodes'
 import {
   Users, GraduationCap, Key, Settings, RefreshCw,
   Plus, X, Check, Copy, Edit3, Save,
@@ -112,11 +113,8 @@ function SeccionAlumnos({ studentProfiles, subjects, updateStudentProfile }: {
   for (const s of subjects) subMap[s.id] = s
 
   const handleSave = async (userId: string, form: AlumnoForm) => {
-    // Get academy_id from the profile
-    const { data: profile } = await supabase.from('profiles').select('academy_id').eq('id', userId).single()
-    await supabase.from('student_profiles').upsert({
+    const { error: upsertErr } = await supabase.from('student_profiles').upsert({
       id:             userId,
-      academy_id:     (profile as any)?.academy_id ?? null,
       full_name:      form.full_name     || null,
       phone:          form.phone         || null,
       email_contact:  form.email_contact || null,
@@ -126,6 +124,13 @@ function SeccionAlumnos({ studentProfiles, subjects, updateStudentProfile }: {
       payment_status: 'pending',
       updated_at:     new Date().toISOString(),
     }, { onConflict: 'id' })
+
+    if (upsertErr) {
+      console.error('Error guardando perfil:', upsertErr.message)
+      alert('Error al guardar: ' + upsertErr.message)
+      return
+    }
+
     if (form.access_until) {
       await supabase.from('profiles').update({ access_until: new Date(form.access_until + 'T23:59:59').toISOString() }).eq('id', userId)
     }
@@ -172,59 +177,55 @@ function SeccionAlumnos({ studentProfiles, subjects, updateStudentProfile }: {
                     <div className={styles.alumnoCardAvatar}>
                       {nombre[0]!.toUpperCase()}
                     </div>
-                    <div className={styles.alumnoCardInfo}>
+                    <div className={styles.alumnoCardIdent}>
                       <span className={styles.alumnoCardNombre}>{nombre}</span>
-                      {ext.full_name && <span className={styles.alumnoCardUsername}>@{a.username}</span>}
+                      <span className={styles.alumnoCardUser}>@{a.username}</span>
                     </div>
-                    <button className={styles.editBtn} onClick={() => setEditAlumno(a)}>
-                      <Edit3 size={13}/>
-                    </button>
+                    <button className={styles.alumnoCardEdit} onClick={() => setEditAlumno(a)} title="Editar alumno"><Edit3 size={13} /></button>
                   </div>
 
-                  {/* Asignatura */}
-                  {sub && (
-                    <div className={styles.alumnoCardSub}>
-                      <div className={styles.subDot} style={{background: sub.color}}/>
-                      <span>{sub.name}</span>
-                    </div>
-                  )}
-
-                  {/* Precio + acceso */}
-                  <div className={styles.alumnoCardMeta}>
-                    <div className={styles.alumnoCardMetaItem}>
-                      <span className={styles.alumnoCardMetaLabel}>Precio/mes</span>
-                      <span className={styles.alumnoCardMetaVal}>
-                        {ext.monthly_price
-                          ? <strong>{String(ext.monthly_price)} €</strong>
-                          : <span className={styles.muted}>Sin precio</span>}
+                  {/* Datos clave */}
+                  <div className={styles.alumnoCardGrid}>
+                    {sub && (
+                      <div className={styles.alumnoCardRow}>
+                        <span className={styles.alumnoCardLabel}>Asignatura</span>
+                        <div className={styles.alumnoCardVal}>
+                          <div className={styles.subDot} style={{ background: sub.color }} />
+                          <span>{sub.name}</span>
+                        </div>
+                      </div>
+                    )}
+                    <div className={styles.alumnoCardRow}>
+                      <span className={styles.alumnoCardLabel}>Precio</span>
+                      <span className={styles.alumnoCardVal}>
+                        {ext.monthly_price ? `${ext.monthly_price} €/mes` : <span className={styles.muted}>—</span>}
                       </span>
                     </div>
-                    <div className={styles.alumnoCardMetaItem}>
-                      <span className={styles.alumnoCardMetaLabel}>Acceso</span>
-                      <span className={[styles.accesoChip, expirado ? styles.accesoExpirado : pronto ? styles.accesoPronto : styles.accesoOk].join(' ')}>
-                        {a.access_until
-                          ? expirado
-                            ? 'Expirado'
-                            : diasRestantes !== null && diasRestantes <= 30
-                              ? `${diasRestantes}d`
-                              : fmt(a.access_until)
-                          : 'Sin límite'}
+                    <div className={styles.alumnoCardRow}>
+                      <span className={styles.alumnoCardLabel}>Contacto</span>
+                      <div className={styles.alumnoCardContacto}>
+                        {ext.phone         && <span><Phone size={11} />{String(ext.phone)}</span>}
+                        {ext.email_contact && <span><Mail  size={11} />{String(ext.email_contact)}</span>}
+                        {!ext.phone && !ext.email_contact && <span className={styles.muted}>Sin datos</span>}
+                      </div>
+                    </div>
+                    <div className={styles.alumnoCardRow}>
+                      <span className={styles.alumnoCardLabel}>Acceso</span>
+                      <span className={styles.alumnoCardVal}>
+                        {exp
+                          ? (expirado
+                              ? <span style={{ color:'#DC2626', fontWeight:700 }}>Expirado</span>
+                              : pronto
+                                ? <span style={{ color:'#D97706', fontWeight:700 }}>{diasRestantes}d</span>
+                                : fmt(a.access_until))
+                          : <span className={styles.muted}>Sin fecha</span>}
                       </span>
                     </div>
                   </div>
-
-                  {/* Contacto */}
-                  {(ext.phone || ext.email_contact) && (
-                    <div className={styles.alumnoCardContacto}>
-                      {ext.phone         && <span><Phone size={11}/> {String(ext.phone)}</span>}
-                      {ext.email_contact && <span><Mail  size={11}/> {String(ext.email_contact)}</span>}
-                    </div>
-                  )}
                 </div>
               )
             })}
-          </div>
-      }
+          </div>}
 
       {editAlumno && <EditAlumnoModal alumno={editAlumno} onSave={handleSave} onClose={() => setEditAlumno(null)} />}
     </div>
@@ -277,17 +278,31 @@ function SeccionProfesores({ staffProfiles, subjects }: { staffProfiles: Student
 
 // ── SeccionCodigos ─────────────────────────────────────────────────────────
 interface CodigoInvitacion {
-  id:           string
-  code:         string
-  subject_id:   string | null
+  id:            string
+  code:          string
+  subject_id:    string | null
   access_months: number
-  used_by:      string | null
-  expires_at:   string
-  created_at:   string | null
+  used_by:       string | null
+  used_at:       string | null
+  expires_at:    string
+  created_at:    string | null
+  created_by:    string | null
 }
 
-function SeccionCodigos({ academyId, subjects }: { academyId: string | null | undefined; subjects: Subject[] }) {
+// Info minima de un usuario para resolver "creado por" / "usado por"
+interface UserMini {
+  id:        string
+  username:  string
+  full_name: string | null
+}
+
+function SeccionCodigos({ academyId, academyName, subjects }: {
+  academyId:    string | null | undefined
+  academyName:  string | null | undefined
+  subjects:     Subject[]
+}) {
   const [codigos,   setCodigos]   = useState<CodigoInvitacion[]>([])
+  const [userMap,   setUserMap]   = useState<Record<string, UserMini>>({})
   const [loading,   setLoading]   = useState(true)
   const [creando,   setCreando]   = useState(false)
   const [form,      setForm]      = useState({ subject_id: '', meses: '12' })
@@ -298,9 +313,36 @@ function SeccionCodigos({ academyId, subjects }: { academyId: string | null | un
     if (!academyId) return
     setLoading(true)
     const { data } = await supabase.from('invite_codes')
-      .select('id, code, subject_id, access_months, used_by, expires_at, created_at')
+      .select('id, code, subject_id, access_months, used_by, used_at, expires_at, created_at, created_by')
       .eq('academy_id', academyId).order('created_at', { ascending: false })
-    setCodigos((data ?? []) as CodigoInvitacion[])
+    const codigosData = (data ?? []) as CodigoInvitacion[]
+    setCodigos(codigosData)
+
+    // Resolver usernames y nombres de los usuarios implicados (creadores + consumidores)
+    const ids = new Set<string>()
+    for (const c of codigosData) {
+      if (c.created_by) ids.add(c.created_by)
+      if (c.used_by)    ids.add(c.used_by)
+    }
+    if (ids.size > 0) {
+      const idList = Array.from(ids)
+      const [{ data: profs }, { data: sps }, { data: sfps }] = await Promise.all([
+        supabase.from('profiles').select('id, username').in('id', idList),
+        supabase.from('student_profiles').select('id, full_name').in('id', idList),
+        supabase.from('staff_profiles').select('id, full_name').in('id', idList),
+      ])
+      const fullNameMap: Record<string, string | null> = {}
+      for (const sp  of (sps  ?? []) as { id: string; full_name: string | null }[]) fullNameMap[sp.id]  = sp.full_name
+      for (const sfp of (sfps ?? []) as { id: string; full_name: string | null }[]) fullNameMap[sfp.id] = sfp.full_name
+      const map: Record<string, UserMini> = {}
+      for (const p of (profs ?? []) as { id: string; username: string }[]) {
+        map[p.id] = { id: p.id, username: p.username, full_name: fullNameMap[p.id] ?? null }
+      }
+      setUserMap(map)
+    } else {
+      setUserMap({})
+    }
+
     setLoading(false)
   }, [academyId])
 
@@ -311,7 +353,7 @@ function SeccionCodigos({ academyId, subjects }: { academyId: string | null | un
     setGenerando(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setGenerando(false); return }
-    const code    = Math.random().toString(36).slice(2, 8).toUpperCase()
+    const code    = generateInviteCode(academyName)
     const expires = new Date(); expires.setDate(expires.getDate() + 30)
     const { error } = await supabase.from('invite_codes').insert({
       academy_id:    academyId,
@@ -383,6 +425,10 @@ function SeccionCodigos({ academyId, subjects }: { academyId: string | null | un
             const isUsado   = !!c.used_by
             const isExpired = !isUsado && new Date(c.expires_at) <= new Date()
             const estado    = isUsado ? 'usado' : isExpired ? 'caducado' : 'activo'
+
+            const creador  = c.created_by ? userMap[c.created_by] : null
+            const consumidor = c.used_by  ? userMap[c.used_by]    : null
+
             return (
               <div key={c.id} className={[styles.codigoItem, styles[`codigo_${estado}`]].join(' ')}>
                 <div className={styles.codigoMain}>
@@ -396,12 +442,28 @@ function SeccionCodigos({ academyId, subjects }: { academyId: string | null | un
                 <div className={styles.codigoInfo}>
                   {sub && <span style={{ color:sub.color, fontWeight:700, fontSize:'0.72rem' }}>{sub.name}</span>}
                   <span className={styles.muted}>{c.access_months} mes{c.access_months !== 1 ? 'es' : ''} de acceso</span>
+                  {creador && (
+                    <span className={styles.muted}>
+                      Creado por {creador.full_name ? `${creador.full_name} (@${creador.username})` : `@${creador.username}`}
+                    </span>
+                  )}
+                  {isUsado && (
+                    <span className={styles.muted} style={{ color: '#0891B2', fontWeight: 600 }}>
+                      {consumidor
+                        ? <>Usado por {consumidor.full_name ? `${consumidor.full_name} (@${consumidor.username})` : `@${consumidor.username}`}</>
+                        : <>Usado por cuenta eliminada</>}
+                    </span>
+                  )}
                   <span className={[styles.estadoChip, isUsado?styles.estadoUsado:isExpired?styles.estadoCaducado:styles.estadoActivo].join(' ')}>
                     {isUsado ? '✓ Usado' : isExpired ? 'Caducado' : 'Activo'}
                   </span>
                 </div>
                 <div className={styles.codigoFecha}>
-                  <span className={styles.muted}>{isUsado ? `Usado el ${fmt(c.created_at)}` : `Expira el ${fmt(c.expires_at)}`}</span>
+                  <span className={styles.muted}>
+                    {isUsado
+                      ? `Usado el ${fmt(c.used_at ?? c.created_at)}`
+                      : `Expira el ${fmt(c.expires_at)}`}
+                  </span>
                 </div>
               </div>
             )
@@ -503,7 +565,7 @@ export default function GestionAcademia({ currentUser }: { currentUser: CurrentU
 
       {tab==='alumnos'    && <SeccionAlumnos    studentProfiles={studentProfiles as StudentProfileLocal[]} subjects={subjects} updateStudentProfile={updateStudentProfile} />}
       {tab==='profesores' && <SeccionProfesores staffProfiles={staffProfiles as StudentProfileLocal[]}   subjects={subjects} />}
-      {tab==='codigos'    && <SeccionCodigos    academyId={currentUser?.academy_id} subjects={subjects} />}
+      {tab==='codigos'    && <SeccionCodigos    academyId={currentUser?.academy_id} academyName={academy?.name ?? currentUser?.academyName} subjects={subjects} />}
       {tab==='config'     && <SeccionConfiguracion currentUser={currentUser} academy={academy} />}
     </div>
   )

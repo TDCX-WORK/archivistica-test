@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import type { CurrentUser, AcademiaConStats, SuperadminStats, Subject, Academy } from '../types'
 
-const EDGE_URL       = 'https://zazqejluzyqihqhzbrga.supabase.co/functions/v1/super-service'
-const EDGE_GESTIONAR = 'https://zazqejluzyqihqhzbrga.supabase.co/functions/v1/gestionar-academia'
+const EDGE_URL       = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/super-service`
+const EDGE_GESTIONAR = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gestionar-academia`
 
 interface EdgeResult {
   ok?:      boolean

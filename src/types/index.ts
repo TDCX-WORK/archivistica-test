@@ -189,7 +189,7 @@ export interface InviteCode {
   code:          string
   academy_id:    string
   subject_id:    string | null
-  created_by:    string
+  created_by:    string | null
   used_by:       string | null
   used_at:       string | null
   expires_at:    string

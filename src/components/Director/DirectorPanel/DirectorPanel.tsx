@@ -370,7 +370,7 @@ export default function DirectorPanel({ currentUser }: { currentUser: CurrentUse
     setTimeout(() => contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80)
   }, [tab])
 
-  const handleSaveAlumno = useCallback(async (userId: string, fields: AlumnoDetalleForm) => {
+ const handleSaveAlumno = useCallback(async (userId: string, fields: AlumnoDetalleForm) => {
     const spFields = {
       full_name:     fields.full_name     || null,
       phone:         fields.phone         || null,
@@ -380,9 +380,22 @@ export default function DirectorPanel({ currentUser }: { currentUser: CurrentUse
       monthly_price: fields.monthly_price ? parseFloat(fields.monthly_price) : null,
     }
     await updateStudentProfile(userId, spFields)
+
+    let newAccessUntil: string | null = null
     if (fields.access_until) {
-      await supabase.from('profiles').update({ access_until: new Date(fields.access_until + 'T23:59:59').toISOString() }).eq('id', userId)
+      newAccessUntil = new Date(fields.access_until + 'T23:59:59').toISOString()
+      await supabase.from('profiles').update({ access_until: newAccessUntil }).eq('id', userId)
     }
+
+    // Refrescar la "foto" del alumno en pantalla de detalle con los datos nuevos
+    setAlumnoDetalle(prev => {
+      if (!prev || prev.id !== userId) return prev
+      return {
+        ...prev,
+        extended: { ...(prev.extended ?? {}), ...spFields },
+        access_until: newAccessUntil ?? prev.access_until,
+      }
+    })
   }, [updateStudentProfile])
 
   if (loading || loadingProfiles) return <div className={styles.state}><RefreshCw size={22} className={styles.spinner} /><p>Cargando datos…</p></div>

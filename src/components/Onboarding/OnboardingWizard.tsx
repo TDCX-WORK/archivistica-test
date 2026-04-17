@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import {
-  User, Phone, MapPin, Target,
+  User, Phone, MapPin, Target, Mail,
   ChevronRight, ChevronLeft, Check, Sparkles
 } from 'lucide-react'
 import type { CurrentUser } from '../../types'
@@ -35,11 +35,17 @@ interface DatosOnboarding {
 }
 
 interface Paso1Props {
-  datos:    DatosOnboarding
-  onChange: (key: keyof DatosOnboarding, value: string) => void
+  datos:            DatosOnboarding
+  onChange:         (key: keyof DatosOnboarding, value: string) => void
+  emailError:       string
+  emailChecking:    boolean
+  emailPreloaded:   boolean
 }
 
-function Paso1({ datos, onChange }: Paso1Props) {
+function Paso1({ datos, onChange, emailError, emailChecking, emailPreloaded }: Paso1Props) {
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.email_contact.trim())
+  const emailEmpty = !datos.email_contact.trim()
+
   return (
     <div className={styles.paso}>
       <div className={styles.pasoIcon}><User size={22} /></div>
@@ -75,12 +81,35 @@ function Paso1({ datos, onChange }: Paso1Props) {
           </div>
         </div>
         <div className={styles.campo}>
-          <label className={styles.campoLabel}>Email de contacto <span className={styles.opcional}>(opcional)</span></label>
+          <label className={styles.campoLabel}>
+            <Mail size={13} style={{ display: 'inline', marginRight: 4 }} />
+            Email personal <span style={{ color: '#DC2626', fontWeight: 700 }}>*</span>
+            <span className={styles.opcional}> — necesario para recuperar tu contraseña</span>
+          </label>
           <input className={styles.campoInput}
             type="email" placeholder="tu@email.com"
             value={datos.email_contact}
             onChange={e => onChange('email_contact', e.target.value)}
+            style={emailError ? {borderColor:'#DC2626'} : {}}
           />
+          {emailChecking && (
+            <p style={{fontSize:'0.8rem', color:'var(--ink-subtle)', margin:'0.25rem 0 0'}}>
+              Verificando disponibilidad…
+            </p>
+          )}
+          {!emailChecking && emailError && (
+            <p style={{fontSize:'0.8rem', color:'#DC2626', margin:'0.25rem 0 0'}}>{emailError}</p>
+          )}
+          {!emailChecking && !emailError && emailValid && (
+            <p style={{fontSize:'0.8rem', color:'#059669', margin:'0.25rem 0 0'}}>
+              ✓ {emailPreloaded ? 'Email confirmado' : 'Podrás recuperar tu contraseña con este email'}
+            </p>
+          )}
+          {!emailChecking && !emailError && emailEmpty && (
+            <p style={{fontSize:'0.8rem', color:'#DC2626', margin:'0.25rem 0 0'}}>
+              El email es obligatorio para poder recuperar tu contraseña si la olvidas.
+            </p>
+          )}
         </div>
         <div className={styles.campo}>
           <label className={styles.campoLabel}>
@@ -146,6 +175,11 @@ function Paso3({ datos }: { datos: DatosOnboarding }) {
             <User size={13} /><span>{datos.full_name}</span>
           </div>
         )}
+        {datos.email_contact && (
+          <div className={styles.resumenRow}>
+            <Mail size={13} /><span>{datos.email_contact}</span>
+          </div>
+        )}
         {datos.city && (
           <div className={styles.resumenRow}>
             <MapPin size={13} /><span>{datos.city}</span>
@@ -180,9 +214,12 @@ interface OnboardingWizardProps {
 const PASOS_LABEL = ['Tus datos', 'Tu mascota', '¡Listo!']
 
 export default function OnboardingWizard({ currentUser, onComplete, onLogout }: OnboardingWizardProps) {
-  const [paso,   setPaso]   = useState(1)
-  const [saving, setSaving] = useState(false)
-  const [datos,  setDatos]  = useState<DatosOnboarding>({
+  const [paso,           setPaso]           = useState(1)
+  const [saving,         setSaving]         = useState(false)
+  const [emailError,     setEmailError]     = useState('')
+  const [emailChecking,  setEmailChecking]  = useState(false)
+  const [emailPreloaded, setEmailPreloaded] = useState(false)
+  const [datos, setDatos] = useState<DatosOnboarding>({
     full_name:     '',
     phone:         '',
     city:          '',
@@ -191,11 +228,73 @@ export default function OnboardingWizard({ currentUser, onComplete, onLogout }: 
     mascota:       '',
   })
 
-  const onChange = (key: keyof DatosOnboarding, value: string) =>
+  const emailCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Cleanup del timer al desmontar (Bug #35)
+  useEffect(() => {
+    return () => {
+      if (emailCheckTimer.current) clearTimeout(emailCheckTimer.current)
+    }
+  }, [])
+
+  // Precargar email si el alumno ya lo puso en el registro (auto-registro con email real)
+  useEffect(() => {
+    const loadExisting = async () => {
+      const { data: sp } = await supabase
+        .from('student_profiles')
+        .select('email_contact, full_name, phone, city, exam_date')
+        .eq('id', currentUser.id)
+        .maybeSingle()
+
+      if (sp) {
+        const emailFromProfile = (sp as { email_contact: string | null }).email_contact ?? ''
+        setDatos(prev => ({
+          ...prev,
+          email_contact: emailFromProfile,
+          full_name:     (sp as any).full_name ?? prev.full_name,
+          phone:         (sp as any).phone     ?? prev.phone,
+          city:          (sp as any).city      ?? prev.city,
+          exam_date:     (sp as any).exam_date ?? prev.exam_date,
+        }))
+        if (emailFromProfile) setEmailPreloaded(true)
+      }
+    }
+    loadExisting()
+  }, [currentUser.id])
+
+  const onChange = (key: keyof DatosOnboarding, value: string) => {
     setDatos(prev => ({ ...prev, [key]: value }))
+    if (key === 'email_contact') {
+      setEmailError('')
+      setEmailChecking(false)
+      setEmailPreloaded(false)
+      if (emailCheckTimer.current) clearTimeout(emailCheckTimer.current)
+      const trimmed = value.trim().toLowerCase()
+      if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return
+      setEmailChecking(true)
+      emailCheckTimer.current = setTimeout(async () => {
+        const { data: available, error: rpcErr } = await supabase
+          .rpc('check_email_available', { p_email: trimmed, p_user_id: currentUser.id })
+
+        setEmailChecking(false)
+        if (!rpcErr && available === false) {
+          setEmailError('Este email ya está en uso en la plataforma. Usa otro email personal.')
+        }
+      }, 600)
+    }
+  }
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.email_contact.trim())
 
   const canNext = () => {
-    if (paso === 1) return datos.full_name.trim().length >= 2
+    if (paso === 1) {
+      return (
+        datos.full_name.trim().length >= 2 &&
+        emailValid &&
+        !emailError &&
+        !emailChecking
+      )
+    }
     if (paso === 2) return datos.mascota !== ''
     return true
   }
@@ -207,12 +306,29 @@ export default function OnboardingWizard({ currentUser, onComplete, onLogout }: 
 
   const handleFinish = async () => {
     setSaving(true)
+    setEmailError('')
+
+    const emailTrimmed = datos.email_contact.trim().toLowerCase()
+
+    // Validación final de email duplicado
+    if (emailTrimmed) {
+      const { data: available } = await supabase
+        .rpc('check_email_available', { p_email: emailTrimmed, p_user_id: currentUser.id })
+
+      if (available === false) {
+        setEmailError('Este email ya está en uso en la plataforma. Usa otro email personal.')
+        setSaving(false)
+        setPaso(1)
+        return
+      }
+    }
+
     const { error } = await supabase.from('student_profiles').upsert({
       id:                   currentUser.id,
       full_name:            datos.full_name.trim()     || null,
       phone:                datos.phone.trim()          || null,
       city:                 datos.city.trim()            || null,
-      email_contact:        datos.email_contact.trim()  || null,
+      email_contact:        emailTrimmed                 || null,
       exam_date:            datos.exam_date              || null,
       mascota:              datos.mascota                || null,
       onboarding_completed: true,
@@ -270,7 +386,7 @@ export default function OnboardingWizard({ currentUser, onComplete, onLogout }: 
         </div>
 
         <div className={styles.wizardBody}>
-          {paso === 1 && <Paso1 datos={datos} onChange={onChange} />}
+          {paso === 1 && <Paso1 datos={datos} onChange={onChange} emailError={emailError} emailChecking={emailChecking} emailPreloaded={emailPreloaded} />}
           {paso === 2 && <Paso2 mascota={datos.mascota} onChange={onChange} />}
           {paso === 3 && <Paso3 datos={datos} />}
         </div>
@@ -279,11 +395,6 @@ export default function OnboardingWizard({ currentUser, onComplete, onLogout }: 
           {paso > 1 && (
             <button className={styles.btnVolver} onClick={() => setPaso(p => p - 1)}>
               <ChevronLeft size={15} /> Volver
-            </button>
-          )}
-          {paso === 1 && (
-            <button className={styles.btnSaltar} onClick={() => setPaso(2)}>
-              Rellenar después
             </button>
           )}
           <button

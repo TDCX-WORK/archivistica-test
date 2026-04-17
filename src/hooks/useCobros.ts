@@ -26,12 +26,10 @@ export function useCobros(academyId: string | null | undefined, month: string) {
   const [loading,  setLoading]  = useState(true)
   const [saving,   setSaving]   = useState<Record<string, boolean>>({})
 
-  const load = useCallback(async () => {
-    if (!academyId || !month) return
+  const load = useCallback(async (currentMonth: string) => {
+    if (!academyId || !currentMonth) return
     setLoading(true)
 
-    // Load profiles + student_profiles + payments for this month in parallel
-    // First get alumno profiles for this academy
     const { data: profiles } = await supabase
       .from('profiles').select('id, username').eq('academy_id', academyId).eq('role', 'alumno')
 
@@ -41,7 +39,7 @@ export function useCobros(academyId: string | null | undefined, month: string) {
       alumnoIds.length > 0
         ? supabase.from('student_profiles').select('id, monthly_price, full_name').in('id', alumnoIds)
         : Promise.resolve({ data: [] }),
-      supabase.from('academy_payments').select('*').eq('academy_id', academyId).eq('month', month),
+      supabase.from('academy_payments').select('*').eq('academy_id', academyId).eq('month', currentMonth),
     ])
 
     const spMap: Record<string, { monthly_price: number | null; full_name: string | null }> = {}
@@ -60,12 +58,14 @@ export function useCobros(academyId: string | null | undefined, month: string) {
 
     setAlumnos(result)
     setLoading(false)
-  }, [academyId, month])
+  }, [academyId])
 
-  useEffect(() => { load() }, [load])
+  // Reload whenever month changes — pass month directly to avoid stale closure
+  useEffect(() => { load(month) }, [load, month])
 
   // Upsert payment status for an alumno
-  const updateStatus = async (alumnoId: string, status: AcademyPayment['status'], notes?: string) => {
+  const updateStatus = async (alumnoId: string, status: AcademyPayment['status'], notes?: string, currentMonth?: string) => {
+    const effectiveMonth = currentMonth ?? month
     if (!academyId) return
     setSaving(prev => ({ ...prev, [alumnoId]: true }))
     try {
@@ -76,7 +76,7 @@ export function useCobros(academyId: string | null | undefined, month: string) {
         academy_id: academyId,
         alumno_id:  alumnoId,
         amount,
-        month,
+        month: effectiveMonth,
         status,
         paid_at:    status === 'paid' ? new Date().toISOString() : null,
         notes:      notes ?? alumnos.find(a => a.id === alumnoId)?.payment?.notes ?? null,
@@ -97,8 +97,8 @@ export function useCobros(academyId: string | null | undefined, month: string) {
 
       // Also sync student_profiles.payment_status for current month
       const now = new Date()
-      const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
-      if (month === currentMonth) {
+      const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
+      if (effectiveMonth === thisMonth) {
         await supabase.from('student_profiles').update({ payment_status: status }).eq('id', alumnoId)
       }
 
@@ -133,7 +133,7 @@ export function useCobros(academyId: string | null | undefined, month: string) {
         status:     'pending',
       }))
     )
-    await load()
+    await load(month)
   }
 
   // Export CSV
@@ -149,7 +149,7 @@ export function useCobros(academyId: string | null | undefined, month: string) {
         a.payment?.notes ?? '',
       ])
     ]
-    const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url  = URL.createObjectURL(blob)
     const a    = document.createElement('a')
@@ -157,5 +157,5 @@ export function useCobros(academyId: string | null | undefined, month: string) {
     URL.revokeObjectURL(url)
   }
 
-  return { alumnos, loading, saving, updateStatus, updateNotes, generarMes, exportarCSV, reload: load }
+  return { alumnos, loading, saving, updateStatus, updateNotes, generarMes, exportarCSV, reload: () => load(month) }
 }

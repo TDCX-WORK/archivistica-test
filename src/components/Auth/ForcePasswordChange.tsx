@@ -37,19 +37,20 @@ export default function ForcePasswordChange({
 
     setLoading(true)
 
-    if (isRecovery) {
-      const ok = await onDone(password)
-      if (!ok) { setError('No se pudo cambiar la contraseña. El enlace puede haber expirado.'); setLoading(false) }
-      return
-    }
-
-    // Modo primer login: cambiar contraseña directamente y llamar onDone
     const { error: authErr } = await supabase.auth.updateUser({ password })
     if (authErr) {
-      setError(authErr.message)
+      const msg = authErr.message.toLowerCase()
+      if (msg.includes('same') || msg.includes('different') || msg.includes('identical')) {
+        setError('La nueva contraseña debe ser diferente a la anterior. Elige otra.')
+      } else if (isRecovery) {
+        setError('El enlace ha expirado o ya fue usado. Solicita uno nuevo desde "Olvidé mi contraseña".')
+      } else {
+        setError(authErr.message)
+      }
       setLoading(false)
       return
     }
+
     await onDone(password)
     setLoading(false)
   }

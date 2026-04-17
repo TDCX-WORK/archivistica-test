@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSuperadmin } from '../../hooks/useSuperadmin'
+import { supabase } from '../../lib/supabase'
 import {
   Building2, Users, Zap, BarChart2, Plus, RefreshCw,
   ChevronDown, AlertTriangle, Check, X,
@@ -297,10 +298,22 @@ function ModalUsuario({ academia, onCrear, onClose }: { academia: any; onCrear: 
   const handleCrear = async () => {
     if (!username.trim() || password.length < 4)         { setError('Usuario requerido y contraseña mínimo 4 caracteres'); return }
     if (role !== 'director' && !subjectId)               { setError('Selecciona una asignatura'); return }
-    if ((role === 'profesor' || role === 'director') && !email.trim())   { setError('El email real es obligatorio'); return }
+    if ((role === 'profesor' || role === 'director') && !email.trim())   { setError('El email real es obligatorio para profesor/director'); return }
     if ((role === 'profesor' || role === 'director') && !emailValido)    { setError('El email no tiene un formato válido'); return }
+    // Alumnos nunca usan email real — siempre email ficticio generado
+    // Esto evita colisiones con cuentas existentes en Supabase Auth
+    const emailFinal = role === 'alumno' ? null : email.trim() || null
+    if (emailFinal) {
+      // Comprobar si el email ya existe en profiles
+      const { data: existing } = await supabase
+        .from('profiles').select('id, username, academy_id').eq('email', emailFinal).maybeSingle()
+      if (existing) {
+        setError(`El email ${emailFinal} ya está en uso por @${existing.username}. Usa otro email.`)
+        return
+      }
+    }
     setSaving(true)
-    const res = await onCrear({ username, password, role, academyId: academia.id, subjectId: role !== 'director' ? subjectId : null, academySlug: academia.slug, emailOverride: email.trim() || null })
+    const res = await onCrear({ username, password, role, academyId: academia.id, subjectId: role !== 'director' ? subjectId : null, academySlug: academia.slug, emailOverride: emailFinal })
     if (res.error) { setError(res.error); setSaving(false) } else onClose()
   }
   return (
@@ -318,8 +331,15 @@ function ModalUsuario({ academia, onCrear, onClose }: { academia: any; onCrear: 
             </select>
           </Field>
         )}
-        {(role === 'profesor' || role === 'director') && (<Field label="Email real" hint="Necesario para recuperar contraseña"><input className={styles.input} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="profesor@ejemplo.com" /></Field>)}
-        <Field label="Email generado"><div className={styles.emailPreview}>{emailPreview}</div></Field>
+        {role === 'alumno' && (
+          <Field label="Email" hint="Los alumnos usan email ficticio generado automáticamente — nunca pongas un email real">
+            <div className={styles.emailPreview} style={{color:'var(--ink-subtle)', fontSize:'var(--fs-6)'}}>
+              {emailPreview} <span style={{color:'#059669', fontWeight:700}}>✓ auto</span>
+            </div>
+          </Field>
+        )}
+        {(role === 'profesor' || role === 'director') && (<Field label="Email real" hint="Necesario para recuperar contraseña. Debe ser único en toda la plataforma."><input className={styles.input} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="profesor@ejemplo.com" /></Field>)}
+        {role !== 'alumno' && <Field label="Email generado"><div className={styles.emailPreview}>{emailPreview}</div></Field>}
         {error && <div className={styles.errorMsg}><AlertTriangle size={13} />{error}</div>}
         <div className={styles.modalActions}>
           <button className={styles.btnCancel} onClick={onClose}>Cancelar</button>
@@ -399,7 +419,7 @@ function PaymentHealthCard({ stats }: { stats: any }) {
 }
 
 // ── AcademiaCard ───────────────────────────────────────────────────────────
-function AcademiaCard({ ac, onVerDetalle, onEditar, onNuevaAsignatura, onNuevoUsuario, onToggleSuspender, onEliminar }: {
+const AcademiaCard = React.forwardRef<HTMLDivElement, {
   ac:                 any
   onVerDetalle:       (ac: any) => void
   onEditar:           (ac: any) => void
@@ -407,7 +427,7 @@ function AcademiaCard({ ac, onVerDetalle, onEditar, onNuevaAsignatura, onNuevoUs
   onNuevoUsuario:     (ac: any) => void
   onToggleSuspender:  (id: string, suspendido: boolean) => Promise<any>
   onEliminar:         (ac: any) => void
-}) {
+}>(function AcademiaCard({ ac, onVerDetalle, onEditar, onNuevaAsignatura, onNuevoUsuario, onToggleSuspender, onEliminar }, ref) {
   const [open,        setOpen]        = useState(false)
   const [suspending,  setSuspending]  = useState(false)
   const [actionError, setActionError] = useState('')
@@ -558,7 +578,7 @@ function AcademiaCard({ ac, onVerDetalle, onEditar, onNuevaAsignatura, onNuevoUs
       </AnimatePresence>
     </motion.div>
   )
-}
+})
 
 // ── Panel principal ────────────────────────────────────────────────────────
 export default function SuperadminPanel({ currentUser, modoPapelera = false }: { currentUser: CurrentUser | null; modoPapelera?: boolean }) {

@@ -297,17 +297,18 @@ function BillingWrapper({ currentUser }: { currentUser: CurrentUser }) {
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             display:'inline-flex', alignItems:'center', gap:'0.45rem', padding:'0.5rem 1.1rem',
-            background: tab===t.id ? 'rgba(93,228,255,0.10)' : 'var(--surface-off)',
-            border:     tab===t.id ? '1px solid rgba(93,228,255,0.40)' : '1px solid var(--line)',
+            background: tab===t.id ? 'rgba(37,99,235,0.10)' : 'var(--surface-off)',
+            border:     tab===t.id ? '1px solid rgba(37,99,235,0.40)' : '1px solid var(--line)',
             borderRadius:'999px', fontSize:'var(--fs-5)', fontWeight: tab===t.id ? 700 : 500,
-            color: tab===t.id ? '#5de4ff' : 'var(--ink-muted)', cursor:'pointer', transition:'all 0.15s',
+            color: tab===t.id ? '#2563EB' : 'var(--ink-muted)',
           }}>
             {t.label}
             <span style={{
               fontSize:'9px', fontWeight:800, padding:'1px 6px',
-              background: tab===t.id ? 'rgba(93,228,255,0.15)' : 'var(--surface-dim)',
-              border: `1px solid ${tab===t.id ? 'rgba(93,228,255,0.30)' : 'var(--line)'}`,
-              borderRadius:'999px', color: tab===t.id ? '#5de4ff' : 'var(--ink-subtle)',
+             background: tab===t.id ? 'rgba(37,99,235,0.15)' : 'var(--surface-dim)',
+              border: `1px solid ${tab===t.id ? 'rgba(37,99,235,0.30)' : 'var(--line)'}`,
+              borderRadius:'999px', color: tab===t.id ? '#2563EB' : 'var(--ink-subtle)',
+              
               letterSpacing:'0.05em', textTransform:'uppercase' as const,
             }}>{t.badge}</span>
           </button>

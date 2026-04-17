@@ -35,6 +35,39 @@ function formatFecha(iso: string | null | undefined): string {
   return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+// Hook que resuelve username + full_name a partir de un conjunto de user_ids
+// Util para mostrar "Usado por X" en los códigos de invitación
+function useUserInfoMap(userIds: string[]) {
+  const [map, setMap] = useState<Record<string, { username: string; full_name: string | null }>>({})
+
+  const key = [...new Set(userIds)].sort().join(',')
+
+  useEffect(() => {
+    const ids = key ? key.split(',') : []
+    if (ids.length === 0) { setMap({}); return }
+
+    let cancelled = false
+    const load = async () => {
+      const [{ data: profs }, { data: sps }] = await Promise.all([
+        supabase.from('profiles').select('id, username').in('id', ids),
+        supabase.from('student_profiles').select('id, full_name').in('id', ids),
+      ])
+      if (cancelled) return
+      const fullNameMap: Record<string, string | null> = {}
+      for (const sp of (sps ?? []) as { id: string; full_name: string | null }[]) fullNameMap[sp.id] = sp.full_name
+      const out: Record<string, { username: string; full_name: string | null }> = {}
+      for (const p of (profs ?? []) as { id: string; username: string }[]) {
+        out[p.id] = { username: p.username, full_name: fullNameMap[p.id] ?? null }
+      }
+      setMap(out)
+    }
+    load()
+    return () => { cancelled = true }
+  }, [key])
+
+  return map
+}
+
 function Stat({ icon: Icon, label, value, color, alert }: {
   icon: React.ElementType; label: string; value: string | number | null | undefined; color: string; alert?: boolean
 }) {
@@ -196,17 +229,45 @@ function AlumnoRow({ alumno, expanded, onToggle, onRenovar, onRevocar, onDetalle
   )
 }
 
-function CodigoCard({ code, onCopy, copied }: { code: InviteCode; onCopy: (c: string) => void; copied: string | null }) {
+function CodigoCard({ code, usedByInfo, onCopy, copied }: {
+  code: InviteCode
+  usedByInfo: { username: string; full_name: string | null } | null
+  onCopy: (c: string) => void
+  copied: string | null
+}) {
   const isUsado   = !!code.used_by
   const isExpired = new Date(code.expires_at) < new Date()
   const estado    = isUsado ? 'usado' : isExpired ? 'expirado' : 'activo'
   const expDate   = new Date(code.expires_at).toLocaleDateString('es-ES')
+  const usedDate  = code.used_at ? new Date(code.used_at).toLocaleDateString('es-ES') : null
+
+  // Construir línea "Usado por X"
+  let usedLine: string | null = null
+  if (isUsado) {
+    if (usedByInfo) {
+      const who = usedByInfo.full_name
+        ? `${usedByInfo.full_name} (@${usedByInfo.username})`
+        : `@${usedByInfo.username}`
+      usedLine = usedDate
+        ? `Usado por ${who} · ${usedDate}`
+        : `Usado por ${who}`
+    } else {
+      usedLine = usedDate
+        ? `Usado por cuenta eliminada · ${usedDate}`
+        : 'Usado por cuenta eliminada'
+    }
+  }
+
   return (
     <div className={[styles.codeCard, styles[`code_${estado}`]].join(' ')}>
       <div className={styles.codeLeft}>
         <span className={styles.codeText}>{code.code}</span>
         <span className={styles.codeExpiry}>
-          {estado === 'activo' ? `Registro hasta ${expDate} · Acceso ${code.access_months === 12 ? '1 año' : `${code.access_months} meses`}` : estado === 'usado' ? 'Utilizado' : 'Expirado'}
+          {estado === 'activo'
+            ? `Registro hasta ${expDate} · Acceso ${code.access_months === 12 ? '1 año' : `${code.access_months} meses`}`
+            : estado === 'usado'
+              ? (usedLine ?? 'Utilizado')
+              : 'Expirado'}
         </span>
       </div>
       {estado === 'activo' && <button className={styles.copyBtn} onClick={() => onCopy(code.code)}>{copied === code.code ? <Check size={14} /> : <Copy size={14} />}</button>}
@@ -273,25 +334,27 @@ function SupuestoCard({ supuesto }: { supuesto: { id: string; title: string; sub
       {abierto && (
         <div className={styles.supBody}>
           {supuesto.scenario && (
-            <div className={styles.supScenario}>
-              <span className={styles.supScenarioLabel}>Caso práctico</span>
-              <p className={styles.supScenarioText}>{supuesto.scenario}</p>
+            <div className={styles.supEscenario}>
+              <div className={styles.supEscenarioLabel}>Enunciado</div>
+              <p>{supuesto.scenario}</p>
             </div>
           )}
-          <div className={styles.supPreguntas}>
+
+          <div className={styles.supPregLista}>
             {supuesto.questions.map((q, idx) => (
-              <div key={q.id} className={styles.supPregunta}>
-                <button className={styles.supPreguntaHeader} onClick={() => setPregAbierta(pregAbierta === q.id ? null : q.id)}>
-                  <span className={styles.supPreguntaNum}>{idx + 1}</span>
-                  <span className={styles.supPreguntaTexto}>{q.question}</span>
-                  {pregAbierta === q.id ? <ChevronUp size={13} className={styles.chevron} /> : <ChevronDown size={13} className={styles.chevron} />}
+              <div key={q.id} className={styles.supPregItem}>
+                <button className={styles.supPregHead} onClick={() => setPregAbierta(p => p === q.id ? null : q.id)}>
+                  <span className={styles.supPregNum}>{idx + 1}</span>
+                  <span className={styles.supPregTexto}>{q.question}</span>
+                  {pregAbierta === q.id ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                 </button>
+
                 {pregAbierta === q.id && (
-                  <div className={styles.supPreguntaBody}>
-                    {q.options.map((op, i) => (
+                  <div className={styles.supPregDetalle}>
+                    {q.options.map((opt, i) => (
                       <div key={i} className={[styles.supOpcion, i === q.answer ? styles.supOpcionCorrecta : ''].join(' ')}>
                         <span className={styles.supOpcionLetra}>{LETRAS_SUP[i]}</span>
-                        <span>{op}</span>
+                        <span className={styles.supOpcionTexto}>{opt}</span>
                         {i === q.answer && <span className={styles.supOpcionBadge}>✓</span>}
                       </div>
                     ))}
@@ -679,6 +742,10 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
   const [nPreguntas,    setNPreguntas]    = useState(0)
   const [nSupuestos,    setNSupuestos]    = useState(0)
 
+  // Mapa de info de los alumnos que han consumido códigos — para mostrar "Usado por X"
+  const usedByIds = inviteCodes.map(c => c.used_by).filter((x): x is string => !!x)
+  const usedByInfoMap = useUserInfoMap(usedByIds)
+
   // Cargar count de supuestos al montar
   useEffect(() => {
     const aid = currentUser?.academy_id
@@ -791,7 +858,7 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
         {tab==='examenes'&&<div className={styles.tabContent}><ProximosExamenes alumnos={alumnos} /></div>}
         {tab==='codigos'&&(
           <div className={styles.tabContent}>
-            {inviteCodes.length===0?(<div className={styles.emptyState}><Key size={32} strokeWidth={1.2}/><p>No hay códigos. Pulsa "Nuevo código" para crear uno.</p></div>):(<div className={styles.codesList}>{inviteCodes.map(code=><CodigoCard key={code.id} code={code} onCopy={handleCopy} copied={copied}/>)}</div>)}
+            {inviteCodes.length===0?(<div className={styles.emptyState}><Key size={32} strokeWidth={1.2}/><p>No hay códigos. Pulsa "Nuevo código" para crear uno.</p></div>):(<div className={styles.codesList}>{inviteCodes.map(code=><CodigoCard key={code.id} code={code} usedByInfo={code.used_by ? (usedByInfoMap[code.used_by] ?? null) : null} onCopy={handleCopy} copied={copied}/>)}</div>)}
           </div>
         )}
         {tab&&<button className={styles.scrollBackBtn} onClick={()=>bentoRef.current?.scrollIntoView({behavior:'smooth',block:'start'})} aria-label="Volver arriba"><ChevronUp size={18} strokeWidth={2.5}/></button>}
