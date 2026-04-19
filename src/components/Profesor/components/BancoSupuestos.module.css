@@ -1,0 +1,227 @@
+/* ═══════════════════════════════════════════════════════════════
+   BancoSupuestos — supuestos prácticos con preguntas expandibles
+═══════════════════════════════════════════════════════════════ */
+
+.supLista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.supCard {
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.supHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  background: none;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+.supHeader:hover { background: var(--surface-off); }
+
+.supHeaderLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.supTitle {
+  font-size: var(--fs-4);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.supSubtitle {
+  font-size: var(--fs-6);
+  color: var(--ink-muted);
+}
+
+.supHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  color: var(--ink-subtle);
+}
+
+.supCount {
+  font-size: var(--fs-6);
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.supBody {
+  border-top: 1px solid var(--line);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.supEscenario {
+  background: var(--surface-off);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 0.85rem 1rem;
+}
+
+.supEscenarioLabel {
+  display: block;
+  font-size: var(--fs-7);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-subtle);
+  margin-bottom: 0.4rem;
+}
+
+.supEscenario p {
+  font-size: var(--fs-5);
+  color: var(--ink);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.supPregLista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.supPregItem {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.supPregHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  background: none;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+.supPregHead:hover { background: var(--surface-off); }
+
+.supPregNum {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface-dim);
+  color: var(--ink-muted);
+  font-size: var(--fs-7);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.supPregTexto {
+  flex: 1;
+  font-size: var(--fs-5);
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.4;
+  min-width: 0;
+}
+
+.supPregDetalle {
+  padding: 0 0.85rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.supOpcion {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: var(--r-sm);
+  background: var(--surface-off);
+  font-size: var(--fs-5);
+  color: var(--ink-muted);
+}
+
+.supOpcionCorrecta {
+  background: #ECFDF5;
+  color: #065F46;
+  font-weight: 600;
+}
+
+.supOpcionLetra {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.07);
+  font-size: var(--fs-7);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.supOpcionTexto {
+  flex: 1;
+  min-width: 0;
+}
+
+.supOpcionBadge {
+  margin-left: auto;
+  font-size: var(--fs-7);
+  font-weight: 800;
+  color: #059669;
+}
+
+.supExplicacion {
+  margin: 0.35rem 0 0;
+  padding: 0.6rem 0.75rem;
+  background: #EFF6FF;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-6);
+  color: #1e40af;
+  line-height: 1.5;
+}
+
+/* Loading / Empty */
+.loading {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.75rem; padding: 3.5rem 1rem; color: var(--ink-muted); text-align: center;
+}
+.loading p { font-size: var(--fs-3); margin: 0; }
+
+.spinner {
+  width: 24px; height: 24px;
+  border: 2.5px solid var(--line);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.75rem; padding: 3.5rem 1rem; color: var(--ink-muted); text-align: center;
+}
+.empty p { font-size: var(--fs-3); margin: 0; }

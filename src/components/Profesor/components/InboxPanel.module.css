@@ -1,0 +1,297 @@
+/* ═══════════════════════════════════════════════════════════════
+   InboxPanel — 3 wallet cards + panel expandible
+═══════════════════════════════════════════════════════════════ */
+
+.inbox {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+/* ── Row de 3 wallets ────────────────────────────────────────────────────── */
+.walletRow {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* ── Wallet card individual ──────────────────────────────────────────────── */
+.wallet {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  height: 180px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.2s;
+}
+.wallet:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  border-color: var(--wc, var(--line-strong));
+}
+.walletActive {
+  border-color: var(--wc, var(--primary));
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  transform: translateY(-3px);
+}
+
+.walletBg {
+  position: absolute;
+  inset: 0;
+  background: var(--surface-off);
+  z-index: 0;
+}
+
+/* Tab que asoma por arriba del bolsillo */
+.walletTab {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  bottom: 58%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1;
+}
+.walletTab > * {
+  display: flex;
+  align-items: center;
+}
+
+.walletTabDot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--wc, var(--ink-muted));
+  flex-shrink: 0;
+  margin-right: 6px;
+}
+
+.walletTabLabel {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--wc, var(--ink-muted));
+  background: var(--wcb, var(--surface-dim));
+  padding: 6px 14px;
+  border-radius: 10px 10px 0 0;
+  border: 1px solid var(--line);
+  border-bottom: none;
+  white-space: nowrap;
+  transition: transform 0.3s var(--ease);
+}
+.wallet:hover .walletTabLabel { transform: translateY(-3px); }
+
+.walletTabBadge {
+  min-width: 18px; height: 18px;
+  border-radius: 99px;
+  background: var(--wc, var(--danger));
+  color: white;
+  font-size: 0.6rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 5px;
+  margin-left: 6px;
+  margin-bottom: 4px;
+}
+
+/* Bolsillo frontal */
+.walletPocket {
+  position: absolute;
+  bottom: 0;
+  left: -1px;
+  right: -1px;
+  height: 60%;
+  background: var(--surface);
+  border-radius: 50% 50% 0 0 / 22% 22% 0 0;
+  z-index: 2;
+  border-top: 1.5px solid var(--line-strong);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.walletContent {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.walletIconWrap {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  background: var(--wcb, var(--surface-dim));
+  color: var(--wc, var(--ink-muted));
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 4px;
+}
+
+.walletTitle {
+  font-size: var(--fs-5);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.walletCount {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--ink-subtle);
+}
+
+/* ── Panel expandido debajo de los wallets ────────────────────────────────── */
+.expandedPanel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  animation: slideDown 0.2s var(--ease) both;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.expandedHeader {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1.1rem;
+  font-size: var(--fs-5); font-weight: 700;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-off);
+}
+
+.expandedEmpty {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: var(--fs-5);
+  color: var(--ink-subtle);
+}
+
+/* ── Lista de acciones ───────────────────────────────────────────────────── */
+.actionList {
+  display: flex;
+  flex-direction: column;
+}
+
+.actionRow {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.65rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.12s;
+}
+.actionRow:last-child { border-bottom: none; }
+.actionRow:hover { background: var(--surface-off); }
+
+.actionAvatar {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-5); font-weight: 800;
+  flex-shrink: 0;
+}
+
+.actionInfo {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.actionName {
+  font-size: var(--fs-5); font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.actionPreview {
+  font-size: var(--fs-6); color: var(--ink-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.actionChip {
+  font-size: 0.62rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 99px;
+  white-space: nowrap;
+}
+.chipDanger  { background: #FEF2F2; color: #991B1B; }
+.chipWarning { background: #FFFBEB; color: #92400E; }
+.chipMuted   { background: var(--surface-dim); color: var(--ink-subtle); }
+
+.actionBtns {
+  display: flex; gap: 0.3rem; flex-shrink: 0;
+}
+
+.btnSmall {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btnSmall:hover { background: var(--surface-off); border-color: var(--line-strong); color: var(--ink); }
+
+.btnLeido {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(5,150,105,0.25);
+  background: rgba(5,150,105,0.06);
+  color: #059669;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btnLeido:hover { background: rgba(5,150,105,0.15); border-color: #059669; }
+
+.btnEliminar {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(220,38,38,0.2);
+  background: rgba(220,38,38,0.05);
+  color: #DC2626;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btnEliminar:hover { background: rgba(220,38,38,0.14); border-color: #DC2626; }
+
+/* ── Códigos caducados ───────────────────────────────────────────────────── */
+.codigoRow {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.65rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.12s;
+}
+.codigoRow:last-child { border-bottom: none; }
+.codigoRow:hover { background: var(--surface-off); }
+
+.codigoCode {
+  font-family: var(--font-mono);
+  font-size: var(--fs-5); font-weight: 700;
+  color: var(--ink); letter-spacing: 0.04em;
+}
+.codigoMeta {
+  font-size: var(--fs-6); color: var(--ink-subtle);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .walletRow { flex-direction: column; }
+  .wallet { height: 140px; }
+}
+
+@media (max-width: 500px) {
+  .actionInfo { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .actionBtns { gap: 0.2rem; }
+  .btnSmall, .btnLeido, .btnEliminar { width: 28px; height: 28px; }
+}

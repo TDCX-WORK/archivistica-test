@@ -1,0 +1,60 @@
+/* ═══════════════════════════════════════════════════════════════
+   MODAL STYLES — compartidos entre RenovarModal y GenerarCodigoModal
+═══════════════════════════════════════════════════════════════ */
+
+.modalOverlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100; padding: 1rem;
+  animation: fadeIn 0.15s var(--ease);
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: var(--surface); border-radius: 16px; padding: 1.5rem;
+  width: 100%; max-width: 420px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.06);
+  animation: slideUp 0.2s var(--spring);
+}
+@keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.modalTitle   { font-size: var(--fs-2); font-weight: 800; color: var(--ink); margin: 0 0 0.3rem; }
+.modalSub     { font-size: var(--fs-5); color: var(--ink-muted); margin: 0 0 1.25rem; }
+.modalField   { margin-bottom: 1.25rem; }
+.modalLabel   { display: block; font-size: var(--fs-6); font-weight: 700; color: var(--ink-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.modalPreview { font-size: var(--fs-4); color: var(--ink-muted); margin: 0 0 1.25rem; }
+.modalPreview strong { color: var(--ink); font-weight: 700; }
+.modalActions { display: flex; gap: 0.6rem; justify-content: flex-end; }
+
+.pillarBtns { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.pillarBtn {
+  padding: 0.4rem 0.9rem; border-radius: var(--r-full);
+  border: 1px solid var(--line-light); background: var(--surface);
+  font-size: var(--fs-5); font-weight: 600; color: var(--ink-muted);
+  cursor: pointer; transition: all 0.15s var(--ease);
+}
+.pillarBtn:hover      { border-color: var(--primary); color: var(--primary); }
+.pillarBtnActive      { background: var(--primary); color: white; border-color: var(--primary); }
+
+.btnCancelar {
+  padding: 0.55rem 1rem; background: none;
+  border: 1px solid var(--line-light); border-radius: 10px;
+  font-size: var(--fs-4); font-weight: 600; color: var(--ink-muted); cursor: pointer;
+  transition: all 0.15s;
+}
+.btnCancelar:hover { border-color: var(--line-strong); color: var(--ink); }
+
+.btnPrimary {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-mid) 100%);
+  color: white; border: none; border-radius: 10px;
+  font-size: var(--fs-4); font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: all 0.15s var(--ease);
+}
+.btnPrimary:hover    { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+.btnPrimary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }

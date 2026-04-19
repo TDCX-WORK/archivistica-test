@@ -1,0 +1,27 @@
+/* ═══════════════════════════════════════════════════════════════
+   CodigoCard — card de código de invitación
+═══════════════════════════════════════════════════════════════ */
+
+.codeCard {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.85rem 1rem; border-radius: 10px;
+  border: 1px solid var(--line-light); background: var(--surface);
+  box-shadow: var(--shadow-xs);
+  transition: transform 0.15s var(--spring), box-shadow 0.15s var(--ease);
+}
+.codeCard:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+.code_activo  { border-left: 3px solid var(--accent); }
+.code_usado   { opacity: 0.5; }
+.code_expirado { opacity: 0.4; }
+
+.codeLeft  { display: flex; flex-direction: column; gap: 0.15rem; }
+.codeText  { font-family: var(--font-mono); font-size: var(--fs-2); font-weight: 700; color: var(--ink); letter-spacing: 0.06em; }
+.codeExpiry { font-size: var(--fs-6); color: var(--ink-muted); }
+
+.copyBtn {
+  background: var(--surface-dim); border: 1px solid var(--line-light);
+  border-radius: 8px; padding: 0.45rem; cursor: pointer; color: var(--ink-muted);
+  display: flex; transition: all 0.15s var(--ease);
+}
+.copyBtn:hover { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }

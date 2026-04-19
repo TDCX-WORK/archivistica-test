@@ -1,0 +1,163 @@
+/* ═══════════════════════════════════════════════════════════════
+   TablonPanel — panel de avisos del profesor
+═══════════════════════════════════════════════════════════════ */
+
+.tablonPage {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: fadeUp 0.2s var(--ease) both;
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Formulario */
+.tablonForm {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.tablonFormTitle {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: var(--fs-3); font-weight: 700; color: var(--ink);
+  margin: 0;
+}
+
+/* Selector de tipo */
+.tipoRow { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.tipoBtn {
+  padding: 0.28rem 0.75rem;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: var(--surface-dim);
+  color: var(--ink-muted);
+  font-size: var(--fs-6); font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+  font-family: var(--font-body);
+}
+.tipoBtn:hover { background: var(--surface-off); color: var(--ink); }
+.tipoBtnActive { font-weight: 700; }
+
+.tablonInput {
+  width: 100%; padding: 0.65rem 0.85rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface); color: var(--ink);
+  font-size: var(--fs-4); font-family: var(--font-body);
+  transition: border-color 0.15s; box-sizing: border-box;
+}
+.tablonInput:focus { outline: none; border-color: var(--primary); }
+
+.tablonTextarea {
+  width: 100%; padding: 0.65rem 0.85rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface); color: var(--ink);
+  font-size: var(--fs-5); font-family: var(--font-body);
+  resize: vertical; min-height: 72px;
+  transition: border-color 0.15s; box-sizing: border-box;
+}
+.tablonTextarea:focus { outline: none; border-color: var(--primary); }
+
+.tablonFooter {
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.expiraWrap { display: flex; align-items: center; gap: 0.5rem; }
+.expiraLabel { font-size: var(--fs-6); font-weight: 600; color: var(--ink-muted); white-space: nowrap; }
+.expiraInput {
+  padding: 0.28rem 0.55rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface); color: var(--ink);
+  font-size: var(--fs-5); font-family: var(--font-body);
+  cursor: pointer;
+}
+.expiraInput:focus { outline: none; border-color: var(--primary); }
+.expiraClear {
+  width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; border: 1px solid var(--line);
+  background: transparent; cursor: pointer; color: var(--ink-subtle);
+  font-size: var(--fs-2); line-height: 1;
+}
+.expiraClear:hover { background: var(--danger-lt); color: var(--danger); }
+
+.tablonPublicar {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--r-md);
+  background: var(--ink); color: white; border: none;
+  font-size: var(--fs-5); font-weight: 700;
+  cursor: pointer; font-family: var(--font-body);
+  transition: background 0.15s, transform 0.12s;
+  white-space: nowrap;
+}
+.tablonPublicar:hover:not(:disabled) { background: var(--ink-soft); }
+.tablonPublicar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Lista de avisos */
+.tablonLista {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.tablonListaTitle {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: var(--fs-5); font-weight: 700; color: var(--ink);
+  margin: 0; padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+}
+.tablonCount {
+  font-size: var(--fs-7); font-weight: 700;
+  background: var(--ink); color: white;
+  min-width: 18px; height: 18px; border-radius: 99px;
+  display: flex; align-items: center; justify-content: center; padding: 0 4px;
+}
+
+.tablonVacio {
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  padding: 3rem 1rem; color: var(--ink-subtle); text-align: center;
+}
+.tablonVacio p    { font-size: var(--fs-3); font-weight: 600; color: var(--ink-muted); margin: 0; }
+.tablonVacio span { font-size: var(--fs-5); }
+
+.tablonItems { display: flex; flex-direction: column; }
+
+.tablonItem {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.12s;
+}
+.tablonItem:last-child { border-bottom: none; }
+.tablonItem:hover { background: var(--surface-off); }
+
+.tablonItemLeft { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+.tablonItemTipo {
+  font-size: var(--fs-7); font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; padding: 0.1rem 0.5rem; border-radius: 99px;
+  width: fit-content;
+}
+.tablonItemTitle { font-size: var(--fs-4); font-weight: 700; color: var(--ink); margin: 0; line-height: 1.35; }
+.tablonItemBody  { font-size: var(--fs-5); color: var(--ink-muted); margin: 0; line-height: 1.45; }
+.tablonItemMeta  { font-size: var(--fs-7); color: var(--ink-subtle); display: flex; gap: 0.35rem; }
+
+.tablonItemDelete {
+  width: 30px; height: 30px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r-sm); border: 1px solid transparent;
+  background: transparent; color: var(--ink-subtle);
+  cursor: pointer; transition: all 0.15s;
+}
+.tablonItemDelete:hover { background: var(--danger-lt); border-color: var(--danger-dim); color: var(--danger); }
+
+.spinner { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }

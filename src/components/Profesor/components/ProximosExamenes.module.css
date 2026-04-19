@@ -1,0 +1,61 @@
+/* ═══════════════════════════════════════════════════════════════
+   ProximosExamenes — lista de fechas de examen por alumno
+═══════════════════════════════════════════════════════════════ */
+
+.examList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.examRow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.6rem;
+  background: var(--surface-off);
+  border-radius: var(--r-md);
+}
+
+.examDias {
+  flex-shrink: 0;
+  font-size: var(--fs-6);
+  font-weight: 800;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--r-full);
+  min-width: 32px;
+  text-align: center;
+}
+
+.examInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.examNombre {
+  font-size: var(--fs-5);
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.examFecha {
+  font-size: var(--fs-7);
+  color: var(--ink-muted);
+}
+
+.examEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  color: var(--ink-subtle);
+  font-size: var(--fs-5);
+  text-align: center;
+}
+.examEmpty p { margin: 0; }

@@ -1,0 +1,25 @@
+/* ═══════════════════════════════════════════════════════════════
+   GenerarCodigoModal — estilos propios
+═══════════════════════════════════════════════════════════════ */
+
+.codigoGenerado {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, var(--surface-dim) 0%, var(--surface-off) 100%);
+  border-radius: 12px; padding: 1rem 1.25rem; margin: 1rem 0;
+  border: 1px solid var(--line-light);
+}
+
+.codigoTexto {
+  font-family: var(--font-mono); font-size: var(--fs-1);
+  font-weight: 800; color: var(--ink); letter-spacing: 0.1em;
+}
+
+.copyBtn {
+  background: var(--surface-dim); border: 1px solid var(--line-light);
+  border-radius: 8px; padding: 0.45rem; cursor: pointer; color: var(--ink-muted);
+  display: flex; transition: all 0.15s var(--ease);
+}
+.copyBtn:hover { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
+
+.spinner { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
