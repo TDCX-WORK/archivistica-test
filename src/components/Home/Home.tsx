@@ -533,28 +533,74 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
             />
           </div>
 
-          {studentProfile && (studentProfile.monthly_price || studentProfile.exam_date || currentUser?.access_until) && (
-            <div className={styles.matriculaCard}>
-              {studentProfile.monthly_price && (
-                <div className={styles.matriculaRow}>
-                  <span className={styles.matriculaLabel}>Tu matrícula</span>
-                  <span className={styles.matriculaPrecio}>{studentProfile.monthly_price} €<span className={styles.matriculaMes}>/mes</span></span>
+          <div className={styles.walletRow}>
+            {/* Wallet 1 — Tu Matrícula */}
+            <div className={styles.wallet}>
+              <div className={styles.walletBg} />
+              <div className={styles.walletTabs}>
+                <div className={[styles.walletTab, styles.walletTabGreen].join(' ')}>
+                  <span className={styles.walletTabDot} style={{background:'#059669'}} />
+                  <span>Acceso activo</span>
+                  <span className={styles.walletTabRight}>✓</span>
                 </div>
-              )}
-              {currentUser?.access_until && (
-                <div className={styles.matriculaRow}>
-                  <span className={styles.matriculaLabel}>Acceso hasta</span>
-                  <span className={styles.matriculaFecha}>{new Date(currentUser.access_until).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                <div className={[styles.walletTab, styles.walletTabAmber].join(' ')}>
+                  <span className={styles.walletTabDot} style={{background:'#D97706'}} />
+                  <span>Próximo examen</span>
+                  {studentProfile?.exam_date && <span className={styles.walletTabRight}>{new Date(studentProfile.exam_date + 'T12:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'short'})}</span>}
                 </div>
-              )}
-              {studentProfile.exam_date && (
-                <div className={styles.matriculaRow}>
-                  <span className={styles.matriculaLabel}>Fecha examen</span>
-                  <span className={styles.matriculaFecha}>{new Date(studentProfile.exam_date + 'T12:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+              </div>
+              <div className={styles.walletPocket}>
+                
+                <div className={styles.walletContent}>
+                  <span className={styles.walletLabel}>Tu matrícula</span>
+                  {studentProfile?.monthly_price ? (
+                    <div className={styles.walletPrice}>{studentProfile.monthly_price} €<span className={styles.walletPriceUnit}>/mes</span></div>
+                  ) : (
+                    <div className={styles.walletPrice}>—</div>
+                  )}
+                  <div className={styles.walletDetails}>
+                    {currentUser?.access_until && (
+                      <div className={styles.walletDetailRow}>
+                        <span>Acceso hasta</span>
+                        <span className={styles.walletDetailVal}>{new Date(currentUser.access_until).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}</span>
+                      </div>
+                    )}
+                    {studentProfile?.exam_date && (
+                      <div className={styles.walletDetailRow}>
+                        <span>Fecha examen</span>
+                        <span className={styles.walletDetailVal}>{new Date(studentProfile.exam_date + 'T12:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
-          )}
+
+            {/* Wallet 2 — Tus Documentos */}
+            <div className={styles.wallet}>
+              <div className={styles.walletBg} />
+              <div className={styles.walletTabs}>
+                <div className={[styles.walletTab, styles.walletTabBlue].join(' ')}>
+                  <span className={styles.walletTabDot} style={{background:'#2563EB'}} />
+                  <span>Contrato</span>
+                </div>
+                <div className={[styles.walletTab, styles.walletTabPurple].join(' ')}>
+                  <span className={styles.walletTabDot} style={{background:'#7C3AED'}} />
+                  <span>Material de estudio</span>
+                </div>
+              </div>
+              <div className={styles.walletPocket}>
+                
+                <div className={styles.walletContent}>
+                  <span className={styles.walletLabel}>Tus documentos</span>
+                  <div className={styles.walletPlaceholder}>
+                    <span className={styles.walletPlaceholderTitle}>Próximamente</span>
+                    <span className={styles.walletPlaceholderSub}>Tu academia compartirá contratos, recibos y material aquí</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

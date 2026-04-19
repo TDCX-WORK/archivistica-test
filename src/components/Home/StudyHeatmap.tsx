@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Flame, TrendingUp, Plus, X, Check, CalendarDays } from 'lucide-react'
-import { AnimatedGridPattern } from '../magicui/AnimatedGridPattern'
 import type { Session, WrongAnswer } from '../../types'
 import s from './StudyHeatmap.module.css'
 
@@ -125,13 +124,7 @@ export default function StudyHeatmap({
 
   return (
     <div className={s.root}>
-      <div className={s.gridWrap}>
-        <AnimatedGridPattern
-          width={40} height={40} numSquares={45} maxOpacity={0.28}
-          duration={3} repeatDelay={0.5}
-          color="rgba(34,197,94,1)" lineColor="rgba(34,197,94,0.18)"
-        />
-      </div>
+      
       <div className={s.edgeFadeTop}    />
       <div className={s.edgeFadeBottom} />
       <div className={s.edgeFadeLeft}   />
@@ -204,28 +197,20 @@ export default function StudyHeatmap({
 
       {/* ── RIGHT: stats + detalle ── */}
       <div className={s.infoSide}>
-        <div className={s.pillRow}>
-          {streakDays > 0 && (
-            <div className={s.pill} style={{ background: '#FEF9E7', color: '#7D5A00', borderColor: '#F5D06E' }}>
-              <Flame size={13} /> {streakDays} días de racha
-            </div>
-          )}
-          <div className={s.pill} style={{
-            background:  avgScore >= 70 ? '#F0FDF4' : avgScore >= 50 ? '#FFFBEB' : '#FEF2F2',
-            color:       avgScore >= 70 ? '#166534' : avgScore >= 50 ? '#78350F' : '#991B1B',
-            borderColor: avgScore >= 70 ? '#86EFAC' : avgScore >= 50 ? '#FDE68A' : '#FECACA',
-          }}>
-            <TrendingUp size={13} /> {avgScore}% media
-          </div>
-        </div>
+        
 
         <div className={s.mStats}>
           <div className={s.mStat}><span className={s.mStatV}>{ms.days}</span><span className={s.mStatL}>días activos</span></div>
           <div className={s.mStatSep} />
           <div className={s.mStat}><span className={s.mStatV}>{ms.ses}</span><span className={s.mStatL}>sesiones</span></div>
-          <div className={s.mStatSep} />
-          <div className={s.mStat}><span className={s.mStatV}>{ms.avg !== null ? `${ms.avg}%` : '—'}</span><span className={s.mStatL}>nota media</span></div>
         </div>
+
+        {streakDays > 0 && (
+          <div className={s.streakBar}>
+            <Flame size={14} style={{ color: '#D97706' }} />
+            <span className={s.streakText}>Racha actual: <strong>{streakDays} día{streakDays !== 1 ? 's' : ''}</strong></span>
+          </div>
+        )}
 
         {dueForReview.length > 0 && (
           <div className={s.reviewAlert}>

@@ -137,7 +137,10 @@
 /* ── CALENDARIO ───────────────────────────────────────────────────────────── */
 .calendarCard {
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 /* ── XP CARD ──────────────────────────────────────────────────────────────── */
@@ -236,8 +239,8 @@
 
 /* Círculo de estado — sin relleno, borde + glow cuando está desbloqueado */
 .missionDot {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   border: 1.5px solid var(--line-strong);
   background: transparent;
@@ -253,7 +256,7 @@
 
 /* Título de la misión */
 .missionName {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--ink-muted);
   overflow: hidden;
@@ -268,7 +271,7 @@
 .missionConnector {
   width: 1.5px;
   height: 7px;
-  margin-left: 9px; /* centra bajo el círculo de 20px */
+  margin-left: 12px; /* centra bajo el círculo de 20px */
   background: var(--line);
   border-radius: 99px;
   flex-shrink: 0;
@@ -595,48 +598,239 @@
 }
 
 /* ── Card de matrícula ──────────────────────────────────────────────────────── */
-.matriculaCard {
-  background: var(--surface);
+
+/* ── WALLET CARDS ────────────────────────────────────────────────────────── */
+.walletRow {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.wallet {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  height: 280px;
+  border-radius: 20px;
   border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  padding: 0.9rem 1.1rem;
+  overflow: hidden;
+  background: var(--surface);
   box-shadow: var(--shadow-card);
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+  cursor: default;
+}
+.wallet:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+}
+
+.walletBg {
+  position: absolute;
+  inset: 0;
+  background: var(--surface-off);
+  z-index: 0;
+}
+
+.walletTabs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 55%;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0;
+  padding: 12px 10px 0;
+  z-index: 1;
 }
 
-.matriculaRow {
+.walletTab {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.matriculaLabel {
-  font-size: var(--fs-6);
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 12px 12px 0 0;
+  border-bottom: none;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: var(--ink-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  position: relative;
+  transition: transform 0.3s var(--ease);
+  width: 92% !important;
+  box-sizing: border-box;
+}
+.walletTab:first-child {
+  width: 84% !important;
+}
+.wallet:hover .walletTab:first-child { transform: translateY(-5px); }
+.wallet:hover .walletTab:last-child  { transform: translateY(-2px); }
+
+.walletTabGreen  { background: #ECFDF5; border: 1px solid #A7F3D0; border-bottom: none; color: #065F46; }
+.walletTabAmber  { background: #FFFBEB; border: 1px solid #FDE68A; border-bottom: none; color: #92400E; }
+.walletTabBlue   { background: #EFF6FF; border: 1px solid #BFDBFE; border-bottom: none; color: #1E40AF; }
+.walletTabPurple { background: #F5F3FF; border: 1px solid #DDD6FE; border-bottom: none; color: #5B21B6; }
+
+.walletTabDot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.matriculaPrecio {
-  font-size: var(--fs-2);
+.walletTabRight {
+  margin-left: auto;
+  font-size: 0.62rem;
+  opacity: 0.6;
+  font-weight: 500;
+}
+
+/* Bolsillo frontal */
+.walletPocket {
+  position: absolute;
+  bottom: 0;
+  left: -1px;
+  right: -1px;
+  height: 58%;
+  background: var(--surface);
+  border-radius: 50% 50% 0 0 / 24% 24% 0 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  border-top: 1.5px solid var(--line-strong);
+  box-shadow: 0 -6px 16px rgba(0,0,0,0.03);
+}
+
+.walletPocketEdge {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 48% 48% 0 0 / 100% 100% 0 0;
+  opacity: 0.35;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.walletContent {
+  position: relative;
+  z-index: 4;
+  padding: 22px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.walletLabel {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--ink-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 4px;
+}
+
+.walletPrice {
+  font-size: 1.5rem;
   font-weight: 800;
   color: var(--ink);
   letter-spacing: -0.03em;
   line-height: 1;
 }
 
-.matriculaMes {
-  font-size: var(--fs-6);
+.walletPriceUnit {
+  font-size: 0.7rem;
   font-weight: 500;
   color: var(--ink-muted);
+  margin-left: 1px;
 }
 
-.matriculaFecha {
-  font-size: var(--fs-5);
-  font-weight: 700;
+.walletDetails {
+  border-top: 1px solid var(--line);
+  margin-top: 10px;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.walletDetailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.65rem;
+  color: var(--ink-subtle);
+  font-weight: 500;
+}
+
+.walletDetailVal {
   color: var(--ink);
+  font-weight: 600;
+  font-size: 0.68rem;
+}
+
+.walletPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px 0;
+  gap: 4px;
+}
+
+.walletPlaceholderTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--line-strong);
+}
+
+.walletPlaceholderSub {
+  font-size: 0.62rem;
+  color: var(--line-strong);
+  line-height: 1.4;
+  max-width: 140px;
+}
+
+@media (max-width: 700px) {
+  .walletRow {
+    flex-direction: column;
+  }
+  .wallet {
+    height: auto;
+    aspect-ratio: 1.6 / 1.2;
+  }
+
+  .walletTabs {
+    bottom: 50%;
+    padding: 16px 12px 0;
+  }
+  .walletTab {
+    padding: 11px 16px;
+    font-size: 0.82rem;
+  }
+  .walletPocket {
+    height: 54%;
+  }
+  .walletContent {
+    padding: 26px 20px 20px;
+  }
+  .walletPrice {
+    font-size: 1.8rem;
+  }
+  .walletLabel {
+    font-size: 0.72rem;
+  }
+  .walletDetailRow {
+    font-size: 0.75rem;
+  }
+  .walletDetailVal {
+    font-size: 0.78rem;
+  }
+  .walletPlaceholderTitle {
+    font-size: 0.95rem;
+  }
+  .walletPlaceholderSub {
+    font-size: 0.72rem;
+    max-width: 220px;
+  }
 }

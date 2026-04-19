@@ -154,6 +154,63 @@
 .tabActive  { color: var(--primary); border-bottom-color: var(--primary); }
 .tabContent { padding-top: 0.75rem; }
 
+/* Header de Mi Clase */
+.claseHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+.claseHeaderLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.claseTitle {
+  font-size: var(--fs-2);
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.claseCount {
+  font-size: var(--fs-6);
+  font-weight: 600;
+  color: var(--ink-subtle);
+}
+.claseSearchWrap {
+  position: relative;
+  width: 220px;
+}
+.claseSearchIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-subtle);
+  pointer-events: none;
+}
+.claseSearchInput {
+  width: 100%;
+  padding: 0.45rem 0.75rem 0.45rem 2rem;
+  border-radius: var(--r-full);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: var(--fs-5);
+  color: var(--ink);
+  font-family: var(--font-body);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.claseSearchInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-xlt);
+}
+.claseSearchInput::placeholder {
+  color: var(--ink-subtle);
+}
+
 /* Filtros */
 .filtros { display: flex; gap: 0.4rem; margin-bottom: 1rem; flex-wrap: wrap; }
 .filtroBtn {
@@ -167,39 +224,51 @@
 .filtroActive { background: var(--primary); color: var(--surface); border-color: var(--primary); }
 
 /* Lista alumnos */
+/* Lista alumnos */
 .alumnosList { display: flex; flex-direction: column; gap: 0.5rem; }
 
 .alumnoCard {
   background: var(--surface);
   border: 1px solid var(--line-light);
-  border-radius: 12px; overflow: hidden;
-  box-shadow: var(--shadow-xs);
+  border-radius: 14px; overflow: hidden;
   transition: transform 0.15s var(--spring), box-shadow 0.15s var(--ease), border-color 0.15s;
 }
-.alumnoCard:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); border-color: var(--line-strong); }
-.enRiesgo   { border-left: 3px solid var(--danger); }
-.expirado   { border-left: 3px solid var(--danger); opacity: 0.75; }
-.expirando  { border-left: 3px solid var(--amber); }
+.alumnoCard:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); border-color: var(--ac, var(--line-strong)); }
+.alumnoCardOpen { border-color: var(--ac, var(--line-strong)); box-shadow: var(--shadow-md); }
 
 .alumnoHeader {
   display: flex; align-items: center; justify-content: space-between;
-  width: 100%; padding: 0.9rem 1rem;
+  width: 100%; padding: 0.85rem 1rem;
   background: none; border: none; cursor: pointer; text-align: left; gap: 0.75rem;
 }
 .alumnoLeft  { display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 0; }
 .alumnoRight { display: flex; align-items: center; gap: 0.6rem; color: var(--ink-muted); flex-shrink: 0; }
 
 .alumnoAvatar {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--surface-dim) 0%, var(--line-light) 100%);
+  width: 40px; height: 40px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  font-size: var(--fs-3); font-weight: 800; color: var(--ink); flex-shrink: 0;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+  font-size: var(--fs-3); font-weight: 800; flex-shrink: 0;
+  transition: transform 0.2s var(--ease);
 }
-.alumnoInfo   { display: flex; flex-direction: column; min-width: 0; }
-.alumnoName   { font-size: var(--fs-3); font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.alumnoBadges { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.15rem; }
-.alumnoNota   { font-size: var(--fs-2); font-weight: 800; color: var(--ink); }
+.alumnoCard:hover .alumnoAvatar { transform: scale(1.05); }
+
+.alumnoInfo    { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.alumnoNameRow { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.alumnoName    { font-size: var(--fs-4); font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.alumnoUsername { font-size: var(--fs-6); color: var(--ink-subtle); font-weight: 500; }
+.alumnoNota    { font-size: var(--fs-2); font-weight: 800; letter-spacing: -0.03em; }
+
+/* Chips de estado */
+.alumnoChip {
+  font-size: 0.65rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 99px;
+  white-space: nowrap; flex-shrink: 0;
+  letter-spacing: 0.01em;
+}
+.chipSuccess { background: #ECFDF5; color: #065F46; }
+.chipWarning { background: #FFFBEB; color: #92400E; }
+.chipDanger  { background: #FEF2F2; color: #991B1B; }
+.chipMuted   { background: var(--surface-dim); color: var(--ink-subtle); }
 
 .badge          { font-size: var(--fs-6); font-weight: 600; }
 .badgeActivo    { color: var(--accent); }
@@ -210,23 +279,42 @@
 .badgeAccesoOk  { color: var(--accent); }
 
 /* Detalle acordeón */
+/* Detalle acordeón */
 .alumnoDetail {
-  padding: 0.85rem 1rem 1rem;
+  padding: 0 1rem 1rem;
   border-top: 1px solid var(--line-light);
-  background: linear-gradient(180deg, var(--surface-off) 0%, var(--surface) 100%);
+  background: var(--surface-off);
 }
-.detailGrid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
+
+.detailKpis {
+  display: flex;
+  gap: 0;
+  margin: 0.75rem 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
 }
-@media (max-width: 500px) { .detailGrid { grid-template-columns: repeat(2, 1fr); } }
-.detailItem {
-  display: flex; align-items: center; gap: 0.4rem;
-  font-size: var(--fs-5); color: var(--ink-muted);
+.detailKpi {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0.65rem 0.25rem;
+  border-right: 1px solid var(--line);
+  gap: 2px;
 }
-.detailItem svg { color: var(--ink-subtle); flex-shrink: 0; }
+.detailKpi:last-child { border-right: none; }
+.detailKpiVal {
+  font-size: var(--fs-3); font-weight: 800;
+  color: var(--ink); letter-spacing: -0.03em; line-height: 1;
+}
+.detailKpiLabel {
+  font-size: 0.62rem; font-weight: 600;
+  color: var(--ink-subtle); text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 
 /* Botones acordeón */
-.detailActions { display: flex; gap: 0.5rem; margin-top: 0.9rem; flex-wrap: wrap; }
+.detailActions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 
 .btnRevocarSmall {
   display: inline-flex; align-items: center; gap: 0.35rem;

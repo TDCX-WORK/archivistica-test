@@ -66,13 +66,13 @@
   /* fs-5: body secundario / labels de formulario / metadata                      */
   /* fs-6: captions / badges / chips / tooltips                                   */
   /* fs-7: micro / timestamps / copyright / ticks de eje                          */
-  --fs-1:  1.4rem;    /* ~22.4px */
-  --fs-2:  1.1rem;    /* ~17.6px */
-  --fs-3:  0.95rem;   /* ~15.2px */
-  --fs-4:  0.875rem;  /* ~14px   */
-  --fs-5:  0.82rem;   /* ~13.1px */
-  --fs-6:  0.72rem;   /* ~11.5px */
-  --fs-7:  0.65rem;   /* ~10.4px */
+  --fs-1:  1.5rem;    /* ~24px   */
+  --fs-2:  1.2rem;    /* ~19.2px */
+  --fs-3:  1.05rem;   /* ~16.8px */
+  --fs-4:  0.95rem;   /* ~15.2px */
+  --fs-5:  0.88rem;   /* ~14.1px */
+  --fs-6:  0.78rem;   /* ~12.5px */
+  --fs-7:  0.7rem;    /* ~11.2px */
 
   /* ── Radii ── */
   --r-xs:   6px;

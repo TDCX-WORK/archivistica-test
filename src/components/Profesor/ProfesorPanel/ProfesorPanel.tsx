@@ -5,7 +5,7 @@ import {
   Plus, RefreshCw, ChevronDown, ChevronUp, Zap, Clock,
   UserX, BarChart2, Key, Calendar, Shield, ShieldOff, RotateCcw, XCircle,
   TrendingDown, CalendarDays, ExternalLink, Bell, CheckCircle2, ArrowRight,
-  Megaphone, Trash2, BookOpen as BookIcon, MessageSquare, Send, X, CornerDownLeft
+  Megaphone, Trash2, BookOpen as BookIcon, MessageSquare, Send, X, CornerDownLeft, Search
 } from 'lucide-react'
 import { supabase }              from '../../../lib/supabase'
 import { Ripple }              from '../../magicui/Ripple'
@@ -177,51 +177,87 @@ function AlumnoRow({ alumno, expanded, onToggle, onRenovar, onRevocar, onDetalle
     if (!window.confirm(`¿Revocar acceso de ${alumno.username}? Dejará de poder entrar inmediatamente.`)) return
     setRevocando(true); await onRevocar(alumno.id); setRevocando(false)
   }
-  const getEstadoAcceso = () => {
-    if (alumno.accesoExpirado)  return { text: 'Acceso expirado',                         cls: styles.badgeExpirado  }
-    if (alumno.proximoAExpirar) return { text: `Expira en ${alumno.diasParaExpirar}d`,     cls: styles.badgeExpirando }
-    if (alumno.accessUntil)     return { text: `Hasta ${formatFecha(alumno.accessUntil)}`, cls: styles.badgeAccesoOk  }
-    return null
-  }
-  const estadoAcceso = getEstadoAcceso()
+
+  const notaColor = alumno.notaMedia == null ? '#9CA3AF'
+    : alumno.notaMedia >= 70 ? '#059669'
+    : alumno.notaMedia >= 50 ? '#D97706'
+    : '#DC2626'
+
+  const avatarBg = alumno.accesoExpirado ? '#F3F4F6'
+    : alumno.notaMedia == null ? '#F3F4F6'
+    : alumno.notaMedia >= 70 ? '#ECFDF5'
+    : alumno.notaMedia >= 50 ? '#FFFBEB'
+    : '#FEF2F2'
+
+  const avatarColor = alumno.accesoExpirado ? '#9CA3AF'
+    : alumno.notaMedia == null ? '#6B7280'
+    : notaColor
+
+  const estadoLabel = alumno.accesoExpirado ? 'Expirado'
+    : alumno.enRiesgo ? 'En riesgo'
+    : alumno.diasInactivo === 0 ? 'Activo hoy'
+    : alumno.proximoAExpirar ? `Expira en ${alumno.diasParaExpirar}d`
+    : alumno.diasInactivo != null ? formatDias(alumno.diasInactivo)
+    : 'Sin datos'
+
+  const estadoCls = alumno.accesoExpirado ? styles.chipDanger
+    : alumno.enRiesgo ? styles.chipWarning
+    : alumno.diasInactivo === 0 ? styles.chipSuccess
+    : alumno.proximoAExpirar ? styles.chipWarning
+    : styles.chipMuted
 
   return (
-    <div className={[styles.alumnoCard, alumno.enRiesgo ? styles.enRiesgo : '', alumno.accesoExpirado ? styles.expirado : '', alumno.proximoAExpirar ? styles.expirando : ''].filter(Boolean).join(' ')}>
+    <div className={[styles.alumnoCard, expanded ? styles.alumnoCardOpen : ''].join(' ')}
+      style={{ ['--ac' as string]: avatarColor }}>
       <button className={styles.alumnoHeader} onClick={onToggle}>
         <div className={styles.alumnoLeft}>
-          <div className={styles.alumnoAvatar}>{alumno.accesoExpirado ? <ShieldOff size={14} /> : alumno.username[0]!.toUpperCase()}</div>
+          <div className={styles.alumnoAvatar} style={{ background: avatarBg, color: avatarColor }}>
+            {alumno.accesoExpirado ? <ShieldOff size={15} /> : alumno.username[0]!.toUpperCase()}
+          </div>
           <div className={styles.alumnoInfo}>
-            <span className={styles.alumnoName}>{alumno.username}</span>
-            <div className={styles.alumnoBadges}>
-              <span className={[styles.badge, alumno.accesoExpirado ? styles.badgeExpirado : alumno.enRiesgo ? styles.badgeRiesgo : alumno.diasInactivo === 0 ? styles.badgeActivo : styles.badgeNormal].join(' ')}>
-                {alumno.accesoExpirado ? '✕ Expirado' : alumno.enRiesgo ? '⚠ En riesgo' : alumno.diasInactivo === 0 ? '● Activo hoy' : formatDias(alumno.diasInactivo)}
-              </span>
-              {estadoAcceso && !alumno.accesoExpirado && <span className={[styles.badge, estadoAcceso.cls].join(' ')}>{estadoAcceso.text}</span>}
+            <div className={styles.alumnoNameRow}>
+              <span className={styles.alumnoName}>{alumno.fullName || alumno.username}</span>
+              <span className={[styles.alumnoChip, estadoCls].join(' ')}>{estadoLabel}</span>
             </div>
+            <span className={styles.alumnoUsername}>@{alumno.username}{alumno.accessUntil ? ` · Hasta ${formatFecha(alumno.accessUntil)}` : ''}</span>
           </div>
         </div>
         <div className={styles.alumnoRight}>
-          <span className={styles.alumnoNota}>{alumno.notaMedia !== null ? `${alumno.notaMedia}%` : '—'}</span>
+          <span className={styles.alumnoNota} style={{ color: notaColor }}>{alumno.notaMedia !== null ? `${alumno.notaMedia}%` : '—'}</span>
           {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </div>
       </button>
       {expanded && (
         <div className={styles.alumnoDetail}>
-          <div className={styles.detailGrid}>
-            <div className={styles.detailItem}><Zap size={13} /><span>{alumno.sesiones} sesiones</span></div>
-            <div className={styles.detailItem}><BookOpen size={13} /><span>{alumno.temasLeidos} temas leídos</span></div>
-            <div className={styles.detailItem}><TrendingUp size={13} /><span>Racha: {alumno.racha}d</span></div>
-            <div className={styles.detailItem}><AlertTriangle size={13} /><span>{alumno.fallos} preguntas falladas</span></div>
-            <div className={styles.detailItem}><Clock size={13} /><span>{alumno.pendientesHoy} pendientes hoy</span></div>
-            <div className={styles.detailItem}><Calendar size={13} /><span>Acceso hasta: {formatFecha(alumno.accessUntil ?? null)}</span></div>
+          <div className={styles.detailKpis}>
+            <div className={styles.detailKpi}>
+              <span className={styles.detailKpiVal}>{alumno.sesiones}</span>
+              <span className={styles.detailKpiLabel}>Sesiones</span>
+            </div>
+            <div className={styles.detailKpi}>
+              <span className={styles.detailKpiVal}>{alumno.temasLeidos}</span>
+              <span className={styles.detailKpiLabel}>Temas</span>
+            </div>
+            <div className={styles.detailKpi}>
+              <span className={styles.detailKpiVal}>{alumno.racha}d</span>
+              <span className={styles.detailKpiLabel}>Racha</span>
+            </div>
+            <div className={styles.detailKpi}>
+              <span className={styles.detailKpiVal}>{alumno.fallos}</span>
+              <span className={styles.detailKpiLabel}>Fallos</span>
+            </div>
+            <div className={styles.detailKpi}>
+              <span className={styles.detailKpiVal}>{alumno.pendientesHoy}</span>
+              <span className={styles.detailKpiLabel}>Pendientes</span>
+            </div>
           </div>
           <div className={styles.detailActions}>
-            <button className={styles.btnRevocarSmall} onClick={handleRevocar} disabled={revocando}>
-              {revocando ? <RefreshCw size={12} className={styles.spinner} /> : <XCircle size={12} />} Revocar acceso
-            </button>
-            <button className={styles.btnRenovarSmall2} onClick={() => onRenovar(alumno)}><RotateCcw size={12} /> Renovar acceso</button>
             <button className={styles.btnDetalleSmall} onClick={() => onDetalle(alumno)}><ExternalLink size={12} /> Ver detalle</button>
             <button className={styles.btnMensajeSmall} onClick={() => onMensaje(alumno)}><MessageSquare size={12} /> Mensaje</button>
+            <button className={styles.btnRenovarSmall2} onClick={() => onRenovar(alumno)}><RotateCcw size={12} /> Renovar</button>
+            <button className={styles.btnRevocarSmall} onClick={handleRevocar} disabled={revocando}>
+              {revocando ? <RefreshCw size={12} className={styles.spinner} /> : <XCircle size={12} />} Revocar
+            </button>
           </div>
         </div>
       )}
@@ -739,6 +775,7 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
   const [modalRenovar,  setModalRenovar]  = useState<AlumnoConStats | null>(null)
   const [copied,        setCopied]        = useState<string | null>(null)
   const [bancoSubtab,   setBancoSubtab]   = useState<'preguntas' | 'supuestos'>('preguntas')
+  const [busquedaClase, setBusquedaClase] = useState('')
   const [nPreguntas,    setNPreguntas]    = useState(0)
   const [nSupuestos,    setNSupuestos]    = useState(0)
 
@@ -816,16 +853,32 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
         {tab==='inbox'&&<InboxPanel alumnos={alumnos} inviteCodes={inviteCodes} onVerAlumno={setAlumnoDetalle} onRenovar={setModalRenovar} onEnviarMensaje={setModalMensaje} mensajes={dmSent} onMensajeLeido={handleMensajeLeido} onDeleteMensaje={handleDeleteMensaje}/>}
         {tab==='clase'&&(
           <div className={styles.tabContent}>
+            <div className={styles.claseHeader}>
+              <div className={styles.claseHeaderLeft}>
+                <h2 className={styles.claseTitle}>Mi clase</h2>
+                <span className={styles.claseCount}>{alumnos.length} alumnos</span>
+              </div>
+              <div className={styles.claseSearchWrap}>
+                <Search size={14} className={styles.claseSearchIcon} />
+                <input className={styles.claseSearchInput} placeholder="Buscar alumno…" value={busquedaClase} onChange={e => setBusquedaClase(e.target.value)} />
+              </div>
+            </div>
             <div className={styles.filtros}>
               {[{id:'todos',label:`Todos (${alumnos.length})`},{id:'riesgo',label:`⚠ En riesgo (${alumnos.filter(a=>a.enRiesgo).length})`},{id:'expirando',label:`🔒 Acceso (${nExpirando})`},{id:'activos',label:`Activos (${alumnos.filter(a=>!a.enRiesgo&&!a.accesoExpirado&&a.diasInactivo!==null&&a.diasInactivo<3).length})`}].map(f=>(
                 <button key={f.id} className={[styles.filtroBtn,filtro===f.id?styles.filtroActive:''].join(' ')} onClick={()=>setFiltro(f.id)}>{f.label}</button>
               ))}
             </div>
-            {alumnosFiltrados.length===0?(
-              <div className={styles.emptyState}><Users size={32} strokeWidth={1.2}/><p>{filtro==='riesgo'?'Ningún alumno en riesgo. ¡Bien!':filtro==='expirando'?'Ningún acceso próximo a expirar.':'No hay alumnos en este filtro.'}</p></div>
+            {alumnosFiltrados.filter(a => {
+              const q = busquedaClase.toLowerCase()
+              return !q || a.username.toLowerCase().includes(q) || (a.fullName?.toLowerCase().includes(q) ?? false)
+            }).length===0?(
+              <div className={styles.emptyState}><Users size={32} strokeWidth={1.2}/><p>{busquedaClase ? 'No se encontraron alumnos' : filtro==='riesgo'?'Ningún alumno en riesgo. ¡Bien!':filtro==='expirando'?'Ningún acceso próximo a expirar.':'No hay alumnos en este filtro.'}</p></div>
             ):(
               <div className={styles.alumnosList}>
-                {alumnosFiltrados.map(alumno=><AlumnoRow key={alumno.id} alumno={alumno} expanded={expandedId===alumno.id} onToggle={()=>setExpandedId(prev=>prev===alumno.id?null:alumno.id)} onRenovar={setModalRenovar} onRevocar={revocarAcceso} onDetalle={setAlumnoDetalle} onMensaje={setModalMensaje}/>)}
+                {alumnosFiltrados.filter(a => {
+                  const q = busquedaClase.toLowerCase()
+                  return !q || a.username.toLowerCase().includes(q) || (a.fullName?.toLowerCase().includes(q) ?? false)
+                }).map(alumno=><AlumnoRow key={alumno.id} alumno={alumno} expanded={expandedId===alumno.id} onToggle={()=>setExpandedId(prev=>prev===alumno.id?null:alumno.id)} onRenovar={setModalRenovar} onRevocar={revocarAcceso} onDetalle={setAlumnoDetalle} onMensaje={setModalMensaje}/>)}
               </div>
             )}
           </div>

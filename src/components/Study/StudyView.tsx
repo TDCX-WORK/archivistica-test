@@ -684,11 +684,11 @@ export default function StudyView({ currentUser, onSelectMode, initialBlockId }:
                         const hlCount      = highlightCountByTopic[topic.id] ?? 0
                         return (
                           <button key={topic.id}
-                            className={[styles.topicRow, isRead?styles.topicRowRead:'', isRead?'cardDone':''].join(' ')}
+                            className={[styles.topicRow, isRead?styles.topicRowRead:''].join(' ')}
                             style={isRead?{['--bc' as string]:block.color,['--done-color' as string]:block.color}:{['--bc' as string]:block.color}}
                             onClick={() => setReadMode({ block, topicIndex: i })}>
                             <span className={[styles.topicRowDot, isRead?styles.topicRowDotRead:''].join(' ')}>
-                              {isRead && <CheckCircle size={9} />}
+                              {isRead && <CheckCircle size={13} />}
                             </span>
                             <span className={styles.topicRowTitle}>{topic.title}</span>
                             <div className={styles.topicRowRight}>
