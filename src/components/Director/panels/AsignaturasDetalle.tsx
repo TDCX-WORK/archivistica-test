@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Users, Zap, AlertTriangle, Shield, BarChart2, BookOpen,
   RefreshCw, TrendingUp, TrendingDown, GraduationCap,
@@ -6,7 +7,7 @@ import {
   UserPlus, Star, BookMarked, Rocket, ArrowUpDown, ArrowRight,
   MessageSquare, Send, Trash2, CornerDownLeft, Megaphone, RotateCcw,
   Phone, MapPin, Mail, Target, Calendar, Edit3,
-  Save, ChevronLeft, ChevronUp
+  Save, ChevronLeft, ChevronUp, ChevronDown
 } from 'lucide-react'
 import { scoreColor, MASCOTAS } from '../DirectorTypes'
 import styles from './AsignaturasDetalle.module.css'
@@ -110,14 +111,14 @@ function AsignaturasDetalle({ stats, studentProfiles, onAlumnoClick }: {
   studentProfiles: StudentProfile[]
   onAlumnoClick:   (a: AlumnoEnriquecido) => void
 }) {
-  const [subSel,  setSubSel]  = useState<string | null>(stats.bySubject?.[0]?.id ?? null)
-  const [sortBy,  setSortBy]  = useState<'nota' | 'sesiones'>('nota')
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [sortBy,     setSortBy]     = useState<'nota' | 'sesiones'>('nota')
+  const [sortDir,    setSortDir]    = useState<'asc' | 'desc'>('desc')
 
   const spMap: Record<string, StudentProfile> = {}
   for (const sp of studentProfiles) spMap[sp.id] = sp
 
-  const sub     = stats.bySubject?.find(s => s.id === subSel)
+  const sub     = stats.bySubject?.find(s => s.id === expandedId)
   const alumnos = useMemo<AlumnoEnriquecido[]>(() => {
     if (!sub) return []
     return [...sub.alumnosConNota].map(a => ({
@@ -141,6 +142,10 @@ function AsignaturasDetalle({ stats, studentProfiles, onAlumnoClick }: {
     else { setSortBy(col); setSortDir('desc') }
   }
 
+  const handleToggle = (id: string) => {
+    setExpandedId(prev => prev === id ? null : id)
+  }
+
   if (!stats.bySubject?.length) return null
 
   // Ranking comparativo
@@ -160,7 +165,7 @@ function AsignaturasDetalle({ stats, studentProfiles, onAlumnoClick }: {
           <div className={styles.asigComparativaGrid}>
             {sorted.map((s, i) => (
               <div key={s.id} className={styles.asigComparativaRow}
-                onClick={() => setSubSel(s.id)}
+                onClick={() => setExpandedId(s.id)}
                 style={{cursor:'pointer'}}>
                 <div className={styles.asigComparativaRank}
                   style={{color: i===0?'#D97706':i===1?'#94A3B8':'#CD7C54'}}>
@@ -196,62 +201,183 @@ function AsignaturasDetalle({ stats, studentProfiles, onAlumnoClick }: {
       )}
 
       <div className={styles.asigCards}>
-        {stats.bySubject.map(s => (
-          <button key={s.id} className={[styles.asigDetailCard, subSel===s.id?styles.asigDetailCardActive:''].join(' ')} style={{ ['--sc' as string]: s.color }} onClick={() => setSubSel(s.id)}>
-            <div className={styles.asigDetailBar} />
-            <div className={styles.asigDetailContent}>
-              <span className={styles.asigDetailName}>{s.name}</span>
-              <div className={styles.asigDetailKpis}>
-                <div className={styles.asigDetailKpi}><span className={styles.asigDetailKpiVal}>{s.totalAlumnos}</span><span className={styles.asigDetailKpiLabel}>Alumnos</span></div>
-                <div className={styles.asigDetailKpi}><span className={styles.asigDetailKpiVal} style={{ color: '#059669' }}>{s.alumnosActivos}</span><span className={styles.asigDetailKpiLabel}>Activos</span></div>
-                <div className={styles.asigDetailKpi}><span className={styles.asigDetailKpiVal} style={{ color: scoreColor(s.notaMedia) }}>{s.notaMedia!==null?`${s.notaMedia}%`:'—'}</span><span className={styles.asigDetailKpiLabel}>Nota media</span></div>
-                <div className={styles.asigDetailKpi}><span className={styles.asigDetailKpiVal}>{s.sesiones30d}</span><span className={styles.asigDetailKpiLabel}>Sesiones 30d</span></div>
-              </div>
-            </div>
-          </button>
-        ))}
-      </div>
-      {sub && (
-        <div className={styles.asigAlumnos}>
-          <div className={styles.asigAlumnosHead}>
-            <h3 className={styles.asigAlumnosTitle} style={{ color: sub.color }}><span className={styles.asigAlumnosDot} style={{ background: sub.color }} />{sub.name}</h3>
-            <div className={styles.asigAlumnosStats}>
-              {sub.enRiesgo > 0 && <span className={styles.asigBadgeRed}>⚠ {sub.enRiesgo} en riesgo</span>}
-              {sub.porExpirar > 0 && <span className={styles.asigBadgeAmber}>🔒 {sub.porExpirar} expiran pronto</span>}
-            </div>
-          </div>
-          {alumnos.length === 0 ? <p className={styles.empty}>Sin alumnos en esta asignatura</p> : (
-            <div className={styles.alumnosTable}>
-              <div className={styles.alumnosTableHead}>
-                <span>Alumno</span>
-                <button className={styles.sortBtn} onClick={() => handleSort('nota')}>Nota <ArrowUpDown size={10} style={{ opacity: sortBy==='nota'?1:0.4 }} /></button>
-                <button className={styles.sortBtn} onClick={() => handleSort('sesiones')}>Sesiones <ArrowUpDown size={10} style={{ opacity: sortBy==='sesiones'?1:0.4 }} /></button>
-                <span>Estado</span><span />
-              </div>
-              {alumnos.map(a => {
-                const mascota = MASCOTAS[String(a.extended?.mascota ?? '')]
-                const nombre  = String(a.extended?.full_name ?? '') || a.username
-                const color   = scoreColor(a.nota)
-                return (
-                  <div key={a.id} className={styles.alumnoRow} style={{ gridTemplateColumns: '1.5fr 100px 100px 120px 32px' }} onClick={() => onAlumnoClick(a)}>
-                    <div className={styles.alumnoNameCell}>
-                      <div className={styles.alumnoAvatarSm} style={{ background: color+'22', color }}>{mascota?mascota.emoji:nombre[0]!.toUpperCase()}</div>
-                      <div>
-                        <div style={{ fontWeight:700, fontSize:'0.82rem', color:'var(--ink)' }}>{nombre}</div>
-                        {a.extended?.full_name && <div style={{ fontSize:'0.68rem', color:'var(--ink-muted)' }}>@{a.username}</div>}
-                      </div>
-                    </div>
-                    <span style={{ color, fontWeight:700, fontSize:'0.88rem' }}>{a.nota!==null?`${a.nota}%`:'—'}</span>
-                    <span style={{ fontSize:'0.82rem', color:'var(--ink-muted)' }}>{a.sesiones}</span>
-                    <span className={a.enRiesgo?styles.estadoRiesgo:styles.estadoOk}>{a.enRiesgo?`${a.diasInactivo??'?'}d inactivo`:'Activo'}</span>
-                    <ArrowRight size={13} className={styles.alumnoArrow} />
+        {stats.bySubject.map((s, i) => {
+          const isOpen  = expandedId === s.id
+          const notaCol = scoreColor(s.notaMedia)
+          const pctAct  = s.totalAlumnos > 0 ? Math.round((s.alumnosActivos / s.totalAlumnos) * 100) : 0
+          // Shape alterna entre dos variantes para dar sensación de "encajan"
+          const shape   = i % 2 === 0 ? styles.shapeA : styles.shapeB
+          const alertTotal = s.enRiesgo + s.porExpirar
+          const alertTone  = s.enRiesgo > 0 ? 'danger' : s.porExpirar > 0 ? 'amber' : 'muted'
+          const alertLabel = s.enRiesgo > 0
+            ? `${s.enRiesgo} en riesgo`
+            : s.porExpirar > 0 ? `${s.porExpirar} expiran` : 'Sin alertas'
+
+          return (
+            <div
+              key={s.id}
+              className={[styles.asigDetailCard, shape, isOpen ? styles.asigDetailCardOpen : ''].join(' ')}
+              style={{ ['--sc' as string]: s.color }}
+            >
+              <span className={styles.asigDetailGlow} aria-hidden="true" />
+
+              <header className={styles.asigDetailHead}>
+                <div className={styles.asigDetailHeadLeft}>
+                  <span className={styles.asigDetailDot} />
+                  <h3 className={styles.asigDetailName}>{s.name}</h3>
+                </div>
+                <span className={styles.asigDetailSess}>
+                  <strong>{s.sesiones30d}</strong> sesiones / 30d
+                </span>
+              </header>
+
+              {/* KPIs en mini-cards */}
+              <div className={styles.kpiGrid}>
+                <div className={styles.kpiTile}>
+                  <div className={styles.kpiTileIcon}><Users size={11} strokeWidth={2.4} /></div>
+                  <div className={styles.kpiTileBody}>
+                    <span className={styles.kpiTileVal}>{s.totalAlumnos}</span>
+                    <span className={styles.kpiTileLabel}>Alumnos</span>
                   </div>
-                )
-              })}
+                </div>
+
+                <div className={styles.kpiTile}>
+                  <div className={styles.kpiTileIcon} data-tone="accent"><Zap size={11} strokeWidth={2.4} /></div>
+                  <div className={styles.kpiTileBody}>
+                    <span className={[styles.kpiTileVal, styles.kpiTileValAccent].join(' ')}>{s.alumnosActivos}</span>
+                    <span className={styles.kpiTileLabel}>Activos · {pctAct}%</span>
+                  </div>
+                </div>
+
+                <div className={styles.kpiTile}>
+                  <div className={styles.kpiTileIcon} data-tone="ink"><Target size={11} strokeWidth={2.4} /></div>
+                  <div className={styles.kpiTileBody}>
+                    <span className={styles.kpiTileVal} style={{ color: notaCol }}>
+                      {s.notaMedia !== null ? `${s.notaMedia}%` : '—'}
+                    </span>
+                    <span className={styles.kpiTileLabel}>Nota media</span>
+                  </div>
+                </div>
+
+                <div className={styles.kpiTile}>
+                  <div className={styles.kpiTileIcon} data-tone={alertTone}>
+                    <AlertTriangle size={11} strokeWidth={2.4} />
+                  </div>
+                  <div className={styles.kpiTileBody}>
+                    <span
+                      className={styles.kpiTileVal}
+                      style={{
+                        color: s.enRiesgo > 0 ? 'var(--danger)'
+                             : s.porExpirar > 0 ? 'var(--amber)' : 'var(--ink)',
+                      }}
+                    >
+                      {alertTotal}
+                    </span>
+                    <span className={styles.kpiTileLabel}>{alertLabel}</span>
+                  </div>
+                </div>
+              </div>
+
+              <footer className={styles.asigDetailFoot}>
+                <button
+                  type="button"
+                  className={styles.verAlumnosBtn}
+                  onClick={() => handleToggle(s.id)}
+                  aria-expanded={isOpen}
+                  aria-controls={`asig-alumnos-${s.id}`}
+                >
+                  <span>{isOpen ? 'Ocultar alumnos' : 'Ver alumnos'}</span>
+                  <motion.span
+                    className={styles.verAlumnosChev}
+                    animate={{ rotate: isOpen ? 180 : 0 }}
+                    transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                  >
+                    <ChevronDown size={14} strokeWidth={2.5} />
+                  </motion.span>
+                </button>
+              </footer>
+
+              <AnimatePresence initial={false}>
+                {isOpen && sub && sub.id === s.id && (
+                  <motion.div
+                    key="panel"
+                    id={`asig-alumnos-${s.id}`}
+                    className={styles.asigAlumnosWrap}
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+                  >
+                    <div className={styles.asigAlumnos}>
+                      <div className={styles.asigAlumnosHead}>
+                        <div className={styles.asigAlumnosTitleWrap}>
+                          <span className={styles.asigAlumnosCount}>{alumnos.length}</span>
+                          <span className={styles.asigAlumnosLabel}>
+                            {alumnos.length === 1 ? 'alumno' : 'alumnos'} en {sub.name}
+                          </span>
+                        </div>
+                      </div>
+
+                      {alumnos.length === 0 ? (
+                        <p className={styles.empty}>Sin alumnos en esta asignatura</p>
+                      ) : (
+                        <div className={styles.alumnosTable}>
+                          <div className={styles.alumnosTableHead}>
+                            <span>Alumno</span>
+                            <button className={styles.sortBtn} onClick={() => handleSort('nota')}>
+                              Nota <ArrowUpDown size={10} style={{ opacity: sortBy === 'nota' ? 1 : 0.4 }} />
+                            </button>
+                            <button className={styles.sortBtn} onClick={() => handleSort('sesiones')}>
+                              Sesiones <ArrowUpDown size={10} style={{ opacity: sortBy === 'sesiones' ? 1 : 0.4 }} />
+                            </button>
+                            <span>Estado</span>
+                            <span />
+                          </div>
+                          {alumnos.map(a => {
+                            const mascota = MASCOTAS[String(a.extended?.mascota ?? '')]
+                            const nombre  = String(a.extended?.full_name ?? '') || a.username
+                            const color   = scoreColor(a.nota)
+                            return (
+                              <div
+                                key={a.id}
+                                className={styles.alumnoRow}
+                                onClick={() => onAlumnoClick(a)}
+                              >
+                                <div className={styles.alumnoNameCell}>
+                                  <div
+                                    className={styles.alumnoAvatarSm}
+                                    style={{ background: `${color}22`, color }}
+                                  >
+                                    {mascota ? mascota.emoji : nombre[0]!.toUpperCase()}
+                                  </div>
+                                  <div className={styles.alumnoNameBlock}>
+                                    <div className={styles.alumnoNameMain}>{nombre}</div>
+                                    {a.extended?.full_name && (
+                                      <div className={styles.alumnoNameUser}>@{a.username}</div>
+                                    )}
+                                  </div>
+                                </div>
+                                <span className={styles.alumnoNota} style={{ color }}>
+                                  {a.nota !== null ? `${a.nota}%` : '—'}
+                                </span>
+                                <span className={styles.alumnoSesiones}>{a.sesiones}</span>
+                                <span className={a.enRiesgo ? styles.estadoRiesgo : styles.estadoOk}>
+                                  {a.enRiesgo ? `${a.diasInactivo ?? '?'}d inactivo` : 'Activo'}
+                                </span>
+                                <ArrowRight size={13} className={styles.alumnoArrow} />
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          )}
-        </div>
-      )}
+          )
+        })}
+      </div>
     </div>
   )
 }

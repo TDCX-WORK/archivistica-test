@@ -1,3 +1,7 @@
+/* ══════════════════════════════════════════════════════════════
+   Sidebar — desktop + mobile bottom nav
+══════════════════════════════════════════════════════════════ */
+
 /* ── DESKTOP ─────────────────────────────────────────────── */
 .sidebar {
   width: var(--sidebar-w);
@@ -13,20 +17,16 @@
   z-index: 100;
   flex-shrink: 0;
   overflow: hidden;
-  /* Bordes redondeados solo en la derecha */
   border-radius: 0 20px 20px 0;
-  /* Glow cyan en el borde derecho */
   box-shadow:
     2px 0 0 rgba(8,145,178,0.2),
     4px 0 24px rgba(8,145,178,0.10),
     2px 0 8px rgba(0,0,0,0.06);
-  /* Transición de expansión suave */
   transition:
     width 0.45s cubic-bezier(0.25,0.1,0.25,1),
     box-shadow 0.35s ease;
 }
 
-/* ── ESTADO EXPANDIDO (hover) ────────────────────────────── */
 .sidebarExpanded {
   width: calc(var(--sidebar-w) * 2);
   box-shadow:
@@ -51,7 +51,7 @@
   border-radius: var(--r-md);
   display: flex; align-items: center; justify-content: center;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   flex-shrink: 0;
 }
 [data-theme="oscuro"] .logoIcon { background: #fff; color: #18181B; }
@@ -71,8 +71,7 @@
 
 /* ── NAV ITEM ────────────────────────────────────────────── */
 .navItem {
-  width: 44px;
-  height: 44px;
+  width: 44px; height: 44px;
   border-radius: var(--r-lg);
   display: flex;
   align-items: center;
@@ -93,14 +92,10 @@
     padding 0.28s ease;
 }
 .navItem:hover { background: var(--surface-dim); color: var(--ink); }
-
-/* Icono no se encoge */
 .navIcon { flex-shrink: 0; }
-
-/* Tooltip desktop — reemplazado por label inline */
 .navItem::before { display: none; }
 
-/* ── LABEL con underline animado ─────────────────────────── */
+/* ── LABEL ───────────────────────────────────────────────── */
 .navLabel {
   font-size: var(--fs-6);
   font-weight: 600;
@@ -109,79 +104,54 @@
   max-width: 0;
   opacity: 0;
   position: relative;
-  /* Transición de aparición */
   transition:
     max-width 0.28s cubic-bezier(0.34,1.4,0.64,1),
     opacity   0.18s ease;
 }
-
-/* La línea debajo — solo ocupa el 65% del texto */
 .navLabel::after {
   content: '';
   position: absolute;
-  bottom: -2px;
-  left: 0;
-  height: 1.5px;
-  width: 0;
+  bottom: -2px; left: 0;
+  height: 1.5px; width: 0;
   background: currentColor;
   border-radius: 99px;
   opacity: 0.7;
   transition: width 0.4s cubic-bezier(0.25,0.1,0.25,1) 0.1s;
 }
 
-/* ── ESTILOS CUANDO EL SIDEBAR ESTÁ EXPANDIDO ────────────── */
+/* ── EXPANDIDO ───────────────────────────────────────────── */
 .sidebarExpanded .nav {
   align-items: stretch;
   padding: 1rem 0.6rem;
 }
-
 .sidebarExpanded .navItem {
-  width: 100%;
-  height: 42px;
+  width: 100%; height: 42px;
   justify-content: flex-start;
   padding: 0 0.85rem;
   gap: 0.7rem;
   border-radius: var(--r-md);
 }
-
-/* Labels visibles */
-.sidebarExpanded .navLabel {
-  max-width: 110px;
-  opacity: 1;
-}
-
-/* Underline al hacer hover */
-.sidebarExpanded .navItem:hover .navLabel::after {
-  width: 65%;
-}
-
-/* Footer expandido */
+.sidebarExpanded .navLabel { max-width: 110px; opacity: 1; }
+.sidebarExpanded .navItem:hover .navLabel::after { width: 65%; }
 .sidebarExpanded .footer {
   align-items: stretch;
   padding: 1rem 0.6rem 1.25rem;
 }
 .sidebarExpanded .footer .navItem {
-  width: 100%;
-  height: 42px;
+  width: 100%; height: 42px;
   justify-content: flex-start;
-  padding: 0 0.85rem;
-  gap: 0.7rem;
+  padding: 0 0.85rem; gap: 0.7rem;
   margin-bottom: 0 !important;
   border-radius: var(--r-md);
 }
-.sidebarExpanded .footer .navItem .navLabel {
-  max-width: 110px;
-  opacity: 1;
-}
-.sidebarExpanded .footer .navItem:hover .navLabel::after {
-  width: 65%;
-}
+.sidebarExpanded .footer .navItem .navLabel { max-width: 110px; opacity: 1; }
+.sidebarExpanded .footer .navItem:hover .navLabel::after { width: 65%; }
 
-/* ── ACTIVE STATE ────────────────────────────────────────── */
+/* ── ACTIVE ──────────────────────────────────────────────── */
 .navActive {
   background: #18181B !important;
   color: #fff !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 @media (min-width: 769px) {
   [data-theme="oscuro"] .navActive { background: #fff !important; color: #18181B !important; }
@@ -199,7 +169,6 @@
   border-top: 1px solid var(--line);
   transition: align-items 0.45s ease, padding 0.45s ease;
 }
-
 .avatar {
   width: 32px; height: 32px;
   background: var(--surface-dim);
@@ -209,21 +178,16 @@
   color: var(--ink-soft);
   border: 1.5px solid var(--line-strong);
 }
-
 .logoutBtn {
   width: 32px; height: 32px;
   border-radius: var(--r-sm);
   display: flex; align-items: center; justify-content: center;
   color: var(--ink-subtle);
-  background: none;
-  border: none;
-  cursor: pointer;
+  background: none; border: none; cursor: pointer;
   transition: color 0.22s ease, background 0.22s ease;
   min-height: unset;
 }
 .logoutBtn:hover { color: var(--danger); background: var(--danger-lt); }
-
-/* ── Avatar additions ── */
 .avatarWrap {
   display: flex; align-items: center; justify-content: center;
   margin-bottom: .25rem;
@@ -234,90 +198,109 @@
   border: 1.5px solid rgba(215,254,3,.3);
 }
 
-/* ── MÓVIL Y TABLET ───────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   MÓVIL — bottom nav completamente separado del sidebar desktop
+══════════════════════════════════════════════════════════════ */
+
+/* Ocultar sidebar desktop en móvil */
 @media (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-    min-height: unset;
-    top: auto;
+  .sidebar { display: none; }
+}
+
+/* Ocultar mobile nav en desktop */
+.mobileNav { display: none; }
+
+@media (max-width: 768px) {
+  .mobileNav {
+    display: block;
+    position: fixed;
     bottom: 0; left: 0; right: 0;
-    flex-direction: row;
-    border-right: none;
-    border-top: none;
+    z-index: 100;
+  }
+
+  /* ── Menú expandido (encima de la barra) ── */
+  .mobileMenu {
+    background: color-mix(in srgb, var(--surface) 97%, transparent);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(8,145,178,0.18);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
+    padding: 0.75rem 1rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    animation: slideMenuUp 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .mobileMenuItem {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.7rem 1rem;
+    border-radius: var(--r-md);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink-muted);
+    font-size: var(--fs-5);
+    font-weight: 600;
+    font-family: var(--font-body);
+    transition: background 0.15s, color 0.15s;
+    width: 100%;
+    text-align: left;
+  }
+  .mobileMenuItem:hover { background: var(--surface-dim); color: var(--ink); }
+  .mobileMenuItemActive { color: #2563EB; }
+  .mobileMenuItemActive:hover { background: #EFF6FF; color: #2563EB; }
+
+  /* ── Barra fija de 3 botones ── */
+  .mobileBar {
+    display: flex;
+    align-items: stretch;
+    height: 64px;
     background: color-mix(in srgb, var(--surface) 97%, transparent);
     backdrop-filter: blur(32px);
     -webkit-backdrop-filter: blur(32px);
-    padding: 0;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    justify-content: center;
-    align-items: stretch;
-    height: auto;
-    overflow: visible;
+    border-top: 1px solid rgba(8,145,178,0.18);
+    border-left: 1px solid rgba(8,145,178,0.18);
+    border-right: 1px solid rgba(8,145,178,0.18);
     border-radius: 20px 20px 0 0;
-    /* Glow cyan en mobile */
     box-shadow:
       0 -4px 24px rgba(8,145,178,0.18),
-      0 -2px 10px rgba(8,145,178,0.10),
-      0 -1px 6px rgba(0,0,0,0.07);
-    border: 1px solid rgba(8,145,178,0.18);
-    border-bottom: none;
-    /* Sin animación de expansión en mobile */
-    transition: none;
+      0 -2px 10px rgba(8,145,178,0.10);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  /* La expansión no aplica en mobile */
-  .sidebarExpanded { width: 100%; }
-
-  .logo   { display: none; }
-  .footer { display: none; }
-
-  .nav {
-    flex-direction: row;
+  .mobileBarBtn {
     flex: 1;
-    justify-content: space-around;
+    display: flex;
     align-items: center;
-    gap: 0;
-    padding: 0;
-    height: 68px;
-    transition: none;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink-subtle);
+    transition: color 0.15s, background 0.15s;
+    border-radius: 0;
+  }
+  .mobileBarBtn:hover { color: var(--ink); }
+
+  .mobileBarBtnActive {
+    color: #2563EB !important;
   }
 
-  .navItem {
-    flex: 1;
-    width: auto !important;
-    height: 100% !important;
-    border-radius: 0 !important;
-    flex-direction: column;
-    justify-content: center !important;
-    align-items: center;
-    gap: 0.28rem;
-    color: #b0b0c0;
-    padding: 0 !important;
-    transition: none;
+  /* Botón + */
+  .mobileBarBtnPlus {
+    color: var(--ink-muted);
   }
-
-  /* Labels ocultos en mobile */
-  .navLabel { display: none !important; }
-  .sidebarExpanded .navLabel { display: none !important; }
-
-  .navItem:hover { background: none; color: #b0b0c0; }
-
-  .navActive {
-    color: var(--primary) !important;
-    background: none !important;
-    box-shadow: none !important;
+  .mobileBarBtnPlusOpen {
+    color: var(--ink);
   }
-
-  /* Nav expandida — ignorada en mobile */
-  .sidebarExpanded .nav {
-    align-items: center;
-    padding: 0;
-  }
-  .sidebarExpanded .navItem {
-    justify-content: center !important;
-    gap: 0.28rem;
-  }
-  .sidebarExpanded .footer { display: none; }
 }
 
-/* Dark sidebar classes removed — superadmin now uses light theme */
+/* ── Animación menú ──────────────────────────────────────── */
+@keyframes slideMenuUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

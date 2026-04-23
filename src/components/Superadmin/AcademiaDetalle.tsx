@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import styles from './AcademiaDetalle.module.css'
 
-const EDGE_USUARIO = 'https://zazqejluzyqihqhzbrga.supabase.co/functions/v1/gestionar-usuario'
+const EDGE_USUARIO = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gestionar-usuario`
 
 function formatFecha(iso: string | null | undefined): string {
   if (!iso) return '—'

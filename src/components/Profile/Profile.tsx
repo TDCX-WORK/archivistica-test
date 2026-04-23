@@ -373,7 +373,7 @@ export default function Profile({ currentUser, progress, studyReadTopics, studyB
   const location   = useLocation()
   const [activeTab, setActiveTab] = useState(() => new URLSearchParams(location.search).get('tab') ?? 'logros')
 
-  const { blocks: studyBlocks, loading: loadingContent } = useContent(currentUser?.id, currentUser?.subject_id)
+  const { blocks: studyBlocks, loading: loadingContent } = useContent(currentUser?.academy_id, currentUser?.subject_id)
   const totalTopics = useMemo(() => studyBlocks.reduce((s, b) => s + (b.topics?.length ?? 0), 0), [studyBlocks])
 
   useEffect(() => {

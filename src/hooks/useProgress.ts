@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Session, WrongAnswer } from '../types'
 
@@ -26,6 +26,10 @@ export function useProgress(
   const [sessions,     setSessions]     = useState<Session[]>([])
   const [wrongAnswers, setWrongAnswers] = useState<WrongAnswer[]>([])
   const [loadingData,  setLoadingData]  = useState(false)
+
+  // Ref para acceder siempre al valor actual sin recrear los callbacks
+  const wrongAnswersRef = useRef<WrongAnswer[]>([])
+  useEffect(() => { wrongAnswersRef.current = wrongAnswers }, [wrongAnswers])
 
   useEffect(() => {
     if (!userId) { setSessions([]); setWrongAnswers([]); return }
@@ -139,7 +143,7 @@ export function useProgress(
     if (!userId) return
 
     const today    = new Date().toISOString().slice(0, 10)
-    const existing = wrongAnswers.find(w => w.question_id === questionId)
+    const existing = wrongAnswersRef.current.find(w => w.question_id === questionId)
 
     if (existing) {
       const updated = {
@@ -166,11 +170,11 @@ export function useProgress(
       const { data } = await supabase.from('wrong_answers').insert(newWrong).select().maybeSingle()
       if (data) setWrongAnswers(prev => [...prev, data as WrongAnswer])
     }
-  }, [userId, academyId, subjectId, wrongAnswers])
+  }, [userId, academyId, subjectId])
 
   const recordCorrectReview = useCallback(async (questionId: string) => {
     if (!userId) return
-    const existing = wrongAnswers.find(w => w.question_id === questionId)
+    const existing = wrongAnswersRef.current.find(w => w.question_id === questionId)
     if (!existing) return
 
     const newStreak = existing.correct_streak + 1
@@ -193,7 +197,7 @@ export function useProgress(
     const { data } = await supabase
       .from('wrong_answers').update(updated).eq('id', existing.id).select().maybeSingle()
     if (data) setWrongAnswers(prev => prev.map(w => w.id === (data as WrongAnswer).id ? data as WrongAnswer : w))
-  }, [userId, wrongAnswers])
+  }, [userId])
 
   const today = new Date().toISOString().slice(0, 10)
   const dueForReview = wrongAnswers.filter(w => w.next_review <= today)

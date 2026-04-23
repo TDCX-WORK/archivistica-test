@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Flame, TrendingUp, Plus, X, Check, CalendarDays } from 'lucide-react'
 import type { Session, WrongAnswer } from '../../types'
+import type { CalendarEvent } from '../../hooks/useCalendarEvents'
 import s from './StudyHeatmap.module.css'
 
 // ── Utils ─────────────────────────────────────────────────────────────────
@@ -32,19 +33,36 @@ interface Cell {
 }
 
 interface StudyHeatmapProps {
-  sessions?:     Session[]
-  planDates?:    Set<string>
-  dueForReview?: WrongAnswer[]
-  streakDays?:   number
-  avgScore?:     number
+  sessions?:        Session[]
+  planDates?:       Set<string>
+  dueForReview?:    WrongAnswer[]
+  streakDays?:      number
+  avgScore?:        number
+  calendarEvents?:  Record<string, CalendarEvent[]>
+  upcomingEvents?:  CalendarEvent[]
+}
+
+// Event type colors
+const EVENT_COLORS: Record<string, string> = {
+  examen: '#DC2626',
+  tarea:  '#2563EB',
+  clase:  '#059669',
+  hito:   '#D97706',
+  evento: '#7C3AED',
+}
+
+function fmtEventDate(ds: string): string {
+  return new Date(ds + 'T12:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
 }
 
 export default function StudyHeatmap({
-  sessions     = [],
-  planDates    = new Set(),
-  dueForReview = [],
-  streakDays   = 0,
-  avgScore     = 0,
+  sessions        = [],
+  planDates       = new Set(),
+  dueForReview    = [],
+  streakDays      = 0,
+  avgScore        = 0,
+  calendarEvents  = {},
+  upcomingEvents  = [],
 }: StudyHeatmapProps) {
   const now      = getNow()
   const todayStr = toDS(now)
@@ -183,6 +201,9 @@ export default function StudyHeatmap({
                 <span className={s.cNum}>{cell.day}</span>
                 {hasPlan && <div className={s.planDot} />}
                 {hasNote  && <div className={s.noteDot} />}
+                {!cell.other && !cell.future && calendarEvents[cell.ds]?.slice(0, 2).map((ev, ei) => (
+                  <div key={ei} className={s.eventDot} style={{ background: EVENT_COLORS[ev.type] ?? '#7C3AED' }} />
+                ))}
               </button>
             )
           })}
@@ -237,6 +258,20 @@ export default function StudyHeatmap({
               <div className={s.planTag}><CalendarDays size={11} /> Plan del profesor este día</div>
             )}
 
+            {calendarEvents[sel] && calendarEvents[sel]!.length > 0 && (
+              <div className={s.dayEvents}>
+                {calendarEvents[sel]!.map(ev => (
+                  <div key={ev.id} className={s.dayEvent}>
+                    <div className={s.dayEventDot} style={{ background: EVENT_COLORS[ev.type] ?? '#7C3AED' }} />
+                    <div className={s.dayEventInfo}>
+                      <span className={s.dayEventTitle}>{ev.title}</span>
+                      {ev.description && <span className={s.dayEventDesc}>{ev.description}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {sd && sd.count > 0 ? (
               <div className={s.detailStats}>
                 {[
@@ -278,9 +313,31 @@ export default function StudyHeatmap({
             </div>
           </div>
         ) : (
-          <div className={s.detailEmpty2}>
-            <CalendarDays size={22} strokeWidth={1.4} />
-            <span>Pulsa cualquier día para ver el detalle</span>
+          <div className={s.upcomingSection}>
+            {upcomingEvents.length > 0 ? (
+              <>
+                <div className={s.upcomingTitle}>
+                  <CalendarDays size={13} />
+                  Próximos eventos
+                </div>
+                <div className={s.upcomingList}>
+                  {upcomingEvents.map(ev => (
+                    <div key={ev.id} className={s.upcomingItem}>
+                      <div className={s.upcomingDot} style={{ background: EVENT_COLORS[ev.type] ?? '#7C3AED' }} />
+                      <div className={s.upcomingInfo}>
+                        <span className={s.upcomingItemTitle}>{ev.title}</span>
+                        <span className={s.upcomingItemDate}>{fmtEventDate(ev.event_date)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className={s.detailEmpty2}>
+                <CalendarDays size={22} strokeWidth={1.4} />
+                <span>Pulsa cualquier día para ver el detalle</span>
+              </div>
+            )}
           </div>
         )}
       </div>

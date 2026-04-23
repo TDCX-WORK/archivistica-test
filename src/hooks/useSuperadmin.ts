@@ -62,6 +62,11 @@ export function useSuperadmin(currentUser: CurrentUser | null) {
     const typedAcads = (acads ?? []) as Academy[]
     const acadIds    = typedAcads.map(a => a.id)
 
+    const now          = new Date()
+    const sevenDaysAgo = new Date(now.getTime() - 7  * 86400000).toISOString().slice(0, 10)
+    const thirtyAgo    = new Date(now.getTime() - 30 * 86400000).toISOString().slice(0, 10)
+    const sixtyAgo     = new Date(now.getTime() - 60 * 86400000).toISOString().slice(0, 10)
+
     const [
       { data: subjects },
       { data: profiles },
@@ -69,16 +74,12 @@ export function useSuperadmin(currentUser: CurrentUser | null) {
     ] = await Promise.all([
       supabase.from('subjects').select('id, academy_id, name, slug, color, created_at, exam_config').in('academy_id', acadIds),
       supabase.from('profiles').select('id, username, role, academy_id, subject_id, created_at, access_until, force_password_change').in('academy_id', acadIds),
-      supabase.from('sessions').select('id, user_id, academy_id, score, played_at').in('academy_id', acadIds),
+      supabase.from('sessions').select('id, user_id, academy_id, score, played_at').in('academy_id', acadIds).gte('played_at', sixtyAgo),
     ])
 
     const typedSubjects  = (subjects  ?? []) as Subject[]
     const typedProfiles  = (profiles  ?? []) as { id: string; username: string; role: string; academy_id: string; subject_id: string | null; created_at: string; access_until: string | null; force_password_change: boolean }[]
     const typedSessions  = (sessions  ?? []) as { id: string; user_id: string; academy_id: string; score: number; played_at: string }[]
-
-    const now          = new Date()
-    const sevenDaysAgo = new Date(now.getTime() - 7  * 86400000).toISOString().slice(0, 10)
-    const thirtyAgo    = new Date(now.getTime() - 30 * 86400000).toISOString().slice(0, 10)
 
     const acadStats: AcademiaConStats[] = typedAcads.map(ac => {
       const acSubjects = typedSubjects.filter(s => s.academy_id === ac.id)

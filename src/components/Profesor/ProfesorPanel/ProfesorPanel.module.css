@@ -33,21 +33,27 @@
 }
 
 .scrollBackBtn {
-  display: none;
+  position: fixed;
+  bottom: 5.5rem;
+  right: 2rem;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px; height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: var(--ink); color: white;
-  border: none; cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-  transition: transform 0.15s var(--ease), box-shadow 0.15s;
-  margin: 1.5rem auto 0;
-  flex-shrink: 0;
+  background: var(--surface);
+  color: var(--ink-muted);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: background 0.15s, color 0.15s, transform 0.15s var(--spring);
+  z-index: 10;
 }
 .scrollBackBtn:hover {
+  background: var(--surface-dim);
+  color: var(--ink);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
 /* ── Botones header ────────────────────────────────────────────────────── */
@@ -318,7 +324,7 @@
 
 /* ── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .scrollBackBtn { display: flex; }
+  /* scrollBackBtn ya es fixed, no necesita override */
   .pageHeader { align-items: flex-start; }
   .headerActions { width: 100%; }
   .headerActions .btnExport,
@@ -336,4 +342,36 @@
   .msgTextarea { min-height: 80px; max-height: 120px; }
   .claseHeader { flex-direction: column; align-items: stretch; gap: 0.5rem; }
   .claseSearchWrap { width: 100%; }
+}
+/* ── Layout dos cards tab examenes ──────────────────────────────── */
+.examenesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.examenesCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1.25rem;
+  min-height: 320px;
+}
+
+.examenesCardTitle {
+  font-size: var(--fs-4);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 0.4rem;
+}
+
+.examenesCardSub {
+  font-size: var(--fs-5);
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .examenesGrid { grid-template-columns: 1fr; }
 }

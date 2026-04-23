@@ -42,7 +42,7 @@ export function useProfesor(currentUser: CurrentUser | null) {
       }[]
 
       const alumnoIds     = typedProfiles.map(p => p.id)
-      const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10)
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
 
       const [
         { data: sessions },
@@ -53,7 +53,7 @@ export function useProfesor(currentUser: CurrentUser | null) {
         supabase.from('sessions')
           .select('user_id, score, played_at, created_at, mode_id')
           .eq('academy_id', academyId).in('user_id', alumnoIds)
-          .gte('played_at', ninetyDaysAgo)
+          .gte('played_at', thirtyDaysAgo)
           .order('created_at', { ascending: false }),
         supabase.from('study_read')
           .select('user_id, topic_id')
@@ -78,10 +78,27 @@ export function useProfesor(currentUser: CurrentUser | null) {
       const spMap: Record<string, { full_name: string | null; exam_date: string | null }> = {}
       for (const sp of typedStudentProfiles) spMap[sp.id] = sp
 
+      // Pre-agrupar por user_id para evitar O(n×m)
+      const sessionsByUser: Record<string, typeof typedSessions> = {}
+      for (const s of typedSessions) {
+        if (!sessionsByUser[s.user_id]) sessionsByUser[s.user_id] = []
+        sessionsByUser[s.user_id]!.push(s)
+      }
+      const readsByUser: Record<string, typeof typedReads> = {}
+      for (const r of typedReads) {
+        if (!readsByUser[r.user_id]) readsByUser[r.user_id] = []
+        readsByUser[r.user_id]!.push(r)
+      }
+      const wrongsByUser: Record<string, typeof typedWrongs> = {}
+      for (const w of typedWrongs) {
+        if (!wrongsByUser[w.user_id]) wrongsByUser[w.user_id] = []
+        wrongsByUser[w.user_id]!.push(w)
+      }
+
       const alumnosConStats: AlumnoConStats[] = typedProfiles.map(alumno => {
-        const sesionesAlumno = typedSessions.filter(s => s.user_id === alumno.id)
-        const leidos         = typedReads.filter(r => r.user_id === alumno.id)
-        const fallos         = typedWrongs.filter(w => w.user_id === alumno.id)
+        const sesionesAlumno = sessionsByUser[alumno.id] ?? []
+        const leidos         = readsByUser[alumno.id] ?? []
+        const fallos         = wrongsByUser[alumno.id] ?? []
         const pendientesHoy  = fallos.filter(w => w.next_review <= today)
 
         const notaMedia = sesionesAlumno.length

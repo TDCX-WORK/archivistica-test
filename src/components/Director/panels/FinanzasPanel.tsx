@@ -276,11 +276,18 @@ function PagosSection({ alumnos, spMap, fmtEur }: {
 }
 
 // ── FinanzasPanel ──────────────────────────────────────────────────────────
-function FinanzasPanel({ stats, profiles }: { stats: Stats; profiles: ProfileSimple[] }) {
+function FinanzasPanel({ stats, profiles, onRefresh }: { stats: Stats; profiles: ProfileSimple[]; onRefresh?: () => Promise<void> | void }) {
   const fin = stats.finanzas
   const [precioBase,  setPrecioBase]  = useState('')
   const [editando,    setEditando]    = useState(false)
   const [inputPrecio, setInputPrecio] = useState('')
+  const [refreshing,  setRefreshing]  = useState(false)
+
+  const handleRefresh = async () => {
+    if (!onRefresh || refreshing) return
+    setRefreshing(true)
+    try { await onRefresh() } finally { setRefreshing(false) }
+  }
 
   if (!fin) return null
 
@@ -324,6 +331,21 @@ function FinanzasPanel({ stats, profiles }: { stats: Stats; profiles: ProfileSim
 
   return (
     <div className={styles.finanzasWrap}>
+
+      {/* Toolbar con botón de refresco — los datos dependen de stats del director,
+          que no se refrescan automáticamente al mutar desde otros paneles */}
+      {onRefresh && (
+        <div className={styles.finanzasToolbar}>
+          <div className={styles.finanzasToolbarLeft}>
+            <span className={styles.finanzasToolbarTitle}>Finanzas · tiempo real</span>
+            <span className={styles.finanzasToolbarHint}>Si acabas de cambiar un precio o un pago, pulsa Refrescar</span>
+          </div>
+          <button className={styles.finanzasRefreshBtn} onClick={handleRefresh} disabled={refreshing}>
+            <RefreshCw size={12} className={refreshing ? styles.spinning : ''} />
+            {refreshing ? 'Actualizando…' : 'Refrescar'}
+          </button>
+        </div>
+      )}
 
       {/* KPIs financieros */}
       <div className={styles.finanzasKpis}>

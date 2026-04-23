@@ -243,7 +243,8 @@ export default function Stats({ currentUser, progress, studyReadTopics, studyBoo
   const [activeTab, setActiveTab] = useState<'test' | 'estudio'>('test')
 
   const { blocks: studyBlocks, loading: loadingContent, error: errorContent } = useContent(
-    currentUser?.id, currentUser?.subject_id
+    currentUser?.academy_id, currentUser?.subject_id
+  
   )
 
   const [questions,        setQuestions]        = useState<{ id: string; block_id: string | null; question: string }[]>([])

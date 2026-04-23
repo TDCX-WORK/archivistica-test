@@ -14,7 +14,8 @@ import StudyHeatmap          from './StudyHeatmap'
 import { Ripple }            from '../magicui/Ripple'
 import { useAnnouncements }  from '../../hooks/useAnnouncements'
 import { useAlumnoMessages } from '../../hooks/useDirectMessages'
-import { useStudentProfile } from '../../hooks/useStudentProfile'
+import { useStudentProfile }   from '../../hooks/useStudentProfile'
+import { useCalendarEvents }  from '../../hooks/useCalendarEvents'
 import AnnouncementsCard     from './AnnouncementsCard'
 import type { CurrentUser, Session, WrongAnswer, BloqueConTemas, StudyPlan } from '../../types'
 import type { useProgress }  from '../../hooks/useProgress'
@@ -325,6 +326,7 @@ interface HomeProps {
 
 export default function Home({ onSelectMode, progress, currentUser, studyProgress }: HomeProps) {
   const { announcements, loading: loadingAnn } = useAnnouncements(currentUser?.academy_id, currentUser?.subject_id)
+  const { byDate: calendarEventsByDate, upcoming: upcomingEvents } = useCalendarEvents(currentUser)
   const { messages: dmMessages, unread: dmUnread, markRead: dmMarkRead, replyToMessage: dmReply, deleteMessage: dmDelete } = useAlumnoMessages(currentUser?.id)
   const { profile: studentProfile }            = useStudentProfile(currentUser?.id)
   const navigate = useNavigate()
@@ -577,7 +579,15 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
             </div>
 
             {/* Wallet 2 — Tus Documentos */}
-            <div className={styles.wallet}>
+            <div
+              className={styles.wallet}
+              onClick={() => navigate('/documentos')}
+              style={{ cursor: 'pointer' }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={e => e.key === 'Enter' && navigate('/documentos')}
+              aria-label="Ver tus documentos"
+            >
               <div className={styles.walletBg} />
               <div className={styles.walletTabs}>
                 <div className={[styles.walletTab, styles.walletTabBlue].join(' ')}>
@@ -590,13 +600,11 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
                 </div>
               </div>
               <div className={styles.walletPocket}>
-                
                 <div className={styles.walletContent}>
                   <span className={styles.walletLabel}>Tus documentos</span>
-                  <div className={styles.walletPlaceholder}>
-                    <span className={styles.walletPlaceholderTitle}>Próximamente</span>
-                    <span className={styles.walletPlaceholderSub}>Tu academia compartirá contratos, recibos y material aquí</span>
-                  </div>
+                  <span className={styles.walletPlaceholderSub} style={{marginTop:'6px',display:'block'}}>
+                    Contratos, apuntes y vídeos de tu academia
+                  </span>
                 </div>
               </div>
             </div>
@@ -609,6 +617,8 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
           sessions={sessions} planDates={planDates}
           dueForReview={dueForReview}
           streakDays={streakDays} avgScore={avgScore}
+          calendarEvents={calendarEventsByDate}
+          upcomingEvents={upcomingEvents}
         />
       </div>
 

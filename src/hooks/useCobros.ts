@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { emit } from '../lib/eventBus'
 
 export interface AcademyPayment {
   id:         string
@@ -18,6 +19,7 @@ export interface AlumnoCobro {
   username:       string
   full_name:      string | null
   monthly_price:  number | null
+  access_until:   string | null   // ← necesario para calcular MRR en riesgo
   payment:        AcademyPayment | null  // null = no hay registro aún
 }
 
@@ -31,7 +33,7 @@ export function useCobros(academyId: string | null | undefined, month: string) {
     setLoading(true)
 
     const { data: profiles } = await supabase
-      .from('profiles').select('id, username').eq('academy_id', academyId).eq('role', 'alumno')
+      .from('profiles').select('id, username, access_until').eq('academy_id', academyId).eq('role', 'alumno')
 
     const alumnoIds = (profiles ?? []).map((p: any) => p.id)
 
@@ -53,6 +55,7 @@ export function useCobros(academyId: string | null | undefined, month: string) {
       username:      p.username,
       full_name:     spMap[p.id]?.full_name ?? null,
       monthly_price: spMap[p.id]?.monthly_price ?? null,
+      access_until:  p.access_until ?? null,
       payment:       payMap[p.id] ?? null,
     }))
 
@@ -62,6 +65,10 @@ export function useCobros(academyId: string | null | undefined, month: string) {
 
   // Reload whenever month changes — pass month directly to avoid stale closure
   useEffect(() => { load(month) }, [load, month])
+
+  // NOTA: useCobros NO se suscribe al bus. Emite (desde updateStatus) para que
+  // otros paneles (useDirector, useAcademyProfiles, useHistoricoCobros) reaccionen,
+  // pero si se suscribiera a sí mismo habría un reload redundante en cada click.
 
   // Upsert payment status for an alumno
   const updateStatus = async (alumnoId: string, status: AcademyPayment['status'], notes?: string, currentMonth?: string) => {
@@ -103,6 +110,9 @@ export function useCobros(academyId: string | null | undefined, month: string) {
       }
 
       setAlumnos(prev => prev.map(a => a.id === alumnoId ? { ...a, payment: newPayment } : a))
+
+      // Notificar a Finanzas y al resto de paneles que hubo cambios
+      emit('director-data-changed')
     } finally {
       setSaving(prev => ({ ...prev, [alumnoId]: false }))
     }
@@ -122,7 +132,12 @@ export function useCobros(academyId: string | null | undefined, month: string) {
   const generarMes = async () => {
     if (!academyId) return
     setLoading(true)
-    const toCreate = alumnos.filter(a => a.monthly_price && !a.payment)
+    const now = new Date()
+    const toCreate = alumnos.filter(a =>
+      (a.monthly_price ?? 0) > 0
+      && !a.payment
+      && (!a.access_until || new Date(a.access_until) >= now)
+    )
     if (toCreate.length === 0) { setLoading(false); return }
     await supabase.from('academy_payments').insert(
       toCreate.map(a => ({
@@ -134,6 +149,7 @@ export function useCobros(academyId: string | null | undefined, month: string) {
       }))
     )
     await load(month)
+    emit('director-data-changed')
   }
 
   // Export CSV

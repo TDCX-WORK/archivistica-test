@@ -7,6 +7,7 @@ import {
 import type { AlumnoConStats, InviteCode } from '../../../types'
 import type { DirectMessage } from '../../../hooks/useDirectMessages'
 import styles from './InboxPanel.module.css'
+import GlassFolder from '../../Documentos/GlassFolder'
 
 /* ── Helpers ──────────────────────────────────────────────────────────────── */
 function formatDias(n: number | null): string {
@@ -141,22 +142,31 @@ export default function InboxPanel({ alumnos, inviteCodes, onVerAlumno, onRenova
     <div className={styles.inbox}>
       {/* 3 Wallets lado a lado */}
       <div className={styles.walletRow}>
-        <WalletSection
-          title="Alumnos en riesgo" icon={AlertTriangle} count={alumnosConAlerta.length}
-          color="#DC2626" colorBg="#FEF2F2" tabLabel="En riesgo"
-          active={activeSection === 'riesgo'}
+        <GlassFolder
+          label="Alumnos en riesgo"
+          sublabel="En riesgo"
+          count={alumnosConAlerta.length}
+          color="redPastel"
+          icon={AlertTriangle}
+          isOpen={activeSection === 'riesgo'}
           onClick={() => setActiveSection(prev => prev === 'riesgo' ? null : 'riesgo')}
         />
-        <WalletSection
-          title="Mensajes" icon={MessageSquare} count={mensajesConRespuesta.length}
-          color="#059669" colorBg="#ECFDF5" tabLabel="Con respuesta"
-          active={activeSection === 'mensajes'}
+        <GlassFolder
+          label="Mensajes"
+          sublabel="Con respuesta"
+          count={mensajesConRespuesta.length}
+          color="greenPastel"
+          icon={MessageSquare}
+          isOpen={activeSection === 'mensajes'}
           onClick={() => setActiveSection(prev => prev === 'mensajes' ? null : 'mensajes')}
         />
-        <WalletSection
-          title="Códigos caducados" icon={Key} count={codigosCaducados.length}
-          color="#6B7280" colorBg="#F3F4F6" tabLabel="Caducados"
-          active={activeSection === 'codigos'}
+        <GlassFolder
+          label="Códigos caducados"
+          sublabel="Caducados"
+          count={codigosCaducados.length}
+          color="bluePastel"
+          icon={Key}
+          isOpen={activeSection === 'codigos'}
           onClick={() => setActiveSection(prev => prev === 'codigos' ? null : 'codigos')}
         />
       </div>

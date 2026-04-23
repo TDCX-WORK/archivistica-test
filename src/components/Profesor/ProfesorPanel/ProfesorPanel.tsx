@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import {
   Users, Zap, UserX, BarChart2, Shield, FileText, Plus, RefreshCw,
-  ChevronUp, Key, BookOpen as BookIcon, Send, X, CheckCircle2, Search
+  ChevronUp, Key, BookOpen as BookIcon, Send, X, CheckCircle2, Search, CalendarDays
 } from 'lucide-react'
 import { supabase }              from '../../../lib/supabase'
 import { useProfesor }           from '../../../hooks/useProfesor'
@@ -10,6 +10,7 @@ import { useProfesorMessages }   from '../../../hooks/useDirectMessages'
 import { useAnnouncements }      from '../../../hooks/useAnnouncements'
 import FallosClase               from '../FallosClase/FallosClase'
 import PlanSemanal               from '../PlanSemanal/PlanSemanal'
+import EventosCalendario         from '../components/EventosCalendario'
 import AlumnoDetalle             from '../AlumnoDetalle/AlumnoDetalle'
 import ClaseEvolucionChart       from '../ClaseEvolucionChart/ClaseEvolucionChart'
 import BancoPreguntas            from '../BancoPreguntas/BancoPreguntas'
@@ -23,6 +24,7 @@ import CodigoCard, { useUserInfoMap } from '../components/CodigoCard'
 import BentoNav            from '../components/BentoNav'
 import TablonPanel         from '../components/TablonPanel'
 import ProximosExamenes    from '../components/ProximosExamenes'
+import SubirDocumentos      from '../components/SubirDocumentos'
 import BancoSupuestos      from '../components/BancoSupuestos'
 import InboxPanel          from '../components/InboxPanel'
 
@@ -84,6 +86,7 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
   const [modalRenovar,  setModalRenovar]  = useState<AlumnoConStats | null>(null)
   const [copied,        setCopied]        = useState<string | null>(null)
   const [bancoSubtab,   setBancoSubtab]   = useState<'preguntas' | 'supuestos'>('preguntas')
+  const [planSubtab,    setPlanSubtab]    = useState<'plan' | 'eventos'>('plan')
   const [nPreguntas,    setNPreguntas]    = useState(0)
   const [nSupuestos,    setNSupuestos]    = useState(0)
 
@@ -233,7 +236,28 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
         )}
 
         {tab === 'fallos' && <div className={styles.tabContent}><FallosClase currentUser={currentUser} /></div>}
-        {tab === 'plan' && <div className={styles.tabContent}><PlanSemanal currentUser={currentUser} /></div>}
+        {tab === 'plan' && (
+          <div className={styles.tabContent}>
+            <div className={styles.bancoSubtabs}>
+              <button
+                className={[styles.bancoSubtab, planSubtab === 'plan' ? styles.bancoSubtabActive : ''].join(' ')}
+                onClick={() => setPlanSubtab('plan')}
+              >
+                <CalendarDays size={14} /> Plan semanal
+              </button>
+              <button
+                className={[styles.bancoSubtab, planSubtab === 'eventos' ? styles.bancoSubtabActive : ''].join(' ')}
+                onClick={() => setPlanSubtab('eventos')}
+              >
+                <CalendarDays size={14} /> Eventos calendario
+              </button>
+            </div>
+            {planSubtab === 'plan'
+              ? <PlanSemanal currentUser={currentUser} />
+              : <EventosCalendario currentUser={currentUser} />
+            }
+          </div>
+        )}
         {tab === 'tablon' && <TablonPanel announcements={announcements} onAdd={(a) => addAnnouncement({ ...a, authorId: a.authorId ?? '' })} onDelete={deleteAnnouncement} currentUser={currentUser} />}
 
         {tab === 'banco' && (
@@ -250,7 +274,11 @@ export default function ProfesorPanel({ currentUser }: { currentUser: CurrentUse
           </div>
         )}
 
-        {tab === 'examenes' && <div className={styles.tabContent}><ProximosExamenes alumnos={alumnos} /></div>}
+        {tab === 'documentos' && (
+          <div className={styles.tabContent}>
+            <SubirDocumentos currentUser={currentUser} alumnos={alumnos} />
+          </div>
+        )}
 
         {tab === 'codigos' && (
           <div className={styles.tabContent}>

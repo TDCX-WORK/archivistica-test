@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '../../../lib/supabase'
+import { subscribe } from '../../../lib/eventBus'
 import {
   FileText, Download, AlertCircle, CheckCircle, Clock,
   XCircle, Euro, Calendar, TrendingUp, ChevronLeft, ChevronRight
@@ -45,24 +46,58 @@ function useHistoricoCobros(academyId: string | null | undefined) {
     month: string; cobrado: number; pendiente: number; total: number; nPagados: number; nTotal: number
   }[]>([])
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     if (!academyId) return
-    supabase.from('academy_payments')
-      .select('month, status, amount')
+
+    // 1) Alumnos actuales de la academia — para filtrar pagos huérfanos
+    //    (alumnos borrados cuyas filas en academy_payments siguen en BD).
+    const { data: profiles } = await supabase
+      .from('profiles').select('id').eq('academy_id', academyId).eq('role', 'alumno')
+    const alumnosVivos = new Set<string>((profiles ?? []).map((p: any) => p.id))
+
+    // 2) Pagos
+    const { data } = await supabase.from('academy_payments')
+      .select('month, status, amount, alumno_id')
       .eq('academy_id', academyId)
       .order('month', { ascending: true })
-      .then(({ data }) => {
-        const byMonth: Record<string, { cobrado: number; pendiente: number; total: number; nPagados: number; nTotal: number }> = {}
-        for (const p of (data ?? []) as any[]) {
-          if (!byMonth[p.month]) byMonth[p.month] = { cobrado:0, pendiente:0, total:0, nPagados:0, nTotal:0 }
-          byMonth[p.month]!.total += p.amount
-          byMonth[p.month]!.nTotal++
-          if (p.status === 'paid') { byMonth[p.month]!.cobrado += p.amount; byMonth[p.month]!.nPagados++ }
-          else byMonth[p.month]!.pendiente += p.amount
-        }
-        setHistorico(Object.entries(byMonth).map(([month, v]) => ({ month, ...v })))
-      })
+
+    // 3) Agrupar por mes contando SOLO alumnos vivos y status conocidos
+    const byMonth: Record<string, { cobrado: number; pendiente: number; total: number; nPagados: number; nTotal: number }> = {}
+    for (const p of (data ?? []) as any[]) {
+      if (!alumnosVivos.has(p.alumno_id)) continue       // ignora huérfanos
+      if (!['paid', 'pending', 'overdue'].includes(p.status)) continue   // ignora status desconocidos (cancelled, null, etc.)
+      if (!byMonth[p.month]) byMonth[p.month] = { cobrado:0, pendiente:0, total:0, nPagados:0, nTotal:0 }
+      byMonth[p.month]!.total += p.amount
+      byMonth[p.month]!.nTotal++
+      if (p.status === 'paid')      { byMonth[p.month]!.cobrado   += p.amount; byMonth[p.month]!.nPagados++ }
+      else                          { byMonth[p.month]!.pendiente += p.amount }
+    }
+
+    // 4) No incluir meses futuros (un mes que aún no ha empezado no es representativo)
+    const now      = new Date()
+    const curMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
+    const meses    = Object.keys(byMonth).filter(m => m <= curMonth).sort()
+
+    // 5) Rellenar huecos para que la línea no mienta saltándose meses sin registros
+    const filled: { month: string; cobrado: number; pendiente: number; total: number; nPagados: number; nTotal: number }[] = []
+    if (meses.length > 0) {
+      const start = meses[0]!
+      const end   = meses[meses.length-1]!
+      const [sy, sm] = start.split('-').map(Number) as [number, number]
+      const [ey, em] = end.split('-').map(Number)   as [number, number]
+      let y = sy, mo = sm
+      while (y < ey || (y === ey && mo <= em)) {
+        const key = `${y}-${String(mo).padStart(2,'0')}`
+        filled.push({ month: key, ...(byMonth[key] ?? { cobrado:0, pendiente:0, total:0, nPagados:0, nTotal:0 }) })
+        mo++; if (mo > 12) { mo = 1; y++ }
+      }
+    }
+
+    setHistorico(filled)
   }, [academyId])
+
+  useEffect(() => { load() }, [load])
+  useEffect(() => subscribe('director-data-changed', load), [load])
 
   return historico
 }

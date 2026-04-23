@@ -11,8 +11,19 @@
 
 /* ── Row de 3 wallets ────────────────────────────────────────────────────── */
 .walletRow {
-  display: flex;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  justify-items: center;
+  align-items: end;
+  margin-bottom: 0.5rem;
+  padding: 8px 4px 0;
+}
+
+@media (max-width: 520px) {
+  .walletRow {
+    gap: 12px;
+  }
 }
 
 /* ── Wallet card individual ──────────────────────────────────────────────── */
@@ -285,11 +296,6 @@
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
-@media (max-width: 700px) {
-  .walletRow { flex-direction: column; }
-  .wallet { height: 140px; }
-}
-
 @media (max-width: 500px) {
   .actionInfo { flex-direction: column; align-items: flex-start; gap: 2px; }
   .actionBtns { gap: 0.2rem; }

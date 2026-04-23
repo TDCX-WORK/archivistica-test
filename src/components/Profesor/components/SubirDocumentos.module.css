@@ -1,0 +1,355 @@
+/* ═══════════════════════════════════════════════════════════════
+   SubirDocumentos — panel de gestión de documentos del profesor
+═══════════════════════════════════════════════════════════════ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-top: 0.25rem;
+}
+
+/* ── Cabecera ────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.title {
+  font-size: var(--fs-3);
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: var(--fs-6);
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+/* ── Formulario ──────────────────────────────────────────────────── */
+.form {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.formTitle {
+  font-size: var(--fs-5);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 0.1rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-md);
+  font-size: var(--fs-5);
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--surface-off);
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+  box-sizing: border-box;
+}
+.input::placeholder { color: var(--ink-subtle); }
+.input:focus {
+  outline: none;
+  border-color: #2563EB;
+  background: var(--surface);
+}
+
+/* ── Fila selects ────────────────────────────────────────────────── */
+.selectRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.selectWrap {
+  position: relative;
+}
+
+.selectIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+
+.select {
+  width: 100%;
+  padding: 0.6rem 0.85rem 0.6rem 2.1rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-md);
+  font-size: var(--fs-5);
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--surface-off);
+  cursor: pointer;
+  appearance: none;
+  transition: border-color 0.15s var(--ease);
+  box-sizing: border-box;
+}
+.select:focus {
+  outline: none;
+  border-color: #2563EB;
+}
+
+/* ── Drop zone ───────────────────────────────────────────────────── */
+.dropZone {
+  position: relative;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--r-md);
+  padding: 1.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  background: var(--surface-off);
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+.dropZone:hover,
+.dropZoneActive {
+  border-color: #2563EB;
+  background: #EFF6FF;
+}
+.dropZoneInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+.dropZoneIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  background: var(--surface-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-muted);
+  margin-bottom: 0.1rem;
+}
+.dropZoneText {
+  font-size: var(--fs-6);
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+.dropZoneFile {
+  font-size: var(--fs-6);
+  color: #2563EB;
+  font-weight: 600;
+}
+
+/* ── URL input (vídeos) ──────────────────────────────────────────── */
+.urlWrap {
+  position: relative;
+}
+.urlIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+.urlInput {
+  width: 100%;
+  padding: 0.6rem 0.85rem 0.6rem 2.1rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-md);
+  font-size: var(--fs-5);
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--surface-off);
+  transition: border-color 0.15s var(--ease);
+  box-sizing: border-box;
+}
+.urlInput::placeholder { color: var(--ink-subtle); }
+.urlInput:focus {
+  outline: none;
+  border-color: #2563EB;
+  background: var(--surface);
+}
+
+/* ── Feedback ────────────────────────────────────────────────────── */
+.feedback {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--r-md);
+  font-size: var(--fs-6);
+  font-weight: 500;
+}
+.feedbackOk    { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+.feedbackError { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+
+/* ── Botón subir ─────────────────────────────────────────────────── */
+.btnSubir {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.25rem;
+  background: #2563EB;
+  color: #fff;
+  border: none;
+  border-radius: var(--r-md);
+  font-size: var(--fs-5);
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s var(--ease), transform 0.15s var(--spring), opacity 0.15s;
+  align-self: flex-start;
+}
+.btnSubir:hover:not(:disabled)  { background: #1D4ED8; transform: translateY(-1px); }
+.btnSubir:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Lista docs ──────────────────────────────────────────────────── */
+.listSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--fs-6);
+  font-weight: 700;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.docList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.docItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.docItem:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.docIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.docIconContrato { background: #F5F3FF; color: #7C3AED; }
+.docIconMaterial { background: #EFF6FF; color: #2563EB; }
+.docIconVideo    { background: #FFF7ED; color: #D97706; }
+
+.docInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.docName {
+  font-size: var(--fs-5);
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.docMeta {
+  font-size: var(--fs-7);
+  color: var(--ink-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.docMetaDot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--ink-subtle);
+  flex-shrink: 0;
+}
+
+.docDelete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-subtle);
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.docDelete:hover { color: #DC2626; background: #FEF2F2; }
+
+/* ── Empty ───────────────────────────────────────────────────────── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.5rem 0 0.5rem;
+  color: var(--ink-subtle);
+  text-align: center;
+}
+.emptyIcon {
+  color: var(--line-strong);
+  margin-bottom: 0.1rem;
+}
+.emptyText {
+  font-size: var(--fs-5);
+  color: var(--ink-muted);
+  margin: 0;
+}
+.emptySub {
+  font-size: var(--fs-6);
+  color: var(--ink-subtle);
+  margin: 0;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

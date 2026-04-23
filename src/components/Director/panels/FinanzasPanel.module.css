@@ -361,3 +361,63 @@
 
 /* ── Precio base ──────────────────────────────────────────────────────────── */
 
+/* ── Toolbar de refresco ──────────────────────────────────────────────── */
+.finanzasToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: -0.5rem;
+}
+
+.finanzasToolbarLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.finanzasToolbarTitle {
+  font-size: var(--fs-7);
+  font-weight: 700;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.finanzasToolbarHint {
+  font-size: var(--fs-7);
+  color: var(--ink-subtle);
+}
+
+.finanzasRefreshBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--ink-soft);
+  font-size: var(--fs-7);
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.15s var(--ease);
+  flex-shrink: 0;
+}
+
+.finanzasRefreshBtn:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: var(--line-strong);
+  background: var(--surface-off);
+  transform: translateY(-1px);
+}
+
+.finanzasRefreshBtn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.finanzasRefreshBtn svg.spinning {
+  animation: spin 0.8s linear infinite;
+}

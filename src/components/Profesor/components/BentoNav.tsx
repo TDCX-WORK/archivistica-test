@@ -27,11 +27,12 @@ export default function BentoNav({ tab, setTab, statsClase, nAcciones, announcem
     { id:'inbox',    label:'Acciones',           desc: nAcciones>0?`${nAcciones} pendiente${nAcciones!==1?'s':''}`:'Todo al día', descExtra: null, icon:Bell, color:nAcciones>0?'#DC2626':'#059669', badge:nAcciones>0?nAcciones:null },
     { id:'evolucion',label:'Evolución',          desc: statsClase?`Nota media ${statsClase.notaMediaClase??0}%`:'Ver progreso', descExtra: null, icon:TrendingUp,  color:'#7C3AED' },
     { id:'fallos',   label:'Fallos clase',       desc:'Preguntas con más errores', descExtra: null, icon:TrendingDown, color:'#DC2626' },
-    { id:'plan',     label:'Plan semanal',       desc:'Organiza el temario', descExtra: null, icon:CalendarDays, color:'#D97706' },
+    { id:'plan',     label:'Planificación',      desc:'Plan semanal y eventos', descExtra: null, icon:CalendarDays, color:'#D97706' },
     { id:'tablon',   label:'Tablón',             desc: announcements.length>0?`${announcements.length} aviso${announcements.length!==1?'s':''} activo${announcements.length!==1?'s':''}`:'Sin avisos activos', descExtra: null, icon:Megaphone, color:'#059669', badge:announcements.length>0?announcements.length:null },
     { id:'codigos',  label:'Códigos',            desc:'Invitaciones de acceso', descExtra: null, icon:Key, color:'#0891B2' },
-    { id:'banco',    label:'Banco de preguntas', desc: bancoDesc, descExtra: bancoDescExtra, icon:BookIcon, color:'#6366F1', big:true },
-    { id:'examenes', label:'Fecha de examen',    desc:'Ver fechas por alumno', descExtra: null, icon:CalendarDays, color:'#0891B2', big:true,  badge:null as number|null },
+    { id:'documentos',   label:'Documentos',      desc:'Sube material y contratos', descExtra: null, icon:BookIcon, color:'#059669', big:false, badge:null as number|null, gridClass:'colLeft1' },
+    { id:'proximamente', label:'Próximamente',     desc:'Nueva funcionalidad', descExtra: null, icon:BookIcon, color:'#9CA3AF', big:false, badge:null as number|null, gridClass:'colLeft2' },
+    { id:'banco',        label:'Banco de preguntas', desc: bancoDesc, descExtra: bancoDescExtra, icon:BookIcon, color:'#6366F1', big:true, gridClass:'colRight' },
   ]
 
   return (
@@ -39,7 +40,7 @@ export default function BentoNav({ tab, setTab, statsClase, nAcciones, announcem
       {cards.map(card => {
         const Icon = card.icon, active = tab===card.id
         return (
-          <button key={card.id} className={[styles.bentoCard, card.big?styles.bentoBig:'', active?styles.bentoActive:''].join(' ')} style={{ ['--bento-color' as string]: card.color }} onClick={() => setTab(card.id)}>
+          <button key={card.id} className={[styles.bentoCard, card.big?styles.bentoBig:'', active?styles.bentoActive:'', (card as any).gridClass ? styles[(card as any).gridClass] : ''].join(' ')} style={{ ['--bento-color' as string]: card.color }} onClick={() => setTab(card.id)}>
             {card.big && <AnimatedGridPattern numSquares={18} maxOpacity={active?0.12:0.06} duration={4} color={card.color} lineColor={card.color+'20'} />}
             <Ripple mainCircleSize={card.big?60:40} mainCircleOpacity={active?0.25:0.12} numCircles={card.big?5:3} color={card.color} duration={card.big?3:3.5} />
             <div className={styles.bentoContent}>

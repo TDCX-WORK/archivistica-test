@@ -1,0 +1,342 @@
+/* ── Variables por color ─────────────────────────────────────────── */
+.folderPurple {
+  --f-solid:        #6B46E0;
+  --f-solid-2:      #5535C8;
+  --f-glass:        rgba(90, 55, 200, 0.38);
+  --f-glass-border: rgba(200, 170, 255, 0.25);
+  --f-glow:         rgba(107, 70, 224, 0.28);
+  --f-shine:        rgba(255, 255, 255, 0.13);
+  --f-text:         #fff;
+}
+.folderDark {
+  --f-solid:        #059669;
+  --f-solid-2:      #047857;
+  --f-glass:        rgba(4, 120, 87, 0.45);
+  --f-glass-border: rgba(110, 231, 183, 0.25);
+  --f-glow:         rgba(5, 150, 105, 0.3);
+  --f-shine:        rgba(255, 255, 255, 0.13);
+  --f-text:         #fff;
+}
+.folderBlue {
+  --f-solid:        #2563EB;
+  --f-solid-2:      #1848C8;
+  --f-glass:        rgba(25, 65, 200, 0.38);
+  --f-glass-border: rgba(150, 200, 255, 0.25);
+  --f-glow:         rgba(37, 99, 235, 0.28);
+  --f-shine:        rgba(255, 255, 255, 0.13);
+  --f-text:         #fff;
+}
+.folderRed {
+  --f-solid:        #DC2626;
+  --f-solid-2:      #B91C1C;
+  --f-glass:        rgba(185, 28, 28, 0.38);
+  --f-glass-border: rgba(252, 165, 165, 0.30);
+  --f-glow:         rgba(220, 38, 38, 0.28);
+  --f-shine:        rgba(255, 255, 255, 0.13);
+  --f-text:         #fff;
+}
+.folderAmber {
+  --f-solid:        #D97706;
+  --f-solid-2:      #B45309;
+  --f-glass:        rgba(180, 83, 9, 0.38);
+  --f-glass-border: rgba(253, 230, 138, 0.30);
+  --f-glow:         rgba(217, 119, 6, 0.28);
+  --f-shine:        rgba(255, 255, 255, 0.13);
+  --f-text:         #fff;
+}
+
+/* ── Variantes pastel (Acciones del profesor) ────────────────────── */
+.folderRedPastel {
+  --f-solid:        #F4A7A3;
+  --f-solid-2:      #E98B86;
+  --f-glass:        rgba(240, 140, 135, 0.32);
+  --f-glass-border: rgba(255, 220, 218, 0.40);
+  --f-glow:         rgba(234, 120, 115, 0.22);
+  --f-shine:        rgba(255, 255, 255, 0.18);
+  --f-text:         #fff;
+  --f-icon:         #B94A46;
+}
+.folderGreenPastel {
+  --f-solid:        #9DD8B8;
+  --f-solid-2:      #7CC9A2;
+  --f-glass:        rgba(130, 200, 165, 0.32);
+  --f-glass-border: rgba(210, 240, 225, 0.40);
+  --f-glow:         rgba(125, 200, 160, 0.22);
+  --f-shine:        rgba(255, 255, 255, 0.18);
+  --f-text:         #fff;
+  --f-icon:         #2F7A56;
+}
+.folderBluePastel {
+  --f-solid:        #A9C6F2;
+  --f-solid-2:      #8FB4EC;
+  --f-glass:        rgba(150, 185, 235, 0.32);
+  --f-glass-border: rgba(215, 230, 250, 0.40);
+  --f-glow:         rgba(145, 180, 230, 0.22);
+  --f-shine:        rgba(255, 255, 255, 0.18);
+  --f-text:         #fff;
+  --f-icon:         #3A6BBF;
+}
+
+/* ── Wrapper ─────────────────────────────────────────────────────── */
+.folder {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(.34, 1.56, .64, 1),
+              filter  0.4s ease;
+  filter: drop-shadow(0 10px 22px var(--f-glow));
+}
+
+.folder:hover {
+  transform: translateY(-6px) scale(1.03);
+  filter: drop-shadow(0 16px 36px var(--f-glow));
+}
+
+.folder:hover .docs {
+  bottom: 55px;
+}
+
+/* ── CAPA 1 — cuadrado bordes redondos ───────────────────────────── */
+.body {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, var(--f-solid), var(--f-solid-2));
+  border-radius: 22px;
+  z-index: 2;
+}
+
+/* ── CAPA 2 — documentos anclados abajo */
+.docs {
+  position: absolute;
+  bottom: 38px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0px;
+  align-items: flex-end;
+  z-index: 2;
+  transition: bottom 0.4s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.doc {
+  width: 60px;
+  height: 84px;
+  border-radius: 8px;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.28),
+    0 2px 4px  rgba(0, 0, 0, 0.16);
+  display: flex;
+  flex-direction: column;
+  padding: 8px 6px;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.doc:nth-child(1) {
+  background: rgba(255, 255, 255, 0.55);
+  transform: rotate(-8deg) translateY(6px);
+  margin-right: -14px;
+}
+.doc:nth-child(2) {
+  background: rgba(255, 255, 255, 0.96);
+  transform: rotate(0deg);
+  z-index: 1;
+}
+.doc:nth-child(3) {
+  background: rgba(255, 255, 255, 0.55);
+  transform: rotate(8deg) translateY(6px);
+  margin-left: -14px;
+}
+
+.docLine {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.09);
+}
+.docLine:first-child {
+  background: rgba(0, 0, 0, 0.20);
+  width: 50% !important;
+}
+
+/* ── CAPA 3 — glass ──────────────────────────────────────────────── */
+.glassFront {
+  position: absolute;
+  top: 30%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 22px 0 22px 22px;
+  background: var(--f-glass);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-top: 1px solid var(--f-glass-border);
+  z-index: 4;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 8px 12px 12px;
+}
+
+.glassFront::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: -10%;
+  width: 60%;
+  height: 130%;
+  background: linear-gradient(135deg, var(--f-shine) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.glassFront::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+}
+
+/* ── Texto ───────────────────────────────────────────────────────── */
+.folderLabel {
+  color: var(--f-text);
+  font-weight: 700;
+  font-size: var(--fs-5);
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
+  line-height: 1.2;
+}
+
+.folderSublabel {
+  color: var(--f-text);
+  font-size: var(--fs-7);
+  opacity: 0.65;
+  margin-top: 2px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MODO OUTLINE (Acciones del profesor)
+   Solo contornos, icono encima, sin relleno, sin papeles, sin glass
+══════════════════════════════════════════════════════════════════ */
+.folderOutline {
+  --fo-stroke: var(--f-icon, #6B7280);
+  --fo-glow: color-mix(in srgb, var(--fo-stroke) 35%, transparent);
+  --fo-glow-soft: color-mix(in srgb, var(--fo-stroke) 15%, transparent);
+
+  position: relative;
+  width: 100%;
+  max-width: 140px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+  transition: transform 0.3s var(--spring, cubic-bezier(.34, 1.56, .64, 1));
+  color: var(--fo-stroke);
+}
+
+.folderOutline:hover {
+  transform: translateY(-4px);
+}
+
+.folderOutline[data-open="true"] {
+  transform: translateY(-4px);
+}
+
+/* ── Contorno de la carpeta ─────────────────────────────────────── */
+.outlineSvg {
+  width: 100%;
+  max-width: 110px;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  display: block;
+  /* glow reposo — muy sutil */
+  filter: drop-shadow(0 3px 10px var(--fo-glow-soft));
+  transition: filter 0.3s ease, color 0.2s;
+}
+
+.folderOutline:hover .outlineSvg,
+.folderOutline[data-open="true"] .outlineSvg {
+  filter:
+    drop-shadow(0 0 10px var(--fo-glow))
+    drop-shadow(0 8px 20px var(--fo-glow));
+}
+
+/* ── Icono centrado dentro del cuerpo de la carpeta ─────────────── */
+.outlineIconWrap {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 110px;
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 16%; /* compensar pestaña superior para centrar en el cuerpo */
+  pointer-events: none;
+}
+
+.outlineIcon {
+  color: var(--fo-stroke);
+  /* glow del icono propio */
+  filter: drop-shadow(0 0 6px var(--fo-glow-soft));
+  transition: transform 0.3s var(--spring, cubic-bezier(.34, 1.56, .64, 1)),
+              filter 0.3s ease;
+}
+
+.folderOutline:hover .outlineIcon {
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 10px var(--fo-glow));
+}
+
+/* ── Texto debajo ───────────────────────────────────────────────── */
+.outlineText {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  width: 100%;
+}
+
+.outlineLabel {
+  font-size: var(--fs-5);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.outlineSublabel {
+  font-size: var(--fs-7);
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 520px) {
+  .folderOutline { max-width: 100px; padding-top: 4px; }
+  .outlineSvg    { max-width: 84px; }
+  .outlineIconWrap { max-width: 84px; top: 4px; }
+  .outlineIcon   { width: 26px; height: 26px; }
+  .outlineLabel  { font-size: var(--fs-6); }
+  .outlineSublabel { font-size: 0.65rem; }
+}
+
+@media (max-width: 380px) {
+  .folderOutline { max-width: 86px; }
+  .outlineSvg    { max-width: 72px; }
+  .outlineIconWrap { max-width: 72px; }
+}

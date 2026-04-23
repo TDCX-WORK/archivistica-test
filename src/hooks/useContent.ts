@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import type { StructuredBlock, StructuredTopic } from '../types'
 
 export function useContent(
-  userId:    string | null | undefined,
+  academyId: string | null | undefined,
   subjectId: string | null | undefined
 ) {
   const [blocks,  setBlocks]  = useState<StructuredBlock[]>([])
@@ -11,28 +11,13 @@ export function useContent(
   const [error,   setError]   = useState<string | null>(null)
 
   useEffect(() => {
-    if (!userId) return
+    if (!academyId) return
 
     const load = async () => {
       setLoading(true)
       setError(null)
 
-      // 1. Obtener academy_id del perfil del usuario
-      const { data: profile, error: profileErr } = await supabase
-        .from('profiles')
-        .select('academy_id')
-        .eq('id', userId)
-        .maybeSingle()
-
-      if (profileErr || !profile?.academy_id) {
-        setError('No se pudo obtener la academia del usuario')
-        setLoading(false)
-        return
-      }
-
-      const academyId = profile.academy_id as string
-
-      // 2. Cargar bloques
+      // 1. Cargar bloques
       let blocksQuery = supabase
         .from('content_blocks')
         .select('id, label, color, position, subject_id')
@@ -53,7 +38,7 @@ export function useContent(
         id: string; label: string; color: string; position: number; subject_id: string | null
       }[]
 
-      // 3. Cargar todos los temas de esos bloques
+      // 2. Cargar todos los temas de esos bloques
       const blockIds = typedBlocks.map(b => b.id)
 
       if (blockIds.length === 0) {
@@ -85,7 +70,7 @@ export function useContent(
         dates: string[] | null
       }[]
 
-      // 4. Agrupar temas por bloque
+      // 3. Agrupar temas por bloque
       const topicsByBlock: Record<string, StructuredTopic[]> = {}
       for (const topic of typedTopics) {
         if (!topicsByBlock[topic.block_id]) topicsByBlock[topic.block_id] = []
@@ -99,7 +84,7 @@ export function useContent(
         })
       }
 
-      // 5. Estructura final
+      // 4. Estructura final
       const structured: StructuredBlock[] = typedBlocks.map(block => ({
         id:               block.id,
         label:            block.label,
@@ -114,7 +99,7 @@ export function useContent(
     }
 
     load()
-  }, [userId, subjectId])
+  }, [academyId, subjectId])
 
   return { blocks, loading, error }
 }

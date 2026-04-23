@@ -120,13 +120,30 @@
   padding: 0 5px;
 }
 
+/* ── Fila documentos (izq x2) + banco (der) ─────────────────────── */
+.colLeft1 {
+  grid-column: 1;
+}
+.colLeft2 {
+  grid-column: 2;
+}
+.colRight {
+  grid-column: 3 / span 2;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .bentoGrid { grid-template-columns: repeat(2, 1fr); }
   .bentoBig  { grid-column: span 2; }
+  .colLeft1  { grid-column: 1; }
+  .colLeft2  { grid-column: 2; }
+  .colRight  { grid-column: span 2; }
 }
 
 @media (max-width: 480px) {
   .bentoGrid { grid-template-columns: 1fr 1fr; }
   .bentoBig  { grid-column: span 2; }
+  .colLeft1  { grid-column: 1; }
+  .colLeft2  { grid-column: 2; }
+  .colRight  { grid-column: span 2; }
 }

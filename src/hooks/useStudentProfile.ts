@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { subscribe } from '../lib/eventBus'
 import type { StudentProfile, StaffProfile, Profile, AlumnoConExtended, StaffConExtended } from '../types'
 
 /* ─── Hook para el perfil extendido del alumno ───────────────────────────── */
@@ -121,6 +122,9 @@ export function useAcademyProfiles(academyId: string | null | undefined) {
   }, [academyId])
 
   useEffect(() => { load() }, [load])
+
+  // Re-cargar cuando otros paneles emitan cambios
+  useEffect(() => subscribe('director-data-changed', load), [load])
 
   const updateStudentProfile = useCallback(async (
     userId: string,

@@ -569,7 +569,7 @@ interface StudyViewProps {
 }
 
 export default function StudyView({ currentUser, onSelectMode, initialBlockId }: StudyViewProps) {
-  const { blocks, loading: loadingContent, error: errorContent } = useContent(currentUser?.id, currentUser?.subject_id)
+  const { blocks, loading: loadingContent, error: errorContent } = useContent(currentUser?.academy_id, currentUser?.subject_id)
   const { readTopics, bookmarks, loading: loadingProgress, toggleRead, toggleBookmark } = useStudyProgress(currentUser?.id, currentUser?.academy_id, currentUser?.subject_id)
   const { highlights, addHighlight, removeHighlight, highlightCountByTopic } =
     useHighlights(currentUser?.id, currentUser?.academy_id, currentUser?.subject_id)

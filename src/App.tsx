@@ -20,12 +20,18 @@ import ProfesorPanel      from './components/Profesor/ProfesorPanel/ProfesorPane
 import StatsClase         from './components/Profesor/StatsClase/StatsClase'
 import ProfesorProfile    from './components/Profesor/ProfesorProfile/ProfesorProfile'
 import DirectorPanel      from './components/Director/DirectorPanel/DirectorPanel'
+import DocumentosPage     from './components/Documentos/DocumentosPage'
 import SuperadminPanel    from './components/Superadmin/SuperadminPanel'
 import Pipeline           from './components/Superadmin/Pipeline'
 import OnboardingWizard   from './components/Onboarding/OnboardingWizard'
 import GestionAcademia    from './components/Director/GestionAcademia/GestionAcademia'
+import ForoPage           from './components/Foro/ForoPage'
+import MensajesPage       from './components/Mensajes/MensajesPage'
+import TareasPage         from './components/Tareas/TareasPage'
+import TareasProfesorPage from './components/Tareas/TareasProfesorPage' 
 import FacturacionDirector from './components/Director/FacturacionDirector/FacturacionDirector'
 import SimulacroRunner     from './components/Simulacro/SimulacroRunner'
+import ErrorBoundary from './components/ui/ErrorBoundary'
 import styles             from './App.module.css'
 import { useSuperadmin }  from './hooks/useSuperadmin'
 import ManualBillingTab   from './components/Superadmin/ManualBillingTab'
@@ -92,6 +98,8 @@ function AppShell({ currentUser, logout, progress, studyProgress, updateDisplayN
   const isSuperadmin = role === 'superadmin'
 
   const activeTab =
+  
+    location.pathname.startsWith('/foro')                 ? 'foro'                 :
     location.pathname.startsWith('/estudio')              ? 'estudio'              :
     location.pathname.startsWith('/estadisticas')         ? 'estadisticas'         :
     location.pathname.startsWith('/perfil')               ? 'perfil'               :
@@ -120,6 +128,11 @@ function AppShell({ currentUser, logout, progress, studyProgress, updateDisplayN
       papelera:               '/papelera',
       billing:                '/billing',
       pipeline:               '/pipeline',
+       foro:                   '/foro',
+  documentos:             '/documentos',
+  mensajes:               '/mensajes',
+  tareas:          '/tareas',
+'tareas-profesor': '/tareas-profesor',
     }
     navigate(routes[t] ?? homeRoute(currentUser))
   }
@@ -258,6 +271,34 @@ function AppShell({ currentUser, logout, progress, studyProgress, updateDisplayN
               <Route path="/admin" element={
                 isSuperadmin ? <SuperadminPanel currentUser={currentUser} /> : <Navigate to={homeRoute(currentUser)} replace />
               } />
+              <Route path="/documentos" element={
+  currentUser?.role === 'alumno' || currentUser?.role === 'profesor' || currentUser?.role === 'director'
+    ? <DocumentosPage currentUser={currentUser} />
+    : <Navigate to={homeRoute(currentUser)} replace />
+} />
+              <Route path="/foro" element={
+  currentUser?.role === 'alumno' || currentUser?.role === 'profesor' || currentUser?.role === 'director'
+    ? <ForoPage currentUser={currentUser} />
+    : <Navigate to={homeRoute(currentUser)} replace />
+} />
+
+<Route path="/mensajes" element={
+  isProfesor
+    ? <MensajesPage currentUser={currentUser} />
+    : <Navigate to={homeRoute(currentUser)} replace />
+} />
+
+<Route path="/tareas" element={
+  isAlumno
+    ? <TareasPage currentUser={currentUser} />
+    : <Navigate to={homeRoute(currentUser)} replace />
+} />
+<Route path="/tareas-profesor" element={
+  isProfesor || isDirector
+    ? <TareasProfesorPage currentUser={currentUser} />
+    : <Navigate to={homeRoute(currentUser)} replace />
+} />
+
               <Route path="/pipeline" element={
                 isSuperadmin ? <Pipeline /> : <Navigate to={homeRoute(currentUser)} replace />
               } />
@@ -389,8 +430,10 @@ function AppInner() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppInner />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppInner />
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }

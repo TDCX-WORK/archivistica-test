@@ -232,6 +232,7 @@ export interface Academy {
   notes:                  string | null
   logo_url:               string | null
   price_monthly:          number
+  storage_limit_gb:           number
   contract_start:         string | null
   contract_renews:        string | null
   payment_status:         string | null

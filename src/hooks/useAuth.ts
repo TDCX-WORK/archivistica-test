@@ -304,21 +304,24 @@ export function useAuth() {
     setError('')
     const cleanUsername = username.trim().toLowerCase()
 
-    const emailsToTry: string[] = []
     const { data: emailData } = await supabase
       .rpc('get_user_email_by_username', { p_username: cleanUsername })
-    if (emailData) emailsToTry.push(emailData as string)
 
-    let success = false
-    for (const email of emailsToTry) {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
-      if (!signInError) { success = true; break }
-    }
-
-    if (!success) {
+    if (!emailData) {
       setError('Usuario o contraseña incorrectos')
       return false
     }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: emailData as string,
+      password,
+    })
+
+    if (signInError) {
+      setError('Usuario o contraseña incorrectos')
+      return false
+    }
+
     return true
   }, [])
 
@@ -365,6 +368,11 @@ export function useAuth() {
 
       if (result.no_email) {
         setError('No tienes un email asociado a tu cuenta. Contacta con tu academia para recuperar tu contraseña.')
+        return false
+      }
+
+      if (result.email_conflict) {
+        setError('Hay un problema con el email de tu cuenta. Contacta con tu academia para resolverlo.')
         return false
       }
 

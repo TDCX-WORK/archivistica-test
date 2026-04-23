@@ -1,0 +1,51 @@
+/* ═══════════════════════════════════════════════════════════════
+   ForoPage — página principal del foro
+═══════════════════════════════════════════════════════════════ */
+
+.page {
+  min-height: 100vh;
+  padding: 32px 24px 80px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* ── Header ──────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.headerLeft {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--fs-1);
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  margin: 0 0 2px;
+}
+
+.subtitle {
+  font-size: var(--fs-6);
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+/* ── Error ───────────────────────────────────────────────────────── */
+.error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: var(--r-md);
+  color: #DC2626;
+  font-size: var(--fs-5);
+  margin-bottom: 1rem;
+}

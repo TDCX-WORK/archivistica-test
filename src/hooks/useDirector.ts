@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { subscribe } from '../lib/eventBus'
 import type {
   CurrentUser, DirectorStats, SubjectStats, SemanaStats,
   AlumnoEnRiesgoDetalle, AlumnoPorExpirarDetalle, AlumnoConNota,
@@ -15,45 +16,79 @@ export function useDirector(currentUser: CurrentUser | null) {
   const academyId  = currentUser?.academy_id
   const isDirector = currentUser?.role === 'director'
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     if (!isDirector || !academyId) { setLoading(false); return }
 
-    const load = async () => {
-      setLoading(true)
-      setError(null)
+    setLoading(true)
+    setError(null)
 
       const now          = new Date()
       const sevenAgo     = new Date(now.getTime() - 7  * 86400000).toISOString().slice(0, 10)
       const thirtyAgo    = new Date(now.getTime() - 30 * 86400000).toISOString().slice(0, 10)
       const twoMonthsAgo = new Date(now.getTime() - 60 * 86400000).toISOString().slice(0, 10)
 
+      // ── Paso 1: cargar profiles primero para saber qué alumnoIds filtrar ──
       const [
         { data: subs },
         { data: profiles },
         { data: sessions },
         { data: wrongs },
-        { data: studentProfs },
         { data: announcements },
       ] = await Promise.all([
         supabase.from('subjects').select('id, name, slug, color').eq('academy_id', academyId),
         supabase.from('profiles').select('id, username, role, subject_id, access_until, created_at, academy_id, force_password_change').eq('academy_id', academyId).in('role', ['alumno', 'profesor']),
         supabase.from('sessions').select('user_id, score, played_at, subject_id').eq('academy_id', academyId).gte('played_at', twoMonthsAgo),
         supabase.from('wrong_answers').select('user_id, question_id, fail_count, subject_id').eq('academy_id', academyId),
-        supabase.from('student_profiles').select('id, monthly_price, exam_date, full_name, city, onboarding_completed, payment_status'),
         supabase.from('announcements').select('id, author_id, created_at, title, subject_id').eq('academy_id', academyId).order('created_at', { ascending: false }),
       ])
 
       if (!subs) { setError('Error cargando datos'); setLoading(false); return }
 
-      const typedSubs     = subs as { id: string; name: string; slug: string | null; color: string | null }[]
       const typedProfiles = (profiles ?? []) as Profile[]
+
+      // ── Paso 2: ahora sí pedir student_profiles solo de nuestros alumnos ──
+      const alumnoIds = typedProfiles.filter(p => p.role === 'alumno').map(p => p.id)
+
+      let studentProfs: { id: string; monthly_price: number | null; exam_date: string | null; full_name: string | null; city: string | null; onboarding_completed: boolean | null; payment_status: string }[] = []
+      if (alumnoIds.length > 0) {
+        const { data } = await supabase
+          .from('student_profiles')
+          .select('id, monthly_price, exam_date, full_name, city, onboarding_completed, payment_status')
+          .in('id', alumnoIds)
+        studentProfs = (data ?? []) as typeof studentProfs
+      }
+
+      const typedSubs     = subs as { id: string; name: string; slug: string | null; color: string | null }[]
       const typedSessions = (sessions ?? []) as { user_id: string; score: number; played_at: string; subject_id: string | null }[]
       const typedWrongs   = (wrongs   ?? []) as { user_id: string; question_id: string; fail_count: number; subject_id: string | null }[]
 
       // Map de student_profiles por id
-      const typedSP = (studentProfs ?? []) as { id: string; monthly_price: number | null; exam_date: string | null; full_name: string | null; city: string | null; onboarding_completed: boolean | null; payment_status: string }[]
-      const spMap: Record<string, typeof typedSP[0]> = {}
-      for (const sp of typedSP) spMap[sp.id] = sp
+      const spMap: Record<string, typeof studentProfs[0]> = {}
+      for (const sp of studentProfs) spMap[sp.id] = sp
+
+      // Pre-agrupar por subject_id y user_id para evitar O(n×m)
+      const sessionsBySubject: Record<string, typeof typedSessions> = {}
+      const sessionsByUser: Record<string, typeof typedSessions> = {}
+      for (const s of typedSessions) {
+        const subKey = s.subject_id ?? '__none__'
+        if (!sessionsBySubject[subKey]) sessionsBySubject[subKey] = []
+        sessionsBySubject[subKey]!.push(s)
+        if (!sessionsByUser[s.user_id]) sessionsByUser[s.user_id] = []
+        sessionsByUser[s.user_id]!.push(s)
+      }
+      const wrongsBySubject: Record<string, typeof typedWrongs> = {}
+      for (const w of typedWrongs) {
+        const subKey = w.subject_id ?? '__none__'
+        if (!wrongsBySubject[subKey]) wrongsBySubject[subKey] = []
+        wrongsBySubject[subKey]!.push(w)
+      }
+      // Profiles por rol y subject_id
+      const profilesByRoleSubject: Record<string, typeof typedProfiles> = {}
+      for (const p of typedProfiles) {
+        const key = `${p.role}_${p.subject_id ?? '__none__'}`
+        if (!profilesByRoleSubject[key]) profilesByRoleSubject[key] = []
+        profilesByRoleSubject[key]!.push(p)
+      }
 
       // Actividad de profesores — último aviso por autor
       type AnnRow = { id: string; author_id: string; created_at: string; title: string; subject_id: string | null }
@@ -102,19 +137,26 @@ export function useDirector(currentUser: CurrentUser | null) {
 
       // Stats por asignatura
       const subjectStats: SubjectStats[] = typedSubs.map(sub => {
-        const subAlumnos  = typedProfiles.filter(p => p.role === 'alumno'   && p.subject_id === sub.id)
-        const subProfes   = typedProfiles.filter(p => p.role === 'profesor' && p.subject_id === sub.id)
-        const subSessions = typedSessions.filter(s => s.subject_id === sub.id)
-        const subWrongs   = typedWrongs.filter(w => w.subject_id === sub.id)
+        const subAlumnos  = profilesByRoleSubject[`alumno_${sub.id}`] ?? []
+        const subProfes   = profilesByRoleSubject[`profesor_${sub.id}`] ?? []
+        const subSessions = sessionsBySubject[sub.id] ?? []
+        const subWrongs   = wrongsBySubject[sub.id] ?? []
 
         const sesThisWeek    = subSessions.filter(s => s.played_at >= sevenAgo)
         const ses30d         = subSessions.filter(s => s.played_at >= thirtyAgo)
         const alumnosActivos = new Set(sesThisWeek.map(s => s.user_id)).size
 
+        // Pre-agrupar sesiones 30d por user_id para esta asignatura
+        const ses30dByUser: Record<string, typeof ses30d> = {}
+        for (const s of ses30d) {
+          if (!ses30dByUser[s.user_id]) ses30dByUser[s.user_id] = []
+          ses30dByUser[s.user_id]!.push(s)
+        }
+
         // Media por alumno (no por sesión) — consistente con panel profesor
         const notasPorAlumno = subAlumnos
           .map(a => {
-            const sesSub = ses30d.filter(s => s.user_id === a.id)
+            const sesSub = ses30dByUser[a.id] ?? []
             return sesSub.length ? sesSub.reduce((acc, s) => acc + s.score, 0) / sesSub.length : null
           })
           .filter((n): n is number => n !== null)
@@ -159,18 +201,17 @@ export function useDirector(currentUser: CurrentUser | null) {
           fallosPorAlumno[w.user_id] = (fallosPorAlumno[w.user_id] ?? 0) + w.fail_count
         }
 
+        const alumnoSubIds = new Set(subAlumnos.map(a => a.id))
         const profesoresStats: ProfesorStats[] = subProfes.map(prof => ({
           id:               prof.id,
           username:         prof.username,
           alumnos:          subAlumnos.length,
-          sesionesThisWeek: sesThisWeek.filter(s =>
-            subAlumnos.some(a => a.id === s.user_id)
-          ).length,
+          sesionesThisWeek: sesThisWeek.filter(s => alumnoSubIds.has(s.user_id)).length,
           notaMedia,
         }))
 
         const alumnosConNota: AlumnoConNota[] = subAlumnos.map(a => {
-          const sesSub = ses30d.filter(s => s.user_id === a.id)
+          const sesSub = ses30dByUser[a.id] ?? []
           const nota   = sesSub.length
             ? Math.round(sesSub.reduce((acc, s) => acc + s.score, 0) / sesSub.length)
             : null
@@ -213,7 +254,7 @@ export function useDirector(currentUser: CurrentUser | null) {
       const alumnos30d = typedProfiles.filter(p => p.role === 'alumno')
       const notasPorAlumnoGlobal = alumnos30d
         .map(a => {
-          const sesA = ses30d.filter(s => s.user_id === a.id)
+          const sesA = (sessionsByUser[a.id] ?? []).filter(s => s.played_at >= thirtyAgo)
           return sesA.length ? sesA.reduce((acc, s) => acc + s.score, 0) / sesA.length : null
         })
         .filter((n): n is number => n !== null)
@@ -250,10 +291,12 @@ export function useDirector(currentUser: CurrentUser | null) {
         },
       })
       setLoading(false)
-    }
-
-    load()
   }, [isDirector, academyId, currentUser?.subject_id])
 
-  return { stats, allProfiles, loading, error }
+  useEffect(() => { load() }, [load])
+
+  // Re-cargar cuando otros paneles emitan cambios (Facturación, Acciones, etc.)
+  useEffect(() => subscribe('director-data-changed', load), [load])
+
+  return { stats, allProfiles, loading, error, reload: load }
 }
