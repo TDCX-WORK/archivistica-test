@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+import { insertNotification } from '../lib/notifications'
 import type { Session, WrongAnswer } from '../types'
 
 function calcStreak(sessions: Pick<Session, 'played_at'>[]): number {
@@ -86,8 +87,7 @@ export function useProgress(
         : 0
 
       if (score > mejorNota && score >= 70 && sesionesConNueva.length >= 3) {
-        // El índice único en BD evita duplicados automáticamente
-        await supabase.from('notifications').insert({
+        await insertNotification({
           user_id: userId,
           type:    'mejor_nota',
           title:   `Nueva mejor nota: ${score}/100`,
@@ -104,7 +104,7 @@ export function useProgress(
             .maybeSingle()
 
           if (prof) {
-            await supabase.from('notifications').insert({
+            await insertNotification({
               user_id: (prof as { id: string }).id,
               type:    'alumno_supera',
               title:   'Un alumno ha superado su mejor nota',
@@ -128,7 +128,7 @@ export function useProgress(
           30: 'Un mes entero de racha. Nivel leyenda.',
         }
         // El índice único en BD evita duplicados automáticamente
-        await supabase.from('notifications').insert({
+        await insertNotification({
           user_id: userId,
           type:    'racha',
           title:   `${emojis[racha]} ${racha} dias de racha`,
@@ -142,6 +142,17 @@ export function useProgress(
   const recordWrongAnswer = useCallback(async (questionId: string, block: string) => {
     if (!userId) return
 
+    // Si no tenemos block_id real, buscarlo de la pregunta
+    let resolvedBlock = block
+    if (!block || block === 'unknown') {
+      const { data: q } = await supabase
+        .from('questions')
+        .select('block_id')
+        .eq('id', questionId)
+        .maybeSingle()
+      resolvedBlock = (q as { block_id: string } | null)?.block_id ?? 'unknown'
+    }
+
     const today    = new Date().toISOString().slice(0, 10)
     const existing = wrongAnswersRef.current.find(w => w.question_id === questionId)
 
@@ -151,6 +162,7 @@ export function useProgress(
         correct_streak: 0,
         next_review:    new Date(Date.now() + 86400000).toISOString().slice(0, 10),
         last_seen:      today,
+        ...(existing.block === '' || existing.block === 'unknown' ? { block: resolvedBlock } : {}),
       }
       const { data } = await supabase
         .from('wrong_answers').update(updated).eq('id', existing.id).select().maybeSingle()
@@ -161,7 +173,7 @@ export function useProgress(
         academy_id:     academyId,
         subject_id:     subjectId,
         question_id:    questionId,
-        block,
+        block:          resolvedBlock,
         fail_count:     1,
         correct_streak: 0,
         next_review:    new Date(Date.now() + 86400000).toISOString().slice(0, 10),

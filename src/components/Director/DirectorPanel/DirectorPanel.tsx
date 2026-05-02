@@ -30,19 +30,7 @@ import { AlumnoDetallePanel, ProfesorDetallePanel } from '../components/AlumnoDe
 import { AlumnosTable }         from '../components/AlumnosTable'
 import { ProfesoresTable }      from '../components/ProfesoresTable'
 import styles from './DirectorPanel.module.css'
-
-function scoreColor(s: number | null | undefined): string {
-  if (s == null) return '#6B7280'
-  if (s >= 80) return '#059669'
-  if (s >= 60) return '#0891B2'
-  if (s >= 40) return '#B45309'
-  return '#DC2626'
-}
-
-function fmt(iso: string | null | undefined): string {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' })
-}
+import { scoreColor, fmt } from '../../../lib/helpers'
 
 interface SubjectStats {
   id:               string

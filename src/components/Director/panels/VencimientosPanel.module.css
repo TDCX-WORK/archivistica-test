@@ -76,6 +76,26 @@
 }
 
 @media (max-width: 768px) {
-  .vencKpis { grid-template-columns: repeat(2,1fr); }
-  .vencCardsGrid { grid-template-columns: 1fr 1fr; }
+  .vencWrap { gap: 1rem; padding: 0.75rem 0; }
+
+  .vencKpis { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+  .vencKpi { padding: 0.75rem; }
+  .vencKpiVal { font-size: var(--fs-2); }
+  .vencKpiLabel { font-size: var(--fs-7); }
+
+  .vencCardsGrid { grid-template-columns: 1fr; gap: 0.5rem; }
+
+  .vencCard { padding: 0.75rem; gap: 0.5rem; }
+  .vencCardHead { gap: 0.5rem; }
+  .vencNombre { font-size: var(--fs-6); }
+  .vencFecha { font-size: var(--fs-7); }
+  .vencDiasBadge { font-size: var(--fs-7); padding: 2px 7px; }
+
+  .vencBtnRenovar {
+    padding: 0.45rem 0.75rem;
+    border-radius: var(--r-full);
+    font-size: var(--fs-6);
+  }
+
+  .vencGrupoTitulo { font-size: var(--fs-6); }
 }

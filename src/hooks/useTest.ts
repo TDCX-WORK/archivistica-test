@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { shuffle }  from '../lib/helpers'
 import type { Question } from '../types'
 import config from '../data/config.json'
 
@@ -60,7 +61,7 @@ async function fetchQuestionsForMode(
 
   const typed = data as (Omit<Question, 'options' | 'answer'> & { options: unknown; answer: number })[]
 
-  const shuffled = [...typed].sort(() => Math.random() - 0.5)
+  const shuffled = shuffle(typed)
   return shuffled.slice(0, mode.questions).map(q => ({
     ...q,
     options: q.options as string[],

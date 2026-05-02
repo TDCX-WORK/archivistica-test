@@ -1,0 +1,124 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.loading {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--ink-subtle);
+  font-size: var(--fs-4);
+}
+
+/* ── Tab bar ──────────────────────────────────────────────── */
+.tabBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem 2rem 0;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 1.1rem;
+  background: var(--surface-off);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  font-size: var(--fs-5);
+  font-weight: 500;
+  font-family: var(--font-body);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.tab:hover { border-color: var(--line-strong); }
+
+.tabActive {
+  background: rgba(37,99,235,0.10);
+  border-color: rgba(37,99,235,0.40);
+  color: #2563EB;
+  font-weight: 700;
+}
+
+.tabBadge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 6px;
+  background: var(--surface-dim);
+  border: 1px solid var(--line);
+  border-radius: var(--r-full);
+  color: var(--ink-subtle);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.tabBadgeActive {
+  background: rgba(37,99,235,0.15);
+  border-color: rgba(37,99,235,0.30);
+  color: #2563EB;
+}
+
+/* ── Content ──────────────────────────────────────────────── */
+.content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem 4rem;
+}
+
+/* ── Stripe placeholder ───────────────────────────────────── */
+.stripePlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 5rem;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid rgba(93,228,255,0.20);
+  border-radius: var(--r-xl);
+  box-shadow: 0 0 0 3px rgba(93,228,255,0.06);
+}
+
+.stripeEmoji {
+  font-size: 2.5rem;
+}
+
+.stripeTitle {
+  font-size: var(--fs-2);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.stripeText {
+  font-size: var(--fs-5);
+  color: var(--ink-muted);
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.stripeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  background: var(--ink);
+  border: none;
+  border-radius: var(--r-full);
+  font-size: var(--fs-5);
+  font-weight: 700;
+  font-family: var(--font-body);
+  color: #fff;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: opacity 0.15s;
+}
+.stripeBtn:hover { opacity: 0.85; }

@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { TrendingUp, TrendingDown, Minus, CalendarDays, X, ChevronDown, Users, UsersRound } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
 import type { AlumnoConStats } from '../../../types'
+import { scoreColor } from '../../../lib/helpers'
 import styles from './ClaseEvolucionChart.module.css'
 
 const MODOS_BASE = [
@@ -29,12 +30,7 @@ function colorForId(id: string): string {
   return ALUMNO_COLORS[hash % ALUMNO_COLORS.length]!
 }
 
-function scoreColor(s: number): string {
-  if (s >= 80) return '#059669'
-  if (s >= 60) return '#0891B2'
-  if (s >= 40) return '#D97706'
-  return '#DC2626'
-}
+
 
 /* ── Lunes de la semana a la que pertenece una fecha (YYYY-MM-DD) ── */
 function weekStart(iso: string): string {

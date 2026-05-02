@@ -1,254 +1,289 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit                   from '@tiptap/starter-kit'
 import Placeholder                  from '@tiptap/extension-placeholder'
 import {
   ClipboardList, CheckCircle2, Clock, AlertCircle,
-  ChevronDown, ChevronUp, Send, Loader2, Edit3
+  ChevronDown, ChevronUp, Send, Loader2, Edit3,
+  RefreshCw, MessageSquare, User
 } from 'lucide-react'
-import { useTareasAlumno } from '../../hooks/useTareas'
+import { useTareasAlumno, getGradeBadge, getGradeBadgeLabel } from '../../hooks/useTareas'
 import type { CurrentUser } from '../../types'
-import type { Assignment }  from '../../hooks/useTareas'
-import styles from './TareasPage.module.css'
+import type { Assignment, Submission, InlineComment } from '../../hooks/useTareas'
+import s from './TareasPage.module.css'
 
-interface Props {
-  currentUser: CurrentUser | null
+interface Props { currentUser: CurrentUser | null }
+type Filter = 'todas' | 'pendiente' | 'entregada' | 'corregida' | 'revision'
+
+/* ── Helpers ─────────────────────────────────────────────────── */
+function fmtFecha(iso: string) {
+  return new Date(iso + 'T12:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
 }
-
-type Filter = 'todas' | 'pendiente' | 'entregada' | 'corregida'
-
-function fmtFecha(iso: string): string {
-  return new Date(iso + 'T12:00:00').toLocaleDateString('es-ES', {
-    day: '2-digit', month: 'short', year: 'numeric'
-  })
+function fmtFechaHora(iso: string) {
+  return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
-
-function isOverdue(dueDate: string): boolean {
-  return new Date(dueDate + 'T23:59:59') < new Date()
-}
-
-function diasRestantes(dueDate: string): string {
-  const diff = Math.ceil(
-    (new Date(dueDate + 'T23:59:59').getTime() - new Date().getTime()) / 86400000
-  )
-  if (diff < 0)  return 'Vencida'
+function isOverdue(d: string) { return new Date(d + 'T23:59:59') < new Date() }
+function diasRestantes(d: string) {
+  const diff = Math.ceil((new Date(d + 'T23:59:59').getTime() - Date.now()) / 86400000)
+  if (diff < 0) return 'Vencida'
   if (diff === 0) return 'Hoy'
   if (diff === 1) return 'Mañana'
   return `${diff} días`
 }
+function escapeHtml(t: string) {
+  return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
 
-/* ── Editor TipTap ───────────────────────────────────────────────── */
-function RichEditor({
-  onSubmit, initial = '', sending
-}: {
-  onSubmit: (html: string) => void
-  initial?: string
-  sending:  boolean
+/* ── Render con highlights ───────────────────────────────────── */
+function renderWithHighlights(html: string, comments: InlineComment[], activeId: string | null) {
+  const tmp = document.createElement('div')
+  tmp.innerHTML = html
+  const plain = tmp.textContent ?? ''
+  if (comments.length === 0) return { __html: html }
+
+  const sorted = [...comments].sort((a, b) => a.range_start - b.range_start)
+  let result = '', cursor = 0
+
+  for (const c of sorted) {
+    if (c.range_start < cursor || c.range_start > plain.length) continue
+    result += escapeHtml(plain.slice(cursor, c.range_start))
+    const fragment = plain.slice(c.range_start, c.range_end)
+    const cls = c.comment_type === 'correction' ? s.highlightCorrection
+      : c.comment_type === 'suggestion' ? s.highlightSuggestion : s.highlightPositive
+    result += `<span class="${cls}" data-comment-id="${c.id}">${escapeHtml(fragment)}</span>`
+    if (activeId === c.id) {
+      const tCls = c.comment_type === 'correction' ? s.annotationTypeCorrection
+        : c.comment_type === 'suggestion' ? s.annotationTypeSuggestion : s.annotationTypePositive
+      const label = c.comment_type === 'correction' ? 'Corrección'
+        : c.comment_type === 'suggestion' ? 'Sugerencia' : 'Bien hecho'
+      result += `<span class="${s.annotationTooltip} ${s.annotationTooltipVisible}">`
+      result += `<span class="${s.annotationHeader}"><span class="${s.annotationType} ${tCls}">${label}</span>`
+      result += `<span class="${s.annotationAuthor}">${escapeHtml(c.author?.username ?? 'Profesor')}</span></span>`
+      result += `<span class="${s.annotationBody}">${escapeHtml(c.comment)}</span></span>`
+    }
+    cursor = c.range_end
+  }
+  result += escapeHtml(plain.slice(cursor))
+  return { __html: result.replace(/\n/g, '<br/>') }
+}
+
+/* ── Editor ──────────────────────────────────────────────────── */
+function RichEditor({ onSubmit, initial = '', sending, buttonLabel = 'Entregar', buttonClassName }: {
+  onSubmit: (html: string) => void; initial?: string; sending: boolean;
+  buttonLabel?: string; buttonClassName?: string
 }) {
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Placeholder.configure({ placeholder: 'Escribe tu entrega aquí…' }),
-    ],
+    extensions: [StarterKit, Placeholder.configure({ placeholder: 'Escribe tu entrega aquí…' })],
     content: initial,
-    editorProps: {
-  attributes: { class: styles.editorContent ?? '' },
-},
-  })
+    editorProps: { attributes: { class: s.editorContent ?? '' } },
+  }, [initial])
 
   if (!editor) return null
-
   return (
-    <div>
-      <div className={styles.editorWrap}>
-        <div className={styles.editorToolbar}>
-          <button
-            type="button"
-            className={[styles.toolbarBtn, editor.isActive('bold') ? styles.toolbarBtnActive : ''].join(' ')}
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            title="Negrita"
-          >
-            <strong>N</strong>
-          </button>
-          <button
-            type="button"
-            className={[styles.toolbarBtn, editor.isActive('italic') ? styles.toolbarBtnActive : ''].join(' ')}
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            title="Cursiva"
-          >
-            <em>I</em>
-          </button>
-          <button
-            type="button"
-            className={[styles.toolbarBtn, editor.isActive('bulletList') ? styles.toolbarBtnActive : ''].join(' ')}
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            title="Lista"
-          >
-            •
-          </button>
-          <button
-            type="button"
-            className={[styles.toolbarBtn, editor.isActive('orderedList') ? styles.toolbarBtnActive : ''].join(' ')}
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            title="Lista numerada"
-          >
-            1.
-          </button>
+    <>
+      <div className={s.editorWrap}>
+        <div className={s.editorToolbar}>
+          <button type="button" className={`${s.toolbarBtn} ${editor.isActive('bold') ? s.toolbarBtnActive : ''}`}
+            onClick={() => editor.chain().focus().toggleBold().run()} title="Negrita"><strong>N</strong></button>
+          <button type="button" className={`${s.toolbarBtn} ${editor.isActive('italic') ? s.toolbarBtnActive : ''}`}
+            onClick={() => editor.chain().focus().toggleItalic().run()} title="Cursiva"><em>I</em></button>
+          <button type="button" className={`${s.toolbarBtn} ${editor.isActive('bulletList') ? s.toolbarBtnActive : ''}`}
+            onClick={() => editor.chain().focus().toggleBulletList().run()} title="Lista">•</button>
+          <button type="button" className={`${s.toolbarBtn} ${editor.isActive('orderedList') ? s.toolbarBtnActive : ''}`}
+            onClick={() => editor.chain().focus().toggleOrderedList().run()} title="Lista numerada">1.</button>
         </div>
         <EditorContent editor={editor} />
       </div>
-      <div className={styles.taskActions} style={{ marginTop: '0.6rem' }}>
-        <button
-          className={styles.btnEntregar}
-          onClick={() => onSubmit(editor.getHTML())}
-          disabled={sending || editor.isEmpty}
-        >
-          {sending
-            ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
-            : <Send size={14} />
-          }
-          {sending ? 'Enviando…' : 'Entregar'}
+      <div className={s.editorActions}>
+        <button className={buttonClassName ?? s.btnEntregar}
+          onClick={() => onSubmit(editor.getHTML())} disabled={sending || editor.isEmpty}>
+          {sending ? <Loader2 size={15} className={s.spinner} /> : <Send size={15} />}
+          {sending ? 'Enviando…' : buttonLabel}
         </button>
       </div>
+    </>
+  )
+}
+
+/* ── Summary ─────────────────────────────────────────────────── */
+function AnnotationsSummary({ comments }: { comments: InlineComment[] }) {
+  if (comments.length === 0) return null
+  const c = comments.filter(x => x.comment_type === 'correction').length
+  const su = comments.filter(x => x.comment_type === 'suggestion').length
+  const p = comments.filter(x => x.comment_type === 'positive').length
+  return (
+    <div className={s.annotationsSummary}>
+      <MessageSquare size={12} />
+      <span>{comments.length} anotacion{comments.length !== 1 ? 'es' : ''}</span>
+      {c > 0 && <><span className={`${s.annotationDot} ${s.annotationDotCorrection}`} /><span>{c}</span></>}
+      {su > 0 && <><span className={`${s.annotationDot} ${s.annotationDotSuggestion}`} /><span>{su}</span></>}
+      {p > 0 && <><span className={`${s.annotationDot} ${s.annotationDotPositive}`} /><span>{p}</span></>}
+      <span>— Pulsa en el texto resaltado</span>
     </div>
   )
 }
 
-/* ── Card de tarea ───────────────────────────────────────────────── */
-function TaskCard({
-  assignment,
-  currentUser,
-  getSubmission,
-  entregar,
-}: {
-  assignment:   Assignment
-  currentUser:  CurrentUser | null
-  getSubmission: (id: string) => ReturnType<ReturnType<typeof useTareasAlumno>['getSubmission']>
-  entregar:     (id: string, body: string) => Promise<{ ok?: boolean; error?: string }>
+/* ── Card ────────────────────────────────────────────────────── */
+function TaskCard({ assignment, currentUser, getSubmission, entregar, loadComments }: {
+  assignment: Assignment; currentUser: CurrentUser | null
+  getSubmission: (id: string) => Submission | null
+  entregar: (id: string, body: string) => Promise<{ ok?: boolean; error?: string }>
+  loadComments: (id: string) => Promise<InlineComment[]>
 }) {
-  const [open,     setOpen]     = useState(false)
-  const [editing,  setEditing]  = useState(false)
-  const [sending,  setSending]  = useState(false)
-  const [feedback, setFeedback] = useState<{ msg: string; ok: boolean } | null>(null)
+  const [open, setOpen]         = useState(false)
+  const [editing, setEditing]   = useState(false)
+  const [sending, setSending]   = useState(false)
+  const [fb, setFb]             = useState<{ msg: string; ok: boolean } | null>(null)
+  const [comments, setComments] = useState<InlineComment[]>([])
+  const [loaded, setLoaded]     = useState(false)
+  const [active, setActive]     = useState<string | null>(null)
 
   const submission = getSubmission(assignment.id)
   const overdue    = isOverdue(assignment.due_date)
-  const status     = submission?.status ?? (overdue ? 'vencida' : 'pendiente')
 
-  const cardClass = [
-    styles.taskCard,
-    status === 'pendiente' || status === 'vencida'
-      ? overdue ? styles.taskCardOverdue : styles.taskCardPending
-      : status === 'entregada' ? styles.taskCardDone
-      : styles.taskCardCorrected,
-  ].join(' ')
+  useEffect(() => {
+    if (open && submission && (submission.status === 'corregida' || submission.status === 'revision') && !loaded)
+      loadComments(submission.id).then(d => { setComments(d); setLoaded(true) })
+  }, [open, submission, loaded, loadComments])
 
-  const mostrarFeedback = (msg: string, ok: boolean) => {
-    setFeedback({ msg, ok })
-    setTimeout(() => setFeedback(null), 3000)
-  }
+  const handleBodyClick = useCallback((e: React.MouseEvent) => {
+    const id = (e.target as HTMLElement).closest('[data-comment-id]')?.getAttribute('data-comment-id')
+    setActive(prev => id ? (prev === id ? null : id) : null)
+  }, [])
+
+  const showFb = (msg: string, ok: boolean) => { setFb({ msg, ok }); setTimeout(() => setFb(null), 3000) }
 
   const handleEntregar = async (html: string) => {
     setSending(true)
-    const result = await entregar(assignment.id, html)
+    const res = await entregar(assignment.id, html)
     setSending(false)
-    if (result.error) return mostrarFeedback('Error al entregar', false)
-    mostrarFeedback('¡Entregado correctamente!', true)
-    setEditing(false)
+    if (res.error) return showFb('Error al entregar', false)
+    showFb(submission?.status === 'revision' ? '¡Re-entregado!' : '¡Entregado!', true)
+    setEditing(false); setLoaded(false)
   }
 
-  const BadgeContent = () => {
-    if (submission?.status === 'corregida')
-      return <><CheckCircle2 size={10} /> Corregida</>
-    if (submission?.status === 'entregada')
-      return <><Clock size={10} /> Entregada</>
-    if (overdue)
-      return <><AlertCircle size={10} /> Vencida</>
-    return <><Clock size={10} /> Pendiente</>
-  }
-
-  const badgeClass = submission?.status === 'corregida' ? styles.badgeCorrected
-    : submission?.status === 'entregada' ? styles.badgeDone
-    : overdue ? styles.badgeOverdue
-    : styles.badgePending
+  const gradeBadge = submission?.grade != null ? getGradeBadge(submission.grade) : null
 
   return (
-    <div className={cardClass}>
-      <div className={styles.taskHeader} onClick={() => setOpen(o => !o)}>
-        <div className={styles.taskHeaderLeft}>
-          <p className={styles.taskTitle}>{assignment.title}</p>
-          <div className={styles.taskMeta}>
+    <div className={s.taskCard}>
+      <div className={s.taskHeader} onClick={() => setOpen(o => !o)}>
+        <div className={s.taskHeaderLeft}>
+          <p className={s.taskTitle}>{assignment.title}</p>
+          <div className={s.taskMeta}>
             <span>Entrega: {fmtFecha(assignment.due_date)}</span>
-            <span className={styles.metaDot} />
-            <span style={{ color: overdue && !submission ? '#DC2626' : 'inherit' }}>
+            <span className={s.metaDot} />
+            <span className={overdue && !submission ? s.taskMetaOverdue : undefined}>
               {diasRestantes(assignment.due_date)}
             </span>
-            {assignment.creator && (
-              <>
-                <span className={styles.metaDot} />
-                <span>{assignment.creator.username}</span>
-              </>
-            )}
+            {assignment.creator && <><span className={s.metaDot} /><span>{assignment.creator.username}</span></>}
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span className={[styles.badge, badgeClass].join(' ')}>
-            <BadgeContent />
-          </span>
-          {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        <div className={s.taskHeaderRight}>
+          {submission?.status === 'revision'
+            ? <span className={`${s.badge} ${s.badgeRevision}`}><RefreshCw size={10} /> Revisión</span>
+            : submission?.status === 'corregida'
+            ? <span className={`${s.badge} ${s.badgeCorrected}`}><CheckCircle2 size={10} /> Corregida</span>
+            : submission?.status === 'entregada'
+            ? <span className={`${s.badge} ${s.badgeDone}`}><Clock size={10} /> Entregada</span>
+            : overdue
+            ? <span className={`${s.badge} ${s.badgeOverdue}`}><AlertCircle size={10} /> Vencida</span>
+            : <span className={`${s.badge} ${s.badgePending}`}><Clock size={10} /> Pendiente</span>
+          }
+          {open ? <ChevronUp size={16} className={s.chevron} /> : <ChevronDown size={16} className={s.chevron} />}
         </div>
       </div>
 
-      <p className={styles.taskDesc}>{assignment.description}</p>
+      <p className={s.taskDesc}>{assignment.description}</p>
 
       {open && (
-        <div className={styles.taskBody}>
-          <span className={styles.submissionLabel}>Tu entrega</span>
-
-          {/* Sin entrega todavía */}
-          {!submission && !editing && (
-            <RichEditor onSubmit={handleEntregar} sending={sending} />
+        <div className={s.taskBody}>
+          {/* Revision banner */}
+          {submission?.status === 'revision' && !editing && (
+            <div className={s.revisionBanner}>
+              <div className={s.revisionBannerIcon}><RefreshCw size={13} /></div>
+              <div className={s.revisionBannerContent}>
+                <p className={s.revisionBannerTitle}>Tu profesor te pide una revisión</p>
+                <p className={s.revisionBannerText}>
+                  {submission.feedback ?? 'Revisa los comentarios y vuelve a entregar.'}
+                </p>
+              </div>
+            </div>
           )}
 
-          {/* Entregada — mostrar texto */}
+          {/* Grade */}
+          {submission?.status === 'corregida' && submission.grade != null && (
+            <div className={s.gradeDisplay}>
+              <span className={s.gradeNumber}>{submission.grade}</span>
+              <span className={s.gradeMax}>/ 10</span>
+              {gradeBadge && (
+                <span className={`${s.gradeBadge} ${
+                  gradeBadge === 'suspenso' ? s.gradeSuspenso : gradeBadge === 'aprobado' ? s.gradeAprobado
+                  : gradeBadge === 'notable' ? s.gradeNotable : s.gradeSobresaliente
+                }`}>{getGradeBadgeLabel(gradeBadge)}</span>
+              )}
+            </div>
+          )}
+
+          {/* Who corrected */}
+          {(submission?.status === 'corregida' || submission?.status === 'revision') && submission.corrected_at && (
+            <div className={s.correctionMeta}>
+              <div className={s.correctionMetaIcon}><User size={12} /></div>
+              <span>Corregido por <strong>{submission.corrector?.username ?? 'Profesor'}</strong></span>
+              <span>·</span>
+              <span>{fmtFechaHora(submission.corrected_at)}</span>
+            </div>
+          )}
+
+          {loaded && <AnnotationsSummary comments={comments} />}
+
+          <span className={s.submissionLabel}>Tu entrega</span>
+
+          {/* No submission — editor */}
+          {!submission && <RichEditor onSubmit={handleEntregar} sending={sending} />}
+
+          {/* Submitted — view */}
           {submission && !editing && (
             <>
-              <div
-                className={styles.submissionView}
-                dangerouslySetInnerHTML={{ __html: submission.body }}
-              />
+              <div className={s.submissionView}
+                dangerouslySetInnerHTML={loaded && comments.length > 0
+                  ? renderWithHighlights(submission.body, comments, active) : { __html: submission.body }}
+                onClick={handleBodyClick} />
+
               {submission.status === 'corregida' && submission.feedback && (
-                <div className={styles.feedbackBubble}>
-                  <p className={styles.feedbackLabel}>Comentario del profesor</p>
-                  <p className={styles.feedbackText}>{submission.feedback}</p>
+                <div className={s.feedbackBubble}>
+                  <p className={s.feedbackLabel}>Comentario general del profesor</p>
+                  <div className={`${s.feedbackText} ${s.feedbackHtml}`}
+                    dangerouslySetInnerHTML={{ __html: submission.feedback }} />
                 </div>
               )}
+
               {submission.status === 'entregada' && (
-                <div className={styles.taskActions}>
-                  <button className={styles.btnEditar} onClick={() => setEditing(true)}>
+                <div className={s.taskActions}>
+                  <button className={s.btnEditar} onClick={() => setEditing(true)}>
                     <Edit3 size={13} /> Editar entrega
+                  </button>
+                </div>
+              )}
+              {submission.status === 'revision' && (
+                <div className={s.taskActions}>
+                  <button className={s.btnReentregar} onClick={() => setEditing(true)}>
+                    <RefreshCw size={13} /> Corregir y re-entregar
                   </button>
                 </div>
               )}
             </>
           )}
 
-          {/* Editando entrega existente */}
+          {/* Editing */}
           {submission && editing && (
-            <RichEditor
-              onSubmit={handleEntregar}
-              initial={submission.body}
-              sending={sending}
-            />
+            <RichEditor onSubmit={handleEntregar} initial={submission.body} sending={sending}
+              buttonLabel={submission.status === 'revision' ? 'Re-entregar' : 'Actualizar'}
+              buttonClassName={submission.status === 'revision' ? s.btnReentregar : undefined} />
           )}
 
-          {feedback && (
-            <div className={[
-              styles.inlineFeedback,
-              feedback.ok ? styles.inlineFeedbackOk : styles.inlineFeedbackError,
-            ].join(' ')}>
-              {feedback.ok ? <CheckCircle2 size={13} /> : <AlertCircle size={13} />}
-              {feedback.msg}
+          {fb && (
+            <div className={`${s.inlineFeedback} ${fb.ok ? s.inlineFeedbackOk : s.inlineFeedbackError}`}>
+              {fb.ok ? <CheckCircle2 size={13} /> : <AlertCircle size={13} />} {fb.msg}
             </div>
           )}
         </div>
@@ -257,86 +292,54 @@ function TaskCard({
   )
 }
 
-/* ── Página principal ────────────────────────────────────────────── */
+/* ── Página ──────────────────────────────────────────────────── */
 export default function TareasPage({ currentUser }: Props) {
-  const { assignments, loading, error, getSubmission, entregar } = useTareasAlumno(currentUser)
+  const { assignments, loading, error, getSubmission, entregar, loadComments } = useTareasAlumno(currentUser)
   const [filter, setFilter] = useState<Filter>('todas')
 
-  const filtered = assignments.filter(a => {
-    if (filter === 'todas') return true
-    const sub     = getSubmission(a.id)
-    const overdue = isOverdue(a.due_date)
-    if (filter === 'pendiente')  return !sub && !overdue
-    if (filter === 'entregada')  return sub?.status === 'entregada'
-    if (filter === 'corregida')  return sub?.status === 'corregida'
-    return true
-  })
-
-  const counts = {
-    pendiente: assignments.filter(a => !getSubmission(a.id) && !isOverdue(a.due_date)).length,
-    entregada: assignments.filter(a => getSubmission(a.id)?.status === 'entregada').length,
-    corregida: assignments.filter(a => getSubmission(a.id)?.status === 'corregida').length,
+  const getStatus = (a: Assignment) => {
+    const sub = getSubmission(a.id)
+    return sub?.status ?? 'pendiente'
   }
 
+  const filtered = assignments.filter(a => filter === 'todas' || getStatus(a) === filter)
+  const counts = { pendiente: 0, entregada: 0, corregida: 0, revision: 0 }
+  assignments.forEach(a => { const st = getStatus(a); if (st in counts) counts[st as keyof typeof counts]++ })
+
   const FILTERS: { id: Filter; label: string }[] = [
-    { id: 'todas',     label: `Todas (${assignments.length})`        },
-    { id: 'pendiente', label: `Pendientes (${counts.pendiente})`     },
-    { id: 'entregada', label: `Entregadas (${counts.entregada})`     },
-    { id: 'corregida', label: `Corregidas (${counts.corregida})`     },
+    { id: 'todas', label: `Todas (${assignments.length})` },
+    { id: 'pendiente', label: `Pendientes (${counts.pendiente})` },
+    { id: 'entregada', label: `Entregadas (${counts.entregada})` },
+    { id: 'corregida', label: `Corregidas (${counts.corregida})` },
+    ...(counts.revision > 0 ? [{ id: 'revision' as Filter, label: `Revisión (${counts.revision})` }] : []),
   ]
 
   return (
-    <div className={styles.page}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Tareas</h1>
-        <p className={styles.subtitle}>Tus tareas y entregas</p>
+    <div className={s.page}>
+      <div className={s.header}>
+        <h1 className={s.title}>Tareas</h1>
+        <p className={s.subtitle}>Tus tareas y entregas</p>
       </div>
-
-      {error && (
-        <div className={styles.inlineFeedback} style={{ marginBottom: '1rem' }}>
-          <AlertCircle size={14} /> {error}
-        </div>
-      )}
-
-      <div className={styles.filters}>
+      {error && <div className={s.inlineFeedback}><AlertCircle size={14} /> {error}</div>}
+      <div className={s.filters}>
         {FILTERS.map(f => (
-          <button
-            key={f.id}
-            className={[styles.filterBtn, filter === f.id ? styles.filterBtnActive : ''].join(' ')}
-            onClick={() => setFilter(f.id)}
-          >
-            {f.label}
-          </button>
+          <button key={f.id} className={`${s.filterBtn} ${filter === f.id ? s.filterBtnActive : ''}`}
+            onClick={() => setFilter(f.id)}>{f.label}</button>
         ))}
       </div>
-
       {loading ? (
-        <div className={styles.loading}>
-          <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
-          Cargando tareas…
-        </div>
+        <div className={s.loading}><Loader2 size={18} className={s.spinner} /> Cargando tareas…</div>
       ) : filtered.length === 0 ? (
-        <div className={styles.empty}>
-          <ClipboardList size={32} className={styles.emptyIcon} />
-          <p className={styles.emptyTitle}>
-            {filter === 'todas' ? 'Sin tareas todavía' : `Sin tareas ${filter}s`}
-          </p>
-          <p className={styles.emptySub}>
-            {filter === 'todas'
-              ? 'Tu profesor publicará tareas aquí'
-              : 'Cambia el filtro para ver otras tareas'}
-          </p>
+        <div className={s.empty}>
+          <ClipboardList size={36} className={s.emptyIcon} />
+          <p className={s.emptyTitle}>{filter === 'todas' ? 'Sin tareas todavía' : 'Sin tareas en este filtro'}</p>
+          <p className={s.emptySub}>{filter === 'todas' ? 'Tu profesor publicará tareas aquí' : 'Prueba otro filtro'}</p>
         </div>
       ) : (
-        <div className={styles.list}>
+        <div className={s.list}>
           {filtered.map(a => (
-            <TaskCard
-              key={a.id}
-              assignment={a}
-              currentUser={currentUser}
-              getSubmission={getSubmission}
-              entregar={entregar}
-            />
+            <TaskCard key={a.id} assignment={a} currentUser={currentUser}
+              getSubmission={getSubmission} entregar={entregar} loadComments={loadComments} />
           ))}
         </div>
       )}

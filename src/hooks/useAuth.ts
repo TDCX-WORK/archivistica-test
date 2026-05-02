@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+import { insertNotification } from '../lib/notifications'
 import type { CurrentUser } from '../types'
 
 const EDGE_RESET_PASSWORD = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-password`
@@ -15,25 +16,24 @@ async function generateLoginNotifications(userId: string, accessUntil: string | 
       .lte('next_review', today)
 
     if ((pendientes ?? 0) > 0) {
-      // El índice único en BD evita duplicados automáticamente
-      await supabase.from('notifications').insert({
+      await insertNotification({
         user_id: userId,
         type:    'repaso_pendiente',
         title:   `Tienes ${pendientes} pregunta${pendientes !== 1 ? 's' : ''} pendiente${pendientes !== 1 ? 's' : ''} de repasar`,
         body:    'Tu sesion de repaso espaciado esta lista. Dedica unos minutos antes de estudiar temario nuevo.',
-        link:    '/',
+        link:    '/estudio',
       })
     }
 
     if (accessUntil) {
       const diasRestantes = Math.ceil((new Date(accessUntil).getTime() - new Date().getTime()) / 86400000)
       if (diasRestantes > 0 && diasRestantes <= 7) {
-        await supabase.from('notifications').insert({
+        await insertNotification({
           user_id: userId,
           type:    'acceso_expira',
           title:   `Tu acceso expira en ${diasRestantes} dia${diasRestantes !== 1 ? 's' : ''}`,
           body:    'Contacta con tu profesor para renovar el acceso antes de que expire.',
-          link:    '/',
+          link:    '/perfil',
         })
       }
     }
@@ -263,7 +263,7 @@ export function useAuth() {
     const uname = cleanUsername
     try {
       if (codeData.created_by) {
-        await supabase.from('notifications').insert({
+        await insertNotification({
           user_id: codeData.created_by,
           type:    'nuevo_alumno',
           title:   `Nuevo alumno: ${uname}`,
@@ -282,7 +282,7 @@ export function useAuth() {
         .maybeSingle()
 
       if (director) {
-        await supabase.from('notifications').insert({
+        await insertNotification({
           user_id: director.id,
           type:    'nuevo_alumno',
           title:   `Nuevo alumno en tu academia: ${uname}`,

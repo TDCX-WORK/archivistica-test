@@ -6,24 +6,14 @@ import {
   BarChart2, Zap, AlertTriangle, RefreshCw,
   ChevronDown, ChevronUp, Calendar, Clock, TrendingUp,
   Mail, Trash2, Lock, Eye, EyeOff, PauseCircle, PlayCircle,
-  Edit3, Check, X, Shield, Phone, MapPin, Target, Euro, User
+  Edit3, Check, X, Shield, Phone, MapPin, Target, Euro, User,
+  Key, Copy, CheckCircle2
 } from 'lucide-react'
 import styles from './AcademiaDetalle.module.css'
+import { scoreColor, fmt } from '../../lib/helpers'
+import type { InviteCode } from '../../types'
 
 const EDGE_USUARIO = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gestionar-usuario`
-
-function formatFecha(iso: string | null | undefined): string {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
-function scoreColor(s: number | null | undefined): string {
-  if (s == null) return '#6B7280'
-  if (s >= 80) return '#22C55E'
-  if (s >= 60) return '#0EA5E9'
-  if (s >= 40) return '#F59E0B'
-  return '#EF4444'
-}
 
 // ── Count-up ───────────────────────────────────────────────────────────────
 function useCountUp(target: number | null, duration = 900) {
@@ -272,8 +262,8 @@ function UsuarioRow({ user, sesiones, emails, extended, expanded, onToggle, onRe
                     <div className={styles.userCard2Stat}><Zap size={12} /><span>{userSessions.length} sesiones</span></div>
                     <div className={styles.userCard2Stat}><BarChart2 size={12} /><span>Nota: {notaMedia !== null ? `${notaMedia}%` : '—'}</span></div>
                     <div className={styles.userCard2Stat}><Clock size={12} /><span>{diasInactivo === null ? 'Sin actividad' : diasInactivo === 0 ? 'Activo hoy' : `Hace ${diasInactivo}d`}</span></div>
-                    <div className={styles.userCard2Stat}><Shield size={12} /><span>Hasta: {formatFecha(user.access_until)}</span></div>
-                    <div className={styles.userCard2Stat}><Calendar size={12} /><span>Alta: {formatFecha(user.created_at)}</span></div>
+                    <div className={styles.userCard2Stat}><Shield size={12} /><span>Hasta: {fmt(user.access_until)}</span></div>
+                    <div className={styles.userCard2Stat}><Calendar size={12} /><span>Alta: {fmt(user.created_at)}</span></div>
                     {email && <div className={styles.userCard2Stat}><Mail size={12} /><a href={`mailto:${email}`} style={{ color:'var(--ink-muted)', textDecoration:'none' }} onClick={e => e.stopPropagation()}>{email}</a></div>}
                   </>}
 
@@ -302,7 +292,7 @@ function UsuarioRow({ user, sesiones, emails, extended, expanded, onToggle, onRe
 
                   {!isAlumno && <>
                     <div className={styles.userCard2Stat}><Shield   size={12} /><span style={{ textTransform:'capitalize' }}>Rol: {user.role}</span></div>
-                    <div className={styles.userCard2Stat}><Calendar size={12} /><span>Alta: {formatFecha(user.created_at)}</span></div>
+                    <div className={styles.userCard2Stat}><Calendar size={12} /><span>Alta: {fmt(user.created_at)}</span></div>
                     {email
                       ? <div className={styles.userCard2Stat}><Mail size={12} /><a href={`mailto:${email}`} style={{ color:'var(--ink-muted)', textDecoration:'none' }} onClick={e => e.stopPropagation()}>{email}</a></div>
                       : <div className={styles.userCard2Stat} style={{ opacity:0.5 }}><Mail size={12} /><span>Sin email</span></div>
@@ -410,19 +400,22 @@ export default function AcademiaDetalle({ academia, onBack }: { academia: any; o
   const [sesiones,         setSesiones]         = useState<Sesion[]>([])
   const [emails,           setEmails]           = useState<Record<string, string>>({})
   const [extendedProfiles, setExtendedProfiles] = useState<Record<string, any>>({})
+  const [codes,            setCodes]            = useState<InviteCode[]>([])
   const [loading,          setLoading]          = useState(true)
   const [expandedDir,      setExpandedDir]      = useState<string | null>(null)
 
   const load = async () => {
     if (!academia?.id) return
     setLoading(true)
-    const [{ data: profs }, { data: sess }, { data: emailData }] = await Promise.all([
+    const [{ data: profs }, { data: sess }, { data: emailData }, { data: codesData }] = await Promise.all([
       supabase.from('profiles').select('id, username, role, subject_id, created_at, access_until').eq('academy_id', academia.id),
       supabase.from('sessions').select('id, user_id, subject_id, score, played_at').eq('academy_id', academia.id).order('played_at', { ascending: false }),
       supabase.rpc('get_academy_user_emails', { p_academy_id: academia.id }),
+      supabase.from('invite_codes').select('*').eq('academy_id', academia.id).order('created_at', { ascending: false }),
     ])
     setProfiles((profs ?? []) as Profile[])
     setSesiones((sess  ?? []) as Sesion[])
+    setCodes((codesData ?? []) as InviteCode[])
     const emailMap: Record<string, string> = {}
     for (const row of (emailData ?? []) as any[]) emailMap[row.user_id] = row.email
     setEmails(emailMap)
@@ -565,6 +558,63 @@ export default function AcademiaDetalle({ academia, onBack }: { academia: any; o
                   {academia.subjects.map((sub: Subject) => (
                     <SubjectSection key={sub.id} subject={sub} profiles={profiles} sesiones={sesiones} emails={emails} extendedProfiles={extendedProfiles} onReload={load} />
                   ))}
+                </div>
+              )}
+            </motion.div>
+
+            <motion.div className={styles.section2} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+              <div className={styles.sectionHeader2}>
+                <Key size={14} />
+                <h2 className={styles.sectionTitle2}>Códigos de invitación</h2>
+                <span className={styles.codesCount}>{codes.length}</span>
+              </div>
+              {codes.length === 0 ? (
+                <p className={styles.empty2}>No se han generado códigos para esta academia</p>
+              ) : (
+                <div className={styles.codesGrid}>
+                  {codes.map(c => {
+                    const now = new Date()
+                    const expired = new Date(c.expires_at) < now
+                    const used = !!c.used_by
+                    const status = used ? 'used' : expired ? 'expired' : 'active'
+                    const usedByProfile = used ? profiles.find(p => p.id === c.used_by) : null
+                    const createdByProfile = c.created_by ? profiles.find(p => p.id === c.created_by) : null
+                    const subject = academia.subjects?.find((s: Subject) => s.id === c.subject_id)
+
+                    return (
+                      <div key={c.id} className={[
+                        styles.codeCard,
+                        status === 'used' ? styles.codeUsed : '',
+                        status === 'expired' ? styles.codeExpired : '',
+                        status === 'active' ? styles.codeActive : '',
+                      ].join(' ')}>
+                        <div className={styles.codeHeader}>
+                          <code className={styles.codeValue}>{c.code}</code>
+                          <span className={[
+                            styles.codeBadge,
+                            status === 'used' ? styles.codeBadgeUsed : '',
+                            status === 'expired' ? styles.codeBadgeExpired : '',
+                            status === 'active' ? styles.codeBadgeActive : '',
+                          ].join(' ')}>
+                            {status === 'used' ? 'Usado' : status === 'expired' ? 'Expirado' : 'Activo'}
+                          </span>
+                        </div>
+                        <div className={styles.codeMeta}>
+                          {subject && <span className={styles.codeSubject}>{subject.name}</span>}
+                          <span className={styles.codeDetail}>{c.access_months} mes{c.access_months !== 1 ? 'es' : ''} de acceso</span>
+                          <span className={styles.codeDetail}>Creado: {fmt(c.created_at)}</span>
+                          {createdByProfile && <span className={styles.codeDetail}>Por: {createdByProfile.username}</span>}
+                          <span className={styles.codeDetail}>Expira: {fmt(c.expires_at)}</span>
+                          {used && usedByProfile && (
+                            <span className={styles.codeUsedBy}>
+                              <CheckCircle2 size={11} /> Usado por {usedByProfile.username}
+                              {c.used_at ? ` el ${fmt(c.used_at)}` : ''}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </motion.div>

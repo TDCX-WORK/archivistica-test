@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { insertNotification } from '../lib/notifications'
 import type { Notification } from '../types'
 
 export function useNotifications(userId: string | null | undefined) {
@@ -101,7 +102,7 @@ export function useNotifications(userId: string | null | undefined) {
     body?:        string | null
     link?:        string | null
   }) => {
-    await supabase.from('notifications').insert({
+    await insertNotification({
       user_id: targetUserId,
       type,
       title,

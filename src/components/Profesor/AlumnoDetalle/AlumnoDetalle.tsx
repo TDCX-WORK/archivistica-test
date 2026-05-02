@@ -7,27 +7,10 @@ import {
   User, Clock, Flame
 } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
+import { scoreColor, scoreLabel, fmt } from '../../../lib/helpers'
 import type { AlumnoConStats } from '../../../types'
 import styles from './AlumnoDetalle.module.css'
 
-function formatFecha(iso: string | null | undefined): string {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-function scoreColor(s: number | null | undefined): string {
-  if (s == null) return '#6B7280'
-  if (s >= 80) return '#059669'
-  if (s >= 60) return '#0891B2'
-  if (s >= 40) return '#B45309'
-  return '#DC2626'
-}
-function scoreLabel(s: number | null | undefined): string {
-  if (s == null) return 'Sin datos'
-  if (s >= 80) return 'Sobresaliente'
-  if (s >= 60) return 'Notable'
-  if (s >= 40) return 'Mejorable'
-  return 'Necesita refuerzo'
-}
 
 function DonutMini({ pct, color, size = 110, stroke = 11 }: { pct: number; color: string; size?: number; stroke?: number }) {
   const r    = (size - stroke) / 2
@@ -127,7 +110,7 @@ function FalloItem({ fallo, rank }: { fallo: FalloConPregunta; rank: number }) {
           )}
 
           <p className={styles.falloMeta}>
-            Próximo repaso: <strong>{formatFecha(fallo.next_review)}</strong>
+            Próximo repaso: <strong>{fmt(fallo.next_review)}</strong>
           </p>
         </div>
       )}
@@ -178,7 +161,7 @@ function generateInformePDF(
   }).join('')
 
   const sesTrs = sesiones.slice(0, 12).map(s =>
-    `<tr><td>${formatFecha(s.played_at ?? s.created_at)}</td><td style="color:${scoreColor(s.score)};font-weight:700">${s.score}%</td><td>${s.total ?? '—'}</td></tr>`
+    `<tr><td>${fmt(s.played_at ?? s.created_at)}</td><td style="color:${scoreColor(s.score)};font-weight:700">${s.score}%</td><td>${s.total ?? '—'}</td></tr>`
   ).join('')
 
   const falloTrs = fallos.slice(0, 8).map((f, i) =>
@@ -200,7 +183,7 @@ function generateInformePDF(
     .chart{background:#F9FAFB;border-radius:8px;padding:14px 18px;border:1px solid #E5E7EB;margin-bottom:22px}
     footer{margin-top:32px;padding-top:14px;border-top:1px solid #E5E7EB;display:flex;justify-content:space-between;font-size:10px;color:#6B7280}
   </style></head><body>
-  <div class="hdr"><div><h1 style="font-size:22px;font-weight:800">Informe de progreso</h1><p style="font-size:15px;font-weight:700;margin-top:6px">${alumno.username}</p><p style="font-size:12px;color:#6B7280">Acceso hasta: ${formatFecha(alumno.accessUntil ?? null)}</p></div><div style="text-align:right"><p style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.08em;color:#6B7280">FrostFox Academy</p><p style="font-size:11px;color:#6B7280;margin-top:4px">Generado el ${now}</p></div></div>
+  <div class="hdr"><div><h1 style="font-size:22px;font-weight:800">Informe de progreso</h1><p style="font-size:15px;font-weight:700;margin-top:6px">${alumno.username}</p><p style="font-size:12px;color:#6B7280">Acceso hasta: ${fmt(alumno.accessUntil ?? null)}</p></div><div style="text-align:right"><p style="font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.08em;color:#6B7280">FrostFox Academy</p><p style="font-size:11px;color:#6B7280;margin-top:4px">Generado el ${now}</p></div></div>
   <div class="nota"><div class="nota-num" style="color:${notaColor}">${alumno.notaMedia ?? '—'}${alumno.notaMedia !== null ? '%' : ''}</div><div><h3 style="font-size:16px;font-weight:700">${scoreLabel(alumno.notaMedia)}</h3><p style="font-size:12px;color:#6B7280;margin-top:4px">${sesiones.length} sesiones · Racha: ${alumno.racha} días</p></div></div>
   <div class="kpis"><div class="kpi"><b style="color:#7C3AED">${alumno.notaMedia ?? '—'}${alumno.notaMedia !== null ? '%' : ''}</b><span>Nota media</span></div><div class="kpi"><b style="color:#059669">${sesiones.length}</b><span>Sesiones</span></div><div class="kpi"><b style="color:#0891B2">${temasLeidos.length}</b><span>Temas leídos</span></div><div class="kpi"><b style="color:#DC2626">${fallos.length}</b><span>Fallos</span></div><div class="kpi"><b style="color:#D97706">${alumno.racha}d</b><span>Racha</span></div></div>
   ${ultimas.length > 0 ? `<div class="sec">Evolución de nota</div><div class="chart"><svg viewBox="0 0 ${Math.max(ultimas.length*(barW+barGap), 100)} ${chartH+20}" width="100%" height="${chartH+20}">${barsSVG}</svg></div>` : ''}
@@ -276,7 +259,7 @@ export default function AlumnoDetalle({ alumno, onBack, academyId }: AlumnoDetal
     setMsgSending(true)
     await supabase.from('notifications').insert({
       user_id: alumno.id, type: 'mensaje_profesor',
-      title: 'Mensaje de tu profesor', body: msgTexto.trim(), link: '/',
+      title: 'Mensaje de tu profesor', body: msgTexto.trim(), link: '/mensajes',
     })
     setMsgSending(false)
     setMsgSent(true)
@@ -352,7 +335,7 @@ export default function AlumnoDetalle({ alumno, onBack, academyId }: AlumnoDetal
               <h3 className={styles.cardTitle}>Información</h3>
               <div className={styles.infoList}>
                 <div className={styles.infoRow}><User     size={13} className={styles.infoIcon} /><span className={styles.infoLabel}>Usuario</span><span className={styles.infoVal}>{alumno.username}</span></div>
-                <div className={styles.infoRow}><Shield   size={13} className={styles.infoIcon} /><span className={styles.infoLabel}>Acceso hasta</span><span className={styles.infoVal}>{formatFecha(alumno.accessUntil ?? null) || 'Sin límite'}</span></div>
+                <div className={styles.infoRow}><Shield   size={13} className={styles.infoIcon} /><span className={styles.infoLabel}>Acceso hasta</span><span className={styles.infoVal}>{fmt(alumno.accessUntil ?? null) || 'Sin límite'}</span></div>
                 <div className={styles.infoRow}><Clock    size={13} className={styles.infoIcon} /><span className={styles.infoLabel}>Última actividad</span><span className={styles.infoVal}>{ultimaActividad}</span></div>
                 <div className={styles.infoRow}><Flame    size={13} className={styles.infoIcon} /><span className={styles.infoLabel}>Racha actual</span><span className={styles.infoVal}>{alumno.racha} día{alumno.racha !== 1 ? 's' : ''}</span></div>
                 {alumno.diasParaExpirar !== null && !alumno.accesoExpirado && (
@@ -398,7 +381,7 @@ export default function AlumnoDetalle({ alumno, onBack, academyId }: AlumnoDetal
                   </div>
                   {sesiones.slice(0, 12).map((s, i) => (
                     <div key={i} className={styles.sesionRow}>
-                      <span>{formatFecha(s.played_at ?? s.created_at)}</span>
+                      <span>{fmt(s.played_at ?? s.created_at)}</span>
                       <span className={styles.sesionNota} style={{ color: scoreColor(s.score) }}>{s.score}%</span>
                       <span>{s.total ?? '—'}</span>
                     </div>

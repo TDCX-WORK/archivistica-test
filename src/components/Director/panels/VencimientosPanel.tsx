@@ -144,8 +144,7 @@ function VencimientosPanel({ profiles, onRenovar }: {
         <div className={styles.vencCardsGrid}>
           {items.map(a => (
             <div key={a.id} className={styles.vencCard} style={{
-              borderLeft: `3px solid ${color}`,
-              boxShadow: urgente ? `0 4px 16px ${color}22` : undefined,
+              boxShadow: `inset 3px 0 8px -4px ${color}${urgente ? ', 0 4px 16px ' + color + '22' : ''}`,
             }}>
               <div className={styles.vencCardHead}>
                 <div className={styles.vencAvatar} style={{background:`${color}15`,color}}>
@@ -215,7 +214,7 @@ function VencimientosPanel({ profiles, onRenovar }: {
           </div>
           <div className={styles.vencCardsGrid}>
             {sin_acceso.map(a => (
-              <div key={a.id} className={styles.vencCard} style={{borderLeft:'3px solid var(--line)'}}>
+              <div key={a.id} className={styles.vencCard} style={{boxShadow:'inset 3px 0 8px -4px var(--line-strong)'}}>
                 <div className={styles.vencCardHead}>
                   <div className={styles.vencAvatar} style={{background:'var(--surface-off)',color:'var(--ink-muted)'}}>
                     {a.username[0]!.toUpperCase()}

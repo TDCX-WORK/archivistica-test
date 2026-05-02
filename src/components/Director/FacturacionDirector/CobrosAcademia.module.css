@@ -251,57 +251,26 @@
 }
 .alumnoCard:hover { transform: translateY(-3px); }
 
-/* Glow animado por estado — versión GPU-friendly.
-   Antes animábamos box-shadow, lo cual obliga a repaint por frame y
-   saturaba el CPU con 16+ cards pulsando a la vez.
-   Ahora animamos la opacity de un pseudo-elemento con la sombra ya aplicada:
-   al ser solo opacity, el navegador lo compone en GPU sin repintar. */
+/* Card alumno — bordes sutiles por estado, sin animación */
 .alumnoCardPaid,
 .alumnoCardPending,
 .alumnoCardOverdue {
   position: relative;
-  isolation: isolate;
 }
 
 .alumnoCardPaid {
-  border: 2px solid rgba(5,150,105,0.45);
-  box-shadow: 0 4px 16px rgba(5,150,105,0.15), 0 1px 3px rgba(0,0,0,0.04);
+  border: 1.5px solid rgba(5,150,105,0.30);
 }
 .alumnoCardPending {
-  border: 2px solid rgba(217,119,6,0.45);
-  box-shadow: 0 4px 16px rgba(217,119,6,0.15), 0 1px 3px rgba(0,0,0,0.04);
+  border: 1.5px solid rgba(217,119,6,0.30);
 }
 .alumnoCardOverdue {
-  border: 2px solid rgba(220,38,38,0.45);
-  box-shadow: 0 4px 16px rgba(220,38,38,0.15), 0 1px 3px rgba(0,0,0,0.04);
+  border: 1.5px solid rgba(220,38,38,0.30);
 }
 
-/* Capa de glow con opacity animada — ésta es la parte que pulsa */
-.alumnoCardPaid::after,
-.alumnoCardPending::after,
-.alumnoCardOverdue::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0;
-  animation: glowPulse 3s ease-in-out infinite;
-  will-change: opacity;
-}
-.alumnoCardPaid::after    { box-shadow: 0 4px 22px rgba(5,150,105,0.35); }
-.alumnoCardPending::after { box-shadow: 0 4px 22px rgba(217,119,6,0.35); }
-.alumnoCardOverdue::after { box-shadow: 0 4px 22px rgba(220,38,38,0.35); }
-
-.alumnoCardPaid:hover    { box-shadow: 0 8px 24px rgba(5,150,105,0.28); }
-.alumnoCardPending:hover { box-shadow: 0 8px 24px rgba(217,119,6,0.28); }
-.alumnoCardOverdue:hover { box-shadow: 0 8px 24px rgba(220,38,38,0.28); }
-
-@keyframes glowPulse {
-  0%, 100% { opacity: 0; }
-  50%      { opacity: 1; }
-}
+.alumnoCardPaid:hover    { box-shadow: 0 4px 12px rgba(5,150,105,0.10); }
+.alumnoCardPending:hover { box-shadow: 0 4px 12px rgba(217,119,6,0.10); }
+.alumnoCardOverdue:hover { box-shadow: 0 4px 12px rgba(220,38,38,0.10); }
 
 .alumnoCardTop {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem;

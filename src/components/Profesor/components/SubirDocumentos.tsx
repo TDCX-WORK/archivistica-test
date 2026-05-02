@@ -5,6 +5,7 @@ import {
   CheckCircle2, AlertCircle
 } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
+import { insertNotification, insertNotifications } from '../../../lib/notifications'
 import type { CurrentUser, AlumnoConStats } from '../../../types'
 import styles from './SubirDocumentos.module.css'
 
@@ -100,6 +101,32 @@ export default function SubirDocumentos({ currentUser, alumnos }: Props) {
       if (dbErr) return mostrarFeedback('Error al guardar el vídeo', false)
       setDocs(prev => [inserted as DocSubido, ...prev])
       setUrlVideo('')
+
+      // Notificar
+      try {
+        const senderName = currentUser.displayName ?? currentUser.username ?? 'Tu profesor'
+        if (destino === 'clase') {
+          const ids = alumnos.map(a => a.id)
+          if (ids.length > 0) {
+            await insertNotifications(ids.map(id => ({
+              user_id: id,
+              type:    'nuevo_documento',
+              title:   `${senderName} ha subido un vídeo`,
+              body:    urlVideo.trim().slice(0, 80),
+              link:    '/documentos',
+            })))
+          }
+        } else {
+          await insertNotification({
+            user_id: destino,
+            type:    'nuevo_documento',
+            title:   `${senderName} te ha compartido un vídeo`,
+            body:    urlVideo.trim().slice(0, 80),
+            link:    '/documentos',
+          })
+        }
+      } catch (_) {}
+
       return mostrarFeedback('Vídeo añadido correctamente', true)
     }
 
@@ -154,6 +181,35 @@ export default function SubirDocumentos({ currentUser, alumnos }: Props) {
           : `${archivos.length} archivos subidos correctamente`,
         true
       )
+
+      // Notificar
+      try {
+        const senderName = currentUser?.displayName ?? currentUser?.username ?? 'Tu profesor'
+        const titulo = archivos.length === 1
+          ? archivos[0]!.name.replace(/\.[^/.]+$/, '')
+          : `${archivos.length} documentos nuevos`
+
+        if (destino === 'clase') {
+          const ids = alumnos.map(a => a.id)
+          if (ids.length > 0) {
+            await insertNotifications(ids.map(id => ({
+              user_id: id,
+              type:    'nuevo_documento',
+              title:   `${senderName} ha subido ${archivos.length === 1 ? 'un documento' : `${archivos.length} documentos`}`,
+              body:    titulo,
+              link:    '/documentos',
+            })))
+          }
+        } else {
+          await insertNotification({
+            user_id: destino,
+            type:    'nuevo_documento',
+            title:   `${senderName} te ha compartido ${archivos.length === 1 ? 'un documento' : `${archivos.length} documentos`}`,
+            body:    titulo,
+            link:    '/documentos',
+          })
+        }
+      } catch (_) {}
     } else {
       mostrarFeedback(`${insertados.length} subidos, ${errores} con error`, false)
     }
@@ -162,6 +218,11 @@ export default function SubirDocumentos({ currentUser, alumnos }: Props) {
   const handleEliminar = async (doc: DocSubido) => {
     // Profesor solo borra los suyos, director borra todo
     if (!isDirector && doc.uploaded_by !== currentUser?.id) return
+
+    // Borrar archivo del bucket (si no es vídeo/URL)
+    if (doc.category !== 'video' && doc.url && !doc.url.startsWith('http')) {
+      await supabase.storage.from('academy-documents').remove([doc.url])
+    }
 
     const { error } = await supabase
       .from('academy_documents')

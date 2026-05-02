@@ -215,7 +215,7 @@
     display: block;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    z-index: 100;
+    z-index: 200;
   }
 
   /* ── Menú expandido (encima de la barra) ── */
@@ -257,9 +257,9 @@
   /* ── Barra fija de 3 botones ── */
   .mobileBar {
     display: flex;
-    align-items: stretch;
+    align-items: center;
     height: 64px;
-    background: color-mix(in srgb, var(--surface) 97%, transparent);
+    background: var(--surface);
     backdrop-filter: blur(32px);
     -webkit-backdrop-filter: blur(32px);
     border-top: 1px solid rgba(8,145,178,0.18);
@@ -269,7 +269,14 @@
     box-shadow:
       0 -4px 24px rgba(8,145,178,0.18),
       0 -2px 10px rgba(8,145,178,0.10);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Safe area spacer — sits below mobileBar, doesn't move icons */
+  .mobileNav::after {
+    content: '';
+    display: block;
+    height: env(safe-area-inset-bottom, 0px);
+    background: var(--surface);
   }
 
   .mobileBarBtn {
@@ -277,11 +284,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 100%;
     background: none;
     border: none;
     cursor: pointer;
     color: var(--ink-subtle);
-    transition: color 0.15s, background 0.15s;
+    transition: color 0.15s;
     border-radius: 0;
   }
   .mobileBarBtn:hover { color: var(--ink); }

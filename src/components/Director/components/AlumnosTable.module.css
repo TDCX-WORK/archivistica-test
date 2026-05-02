@@ -298,19 +298,20 @@
   border-radius: var(--r-lg);
   overflow: hidden;
   transition: box-shadow 0.15s, border-color 0.15s;
+  box-shadow: inset 3px 0 8px -4px var(--subject-color, transparent);
 }
-.cardLista:hover { border-color: var(--line-strong); box-shadow: var(--shadow-sm); }
+.cardLista:hover { border-color: var(--line-strong); box-shadow: inset 3px 0 8px -4px var(--subject-color, transparent), var(--shadow-sm); }
 .cardListaOpen {
   border-color: var(--line-strong);
-  box-shadow: var(--shadow-md);
+  box-shadow: inset 3px 0 8px -4px var(--subject-color, transparent), var(--shadow-md);
 }
 
 .cardListaRow {
   display: grid;
-  grid-template-columns: 4px 44px 1fr auto auto 18px;
+  grid-template-columns: 44px 1fr auto auto 18px;
   gap: 0.85rem;
   align-items: center;
-  padding: 0.75rem 1rem 0.75rem 0;
+  padding: 0.75rem 1rem;
   width: 100%;
   background: transparent;
   border: none;
@@ -320,9 +321,7 @@
 }
 
 .subjectBar {
-  width: 4px;
-  align-self: stretch;
-  border-radius: 0 2px 2px 0;
+  display: none;
 }
 
 .avatar {
@@ -757,32 +756,43 @@
     flex-wrap: wrap;
   }
   .cardListaRow {
-    grid-template-columns: 4px 40px 1fr 18px;
+    grid-template-columns: 38px 1fr 18px;
     grid-template-rows: auto auto;
-    padding: 0.7rem 0.85rem 0.7rem 0;
-    row-gap: 0.5rem;
+    padding: 0.65rem 0.75rem;
+    row-gap: 0.35rem;
+    column-gap: 0.6rem;
   }
-  .info { grid-column: 3; }
+  .info { grid-column: 2; grid-row: 1; }
+  .chevron { grid-column: 3; grid-row: 1; }
+
+  /* Second row: nota + sesiones span full width */
   .notaBlock {
-    grid-column: 2 / 4;
+    grid-column: 1 / 4;
+    grid-row: 2;
     flex-direction: row;
     min-width: 0;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
   }
   .notaBarWrap { flex: 1; }
+
   .sesionesBlock {
-    grid-column: 4;
-    grid-row: 2;
+    grid-column: 1 / 4;
+    grid-row: 3;
     min-width: 0;
     padding: 0;
     flex-direction: row;
-    gap: 0.25rem;
-    align-items: baseline;
+    gap: 0.4rem;
+    align-items: center;
+    justify-content: flex-start;
   }
-  .sesionesLabel { font-size: 0.58rem; }
-  .chevron { grid-column: 4; grid-row: 1; }
-  .expanded { padding-left: 1rem; }
+  .sesionesLabel { font-size: var(--fs-7); }
+  .sesionesVal { font-size: var(--fs-6); }
+
+  .expanded { padding: 0.75rem; }
+  .avatar { width: 38px; height: 38px; font-size: var(--fs-4); border-radius: 10px; }
+  .nombre { font-size: var(--fs-5); }
+  .usernameSoft { display: none; }
 }
 
 @media (max-width: 480px) {

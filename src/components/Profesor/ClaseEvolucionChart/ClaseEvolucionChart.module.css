@@ -349,10 +349,84 @@
 
 /* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 700px) {
-  .header { flex-direction: column; }
-  .filtrosWrap { align-items: flex-start; width: 100%; }
-  .kpiRow { grid-template-columns: repeat(2, 1fr); }
-  .bloquesMenu { right: auto; left: 0; }
+  .card {
+    padding: 1rem 0.85rem 0.85rem;
+    gap: 0.7rem;
+  }
+
+  .header { flex-direction: column; gap: 0.6rem; }
+  .filtrosWrap { align-items: stretch; width: 100%; gap: 0.5rem; }
+
+  /* Mode pills — wrap as a grid, fill width evenly */
+  .selectorRow {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.3rem;
+  }
+
+  .selectorBtn {
+    padding: 0.35rem 0.3rem;
+    font-size: var(--fs-7);
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Range pills — wrap evenly, no border-radius container */
+  .rangoRow {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border-radius: var(--r-md);
+  }
+
+  .rangoIcon { display: none; }
+
+  .rangoBtn {
+    padding: 0.32rem 0.2rem;
+    font-size: var(--fs-7);
+    text-align: center;
+    border-radius: var(--r-sm);
+  }
+
+  /* Date inputs full width */
+  .dateInput {
+    padding: 0.25rem 0.4rem;
+    font-size: var(--fs-7);
+    width: 100%;
+  }
+
+  /* KPIs 2 columns */
+  .kpiRow { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
+  .kpiVal { font-size: var(--fs-3); }
+
+  /* Chart toolbar stack */
+  .chartToolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+  }
+
+  .verAlumnosBtn {
+    justify-content: center;
+    font-size: var(--fs-7);
+  }
+
+  /* Dropdown */
+  .bloquesMenu { right: auto; left: 0; min-width: 200px; }
+
+  /* Legend */
+  .leyenda { gap: 0.3rem; }
+  .leyendaItem { font-size: var(--fs-7); padding: 0.2rem 0.4rem; }
+  .leyendaItemStatic { font-size: var(--fs-7); }
+
+  /* Chart */
+  .svg { height: 200px; }
 }
 
 /* Dropdown inline de bloques */

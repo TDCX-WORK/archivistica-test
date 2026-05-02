@@ -3,10 +3,9 @@ import { RotateCcw, ThumbsUp, RefreshCw, Home as HomeIcon, Eye, Loader2 } from '
 import { supabase } from '../../lib/supabase'
 import type { Question } from '../../types'
 import styles from './Flashcard.module.css'
+import { shuffle } from '../../lib/helpers'
 
 const LETTERS = ['A', 'B', 'C', 'D']
-
-function shuffle<T>(arr: T[]): T[] { return [...arr].sort(() => Math.random() - 0.5) }
 
 interface BlockInfo {
   label: string

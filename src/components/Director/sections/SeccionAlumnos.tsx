@@ -136,15 +136,6 @@ export function SeccionAlumnos({
           <span className={styles.seccionCount}>{studentProfiles.length}</span>
         </div>
         <div className={styles.seccionHeadRight}>
-          <div className={styles.searchWrap}>
-            <Search size={14} className={styles.searchIcon} />
-            <input
-              className={styles.searchInput}
-              placeholder="Buscar alumno…"
-              value={busqueda}
-              onChange={e => setBusqueda(e.target.value)}
-            />
-          </div>
           <button
             className={styles.btnSecondary}
             onClick={exportarCSV}
@@ -172,6 +163,15 @@ export function SeccionAlumnos({
             <span className={styles.pillCount}>{p.count}</span>
           </button>
         ))}
+        <div className={styles.searchWrap} style={{ marginLeft: 'auto' }}>
+          <Search size={14} className={styles.searchIcon} />
+          <input
+            className={styles.searchInput}
+            placeholder="Buscar alumno…"
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+          />
+        </div>
       </div>
 
       {filtrados.length === 0 ? (

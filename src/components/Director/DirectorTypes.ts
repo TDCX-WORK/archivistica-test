@@ -107,16 +107,5 @@ const MASCOTAS: Record<string, { emoji: string; nombre: string }> = {
   mariposa: { emoji: '🦋', nombre: 'Mariposa' },
 }
 
-const scoreColor = (s: number | null | undefined): string => {
-  if (s == null) return '#6B7280'
-  if (s >= 80) return '#059669'
-  if (s >= 60) return '#0891B2'
-  if (s >= 40) return '#B45309'
-  return '#DC2626'
-}
-
-const fmt = (iso: string | null | undefined): string =>
-  iso ? new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
-
-
-export { scoreColor, fmt, MASCOTAS }
+export { MASCOTAS }
+export { scoreColor, fmt } from '../../lib/helpers'

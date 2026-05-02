@@ -7,8 +7,7 @@ import ProgressBar    from '../Progress/ProgressBar'
 import Results        from '../Results/Results'
 import type { Question, WrongAnswer } from '../../types'
 import styles         from './TestRunner.module.css'
-
-function shuffle<T>(arr: T[]): T[] { return [...arr].sort(() => Math.random() - 0.5) }
+import { shuffle }    from '../../lib/helpers'
 
 const modes = config.modes as Record<string, { label: string; questions: number; timeMinutes: number; description: string }>
 

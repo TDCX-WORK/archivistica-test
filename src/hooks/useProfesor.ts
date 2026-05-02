@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { calcularRacha } from '../lib/helpers'
+import { insertNotification } from '../lib/notifications'
 import { generateInviteCode } from '../lib/inviteCodes'
 import type { CurrentUser, AlumnoConStats, StatsClase, InviteCode, Session } from '../types'
 
@@ -141,13 +142,13 @@ export function useProfesor(currentUser: CurrentUser | null) {
       setAlumnos(alumnosConStats)
       setLoading(false)
 
-      // Notificaciones — el índice único en BD evita duplicados automáticamente
+      // Notificaciones — upsert para evitar 409 con el índice único
       try {
         const enRiesgo = alumnosConStats.filter(a => a.enRiesgo)
         if (enRiesgo.length > 0 && currentUser?.id) {
           const nombres = enRiesgo.slice(0, 3).map(a => a.username).join(', ')
           const resto   = enRiesgo.length > 3 ? ` y ${enRiesgo.length - 3} mas` : ''
-          await supabase.from('notifications').insert({
+          await insertNotification({
             user_id: currentUser.id,
             type:    'alumno_inactivo',
             title:   `${enRiesgo.length} alumno${enRiesgo.length !== 1 ? 's' : ''} sin actividad`,
@@ -164,7 +165,7 @@ export function useProfesor(currentUser: CurrentUser | null) {
             `${a.username} (${a.diasParaExpirar}d)`
           ).join(', ')
           const resto = porExpirar.length > 3 ? ` y ${porExpirar.length - 3} mas` : ''
-          await supabase.from('notifications').insert({
+          await insertNotification({
             user_id: currentUser.id,
             type:    'alumno_expira',
             title:   `${porExpirar.length} alumno${porExpirar.length !== 1 ? 's' : ''} con acceso por expirar`,
@@ -200,7 +201,7 @@ export function useProfesor(currentUser: CurrentUser | null) {
         for (const codigo of porCaducar) {
           const horas = Math.ceil((new Date(codigo.expires_at).getTime() - ahora.getTime()) / 3600000)
           // El índice único en BD evita duplicados automáticamente
-          await supabase.from('notifications').insert({
+          await insertNotification({
             user_id: currentUser.id,
             type:    'codigo_caduca',
             title:   `El codigo ${codigo.code} caduca en ${horas}h`,

@@ -22,6 +22,7 @@ const NAV_ALUMNO_MAIN: NavItem[] = [
 ]
 const NAV_ALUMNO_EXTRA: NavItem[] = [
   { id: 'estadisticas', icon: BarChart2,     label: 'Stats'      },
+  { id: 'mensajes',     icon: Send,          label: 'Mensajes'   },
   { id: 'foro',         icon: MessageCircle, label: 'Foro'       },
   { id: 'documentos',   icon: FolderOpen,    label: 'Documentos' },
   { id: 'tareas',          icon: ClipboardList, label: 'Tareas' }, 
@@ -30,6 +31,7 @@ const NAV_ALUMNO_DESKTOP: NavItem[] = [
   { id: 'inicio',       icon: Home,          label: 'Inicio'     },
   { id: 'estudio',      icon: BookOpen,      label: 'Estudio'    },
   { id: 'estadisticas', icon: BarChart2,     label: 'Stats'      },
+  { id: 'mensajes',     icon: Send,          label: 'Mensajes'   },
   { id: 'foro',         icon: MessageCircle, label: 'Foro'       },
   { id: 'documentos',   icon: FolderOpen,    label: 'Documentos' },
   { id: 'tareas',          icon: ClipboardList, label: 'Tareas' },
@@ -37,8 +39,8 @@ const NAV_ALUMNO_DESKTOP: NavItem[] = [
 
 /* ── Profesor ────────────────────────────────────────────────────── */
 const NAV_PROFESOR_MAIN: NavItem[] = [
-  { id: 'inicio',       icon: Home,     label: 'Inicio' },
-  { id: 'estadisticas', icon: BarChart2, label: 'Stats'  },
+  { id: 'inicio',      icon: Home,     label: 'Inicio' },
+  { id: 'stats-clase', icon: BarChart2, label: 'Stats'  },
 ]
 const NAV_PROFESOR_EXTRA: NavItem[] = [
   { id: 'profesor',   icon: GraduationCap, label: 'Mis alumnos' },
@@ -64,6 +66,7 @@ const NAV_DIRECTOR_MAIN: NavItem[] = [
 ]
 const NAV_DIRECTOR_EXTRA: NavItem[] = [
   { id: 'facturacion-director', icon: Receipt,       label: 'Facturación' },
+  { id: 'mensajes',             icon: Send,          label: 'Mensajes'    },
   { id: 'foro',                 icon: MessageCircle, label: 'Foro'        },
   { id: 'documentos',           icon: FolderOpen,    label: 'Documentos'  },
   { id: 'tareas-profesor',      icon: ClipboardList, label: 'Tareas'      },
@@ -72,6 +75,7 @@ const NAV_DIRECTOR_DESKTOP: NavItem[] = [
   { id: 'direccion',            icon: Building2,     label: 'Academia'    },
   { id: 'gestion',              icon: Settings2,     label: 'Gestión'     },
   { id: 'facturacion-director', icon: Receipt,       label: 'Facturación' },
+  { id: 'mensajes',             icon: Send,          label: 'Mensajes'    },
   { id: 'foro',                 icon: MessageCircle, label: 'Foro'        },
   { id: 'documentos',           icon: FolderOpen,    label: 'Documentos'  },
   { id: 'tareas-profesor',      icon: ClipboardList, label: 'Tareas'      },

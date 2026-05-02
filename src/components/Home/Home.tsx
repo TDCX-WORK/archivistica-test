@@ -332,6 +332,7 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
   const navigate = useNavigate()
 
   const { totalAnswered, avgScore, streakDays, wrongAnswers = [], dueForReview = [], sessions = [] } = progress
+  const loadingData = progress.loadingData
   const readTopics = studyProgress?.readTopics
   const bookmarks  = studyProgress?.bookmarks
 
@@ -340,6 +341,7 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
   const [supuestos,      setSupuestos]      = useState<SupuestoData[]>([])
   const [planDates,      setPlanDates]      = useState<Set<string>>(new Set())
   const [totalTopics,    setTotalTopics]    = useState(0)
+  const [blocksReady,    setBlocksReady]    = useState(false)
 
   useEffect(() => {
     const sid = currentUser?.subject_id
@@ -366,6 +368,7 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
     Promise.all([cq, loadBlocks()]).then(([cr, bd]) => {
       setTotalQuestions(cr.count ?? 0)
       setBlocks(bd)
+      setBlocksReady(true)
     })
 
     const loadTopics = async () => {
@@ -422,8 +425,10 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
 
   const regularModes = Object.values(modes).filter(m => m.id !== 'simulacro')
 
+  const homeReady = !loadingData && blocksReady
+
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={{ opacity: homeReady ? 1 : 0, transition: 'opacity 0.25s ease' }}>
       <div className={styles.kpiRow}>
         <StatCard icon={Flame}         label="Racha"       value={`${streakDays}d`}   color="#D97706" bg="#FFFBEB" />
         <StatCard icon={Trophy}        label="Media"       value={`${avgScore}%`}     color="#7C3AED" bg="#F5F3FF" />

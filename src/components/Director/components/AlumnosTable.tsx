@@ -354,9 +354,8 @@ function AlumnoCardLista({ alumno: a, expanded, onToggle, onAbrirFicha }: {
   const isExpirado  = a.diasRestantes !== null && a.diasRestantes < 0
 
   return (
-    <div className={[styles.cardLista, expanded ? styles.cardListaOpen : ''].join(' ')}>
+    <div className={[styles.cardLista, expanded ? styles.cardListaOpen : ''].join(' ')} style={{ ['--subject-color' as string]: a.subjectColor }}>
       <button className={styles.cardListaRow} onClick={onToggle}>
-        <div className={styles.subjectBar} style={{ background: a.subjectColor }} />
 
         <div className={styles.avatar} style={{ background: color + '1E', color }}>
           {mascota ? <span className={styles.avatarEmoji}>{mascota.emoji}</span> : nombre[0]!.toUpperCase()}

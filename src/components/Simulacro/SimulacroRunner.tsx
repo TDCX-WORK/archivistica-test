@@ -8,24 +8,9 @@ import QuestionCard    from '../Question/QuestionCard'
 import ProgressBar     from '../Progress/ProgressBar'
 import type { Question, WrongAnswer, ExamConfig, Supuesto, SupuestoQuestion } from '../../types'
 import styles from './SimulacroRunner.module.css'
-
-function shuffle<T>(arr: T[]): T[] { return [...arr].sort(() => Math.random() - 0.5) }
+import { scoreColor, shuffle, formatTime } from '../../lib/helpers'
 
 const LETTERS = ['A', 'B', 'C', 'D']
-
-// ── Helpers ────────────────────────────────────────────────────────────────
-function scoreColor(s: number): string {
-  if (s >= 80) return '#059669'
-  if (s >= 60) return '#0891B2'
-  if (s >= 40) return '#D97706'
-  return '#DC2626'
-}
-
-function formatTime(secs: number): string {
-  const m = String(Math.floor(secs / 60)).padStart(2, '0')
-  const s = String(secs % 60).padStart(2, '0')
-  return `${m}:${s}`
-}
 
 // ── Pantalla intermedia entre parte 1 y parte 2 ───────────────────────────
 function PantallaIntermedia({

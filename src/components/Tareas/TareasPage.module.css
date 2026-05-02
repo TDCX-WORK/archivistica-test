@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   TareasPage — vista del alumno
+   TareasPage — alumno (v23b)
 ═══════════════════════════════════════════════════════════════ */
 
 .page {
@@ -8,305 +8,301 @@
   max-width: 860px;
   margin: 0 auto;
 }
+.header        { margin-bottom: 1.5rem; }
+.title         { font-size: var(--fs-1); font-weight: 800; color: var(--ink); letter-spacing: -0.03em; margin: 0 0 4px; }
+.subtitle      { font-size: var(--fs-5); color: var(--ink-muted); margin: 0; }
 
-/* ── Header ──────────────────────────────────────────────────────── */
-.header {
-  margin-bottom: 1.5rem;
-}
-.title {
-  font-size: var(--fs-1);
-  font-weight: 800;
-  color: var(--ink);
-  letter-spacing: -0.03em;
-  margin: 0 0 2px;
-}
-.subtitle {
-  font-size: var(--fs-6);
-  color: var(--ink-muted);
-  margin: 0;
-}
-
-/* ── Filtros ─────────────────────────────────────────────────────── */
-.filters {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.25rem;
-}
+/* ── Filtros ─────────────────────────────────────────────────── */
+.filters       { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
 .filterBtn {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.35rem 0.85rem;
-  border: 1.5px solid var(--line);
-  border-radius: var(--r-full);
-  background: var(--surface);
-  font-size: var(--fs-6);
-  font-weight: 600;
-  color: var(--ink-muted);
-  font-family: var(--font-body);
-  cursor: pointer;
-  transition: all 0.15s var(--ease);
+  display: flex; align-items: center; gap: 0.3rem;
+  padding: 0.4rem 0.9rem; border: 1.5px solid var(--line); border-radius: var(--r-full);
+  background: var(--surface); font-size: var(--fs-5); font-weight: 600;
+  color: var(--ink-muted); font-family: var(--font-body); cursor: pointer;
+  transition: all var(--t) var(--ease);
 }
-.filterBtn:hover  { border-color: #2563EB; color: #2563EB; }
-.filterBtnActive  { border-color: #2563EB; background: #EFF6FF; color: #2563EB; }
+.filterBtn:hover  { border-color: var(--ink-subtle); color: var(--ink-soft); }
+.filterBtnActive  { border-color: var(--ink); background: var(--ink); color: var(--surface); }
 
-/* ── Lista tareas ────────────────────────────────────────────────── */
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
+/* ── Lista ───────────────────────────────────────────────────── */
+.list          { display: flex; flex-direction: column; gap: 0.75rem; }
 
-/* ── Card tarea ──────────────────────────────────────────────────── */
+/* ── Card ────────────────────────────────────────────────────── */
 .taskCard {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-xl);
-  overflow: hidden;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-xl); overflow: hidden;
+  transition: border-color var(--t), box-shadow var(--t);
 }
 .taskCard:hover { border-color: var(--line-strong); box-shadow: var(--shadow-sm); }
-.taskCardPending  { border-left: 3px solid #D97706; }
-.taskCardDone     { border-left: 3px solid #2563EB; }
-.taskCardCorrected{ border-left: 3px solid #059669; }
-.taskCardOverdue  { border-left: 3px solid #DC2626; }
 
 .taskHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 1rem 1.1rem 0.75rem;
-  cursor: pointer;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 0.75rem; padding: 1.15rem 1.25rem 0.85rem; cursor: pointer;
 }
-
 .taskHeaderLeft { flex: 1; min-width: 0; }
+.taskTitle      { font-size: var(--fs-3); font-weight: 700; color: var(--ink); margin: 0 0 0.4rem; line-height: 1.3; }
+.taskMeta       { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; font-size: var(--fs-6); color: var(--ink-muted); }
+.taskMetaOverdue { color: var(--danger); }
+.metaDot        { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-subtle); flex-shrink: 0; }
+.taskHeaderRight { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+.chevron        { color: var(--ink-subtle); flex-shrink: 0; }
 
-.taskTitle {
-  font-size: var(--fs-4);
-  font-weight: 700;
-  color: var(--ink);
-  margin: 0 0 0.35rem;
-  line-height: 1.3;
-}
-
-.taskMeta {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-  font-size: var(--fs-7);
-  color: var(--ink-muted);
-}
-.metaDot {
-  width: 3px; height: 3px;
-  border-radius: 50%;
-  background: var(--ink-subtle);
-  flex-shrink: 0;
-}
-
-/* ── Badges estado ───────────────────────────────────────────────── */
+/* ── Badges ──────────────────────────────────────────────────── */
 .badge {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.2rem 0.6rem;
-  border-radius: var(--r-full);
-  font-size: var(--fs-7);
-  font-weight: 700;
-  flex-shrink: 0;
+  display: flex; align-items: center; gap: 0.25rem;
+  padding: 0.22rem 0.65rem; border-radius: var(--r-full);
+  font-size: var(--fs-6); font-weight: 700; flex-shrink: 0;
 }
-.badgePending   { background: #FFF7ED; color: #D97706; border: 1px solid #FED7AA; }
-.badgeDone      { background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; }
-.badgeCorrected { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
-.badgeOverdue   { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+.badgePending   { background: var(--amber-lt);  color: var(--amber);  border: 1px solid var(--amber-dim); }
+.badgeDone      { background: var(--tint-blue); color: #2563EB;       border: 1px solid #BFDBFE; }
+.badgeCorrected { background: var(--accent-lt); color: var(--accent); border: 1px solid var(--accent-dim); }
+.badgeOverdue   { background: var(--danger-lt); color: var(--danger); border: 1px solid var(--danger-dim); }
+.badgeRevision  { background: var(--tint-lav);  color: #7C3AED;      border: 1px solid #DDD6FE; }
 
-/* ── Descripción ─────────────────────────────────────────────────── */
+.gradeBadge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.22rem 0.6rem; border-radius: var(--r-full);
+  font-size: var(--fs-6); font-weight: 800; letter-spacing: 0.02em;
+}
+.gradeSuspenso      { background: var(--danger-lt); color: var(--danger); border: 1px solid var(--danger-dim); }
+.gradeAprobado      { background: var(--amber-lt);  color: var(--amber);  border: 1px solid var(--amber-dim); }
+.gradeNotable       { background: var(--tint-blue); color: #2563EB;       border: 1px solid #BFDBFE; }
+.gradeSobresaliente { background: var(--accent-lt); color: var(--accent); border: 1px solid var(--accent-dim); }
+
+/* ── Descripción ─────────────────────────────────────────────── */
 .taskDesc {
-  padding: 0 1.1rem 0.75rem;
-  font-size: var(--fs-5);
-  color: var(--ink-muted);
-  line-height: 1.5;
+  padding: 0 1.25rem 0.85rem;
+  font-size: var(--fs-4); color: var(--ink-muted); line-height: 1.55;
 }
 
-/* ── Entrega expandida ───────────────────────────────────────────── */
+/* ── Body expandido ──────────────────────────────────────────── */
 .taskBody {
   border-top: 1px solid var(--line);
-  padding: 1rem 1.1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  padding: 1.15rem 1.25rem;
+  display: flex; flex-direction: column; gap: 0.85rem;
   animation: fadeUp 0.2s ease;
 }
-
 .submissionLabel {
-  font-size: var(--fs-6);
-  font-weight: 700;
-  color: var(--ink-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: var(--fs-5); font-weight: 700; color: var(--ink-muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
 }
 
-/* ── TipTap editor ───────────────────────────────────────────────── */
+/* ── Editor ──────────────────────────────────────────────────── */
 .editorWrap {
-  border: 1.5px solid var(--line);
-  border-radius: var(--r-md);
-  background: var(--surface-off);
-  overflow: hidden;
-  transition: border-color 0.15s;
+  border: 1.5px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface-off); overflow: hidden;
+  transition: border-color var(--t);
 }
-.editorWrap:focus-within { border-color: #2563EB; background: var(--surface); }
-
+.editorWrapFocused { border-color: var(--ink-subtle); background: var(--surface); }
 .editorToolbar {
-  display: flex;
-  gap: 0.2rem;
-  padding: 0.4rem 0.6rem;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface);
-  flex-wrap: wrap;
+  display: flex; gap: 0.25rem; padding: 0.45rem 0.7rem;
+  border-bottom: 1px solid var(--line); background: var(--surface); flex-wrap: wrap;
 }
 .toolbarBtn {
-  width: 28px; height: 28px;
-  display: flex; align-items: center; justify-content: center;
-  border: none; background: none; cursor: pointer;
-  border-radius: 6px;
-  color: var(--ink-muted);
-  font-size: var(--fs-5);
-  font-family: var(--font-body);
-  font-weight: 700;
-  transition: background 0.12s, color 0.12s;
+  width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+  border: none; background: none; cursor: pointer; border-radius: var(--r-xs);
+  color: var(--ink-muted); font-size: var(--fs-4); font-family: var(--font-body);
+  font-weight: 700; transition: background var(--t), color var(--t);
 }
 .toolbarBtn:hover    { background: var(--surface-dim); color: var(--ink); }
-.toolbarBtnActive    { background: #EFF6FF; color: #2563EB; }
-
+.toolbarBtnActive    { background: var(--primary-lt); color: var(--ink); }
 .editorContent {
-  padding: 0.75rem 0.85rem;
-  min-height: 120px;
-  font-size: var(--fs-5);
-  color: var(--ink);
-  line-height: 1.6;
+  padding: 0.85rem 1rem; min-height: 140px;
+  font-size: var(--fs-4); color: var(--ink); line-height: 1.7;
 }
 .editorContent:focus { outline: none; }
-
-/* TipTap prose styles */
-.editorContent p         { margin: 0 0 0.5em; }
+.editorContent p     { margin: 0 0 0.5em; }
 .editorContent p:last-child { margin-bottom: 0; }
-.editorContent strong    { font-weight: 700; }
-.editorContent em        { font-style: italic; }
-.editorContent ul        { padding-left: 1.25rem; margin: 0.25em 0; }
-.editorContent ol        { padding-left: 1.25rem; margin: 0.25em 0; }
-.editorContent li        { margin: 0.15em 0; }
+.editorContent strong { font-weight: 700; }
+.editorContent em     { font-style: italic; }
+.editorContent ul,
+.editorContent ol     { padding-left: 1.25rem; margin: 0.25em 0; }
+.editorContent li     { margin: 0.15em 0; }
 .editorContent .is-editor-empty:first-child::before {
-  content: attr(data-placeholder);
-  color: var(--ink-subtle);
-  pointer-events: none;
-  float: left;
-  height: 0;
+  content: attr(data-placeholder); color: var(--ink-subtle);
+  pointer-events: none; float: left; height: 0;
 }
 
-/* ── Entrega ya enviada (readonly) ───────────────────────────────── */
+/* ── Editor actions ──────────────────────────────────────────── */
+.editorActions {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 0.5rem; padding-top: 0.65rem;
+}
+
+/* ── Submission view ─────────────────────────────────────────── */
 .submissionView {
-  background: var(--surface-off);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  padding: 0.75rem 0.85rem;
-  font-size: var(--fs-5);
-  color: var(--ink-soft);
-  line-height: 1.6;
+  background: var(--surface-off); border: 1px solid var(--line);
+  border-radius: var(--r-md); padding: 0.85rem 1rem;
+  font-size: var(--fs-4); color: var(--ink-soft); line-height: 1.7;
+  position: relative;
 }
 .submissionView p      { margin: 0 0 0.5em; }
 .submissionView p:last-child { margin-bottom: 0; }
 .submissionView strong { font-weight: 700; }
 .submissionView em     { font-style: italic; }
-.submissionView ul     { padding-left: 1.25rem; margin: 0.25em 0; }
+.submissionView ul,
 .submissionView ol     { padding-left: 1.25rem; margin: 0.25em 0; }
 
-/* ── Feedback del profesor ───────────────────────────────────────── */
+/* Highlights */
+.highlightCorrection {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  border-bottom: 2px solid var(--danger); border-radius: 2px;
+  cursor: pointer; transition: background var(--t);
+}
+.highlightCorrection:hover { background: color-mix(in srgb, var(--danger) 20%, transparent); }
+.highlightSuggestion {
+  background: color-mix(in srgb, var(--amber) 12%, transparent);
+  border-bottom: 2px solid var(--amber); border-radius: 2px;
+  cursor: pointer; transition: background var(--t);
+}
+.highlightSuggestion:hover { background: color-mix(in srgb, var(--amber) 20%, transparent); }
+.highlightPositive {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-bottom: 2px solid var(--accent); border-radius: 2px;
+  cursor: pointer; transition: background var(--t);
+}
+.highlightPositive:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
+
+/* Tooltip */
+.annotationTooltip {
+  display: none; position: relative; z-index: 50;
+  max-width: 360px; padding: 0.6rem 0.75rem; margin-top: 0.35rem;
+  border-radius: var(--r-md); background: var(--surface);
+  border: 1px solid var(--line); box-shadow: var(--shadow-md);
+  font-size: var(--fs-5); color: var(--ink-soft); line-height: 1.5;
+  animation: fadeUp 0.12s ease;
+}
+.annotationTooltipVisible { display: inline-block; }
+.annotationHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.4rem; margin-bottom: 0.3rem;
+}
+.annotationType { font-size: var(--fs-6); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.annotationTypeCorrection { color: var(--danger); }
+.annotationTypeSuggestion { color: var(--amber); }
+.annotationTypePositive   { color: var(--accent); }
+.annotationAuthor         { font-size: var(--fs-7); color: var(--ink-subtle); }
+.annotationBody           { font-size: var(--fs-5); color: var(--ink-soft); line-height: 1.5; }
+
+/* ── Correction meta ─────────────────────────────────────────── */
+.correctionMeta {
+  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+  padding: 0.55rem 0.85rem; background: var(--surface-off);
+  border-radius: var(--r-md); font-size: var(--fs-6); color: var(--ink-muted);
+  border: 1px solid var(--line);
+}
+.correctionMetaIcon {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--accent-lt); border: 1px solid var(--accent-dim);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent); flex-shrink: 0;
+}
+
+/* ── Grade display ───────────────────────────────────────────── */
+.gradeDisplay {
+  display: flex; align-items: center; gap: 0.65rem;
+  padding: 0.75rem 1rem; background: var(--surface-off);
+  border: 1px solid var(--line); border-radius: var(--r-md);
+}
+.gradeNumber { font-size: var(--fs-1); font-weight: 800; color: var(--ink); letter-spacing: -0.03em; line-height: 1; }
+.gradeMax    { font-size: var(--fs-4); font-weight: 600; color: var(--ink-subtle); }
+
+/* ── Feedback ────────────────────────────────────────────────── */
 .feedbackBubble {
-  background: #ECFDF5;
-  border: 1px solid #A7F3D0;
-  border-radius: var(--r-md);
-  padding: 0.7rem 0.85rem;
+  background: var(--accent-lt); border: 1px solid var(--accent-dim);
+  border-radius: var(--r-md); padding: 0.75rem 1rem;
 }
 .feedbackLabel {
-  font-size: var(--fs-7);
-  font-weight: 700;
-  color: #059669;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.25rem;
+  font-size: var(--fs-6); font-weight: 700; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem;
 }
 .feedbackText {
-  font-size: var(--fs-5);
-  color: var(--ink-soft);
-  line-height: 1.5;
-  margin: 0;
+  font-size: var(--fs-4); color: var(--ink-soft); line-height: 1.55; margin: 0;
 }
+.feedbackHtml p      { margin: 0 0 0.4em; }
+.feedbackHtml p:last-child { margin-bottom: 0; }
+.feedbackHtml strong { font-weight: 700; }
+.feedbackHtml em     { font-style: italic; }
 
-/* ── Botones ─────────────────────────────────────────────────────── */
-.taskActions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.5rem;
+/* ── Revision banner ─────────────────────────────────────────── */
+.revisionBanner {
+  display: flex; align-items: flex-start; gap: 0.65rem;
+  padding: 0.85rem 1rem; background: var(--tint-lav);
+  border: 1px solid #DDD6FE; border-radius: var(--r-md);
 }
+.revisionBannerIcon {
+  width: 26px; height: 26px; border-radius: 50%; background: #EDE9FE;
+  display: flex; align-items: center; justify-content: center;
+  color: #7C3AED; flex-shrink: 0; margin-top: 1px;
+}
+.revisionBannerContent { flex: 1; }
+.revisionBannerTitle   { font-size: var(--fs-4); font-weight: 700; color: #7C3AED; margin: 0 0 0.2rem; }
+.revisionBannerText    { font-size: var(--fs-5); color: var(--ink-muted); margin: 0; line-height: 1.45; }
+
+/* ── Annotations summary ────────────────────────────────────── */
+.annotationsSummary {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-size: var(--fs-6); color: var(--ink-muted); padding: 0.4rem 0; font-weight: 600;
+}
+.annotationDot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.annotationDotCorrection { background: var(--danger); }
+.annotationDotSuggestion { background: var(--amber); }
+.annotationDotPositive   { background: var(--accent); }
+
+/* ── Botones ─────────────────────────────────────────────────── */
+.taskActions { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; }
 .btnEntregar {
-  display: flex; align-items: center; gap: 0.4rem;
-  padding: 0.55rem 1.1rem;
-  background: #2563EB; color: #fff;
-  border: none; border-radius: var(--r-md);
-  font-size: var(--fs-5); font-weight: 700;
+  display: flex; align-items: center; gap: 0.45rem;
+  padding: 0.6rem 1.2rem; background: var(--ink); color: var(--surface);
+  border: none; border-radius: var(--r-md); font-size: var(--fs-4); font-weight: 700;
   font-family: var(--font-body); cursor: pointer;
-  transition: background 0.15s, transform 0.15s var(--spring);
+  transition: background var(--t), transform var(--t) var(--spring);
 }
-.btnEntregar:hover:not(:disabled) { background: #1D4ED8; transform: translateY(-1px); }
+.btnEntregar:hover:not(:disabled) { background: var(--primary-mid); transform: translateY(-1px); }
 .btnEntregar:disabled { opacity: 0.45; cursor: not-allowed; }
-
 .btnEditar {
   display: flex; align-items: center; gap: 0.4rem;
-  padding: 0.45rem 0.85rem;
-  background: none;
-  border: 1.5px solid var(--line);
-  border-radius: var(--r-md);
-  font-size: var(--fs-6); font-weight: 600;
-  font-family: var(--font-body); color: var(--ink-muted);
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  padding: 0.5rem 0.9rem; background: none;
+  border: 1.5px solid var(--line); border-radius: var(--r-md);
+  font-size: var(--fs-5); font-weight: 600; font-family: var(--font-body);
+  color: var(--ink-muted); cursor: pointer;
+  transition: background var(--t), border-color var(--t);
 }
 .btnEditar:hover { background: var(--surface-dim); border-color: var(--line-strong); }
+.btnReentregar {
+  display: flex; align-items: center; gap: 0.45rem;
+  padding: 0.6rem 1.2rem; background: #7C3AED; color: #fff;
+  border: none; border-radius: var(--r-md); font-size: var(--fs-4); font-weight: 700;
+  font-family: var(--font-body); cursor: pointer;
+  transition: background var(--t), transform var(--t) var(--spring);
+}
+.btnReentregar:hover:not(:disabled) { background: #6D28D9; transform: translateY(-1px); }
+.btnReentregar:disabled { opacity: 0.45; cursor: not-allowed; }
 
-/* ── Feedback inline ─────────────────────────────────────────────── */
+/* ── Feedback inline ─────────────────────────────────────────── */
 .inlineFeedback {
   display: flex; align-items: center; gap: 0.4rem;
-  padding: 0.45rem 0.75rem;
-  border-radius: var(--r-md);
-  font-size: var(--fs-6); font-weight: 500;
+  padding: 0.5rem 0.8rem; border-radius: var(--r-md);
+  font-size: var(--fs-5); font-weight: 500;
 }
-.inlineFeedbackOk    { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
-.inlineFeedbackError { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+.inlineFeedbackOk    { background: var(--accent-lt); color: #065F46; border: 1px solid var(--accent-dim); }
+.inlineFeedbackError { background: var(--danger-lt); color: var(--danger); border: 1px solid var(--danger-dim); }
 
-/* ── Empty / Loading ─────────────────────────────────────────────── */
-.empty {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 0.5rem;
-  padding: 4rem 1rem; text-align: center;
-}
-.emptyIcon  { color: var(--line-strong); margin-bottom: 0.25rem; }
-.emptyTitle { font-size: var(--fs-4); font-weight: 700; color: var(--ink-muted); margin: 0; }
-.emptySub   { font-size: var(--fs-5); color: var(--ink-subtle); margin: 0; }
+/* ── Empty / Loading ─────────────────────────────────────────── */
+.empty     { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 4rem 1rem; text-align: center; }
+.emptyIcon { color: var(--line-strong); margin-bottom: 0.25rem; }
+.emptyTitle { font-size: var(--fs-3); font-weight: 700; color: var(--ink-muted); margin: 0; }
+.emptySub   { font-size: var(--fs-4); color: var(--ink-subtle); margin: 0; }
+.loading   { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 3rem; color: var(--ink-muted); font-size: var(--fs-4); }
+.spinner   { animation: spin 1s linear infinite; }
 
-.loading {
-  display: flex; align-items: center; justify-content: center;
-  gap: 0.5rem; padding: 3rem;
-  color: var(--ink-muted); font-size: var(--fs-5);
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .page       { padding: 20px 16px 80px; }
+  .taskHeader { padding: 0.85rem; }
+  .taskDesc   { padding: 0 0.85rem 0.65rem; }
+  .taskBody   { padding: 0.85rem; }
+  .gradeDisplay { flex-wrap: wrap; }
+  .correctionMeta { flex-direction: column; align-items: flex-start; }
+  .annotationTooltip { max-width: calc(100vw - 48px); }
 }

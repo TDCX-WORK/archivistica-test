@@ -172,20 +172,21 @@
 .searchWrap { position: relative; display: flex; align-items: center }
 .searchIcon { position: absolute; left: .7rem; color: var(--ink-subtle); pointer-events: none }
 .searchInput {
-  padding: .45rem .85rem .45rem 2rem;
+  padding: .35rem .85rem .35rem 2rem;
   border: 1px solid var(--line);
-  border-radius: var(--r-md);
+  border-radius: var(--r-full);
   background: var(--surface);
   color: var(--ink);
-  font-size: var(--fs-5);
+  font-size: var(--fs-6);
   font-family: var(--font-body);
-  width: 240px;
-  transition: border-color .15s, box-shadow .15s;
+  width: 180px;
+  transition: border-color .15s, box-shadow .15s, width .2s;
 }
 .searchInput:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent);
+  width: 220px;
 }
 
 /* ── Buttons ──────────────────────────────────────────────────────────────── */
@@ -228,7 +229,7 @@
 
 /* ── Pills / filtros ──────────────────────────────────────────────────────── */
 .pillBar {
-  display: flex; gap: .4rem; flex-wrap: wrap;
+  display: flex; gap: .4rem; flex-wrap: wrap; align-items: center;
 }
 .pill {
   display: inline-flex; align-items: center; gap: .4rem;
@@ -1118,8 +1119,9 @@
   .searchWrap { flex: 1 }
 }
 @media (max-width: 640px) {
-  .page { padding: 1rem .9rem 4rem }
+  .page { padding: 1rem .75rem 5rem }
   .heroTitle { font-size: var(--fs-2) }
+  .hero { flex-direction: column; }
   .alumnosGrid { grid-template-columns: 1fr }
   .profesoresGrid { grid-template-columns: 1fr }
   .subjectsGrid { grid-template-columns: 1fr }
@@ -1127,8 +1129,25 @@
   .configVal, .configMono { text-align: left; max-width: 100% }
   .configCta { flex-direction: column; align-items: stretch }
   .configCtaBtn { justify-content: center }
-  .tab { padding: .45rem .65rem }
+
+  /* Tabs — icon only, wider touch targets */
+  .tab {
+    padding: .55rem .85rem;
+    font-size: var(--fs-6);
+  }
   .tab span:not(.tabCount) { display: none }
+
+  /* Pills + search stack on mobile */
+  .pillBar { gap: .3rem; }
+  .pill { padding: .3rem .6rem; font-size: var(--fs-7); }
+  .searchWrap { width: 100%; margin-left: 0 !important; margin-top: .25rem; }
+  .searchInput { width: 100%; }
+  .searchInput:focus { width: 100%; }
+
+  /* Section head */
+  .seccionHead { flex-direction: column; align-items: stretch; gap: .5rem; }
+  .seccionHeadRight { width: 100%; }
+  .btnSecondary { flex: 1; justify-content: center; font-size: var(--fs-6); }
 }
 
 /* Reduced motion */

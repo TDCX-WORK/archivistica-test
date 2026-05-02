@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 
 export interface DirectMessage {
@@ -136,7 +136,28 @@ export function useAlumnoMessages(userId: string | null | undefined) {
     }
   }, [])
 
-  return { messages, unread, loading, markRead, markAllRead, replyToMessage, deleteMessage, reload: load }
+  // Alumno envía mensaje a un profesor/director
+  const sendMessage = useCallback(async (toId: string, body: string, academyId: string, subjectId?: string | null): Promise<boolean> => {
+    if (!userId || !body.trim()) return false
+    const { data, error } = await supabase
+      .from('direct_messages')
+      .insert({
+        from_id:    userId,
+        to_id:      toId,
+        academy_id: academyId,
+        subject_id: subjectId ?? null,
+        body:       body.trim(),
+      })
+      .select()
+      .maybeSingle()
+    if (error || !data) return false
+    const nuevo = data as DirectMessage
+    nuevo.from_role = 'alumno'
+    setMessages(prev => [nuevo, ...prev])
+    return true
+  }, [userId])
+
+  return { messages, unread, loading, markRead, markAllRead, replyToMessage, deleteMessage, sendMessage, reload: load }
 }
 
 // ── Hook para PROFESORES ─────────────────────────────────────────────────────
@@ -145,23 +166,33 @@ export function useProfesorMessages(
   academyId: string | null | undefined,
   subjectId: string | null | undefined
 ) {
-  const [sent,    setSent]    = useState<DirectMessage[]>([])
-  const [loading, setLoading] = useState(true)
+  const [sent,     setSent]     = useState<DirectMessage[]>([])
+  const [received, setReceived] = useState<DirectMessage[]>([])
+  const [loading,  setLoading]  = useState(true)
 
   const load = useCallback(async () => {
     if (!userId) { setLoading(false); return }
-    const { data } = await supabase
+    // Load messages I sent
+    const { data: sentData } = await supabase
       .from('direct_messages')
       .select('*')
       .eq('from_id', userId)
-      .eq('deleted_by_sender', false)     // ← filtrar borrados por profesor
+      .eq('deleted_by_sender', false)
       .order('created_at', { ascending: false })
-    setSent((data ?? []) as DirectMessage[])
+    // Load messages sent TO me (by alumnos)
+    const { data: recvData } = await supabase
+      .from('direct_messages')
+      .select('*')
+      .eq('to_id', userId)
+      .order('created_at', { ascending: false })
+    setSent((sentData ?? []) as DirectMessage[])
+    setReceived((recvData ?? []) as DirectMessage[])
     setLoading(false)
   }, [userId])
 
   useEffect(() => { load() }, [load])
 
+  // Realtime: listen for UPDATEs on my sent messages (replies) AND INSERTs where to_id = me
   useEffect(() => {
     if (!userId) return
     const channel = supabase
@@ -171,9 +202,17 @@ export function useProfesorMessages(
         filter: `from_id=eq.${userId}`,
       }, (payload) => {
         const updated = payload.new as DirectMessage
-        if (updated.reply_body) {
-          setSent(prev => prev.map(m => m.id === updated.id ? updated : m))
-        }
+        setSent(prev => prev.map(m => m.id === updated.id ? updated : m))
+      })
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'direct_messages',
+        filter: `to_id=eq.${userId}`,
+      }, (payload) => {
+        const nuevo = payload.new as DirectMessage
+        setReceived(prev => {
+          if (prev.some(m => m.id === nuevo.id)) return prev
+          return [nuevo, ...prev]
+        })
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
@@ -208,7 +247,25 @@ export function useProfesorMessages(
     }
   }, [])
 
+  // Mark all received messages from a specific contact as read
+  const markReadByContact = useCallback(async (contactId: string) => {
+    const unreadIds = received
+      .filter(m => m.from_id === contactId && !m.read)
+      .map(m => m.id)
+    if (unreadIds.length === 0) return
+    // Update locally first for instant UI feedback
+    setReceived(prev => prev.map(m =>
+      unreadIds.includes(m.id) ? { ...m, read: true } : m
+    ))
+    // Then update in DB
+    await supabase
+      .from('direct_messages')
+      .update({ read: true })
+      .in('id', unreadIds)
+  }, [received])
+
+  const allMessages = useMemo(() => [...sent, ...received], [sent, received])
   const pendingReplies = sent.filter(m => m.reply_body && m.reply_at)
 
-  return { sent, pendingReplies, loading, sendMessage, deleteSentMessage, reload: load }
+  return { sent, received, allMessages, pendingReplies, loading, sendMessage, deleteSentMessage, markReadByContact, reload: load }
 }

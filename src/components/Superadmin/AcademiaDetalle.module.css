@@ -1141,3 +1141,94 @@
 
 /* ── Stat capitalize ─────────────────────────────────────── */
 .statCapitalize { text-transform: capitalize; }
+
+/* ── Codes section ───────────────────────────────────────── */
+.codesCount {
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: rgba(37,99,235,0.10);
+  color: #2563EB;
+  padding: 2px 7px;
+  border-radius: 99px;
+  margin-left: 0.35rem;
+}
+
+.codesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.6rem;
+}
+
+.codeCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.75rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: border-color 0.15s;
+}
+.codeCard:hover { border-color: var(--line-strong); }
+
+.codeActive  { border-left: 3px solid #059669; }
+.codeUsed    { border-left: 3px solid #2563EB; opacity: 0.75; }
+.codeExpired { border-left: 3px solid #DC2626; opacity: 0.55; }
+
+.codeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.codeValue {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.codeBadge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.codeBadgeActive  { background: rgba(5,150,105,0.10); color: #059669; }
+.codeBadgeUsed    { background: rgba(37,99,235,0.10);  color: #2563EB; }
+.codeBadgeExpired { background: rgba(220,38,38,0.10);  color: #DC2626; }
+
+.codeMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.codeSubject {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #7C3AED;
+  background: rgba(124,58,237,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.codeDetail {
+  font-size: 0.72rem;
+  color: var(--ink-subtle);
+}
+
+.codeUsedBy {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #2563EB;
+  margin-top: 0.1rem;
+}

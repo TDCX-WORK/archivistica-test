@@ -91,3 +91,27 @@ export function calcularRacha(fechas: string[]): number {
   }
   return racha
 }
+
+/** Formatea una fecha ISO con hora: "12 ene 14:30" */
+export function fmtFechaHora(iso: string): string {
+  return new Date(iso).toLocaleDateString('es-ES', {
+    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
+  })
+}
+
+/** Baraja un array con Fisher-Yates (uniforme) */
+export function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j]!, a[i]!]
+  }
+  return a
+}
+
+/** Formatea segundos a mm:ss */
+export function formatTime(secs: number): string {
+  const m = String(Math.floor(secs / 60)).padStart(2, '0')
+  const s = String(secs % 60).padStart(2, '0')
+  return `${m}:${s}`
+}

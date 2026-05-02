@@ -142,7 +142,7 @@ function ComunicacionPanel({ currentUser, profiles, mensajes, onDelete }: {
           type:    'mensaje_director',
           title:   'Mensaje de tu director',
           body:    texto.trim().slice(0, 100),
-          link:    '/',
+          link:    '/mensajes',
         })
       }
       setEnviado(true)
