@@ -11,15 +11,20 @@ export default function useStudyProgress(
   const [loading,    setLoading]    = useState(true)
 
   useEffect(() => {
-    if (!userId) return
+    if (!userId || !academyId) return
 
     const load = async () => {
       setLoading(true)
 
-      const [{ data: reads }, { data: marks }] = await Promise.all([
-        supabase.from('study_read').select('topic_id').eq('user_id', userId),
-        supabase.from('study_bookmarks').select('topic_id').eq('user_id', userId),
-      ])
+      let readsQuery = supabase.from('study_read').select('topic_id').eq('user_id', userId).eq('academy_id', academyId)
+      let marksQuery = supabase.from('study_bookmarks').select('topic_id').eq('user_id', userId).eq('academy_id', academyId)
+
+      if (subjectId) {
+        readsQuery = readsQuery.eq('subject_id', subjectId)
+        marksQuery = marksQuery.eq('subject_id', subjectId)
+      }
+
+      const [{ data: reads }, { data: marks }] = await Promise.all([readsQuery, marksQuery])
 
       setReadTopics(new Set((reads ?? []).map(r => r.topic_id as string)))
       setBookmarks(new Set((marks ?? []).map(r => r.topic_id as string)))
@@ -27,7 +32,7 @@ export default function useStudyProgress(
     }
 
     load()
-  }, [userId])
+  }, [userId, academyId, subjectId])
 
   const toggleRead = useCallback(async (topicId: string, blockId: string) => {
     if (!userId) return

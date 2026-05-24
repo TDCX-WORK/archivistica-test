@@ -1,23 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { insertNotification } from '../lib/notifications'
+import { calcularRacha } from '../lib/helpers'
 import type { Session, WrongAnswer } from '../types'
-
-function calcStreak(sessions: Pick<Session, 'played_at'>[]): number {
-  if (!sessions.length) return 0
-  const days = [...new Set(sessions.map(s => s.played_at))].sort().reverse()
-  const today     = new Date().toISOString().slice(0, 10)
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
-  if (days[0] !== today && days[0] !== yesterday) return 0
-  let streak = 1
-  for (let i = 1; i < days.length; i++) {
-    const prev = new Date(days[i - 1]!)
-    const curr = new Date(days[i]!)
-    if ((prev.getTime() - curr.getTime()) / 86400000 === 1) streak++
-    else break
-  }
-  return streak
-}
 
 export function useProgress(
   userId:    string | null | undefined,
@@ -116,7 +101,7 @@ export function useProgress(
       }
 
       const diasConHoy = [...new Set(sesionesConNueva.map(s => s.played_at))]
-      const racha      = calcStreak(diasConHoy.map(d => ({ played_at: d })))
+      const racha      = calcularRacha(diasConHoy)
       const hitosRacha = [3, 7, 14, 30]
 
       if (hitosRacha.includes(racha)) {
@@ -144,13 +129,13 @@ export function useProgress(
 
     // Si no tenemos block_id real, buscarlo de la pregunta
     let resolvedBlock = block
-    if (!block || block === 'unknown') {
+    if (!block || block === 'unknown' || block === '') {
       const { data: q } = await supabase
         .from('questions')
         .select('block_id')
         .eq('id', questionId)
         .maybeSingle()
-      resolvedBlock = (q as { block_id: string } | null)?.block_id ?? 'unknown'
+      resolvedBlock = (q as { block_id: string } | null)?.block_id ?? 'Sin bloque'
     }
 
     const today    = new Date().toISOString().slice(0, 10)
@@ -217,9 +202,12 @@ export function useProgress(
   const totalSessions = sessions.length
   const totalAnswered = sessions.reduce((s, x) => s + x.total, 0)
   const totalCorrect  = sessions.reduce((s, x) => s + x.correct, 0)
-  const avgScore      = totalSessions > 0
-    ? Math.round(sessions.reduce((s, x) => s + x.score, 0) / totalSessions) : 0
-  const streakDays    = calcStreak(sessions)
+  // Nota media de los últimos 30 días — consistente con useProfesor y useDirector
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
+  const sessions30d   = sessions.filter(s => s.played_at >= thirtyDaysAgo)
+  const avgScore      = sessions30d.length > 0
+    ? Math.round(sessions30d.reduce((s, x) => s + x.score, 0) / sessions30d.length) : 0
+  const streakDays    = calcularRacha(sessions.map(s => s.played_at))
   const studiedDays   = new Set(sessions.map(s => s.played_at))
 
   const last30 = (() => {

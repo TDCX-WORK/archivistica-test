@@ -8,6 +8,7 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import { useContent }        from '../../hooks/useContent'
 import { useStudentProfile } from '../../hooks/useStudentProfile'
+import { calcularRacha }     from '../../lib/helpers'
 import ErrorState            from '../ui/ErrorState'
 import { useSettings }       from '../../hooks/useSettings'
 import type { CurrentUser, Session, WrongAnswer } from '../../types'
@@ -61,17 +62,7 @@ function buildMissions(
   const bookmarkCount = studyBookmarks?.size  ?? 0
   const examSessions  = sessions.filter(s => s.mode_id === 'exam')
   const examAvg       = examSessions.length ? Math.round(examSessions.reduce((s, x) => s + (x.score ?? 0), 0) / examSessions.length) : 0
-  const streakDays    = (() => {
-    const days = [...new Set(sessions.map(s => s.played_at))].sort().reverse()
-    if (!days.length) return 0
-    let streak = 1
-    for (let i = 1; i < days.length; i++) {
-      const prev = new Date(days[i-1]!), curr = new Date(days[i]!)
-      if ((prev.getTime() - curr.getTime()) / 86400000 === 1) streak++
-      else break
-    }
-    return streak
-  })()
+  const streakDays    = calcularRacha(sessions.map(s => s.played_at))
 
   return [
     { id: 'first_test',   category: 'Tests',       title: 'Primer paso',            desc: 'Completa tu primer test',               icon: '📋', current: Math.min(totalSessions, 1),   target: 1,   unlocked: totalSessions >= 1 },
@@ -184,6 +175,21 @@ function SettingsTab({ currentUser, settings, updateSetting, onUpdateDisplayName
     if (!currentUser?.id || !displayName.trim()) return
     const newUsername = displayName.trim().toLowerCase()
     if (newUsername === currentUser.username) return
+
+    // Validación de username
+    if (newUsername.length < 3) {
+      setSaveError('El nombre de usuario debe tener al menos 3 caracteres')
+      return
+    }
+    if (newUsername.length > 30) {
+      setSaveError('El nombre de usuario no puede tener más de 30 caracteres')
+      return
+    }
+    if (!/^[a-z0-9._-]+$/.test(newUsername)) {
+      setSaveError('Solo se permiten letras, números, puntos, guiones y guiones bajos')
+      return
+    }
+
     setSavingName(true)
     setSaveError('')
     const { error } = await import('../../lib/supabase').then(({ supabase }) =>

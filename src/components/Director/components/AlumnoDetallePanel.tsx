@@ -145,14 +145,22 @@ function AlumnoDetallePanel({ alumno, statsAlumno, onBack, onSave }: {
     <div className={styles.detallePanel}>
       <div className={styles.detallePanelHead}>
         <button className={styles.btnBack} onClick={onBack}><ChevronLeft size={16} /> Volver</button>
-        <div className={styles.detalleAvatar} style={{ background: scoreColor(statsAlumno?.nota) + '22', color: scoreColor(statsAlumno?.nota) }}>
-          {mascota ? mascota.emoji : alumno.username[0]!.toUpperCase()}
+        <div className={styles.detalleAvatar}>
+          {mascota
+            ? <img src={mascota.img} alt={mascota.nombre} className={styles.detalleAvatarImg} />
+            : alumno.username[0]!.toUpperCase()
+          }
         </div>
         <div className={styles.detalleTitleWrap}>
           <h2 className={styles.detalleTitle}>{String(ext.full_name ?? alumno.username)}</h2>
           <div className={styles.detalleMeta}>
             <span className={styles.detalleUsername}>@{alumno.username}</span>
-            {mascota && <span className={styles.detalleMascota}>{mascota.emoji} {mascota.nombre}</span>}
+            {mascota && (
+              <span className={styles.detalleMascota}>
+                <img src={mascota.img} alt={mascota.nombre} className={styles.detalleMascotaImg} />
+                {mascota.nombre}
+              </span>
+            )}
           </div>
         </div>
         <button className={styles.btnEditarPerfil} onClick={() => setEditando(v => !v)}>

@@ -6,57 +6,15 @@ import {
   Clock, UserCheck, DollarSign, MessagesSquare, GraduationCap,
   Mail, Phone, ArrowRight, Sparkles
 } from 'lucide-react'
-import { supabase } from '../../../lib/supabase'
-import { emit } from '../../../lib/eventBus'
 import { useAcciones, type AccionesReplyRecibida, type AccionesHiloStale } from '../../../hooks/useAcciones'
+import { useAccionesActions } from '../../../hooks/useAccionesActions'
 import type { CurrentUser } from '../../../types'
 import styles from './AccionesPanel.module.css'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TIPOS
 // ═══════════════════════════════════════════════════════════════════════════
-
-interface SubjectStats {
-  id:               string
-  name:             string
-  color:            string
-  alumnosEnRiesgo:  { id: string; username: string; diasInactivo: number | null }[]
-  alumnosPorExpirar:{ id: string; username: string; diasRestantes: number }[]
-  profesores:       { id: string; username: string; sesionesThisWeek: number }[]
-}
-
-interface Stats {
-  totalAlumnos:    number
-  totalEnRiesgo:   number
-  totalPorExpirar: number
-  bySubject:       SubjectStats[]
-  profesorActivity?: {
-    lastAvisoByProfesor:  Record<string, { created_at: string; title: string }>
-  }
-  finanzas?: {
-    alumnosSinPrecio:      number
-    spMap:                 Record<string, { monthly_price: number | null; exam_date: string | null; full_name: string | null; payment_status: string }>
-    pagos: {
-      vencidos:     number
-      mrrVencido:   number
-      mrrPendiente: number
-    }
-  }
-}
-
-interface StudentProfile {
-  id:            string
-  username:      string
-  access_until:  string | null
-  extended:      Record<string, any> | null
-}
-
-interface ProfileSimple {
-  id:           string
-  username:     string
-  role:         string
-  access_until: string | null
-}
+import type { SubjectStats, Stats, ProfileSimple, StudentProfile } from '../DirectorTypes'
 
 type AccionActiva =
   | { tipo: 'marcarPago';       alumnoId: string; username: string; monto: number }
@@ -121,6 +79,7 @@ export function AccionesPanel({ stats, currentUser, studentProfiles, allProfiles
   reloadProfiles:       () => Promise<void> | void
 }) {
   const { data: acciones, loading, reload, marcarReplyVista, descartarHilo } = useAcciones(currentUser)
+  const actions = useAccionesActions(currentUser, updateStudentProfile, reloadProfiles)
 
   const [abiertas,   setAbiertas]   = useState<Set<string>>(new Set(['dinero','accesos','datos','comunicacion','riesgo']))
   const [accion,     setAccion]     = useState<AccionActiva | null>(null)
@@ -467,6 +426,7 @@ export function AccionesPanel({ stats, currentUser, studentProfiles, allProfiles
           onDescartarHilo={descartarHilo}
           updateStudentProfile={updateStudentProfile}
           reloadProfiles={reloadProfiles}
+          actions={actions}
         />,
         document.body
       )}
@@ -506,7 +466,7 @@ function Dossier({ id, title, sub, icon: Icon, color, count, open, onToggle, chi
 // MODAL
 // ═══════════════════════════════════════════════════════════════════════════
 
-function AccionModal({ accion, currentUser, onClose, onResolved, onMarcarReplyVista, onDescartarHilo, updateStudentProfile, reloadProfiles }: {
+function AccionModal({ accion, currentUser, onClose, onResolved, onMarcarReplyVista, onDescartarHilo, updateStudentProfile, reloadProfiles, actions }: {
   accion:               AccionActiva
   currentUser:          CurrentUser | null
   onClose:              () => void
@@ -515,6 +475,7 @@ function AccionModal({ accion, currentUser, onClose, onResolved, onMarcarReplyVi
   onDescartarHilo:      (id: string) => void
   updateStudentProfile: (userId: string, fields: Record<string, any>) => Promise<boolean>
   reloadProfiles:       () => Promise<void> | void
+  actions:              ReturnType<typeof import('../../../hooks/useAccionesActions').useAccionesActions>
 }) {
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState<string | null>(null)
@@ -546,27 +507,8 @@ function AccionModal({ accion, currentUser, onClose, onResolved, onMarcarReplyVi
     try {
       switch (accion.tipo) {
         case 'marcarPago': {
-          const now      = new Date()
-          const month    = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
-
-          // UPSERT en academy_payments sobre la constraint única (academy_id, alumno_id, month)
-          const { error: payErr } = await supabase.from('academy_payments').upsert({
-            academy_id: currentUser.academy_id,
-            alumno_id:  accion.alumnoId,
-            amount:     accion.monto,
-            month,
-            status:     'paid',
-            paid_at:    new Date().toISOString(),
-            notes:      notas || null,
-          }, { onConflict: 'academy_id,alumno_id,month' })
-          if (payErr) { setError(`Error registrando pago: ${payErr.message}`); setSaving(false); return }
-
-          // Sincronizar payment_status en student_profiles vía upsert del parent
-          const ok = await updateStudentProfile(accion.alumnoId, { payment_status: 'paid' })
-          if (!ok) { setError('Pago registrado, pero no se actualizó el estado del alumno'); setSaving(false); return }
-
-          // Avisar a Finanzas, Facturación y resto de paneles
-          emit('director-data-changed')
+          const result = await actions.marcarPago(accion.alumnoId, accion.monto, notas)
+          if (result.error) { setError(result.error); setSaving(false); return }
           onResolved(`vencido-${accion.alumnoId}`)
           break
         }
@@ -574,34 +516,15 @@ function AccionModal({ accion, currentUser, onClose, onResolved, onMarcarReplyVi
         case 'asignarPrecio': {
           const n = parseFloat(precio.replace(',', '.'))
           if (isNaN(n) || n <= 0) { setError('Precio inválido'); setSaving(false); return }
-
-          const ok = await updateStudentProfile(accion.alumnoId, { monthly_price: n })
-          if (!ok) { setError('No se pudo guardar el precio. Revisa permisos o vuelve a intentarlo.'); setSaving(false); return }
-
-          emit('director-data-changed')
+          const result = await actions.asignarPrecio(accion.alumnoId, n)
+          if (result.error) { setError(result.error); setSaving(false); return }
           onResolved(`sinPrecio-${accion.alumnoId}`)
           break
         }
 
         case 'renovarAcceso': {
-          // Leer el access_until actual de profiles, sumar meses, escribir
-          const { data: current, error: readErr } = await supabase
-            .from('profiles').select('access_until').eq('id', accion.alumnoId).maybeSingle()
-          if (readErr) { setError(`No se pudo leer el acceso actual: ${readErr.message}`); setSaving(false); return }
-
-          const base = (current as {access_until:string|null} | null)?.access_until
-            ? new Date(Math.max(new Date((current as {access_until:string}).access_until).getTime(), Date.now()))
-            : new Date()
-          base.setMonth(base.getMonth() + meses)
-
-          const { error: updErr } = await supabase.from('profiles')
-            .update({ access_until: base.toISOString() })
-            .eq('id', accion.alumnoId)
-          if (updErr) { setError(`No se pudo renovar: ${updErr.message}`); setSaving(false); return }
-
-          // Recargar perfiles para que la tabla "Vencimientos" y el resto del panel vean la nueva fecha
-          await reloadProfiles()
-          emit('director-data-changed')
+          const result = await actions.renovarAcceso(accion.alumnoId, meses)
+          if (result.error) { setError(result.error); setSaving(false); return }
           onResolved(`expirar-${accion.alumnoId}`)
           break
         }
@@ -611,41 +534,26 @@ function AccionModal({ accion, currentUser, onClose, onResolved, onMarcarReplyVi
           if (accion.faltaEmail && emailIn.trim()) patch.email_contact = emailIn.trim()
           if (accion.faltaPhone && phoneIn.trim()) patch.phone         = phoneIn.trim()
           if (Object.keys(patch).length === 0) { setError('Rellena al menos un campo'); setSaving(false); return }
-
-          const ok = await updateStudentProfile(accion.alumnoId, patch)
-          if (!ok) { setError('No se pudieron guardar los datos. Revisa permisos o inténtalo de nuevo.'); setSaving(false); return }
-
+          const result = await actions.completarDatos(accion.alumnoId, patch)
+          if (result.error) { setError(result.error); setSaving(false); return }
           onResolved(`datos-${accion.alumnoId}`)
           break
         }
 
         case 'verReply': {
           if (replyText.trim()) {
-            // Enviar un NUEVO mensaje del director (no sobreescribir reply_body del alumno)
-            const { error: insErr } = await supabase.from('direct_messages').insert({
-              from_id:    currentUser.id,
-              to_id:      accion.reply.to_id,
-              academy_id: currentUser.academy_id,
-              subject_id: accion.reply.subject_id,
-              body:       replyText.trim(),
-            })
-            if (insErr) { setError(`No se pudo enviar: ${insErr.message}`); setSaving(false); return }
+            const result = await actions.enviarMensaje(accion.reply.to_id, replyText, accion.reply.subject_id)
+            if (result.error) { setError(result.error); setSaving(false); return }
           }
           onMarcarReplyVista(accion.reply.id)
-          onResolved(null) // ya lo quita el hook de acciones
+          onResolved(null)
           break
         }
 
         case 'responderHilo': {
           if (!replyText.trim()) { setError('Escribe una respuesta'); setSaving(false); return }
-          const { error: insErr } = await supabase.from('forum_replies').insert({
-            thread_id:   accion.hilo.id,
-            academy_id:  currentUser.academy_id,
-            author_id:   currentUser.id,
-            body:        replyText.trim(),
-            is_solution: false,
-          })
-          if (insErr) { setError(`No se pudo publicar: ${insErr.message}`); setSaving(false); return }
+          const result = await actions.responderHilo(accion.hilo.id, replyText)
+          if (result.error) { setError(result.error); setSaving(false); return }
           onDescartarHilo(accion.hilo.id)
           onResolved(null)
           break
@@ -655,15 +563,8 @@ function AccionModal({ accion, currentUser, onClose, onResolved, onMarcarReplyVi
         case 'recordatorioProfesor': {
           if (!mensaje.trim()) { setError('Escribe un mensaje'); setSaving(false); return }
           const destinatario = accion.tipo === 'recordatorioAlumno' ? accion.alumnoId : accion.profesorId
-          const { error: insErr } = await supabase.from('direct_messages').insert({
-            from_id:    currentUser.id,
-            to_id:      destinatario,
-            academy_id: currentUser.academy_id,
-            subject_id: currentUser.subject_id ?? null,
-            body:       mensaje.trim(),
-          })
-          if (insErr) { setError(`No se pudo enviar: ${insErr.message}`); setSaving(false); return }
-
+          const result = await actions.enviarMensaje(destinatario, mensaje, currentUser.subject_id)
+          if (result.error) { setError(result.error); setSaving(false); return }
           const key = accion.tipo === 'recordatorioAlumno'
             ? `riesgoAlumno-${accion.alumnoId}`
             : `riesgoProf-${accion.profesorId}`
@@ -684,10 +585,8 @@ function AccionModal({ accion, currentUser, onClose, onResolved, onMarcarReplyVi
     if (accion.tipo !== 'asignarPrecio' || !currentUser?.academy_id) return
     setSaving(true); setError(null)
     try {
-      const ok = await updateStudentProfile(accion.alumnoId, { monthly_price: null })
-      if (!ok) { setError('No se pudo quitar el precio. Revisa permisos o vuelve a intentarlo.'); setSaving(false); return }
-      emit('director-data-changed')
-      // No marcamos como resuelto — queremos que vuelva a aparecer en Sin precio
+      const result = await actions.quitarPrecio(accion.alumnoId)
+      if (result.error) { setError(result.error); setSaving(false); return }
       onResolved(null)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error al quitar precio')

@@ -7,22 +7,32 @@ import {
 import type { CurrentUser } from '../../types'
 import styles from './OnboardingWizard.module.css'
 
+import imgLogoAzul  from '../../assets/azul.webp'
+import imgZorro     from '../../assets/zorro.webp'
+import imgConejo    from '../../assets/conejo.webp'
+import imgDino      from '../../assets/dino.webp'
+import imgPanda     from '../../assets/panda.webp'
+import imgPandarojo from '../../assets/pandarojo.webp'
+import imgPato      from '../../assets/pato.webp'
+import imgPerro     from '../../assets/perro.webp'
+import imgRana      from '../../assets/rana.webp'
+
 interface Mascota {
   id:     string
-  emoji:  string
+  img:    string
   nombre: string
   desc:   string
 }
 
 const MASCOTAS: Mascota[] = [
-  { id: 'zorro',    emoji: '🦊', nombre: 'Zorro',    desc: 'Astuto y estratega. Siempre encuentra el camino.' },
-  { id: 'buho',     emoji: '🦉', nombre: 'Búho',     desc: 'Sabio y paciente. Aprende de cada error.' },
-  { id: 'leon',     emoji: '🦁', nombre: 'León',     desc: 'Valiente y constante. Nunca se rinde.' },
-  { id: 'tortuga',  emoji: '🐢', nombre: 'Tortuga',  desc: 'Metódica y perseverante. Lenta pero segura.' },
-  { id: 'aguila',   emoji: '🦅', nombre: 'Águila',   desc: 'Visionaria y enfocada. Ve el objetivo desde lejos.' },
-  { id: 'dragon',   emoji: '🐉', nombre: 'Dragón',   desc: 'Legendario y poderoso. Nació para superar lo imposible.' },
-  { id: 'lobo',     emoji: '🐺', nombre: 'Lobo',     desc: 'Disciplinado y leal. Fuerte en equipo.' },
-  { id: 'mariposa', emoji: '🦋', nombre: 'Mariposa', desc: 'Transformadora y libre. Cada sesión te hace más grande.' },
+  { id: 'zorro',     img: imgZorro,     nombre: 'Zorro',      desc: 'Astuto y estratega. Siempre encuentra el camino.' },
+  { id: 'conejo',    img: imgConejo,    nombre: 'Conejo',     desc: 'Rápido y constante. Nunca para de avanzar.' },
+  { id: 'dino',      img: imgDino,      nombre: 'Dino',       desc: 'Resistente y único. Los grandes siempre dejan huella.' },
+  { id: 'panda',     img: imgPanda,     nombre: 'Panda',      desc: 'Tranquilo y metódico. La calma es su superpoder.' },
+  { id: 'pandarojo', img: imgPandarojo, nombre: 'Panda Rojo', desc: 'Curioso e incansable. Cada detalle importa.' },
+  { id: 'pato',      img: imgPato,      nombre: 'Pato',       desc: 'Paciente y decidido. El agua no le frena, le impulsa.' },
+  { id: 'perro',     img: imgPerro,     nombre: 'Perro',      desc: 'Leal y perseverante. Nunca abandona el objetivo.' },
+  { id: 'rana',      img: imgRana,      nombre: 'Rana',       desc: 'Saltadora nata. Cada salto la acerca más a la meta.' },
 ]
 
 interface DatosOnboarding {
@@ -127,32 +137,131 @@ function Paso1({ datos, onChange, emailError, emailChecking, emailPreloaded }: P
   )
 }
 
+const MASCOTA_COLORS: Record<string, string> = {
+  zorro:     '#E8845A',
+  conejo:    '#A8C5DA',
+  dino:      '#7BAF8E',
+  panda:     '#B8B8B8',
+  pandarojo: '#C47B6B',
+  pato:      '#7BA7BC',
+  perro:     '#C4A882',
+  rana:      '#8FAF7E',
+}
+
 interface Paso2Props {
   mascota:  string
   onChange: (key: keyof DatosOnboarding, value: string) => void
 }
 
 function Paso2({ mascota, onChange }: Paso2Props) {
+  const initialIdx = MASCOTAS.findIndex(m => m.id === mascota)
+  const [idx,       setIdx]       = useState(initialIdx >= 0 ? initialIdx : 0)
+  const [animDir,   setAnimDir]   = useState<'left' | 'right' | null>(null)
+  const [animKey,   setAnimKey]   = useState(0)
+  const touchStartX = useRef<number | null>(null)
+
+  const current = MASCOTAS[idx]!
+  const color   = MASCOTA_COLORS[current.id] ?? '#B8B8B8'
+
+  const go = (dir: 'left' | 'right') => {
+    setAnimDir(dir)
+    setAnimKey(k => k + 1)
+    setIdx(i => dir === 'right'
+      ? (i + 1) % MASCOTAS.length
+      : (i - 1 + MASCOTAS.length) % MASCOTAS.length
+    )
+  }
+
+  const prev = () => go('left')
+  const next = () => go('right')
+
+  useEffect(() => {
+    onChange('mascota', MASCOTAS[idx]!.id)
+  }, [idx])
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0]!.clientX
+  }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return
+    const diff = touchStartX.current - e.changedTouches[0]!.clientX
+    if (Math.abs(diff) > 40) diff > 0 ? next() : prev()
+    touchStartX.current = null
+  }
+
+  const prevM = MASCOTAS[(idx - 1 + MASCOTAS.length) % MASCOTAS.length]!
+  const nextM = MASCOTAS[(idx + 1) % MASCOTAS.length]!
+
   return (
     <div className={styles.paso}>
       <div className={styles.pasoIcon}><Sparkles size={22} /></div>
       <h2 className={styles.pasoTitle}>Elige tu mascota de estudio</h2>
       <p className={styles.pasoDesc}>Tu compañero de oposición. Te acompañará durante todo el camino.</p>
 
-      <div className={styles.mascotasGrid}>
-        {MASCOTAS.map(m => (
-          <button key={m.id}
-            className={[styles.mascotaCard, mascota === m.id ? styles.mascotaCardActive : ''].join(' ')}
-            onClick={() => onChange('mascota', m.id)}
-            type="button"
+      <div className={styles.carruselWrap} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+
+        {/* Difuminado izquierda */}
+        <div className={styles.carruselFadeLeft} />
+
+        {/* Mascota anterior (parcial izquierda) */}
+        <div className={styles.carruselSide}>
+          <div className={styles.carruselCircleSide}>
+            <img src={prevM.img} alt={prevM.nombre} className={styles.carruselImgSide} />
+          </div>
+        </div>
+
+        {/* Flecha izquierda */}
+        <button className={styles.carruselArrow} onClick={prev} type="button" aria-label="Anterior">
+          <ChevronLeft size={20} strokeWidth={2.5} />
+        </button>
+
+        {/* Mascota central */}
+        <div className={styles.carruselCenter}>
+          <div
+            key={animKey}
+            className={[
+              styles.carruselCircle,
+              animDir === 'right' ? styles.slideInRight : '',
+              animDir === 'left'  ? styles.slideInLeft  : '',
+            ].join(' ')}
+            style={{
+              borderColor: color,
+              boxShadow:   `0 0 0 4px ${color}33, 0 8px 32px ${color}44`,
+            }}
           >
-            <span className={styles.mascotaEmoji}>{m.emoji}</span>
-            <span className={styles.mascotaNombre}>{m.nombre}</span>
-            <span className={styles.mascotaDesc}>{m.desc}</span>
-            {mascota === m.id && (
-              <div className={styles.mascotaCheck}><Check size={12} /></div>
-            )}
-          </button>
+            <img src={current.img} alt={current.nombre} className={styles.carruselImg} />
+          </div>
+          <span className={styles.carruselNombre} style={{ color }}>{current.nombre}</span>
+          <span className={styles.carruselDesc}>{current.desc}</span>
+        </div>
+
+        {/* Flecha derecha */}
+        <button className={styles.carruselArrow} onClick={next} type="button" aria-label="Siguiente">
+          <ChevronRight size={20} strokeWidth={2.5} />
+        </button>
+
+        {/* Mascota siguiente (parcial derecha) */}
+        <div className={styles.carruselSide}>
+          <div className={styles.carruselCircleSide}>
+            <img src={nextM.img} alt={nextM.nombre} className={styles.carruselImgSide} />
+          </div>
+        </div>
+
+        {/* Difuminado derecha */}
+        <div className={styles.carruselFadeRight} />
+      </div>
+
+      {/* Dots indicador */}
+      <div className={styles.carruselDots}>
+        {MASCOTAS.map((m, i) => (
+          <button
+            key={m.id}
+            className={[styles.carruselDot, i === idx ? styles.carruselDotActive : ''].join(' ')}
+            style={i === idx ? { background: color } : {}}
+            onClick={() => setIdx(i)}
+            type="button"
+            aria-label={m.nombre}
+          />
         ))}
       </div>
     </div>
@@ -163,7 +272,10 @@ function Paso3({ datos }: { datos: DatosOnboarding }) {
   const mascota = MASCOTAS.find(m => m.id === datos.mascota)
   return (
     <div className={styles.paso}>
-      <div className={styles.pasoIconGrande}>{mascota?.emoji || '🎯'}</div>
+      {mascota
+        ? <img src={mascota.img} alt={mascota.nombre} className={styles.pasoImgGrande} />
+        : <div className={styles.pasoIconGrande}>🎯</div>
+      }
       <h2 className={styles.pasoTitle}>¡Todo listo, {datos.full_name?.split(' ')[0] || 'campeón'}!</h2>
       <p className={styles.pasoDesc}>
         Tu compañero de estudio es el {mascota?.nombre || 'Zorro'}. {mascota?.desc}
@@ -350,7 +462,10 @@ export default function OnboardingWizard({ currentUser, onComplete, onLogout }: 
 
         <div className={styles.wizardHeader}>
           <div className={styles.wizardHeaderLeft}>
-            <span className={styles.wizardBrand}>🦊 FrostFox Academy</span>
+            <div className={styles.wizardBrand}>
+              <img src={imgLogoAzul} alt="FrostFox" className={styles.wizardBrandLogo} />
+              FrostFox Academy
+            </div>
             <span className={styles.wizardSub}>Configuración inicial</span>
           </div>
           {onLogout && (
@@ -402,7 +517,7 @@ export default function OnboardingWizard({ currentUser, onComplete, onLogout }: 
             onClick={handleNext}
             disabled={!canNext() || saving}
           >
-            {saving ? 'Guardando…' : paso === 3 ? '¡Empezar a estudiar! 🚀' : 'Siguiente'}
+            {saving ? 'Guardando…' : paso === 3 ? '¡Empezar a estudiar!' : 'Siguiente'}
             {paso < 3 && !saving && <ChevronRight size={15} />}
           </button>
         </div>

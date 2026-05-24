@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   MessageCircle, CheckCircle2, Plus, Loader2,
   BookOpen, Layers, Building2
@@ -65,8 +66,17 @@ export default function ThreadList({ threads, subjects, blocks, loading, onOpen,
             className={[styles.tab, tab === id ? styles.tabActive : ''].join(' ')}
             onClick={() => setTab(id)}
           >
-            <Icon size={13} />
-            {label}
+            {tab === id && (
+              <motion.span
+                className={styles.tabPill}
+                layoutId="foro-tab-pill"
+                transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.8 }}
+              />
+            )}
+            <span className={styles.tabContent}>
+              <Icon size={13} />
+              {label}
+            </span>
           </button>
         ))}
       </div>

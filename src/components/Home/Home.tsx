@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   BookOpen, Trophy, Flame, FileText, Layers, Zap, Archive,
@@ -7,10 +7,13 @@ import {
   Lock, Check, ClipboardList, TrendingUp, Target, Award,
   GraduationCap, Bookmark, BarChart2, Medal, Hash, Gem
 } from 'lucide-react'
-import { supabase }          from '../../lib/supabase'
+import { calcularRacha }     from '../../lib/helpers'
 import config                from '../../data/config.json'
 import { usePlanSemanal }    from '../../hooks/usePlanSemanal'
+import { useHomeData }       from '../../hooks/useHomeData'
+import type { BlockWithCount, SupuestoData } from '../../hooks/useHomeData'
 import StudyHeatmap          from './StudyHeatmap'
+import SplashLoader          from '../ui/SplashLoader'
 import { Ripple }            from '../magicui/Ripple'
 import { useAnnouncements }  from '../../hooks/useAnnouncements'
 import { useAlumnoMessages } from '../../hooks/useDirectMessages'
@@ -70,17 +73,7 @@ function buildMissions(
   const bookmarkCount = studyBookmarks?.size  ?? 0
   const examSessions  = sessions.filter(s => s.mode_id === 'exam')
   const examAvg       = examSessions.length ? Math.round(examSessions.reduce((s, x) => s + (x.score ?? 0), 0) / examSessions.length) : 0
-  const streakDays    = (() => {
-    const days = [...new Set(sessions.map(s => s.played_at))].sort().reverse()
-    if (!days.length) return 0
-    let streak = 1
-    for (let i = 1; i < days.length; i++) {
-      const prev = new Date(days[i-1]!), curr = new Date(days[i]!)
-      if ((prev.getTime() - curr.getTime()) / 86400000 === 1) streak++
-      else break
-    }
-    return streak
-  })()
+  const streakDays    = calcularRacha(sessions.map(s => s.played_at))
 
   return [
     { id: 'first_test',   category: 'Tests',       title: 'Primer paso',            current: Math.min(totalSessions, 1),   target: 1,   unlocked: totalSessions >= 1 },
@@ -292,7 +285,7 @@ function XpCard({ xp, streakDays, sessions, levelData, nextLevelData, levelPct, 
   )
 }
 
-interface BlockWithCount { id: string; label: string; color: string; position: number; count: number }
+// BlockWithCount importado de useHomeData
 interface BlockCardProps { block: BlockWithCount; onClick: () => void }
 function BlockCard({ block, onClick }: BlockCardProps) {
   const Icon       = getBlockIcon(block.label)
@@ -309,13 +302,7 @@ function BlockCard({ block, onClick }: BlockCardProps) {
   )
 }
 
-interface SupuestoData {
-  id:        string
-  title:     string
-  subtitle:  string
-  scenario:  string
-  questions: { question: string; options: unknown; answer: number; explanation: string }[]
-}
+// SupuestoData importado de useHomeData
 
 interface HomeProps {
   onSelectMode:  (modeId: string, modeLabel?: string, third?: unknown, fourth?: string) => void
@@ -326,9 +313,9 @@ interface HomeProps {
 
 export default function Home({ onSelectMode, progress, currentUser, studyProgress }: HomeProps) {
   const { announcements, loading: loadingAnn } = useAnnouncements(currentUser?.academy_id, currentUser?.subject_id)
-  const { byDate: calendarEventsByDate, upcoming: upcomingEvents } = useCalendarEvents(currentUser)
+  const { byDate: calendarEventsByDate, upcoming: upcomingEvents, loading: loadingCal } = useCalendarEvents(currentUser)
   const { messages: dmMessages, unread: dmUnread, markRead: dmMarkRead, replyToMessage: dmReply, deleteMessage: dmDelete } = useAlumnoMessages(currentUser?.id)
-  const { profile: studentProfile }            = useStudentProfile(currentUser?.id)
+  const { profile: studentProfile, loading: loadingProfile } = useStudentProfile(currentUser?.id)
   const navigate = useNavigate()
 
   const { totalAnswered, avgScore, streakDays, wrongAnswers = [], dueForReview = [], sessions = [] } = progress
@@ -336,83 +323,9 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
   const readTopics = studyProgress?.readTopics
   const bookmarks  = studyProgress?.bookmarks
 
-  const [totalQuestions, setTotalQuestions] = useState(0)
-  const [blocks,         setBlocks]         = useState<BlockWithCount[]>([])
-  const [supuestos,      setSupuestos]      = useState<SupuestoData[]>([])
-  const [planDates,      setPlanDates]      = useState<Set<string>>(new Set())
-  const [totalTopics,    setTotalTopics]    = useState(0)
-  const [blocksReady,    setBlocksReady]    = useState(false)
+  const { totalQuestions, blocks, supuestos, planDates, totalTopics, loading: homeLoading } = useHomeData(currentUser?.academy_id, currentUser?.subject_id)
 
-  useEffect(() => {
-    const sid = currentUser?.subject_id
-    const aid = currentUser?.academy_id
-    if (!aid) return
-
-    const loadBlocks = async (): Promise<BlockWithCount[]> => {
-      const { data: bd } = sid
-        ? await supabase.from('content_blocks').select('id,label,color,position').eq('academy_id', aid).eq('subject_id', sid).order('position')
-        : await supabase.from('content_blocks').select('id,label,color,position').eq('academy_id', aid).order('position')
-      if (!bd?.length) return []
-      const { data: qd } = sid
-        ? await supabase.from('questions').select('block_id').eq('academy_id', aid).eq('subject_id', sid)
-        : await supabase.from('questions').select('block_id').eq('academy_id', aid)
-      const c: Record<string, number> = {}
-      for (const q of (qd ?? []) as { block_id: string }[]) c[q.block_id] = (c[q.block_id] ?? 0) + 1
-      return (bd as { id: string; label: string; color: string; position: number }[]).map(b => ({ ...b, count: c[b.id] ?? 0 }))
-    }
-
-    const cq = sid
-      ? supabase.from('questions').select('id', { count: 'exact', head: true }).eq('academy_id', aid).eq('subject_id', sid)
-      : supabase.from('questions').select('id', { count: 'exact', head: true }).eq('academy_id', aid)
-
-    Promise.all([cq, loadBlocks()]).then(([cr, bd]) => {
-      setTotalQuestions(cr.count ?? 0)
-      setBlocks(bd)
-      setBlocksReady(true)
-    })
-
-    const loadTopics = async () => {
-      const { data: blockData } = sid
-        ? await supabase.from('content_blocks').select('id').eq('academy_id', aid).eq('subject_id', sid)
-        : await supabase.from('content_blocks').select('id').eq('academy_id', aid)
-      if (!blockData?.length) return
-      const { count } = await supabase.from('content_topics').select('id', { count: 'exact', head: true })
-        .in('block_id', (blockData as { id: string }[]).map(b => b.id))
-      setTotalTopics(count ?? 0)
-    }
-    loadTopics()
-
-    const loadSup = async () => {
-      let q = supabase.from('supuestos')
-        .select('id,slug,title,subtitle,scenario,position,supuesto_questions(id,question,options,answer,explanation,position)')
-        .eq('academy_id', aid).order('position')
-      if (sid) q = q.eq('subject_id', sid)
-      const { data } = await q
-      if (data?.length) {
-        type RawSup = {
-          slug: string; title: string; subtitle: string | null; scenario: string | null
-          supuesto_questions: { question: string; options: string[]; answer: number; explanation: string | null; position: number }[]
-        }
-        setSupuestos((data as RawSup[]).map(s => ({
-          id: s.slug, title: s.title, subtitle: s.subtitle ?? '', scenario: s.scenario ?? '',
-          questions: (s.supuesto_questions ?? [])
-            .sort((a, b) => a.position - b.position)
-            .map(q => ({ question: q.question, options: q.options, answer: q.answer, explanation: q.explanation ?? '' }))
-        })))
-      } else setSupuestos([])
-    }
-    loadSup()
-
-    const loadPlan = async () => {
-      let q = supabase.from('study_plans').select('week_start').eq('academy_id', aid)
-      if (sid) q = q.eq('subject_id', sid)
-      const { data } = await q
-      if (data?.length) setPlanDates(new Set((data as { week_start: string }[]).map(p => p.week_start)))
-    }
-    loadPlan()
-  }, [currentUser?.academy_id, currentUser?.subject_id])
-
-  const { planSemanal, bloquesSemanal, planDiario, bloquesDiario } = usePlanSemanal(currentUser?.academy_id, currentUser?.subject_id)
+  const { planSemanal, bloquesSemanal, planDiario, bloquesDiario, loading: loadingPlan } = usePlanSemanal(currentUser?.academy_id, currentUser?.subject_id)
 
   const xp       = useMemo(() => calcXP(sessions, readTopics, wrongAnswers, totalTopics), [sessions, readTopics, wrongAnswers, totalTopics])
   const missions = useMemo(() => buildMissions(sessions, wrongAnswers, readTopics, bookmarks, totalTopics), [sessions, wrongAnswers, readTopics, bookmarks, totalTopics])
@@ -425,10 +338,13 @@ export default function Home({ onSelectMode, progress, currentUser, studyProgres
 
   const regularModes = Object.values(modes).filter(m => m.id !== 'simulacro')
 
-  const homeReady = !loadingData && blocksReady
+  // Espera a que TODOS los hooks terminen para evitar layout shifts
+  const homeReady = !loadingData && !homeLoading && !loadingAnn && !loadingPlan && !loadingCal && !loadingProfile
+
+  if (!homeReady) return <SplashLoader compact />
 
   return (
-    <div className={styles.page} style={{ opacity: homeReady ? 1 : 0, transition: 'opacity 0.25s ease' }}>
+    <div className={styles.page}>
       <div className={styles.kpiRow}>
         <StatCard icon={Flame}         label="Racha"       value={`${streakDays}d`}   color="#D97706" bg="#FFFBEB" />
         <StatCard icon={Trophy}        label="Media"       value={`${avgScore}%`}     color="#7C3AED" bg="#F5F3FF" />

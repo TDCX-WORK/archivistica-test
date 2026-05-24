@@ -3,7 +3,7 @@ import type { CurrentUser } from '../../types'
 export type { CurrentUser }
 
 // ── Types ──────────────────────────────────────────────────────────────────
-interface SubjectStats {
+export interface SubjectStats {
   id:               string
   slug:             string
   name:             string
@@ -20,7 +20,7 @@ interface SubjectStats {
   profesores:       { id: string; username: string; alumnos: number; notaMedia: number | null; sesionesThisWeek: number }[]
 }
 
-interface Stats {
+export interface Stats {
   totalAlumnos:    number
   totalActivos:    number
   totalProfesores: number
@@ -51,7 +51,7 @@ interface Stats {
   }
 }
 
-interface ProfileSimple {
+export interface ProfileSimple {
   id:           string
   username:     string
   role:         string
@@ -59,7 +59,7 @@ interface ProfileSimple {
   created_at:   string
 }
 
-interface StudentProfile {
+export interface StudentProfile {
   id:            string
   username:      string
   role:          string
@@ -69,7 +69,7 @@ interface StudentProfile {
   extended:      Record<string, any> | null
 }
 
-interface AlumnoEnriquecido {
+export interface AlumnoEnriquecido {
   id:            string
   username:      string
   nota:          number | null
@@ -84,7 +84,7 @@ interface AlumnoEnriquecido {
   created_at:    string | null
 }
 
-interface AlumnoDetalleForm {
+export interface AlumnoDetalleForm {
   full_name:     string
   phone:         string
   email_contact: string
@@ -96,15 +96,24 @@ interface AlumnoDetalleForm {
 
 
 
-const MASCOTAS: Record<string, { emoji: string; nombre: string }> = {
-  zorro:    { emoji: '🦊', nombre: 'Zorro'    },
-  buho:     { emoji: '🦉', nombre: 'Búho'     },
-  leon:     { emoji: '🦁', nombre: 'León'     },
-  tortuga:  { emoji: '🐢', nombre: 'Tortuga'  },
-  aguila:   { emoji: '🦅', nombre: 'Águila'   },
-  dragon:   { emoji: '🐉', nombre: 'Dragón'   },
-  lobo:     { emoji: '🐺', nombre: 'Lobo'     },
-  mariposa: { emoji: '🦋', nombre: 'Mariposa' },
+import imgZorro     from '../../assets/zorro.webp'
+import imgConejo    from '../../assets/conejo.webp'
+import imgDino      from '../../assets/dino.webp'
+import imgPanda     from '../../assets/panda.webp'
+import imgPandarojo from '../../assets/pandarojo.webp'
+import imgPato      from '../../assets/pato.webp'
+import imgPerro     from '../../assets/perro.webp'
+import imgRana      from '../../assets/rana.webp'
+
+const MASCOTAS: Record<string, { img: string; nombre: string }> = {
+  zorro:     { img: imgZorro,     nombre: 'Zorro'      },
+  conejo:    { img: imgConejo,    nombre: 'Conejo'     },
+  dino:      { img: imgDino,      nombre: 'Dino'       },
+  panda:     { img: imgPanda,     nombre: 'Panda'      },
+  pandarojo: { img: imgPandarojo, nombre: 'Panda Rojo' },
+  pato:      { img: imgPato,      nombre: 'Pato'       },
+  perro:     { img: imgPerro,     nombre: 'Perro'      },
+  rana:      { img: imgRana,      nombre: 'Rana'       },
 }
 
 export { MASCOTAS }

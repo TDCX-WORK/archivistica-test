@@ -98,7 +98,7 @@ export function useCalendarEvents(currentUser: CurrentUser | null) {
   const crearEvento = useCallback(async (params: {
     title:       string
     event_date:  string
-    type:        'clase' | 'hito' | 'evento'
+    type:        'clase' | 'hito' | 'evento' | 'examen' | 'tarea'
     description: string | null
   }) => {
     if (!currentUser?.academy_id || !currentUser?.id) return { error: 'Sin sesión' }

@@ -149,14 +149,29 @@
 
 /* ── ACTIVE ──────────────────────────────────────────────── */
 .navActive {
-  background: #18181B !important;
   color: #fff !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  box-shadow: none;
+  position: relative;
+  isolation: isolate;
 }
 @media (min-width: 769px) {
-  [data-theme="oscuro"] .navActive { background: #fff !important; color: #18181B !important; }
-  [data-theme="calido"] .navActive { background: #2C1E0F !important; color: #FEFAF6 !important; }
+  [data-theme="oscuro"] .navActive { color: #18181B !important; }
+  [data-theme="calido"] .navActive { color: #FEFAF6 !important; }
 }
+
+/* Pill deslizante — animada por Motion, lleva el fondo */
+.navPill {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-lg);
+  background: #18181B;
+  z-index: -1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  display: block;
+}
+[data-theme="oscuro"] .navPill { background: #fff; }
+[data-theme="calido"] .navPill { background: #2C1E0F; }
+.sidebarExpanded .navPill { border-radius: var(--r-md); }
 
 /* ── FOOTER ──────────────────────────────────────────────── */
 .footer {

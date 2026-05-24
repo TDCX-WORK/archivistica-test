@@ -13,7 +13,7 @@ import { useDirector }          from '../../../hooks/useDirector'
 import { useAcademyProfiles }   from '../../../hooks/useStudentProfile'
 import { useProfesorMessages }  from '../../../hooks/useDirectMessages'
 import type { DirectMessage }   from '../../../hooks/useDirectMessages'
-import { supabase }             from '../../../lib/supabase'
+import { useAlumnoEdit }          from '../../../hooks/useAlumnoEdit'
 import { Ripple }               from '../../magicui/Ripple'
 import { AnimatedGridPattern }  from '../../magicui/AnimatedGridPattern'
 import type { CurrentUser }     from '../../../types'
@@ -24,7 +24,7 @@ import { ComunicacionPanel }    from '../panels/ComunicacionPanel'
 import { AlertasPanel, OnboardingChecklist, exportarInforme } from '../panels/AlertasPanel'
 import { AccionesPanel } from '../panels/AccionesPanel'
 import { VencimientosPanel }    from '../panels/VencimientosPanel'
-import { AsignaturasDetalle, AsignaturasCard } from '../panels/AsignaturasDetalle'
+import { AsignaturasDetalle } from '../panels/AsignaturasDetalle'
 import SubirDocumentos from '../../Profesor/components/SubirDocumentos'
 import { AlumnoDetallePanel, ProfesorDetallePanel } from '../components/AlumnoDetallePanel'
 import { AlumnosTable }         from '../components/AlumnosTable'
@@ -293,17 +293,15 @@ function DirectorBentoNav({ tab, setTab, stats, nAlertas, studentProfiles, nMens
   const mrr = preciosReales.length > 0 ? preciosReales.reduce((a, b) => a + b, 0) : null
 
   const cards = [
-    { id:'overview',    label:'Actividad',    desc: stats.sesiones30d>0?`${stats.sesiones30d} sesiones este mes`:'Sin sesiones todavía',                                                      icon:TrendingUp,   color:'#0891B2', big:true,  isAsig:false, badge:null as number|null },
-    { id:'alumnos',     label:'Alumnos',      desc: stats.totalAlumnos>0?`${stats.totalAlumnos} matriculados · ${stats.totalActivos} activos`:'Sin alumnos aún',                              icon:Users,        color:'#2563EB', big:false, isAsig:false, badge:null as number|null },
-    { id:'alertas',     label:'Acciones',     desc: nAlertas>0?`${nAlertas} decisión${nAlertas!==1?'es':''} pendiente${nAlertas!==1?'s':''}`:'Bandeja vacía',                                   icon:AlertTriangle,color:nAlertas>0?'#DC2626':'#059669', big:false, isAsig:false, badge:nAlertas>0?nAlertas:null as number|null },
-    { id:'profesores',  label:'Profesores',   desc: stats.totalProfesores>0?`${stats.totalProfesores} profesor${stats.totalProfesores!==1?'es':''}`:'Sin profesores aún',                    icon:GraduationCap,color:'#7C3AED', big:false, isAsig:false, badge:null as number|null },
-    { id:'finanzas',    label:'Finanzas',     desc: 'Panel en construcción',                                                                                                                 icon:Euro, color:'#9CA3AF', big:false, isAsig:false, badge:null as number|null, disabled:true as boolean },
-    { id:'comunicacion', label:'Comunicación', desc: nMensajes>0?`${nMensajes} mensaje${nMensajes!==1?'s':''} enviado${nMensajes!==1?'s':''}`:'Mensajes directos', descExtra: null, icon:MessageSquare, color:'#0891B2', big:false, isAsig:false, badge: nRespuestas > 0 ? nRespuestas : null as number|null },
-    { id:'vencimientos', label:'Vencimientos', desc: (stats.totalPorExpirar>0?`${stats.totalPorExpirar} expiran pronto`:'Gestión de accesos'), descExtra: null, icon:Calendar, color:'#D97706', big:false, isAsig:false, badge: stats.totalPorExpirar>0?stats.totalPorExpirar:null as number|null },
-    { id:'retencion',   label:'Retención',    desc: 'Permanencia y cohortes', descExtra: null, icon:TrendingUp, color:'#7C3AED', big:false, isAsig:false, badge:null as number|null },
-    { id:'asignaturas',  label:'Asignaturas',  desc: `${stats.bySubject?.length??0} asignatura${(stats.bySubject?.length??0)!==1?'s':''} activa${(stats.bySubject?.length??0)!==1?'s':''}`, icon:BookOpen,     color:'#D97706', big:false, isAsig:true,  badge:null as number|null },
-    { id:'documentos',   label:'Documentos',   desc: 'Sube material y contratos', descExtra: null, icon:FolderOpen, color:'#059669', big:false, isAsig:false, badge:null as number|null },
-
+    { id:'overview',     label:'Actividad',    desc: stats.sesiones30d>0?`${stats.sesiones30d} sesiones este mes`:'Sin sesiones todavía', icon:TrendingUp,   color:'#0891B2', big:true,  badge:null as number|null },
+    { id:'alumnos',      label:'Alumnos',      desc: stats.totalAlumnos>0?`${stats.totalAlumnos} matriculados · ${stats.totalActivos} activos`:'Sin alumnos aún', icon:Users, color:'#2563EB', big:false, badge:null as number|null },
+    { id:'alertas',      label:'Acciones',     desc: nAlertas>0?`${nAlertas} decisión${nAlertas!==1?'es':''} pendiente${nAlertas!==1?'s':''}`:'Bandeja vacía', icon:AlertTriangle, color:nAlertas>0?'#DC2626':'#059669', big:false, badge:nAlertas>0?nAlertas:null as number|null },
+    { id:'profesores',   label:'Profesores',   desc: stats.totalProfesores>0?`${stats.totalProfesores} profesor${stats.totalProfesores!==1?'es':''}`:'Sin profesores aún', icon:GraduationCap, color:'#7C3AED', big:false, badge:null as number|null },
+    { id:'finanzas',     label:'Finanzas',     desc: 'Panel en construcción', icon:Euro, color:'#9CA3AF', big:false, badge:null as number|null, disabled:true as boolean },
+    { id:'comunicacion', label:'Comunicación', desc: nMensajes>0?`${nMensajes} mensaje${nMensajes!==1?'s':''} enviado${nMensajes!==1?'s':''}`:'Mensajes directos', icon:MessageSquare, color:'#0891B2', big:false, badge:nRespuestas>0?nRespuestas:null as number|null },
+    { id:'vencimientos', label:'Vencimientos', desc: stats.totalPorExpirar>0?`${stats.totalPorExpirar} expiran pronto`:'Gestión de accesos', icon:Calendar, color:'#D97706', big:false, badge:stats.totalPorExpirar>0?stats.totalPorExpirar:null as number|null },
+    { id:'retencion',    label:'Retención',    desc: 'Permanencia y cohortes', icon:TrendingUp, color:'#7C3AED', big:false, badge:null as number|null },
+    { id:'documentos',   label:'Documentos',   desc: 'Sube material y contratos', icon:FolderOpen, color:'#059669', big:false, badge:null as number|null },
   ]
 
   return (
@@ -314,28 +312,18 @@ function DirectorBentoNav({ tab, setTab, stats, nAlertas, studentProfiles, nMens
         return (
           <button key={card.id}
             disabled={isDisabled}
-            className={[styles.bentoCard, card.big?styles.bentoBig:'', active&&!card.isAsig?styles.bentoActive:'', card.isAsig?styles.bentoExam:'', isDisabled?styles.bentoDisabled:''].join(' ')}
+            className={[styles.bentoCard, card.big?styles.bentoBig:'', active?styles.bentoActive:'', isDisabled?styles.bentoDisabled:''].join(' ')}
             style={{ ['--bento-color' as string]: card.color }}
-            onClick={() => { if (isDisabled) return; setTab(card.isAsig?'asignaturas':card.id) }}>
-            {card.big && !card.isAsig && !isDisabled && <AnimatedGridPattern numSquares={18} maxOpacity={active?0.12:0.06} duration={4} color={card.color} lineColor={card.color+'20'} />}
-            {!card.isAsig && !isDisabled && <Ripple mainCircleSize={card.big?60:40} mainCircleOpacity={active?0.25:0.12} numCircles={card.big?5:3} color={card.color} duration={card.big?3:3.5} />}
-            {card.isAsig ? (
-              <div className={styles.bentoContent}>
-                <div className={styles.bentoExamHeader}>
-                  <div className={styles.bentoIconWrap} style={{ background:card.color+'18', color:card.color }}><Icon size={16} strokeWidth={1.8} /></div>
-                  <span className={styles.bentoLabel}>{card.label}</span>
-                </div>
-                <AsignaturasCard stats={stats} />
-              </div>
-            ) : (
-              <div className={styles.bentoContent}>
-                <div className={styles.bentoIconWrap} style={{ background:card.color+'18', color:card.color }}><Icon size={card.big?20:16} strokeWidth={1.8} /></div>
-                <div className={styles.bentoText}><span className={styles.bentoLabel}>{card.label}</span><span className={styles.bentoDesc}>{card.desc}</span></div>
-                {isDisabled
-                  ? <span className={styles.bentoBadgeSoon}>Próximamente</span>
-                  : (card.badge!=null&&card.badge>0&&<span className={styles.bentoBadge} style={{ background:card.color }}>{card.badge}</span>)}
-              </div>
-            )}
+            onClick={() => { if (isDisabled) return; setTab(card.id) }}>
+            {card.big && !isDisabled && <AnimatedGridPattern numSquares={18} maxOpacity={active?0.12:0.06} duration={4} color={card.color} lineColor={card.color+'20'} />}
+            {!isDisabled && <Ripple mainCircleSize={card.big?60:40} mainCircleOpacity={active?0.25:0.12} numCircles={card.big?5:3} color={card.color} duration={card.big?3:3.5} />}
+            <div className={styles.bentoContent}>
+              <div className={styles.bentoIconWrap} style={{ background:card.color+'18', color:card.color }}><Icon size={card.big?20:16} strokeWidth={1.8} /></div>
+              <div className={styles.bentoText}><span className={styles.bentoLabel}>{card.label}</span><span className={styles.bentoDesc}>{card.desc}</span></div>
+              {isDisabled
+                ? <span className={styles.bentoBadgeSoon}>Próximamente</span>
+                : (card.badge!=null&&card.badge>0&&<span className={styles.bentoBadge} style={{ background:card.color }}>{card.badge}</span>)}
+            </div>
           </button>
         )
       })}
@@ -365,33 +353,34 @@ export default function DirectorPanel({ currentUser }: { currentUser: CurrentUse
     setTimeout(() => contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80)
   }, [tab])
 
- const handleSaveAlumno = useCallback(async (userId: string, fields: AlumnoDetalleForm) => {
-    const spFields = {
-      full_name:     fields.full_name     || null,
-      phone:         fields.phone         || null,
-      email_contact: fields.email_contact || null,
-      city:          fields.city          || null,
-      exam_date:     fields.exam_date     || null,
-      monthly_price: fields.monthly_price ? parseFloat(fields.monthly_price) : null,
-    }
-    await updateStudentProfile(userId, spFields)
+ const { guardarAlumno } = useAlumnoEdit(updateStudentProfile)
 
-    let newAccessUntil: string | null = null
-    if (fields.access_until) {
-      newAccessUntil = new Date(fields.access_until + 'T23:59:59').toISOString()
-      await supabase.from('profiles').update({ access_until: newAccessUntil }).eq('id', userId)
-    }
+ const handleSaveAlumno = useCallback(async (userId: string, fields: AlumnoDetalleForm) => {
+    const result = await guardarAlumno(userId, fields)
+    if (result.error) { console.error(result.error); return }
+
+    const newAccessUntil = fields.access_until
+      ? new Date(fields.access_until + 'T23:59:59').toISOString()
+      : null
 
     // Refrescar la "foto" del alumno en pantalla de detalle con los datos nuevos
     setAlumnoDetalle(prev => {
       if (!prev || prev.id !== userId) return prev
+      const patch = {
+        full_name:     fields.full_name     || null,
+        phone:         fields.phone         || null,
+        email_contact: fields.email_contact || null,
+        city:          fields.city          || null,
+        exam_date:     fields.exam_date     || null,
+        monthly_price: fields.monthly_price ? parseFloat(fields.monthly_price) : null,
+      }
       return {
         ...prev,
-        extended: { ...(prev.extended ?? {}), ...spFields },
+        extended: { ...(prev.extended ?? {}), ...patch },
         access_until: newAccessUntil ?? prev.access_until,
       }
     })
-  }, [updateStudentProfile])
+  }, [guardarAlumno])
 
   if (loading || loadingProfiles) return <div className={styles.state}><RefreshCw size={22} className={styles.spinner} /><p>Cargando datos…</p></div>
   if (error)  return <ErrorState message={error ?? 'Error cargando los datos del panel.'} onRetry={() => window.location.reload()} />
@@ -459,7 +448,6 @@ export default function DirectorPanel({ currentUser }: { currentUser: CurrentUse
       </div>
 
       <div ref={contentRef} className={styles.contentArea}>
-        {tab==='asignaturas' && <AsignaturasDetalle stats={typedStats} studentProfiles={studentProfiles as StudentProfile[]} onAlumnoClick={a => setAlumnoDetalle(enrichAlumno(a))} />}
         {tab==='overview' && (
           <div className={styles.section}>
             <div className={styles.chartCard}>

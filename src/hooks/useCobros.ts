@@ -173,5 +173,22 @@ export function useCobros(academyId: string | null | undefined, month: string) {
     URL.revokeObjectURL(url)
   }
 
-  return { alumnos, loading, saving, updateStatus, updateNotes, generarMes, exportarCSV, reload: () => load(month) }
+  // Apply base price to all alumnos without individual price
+  const aplicarPrecioBase = async (precio: number, alumnoIds: string[]): Promise<{ error: string | null; count: number }> => {
+    if (!academyId || alumnoIds.length === 0) return { error: null, count: 0 }
+    const rows = alumnoIds.map(id => ({
+      id,
+      monthly_price: precio,
+      updated_at:    new Date().toISOString(),
+    }))
+    const { error } = await supabase
+      .from('student_profiles')
+      .upsert(rows, { onConflict: 'id' })
+    if (error) return { error: error.message, count: 0 }
+    emit('director-data-changed')
+    await load(month)
+    return { error: null, count: alumnoIds.length }
+  }
+
+  return { alumnos, loading, saving, updateStatus, updateNotes, generarMes, exportarCSV, aplicarPrecioBase, reload: () => load(month) }
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Users, BarChart2, TrendingUp, AlertTriangle, BookOpen, Zap, RefreshCw } from 'lucide-react'
-import { useProfesor } from '../../../hooks/useProfesor'
+import { useStatsClase } from '../../../hooks/useStatsClase'
 import type { CurrentUser } from '../../../types'
 import styles from './StatsClase.module.css'
 
@@ -85,7 +85,7 @@ function SeccionCard({ title, children }: { title: string; children: React.React
 }
 
 export default function StatsClase({ currentUser }: { currentUser: CurrentUser | null }) {
-  const { alumnos, statsClase, loading, error } = useProfesor(currentUser)
+  const { alumnos, statsClase, loading, error } = useStatsClase(currentUser)
 
   if (loading) return <div className={styles.loadingState}><RefreshCw size={22} className={styles.spinner} /><p>Cargando estadísticas…</p></div>
   if (error)   return <div className={styles.errorState}><AlertTriangle size={22} /><p>{error}</p></div>

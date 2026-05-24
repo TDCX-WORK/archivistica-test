@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import {
   Search, X, ArrowUpDown, ArrowRight, ChevronDown,
   LayoutGrid, List, AlertTriangle, Clock, CheckCircle2, Users,
@@ -219,40 +220,37 @@ function AlumnosTable({ stats, academyProfiles, onAlumnoClick }: {
 
       {/* ── Chips de filtro ─────────────────────────────────── */}
       <div className={styles.chipsRow}>
-        <button
-          className={[styles.chip, filtro === 'todos' ? styles.chipActive : ''].join(' ')}
-          onClick={() => setFiltro('todos')}
-        >
-          <Users size={12} />
-          Todos
-          <span className={styles.chipCount}>{counts.todos}</span>
-        </button>
-        <button
-          className={[styles.chip, styles.chipDanger, filtro === 'riesgo' ? styles.chipDangerActive : ''].join(' ')}
-          onClick={() => setFiltro('riesgo')}
-          disabled={counts.riesgo === 0}
-        >
-          <AlertTriangle size={12} />
-          En riesgo
-          <span className={styles.chipCount}>{counts.riesgo}</span>
-        </button>
-        <button
-          className={[styles.chip, styles.chipAmber, filtro === 'expirando' ? styles.chipAmberActive : ''].join(' ')}
-          onClick={() => setFiltro('expirando')}
-          disabled={counts.expirando === 0}
-        >
-          <Clock size={12} />
-          Expirando
-          <span className={styles.chipCount}>{counts.expirando}</span>
-        </button>
-        <button
-          className={[styles.chip, styles.chipOk, filtro === 'activos' ? styles.chipOkActive : ''].join(' ')}
-          onClick={() => setFiltro('activos')}
-        >
-          <CheckCircle2 size={12} />
-          Activos
-          <span className={styles.chipCount}>{counts.activos}</span>
-        </button>
+
+        {/* Grupo izquierda — filtros */}
+        <div className={styles.segControl}>
+          {([
+            { id: 'todos',     label: 'Todos',     icon: Users,         count: counts.todos,     pillColor: 'var(--ink)',    disabled: false },
+            { id: 'riesgo',    label: 'En riesgo', icon: AlertTriangle, count: counts.riesgo,    pillColor: 'var(--danger)', disabled: counts.riesgo === 0 },
+            { id: 'expirando', label: 'Expirando', icon: Clock,         count: counts.expirando, pillColor: 'var(--amber)',  disabled: counts.expirando === 0 },
+            { id: 'activos',   label: 'Activos',   icon: CheckCircle2,  count: counts.activos,   pillColor: 'var(--accent)', disabled: false },
+          ] as const).map(({ id, label, icon: Icon, count, pillColor, disabled }) => (
+            <button
+              key={id}
+              className={[styles.segBtn, filtro === id ? styles.segBtnActive : ''].join(' ')}
+              onClick={() => setFiltro(id)}
+              disabled={disabled}
+            >
+              {filtro === id && (
+                <motion.span
+                  className={styles.segPill}
+                  layoutId="filter-pill"
+                  style={{ background: pillColor }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.8 }}
+                />
+              )}
+              <span className={styles.segBtnContent}>
+                <Icon size={13} strokeWidth={2} />
+                {label}
+                <span className={styles.segCount}>{count}</span>
+              </span>
+            </button>
+          ))}
+        </div>
 
         {hayAsignaturasMultiples && (
           <div className={styles.subDropdownWrap}>
@@ -281,16 +279,32 @@ function AlumnosTable({ stats, academyProfiles, onAlumnoClick }: {
           </div>
         )}
 
-        <div className={styles.sortGroup}>
+        {/* Grupo derecha — ordenar */}
+        <div className={styles.sortSegWrap}>
           <span className={styles.sortLabel}>Ordenar</span>
-          {(['nota', 'sesiones', 'nombre'] as SortKey[]).map(k => (
-            <button key={k}
-              className={[styles.sortChip, sortBy === k ? styles.sortChipActive : ''].join(' ')}
-              onClick={() => handleSort(k)}>
-              {k === 'nota' ? 'Nota' : k === 'sesiones' ? 'Sesiones' : 'Nombre'}
-              {sortBy === k && <ArrowUpDown size={10} style={{ transform: sortDir === 'asc' ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />}
-            </button>
-          ))}
+          <div className={styles.segControl}>
+            {(['nota', 'sesiones', 'nombre'] as SortKey[]).map(k => (
+              <button
+                key={k}
+                className={[styles.segBtn, sortBy === k ? styles.segBtnActive : ''].join(' ')}
+                onClick={() => handleSort(k)}
+              >
+                {sortBy === k && (
+                  <motion.span
+                    className={styles.segPill}
+                    layoutId="sort-pill"
+                    transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.8 }}
+                  />
+                )}
+                <span className={styles.segBtnContent}>
+                  {k === 'nota' ? 'Nota' : k === 'sesiones' ? 'Sesiones' : 'Nombre'}
+                  {sortBy === k && (
+                    <ArrowUpDown size={11} style={{ transform: sortDir === 'asc' ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                  )}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -357,8 +371,11 @@ function AlumnoCardLista({ alumno: a, expanded, onToggle, onAbrirFicha }: {
     <div className={[styles.cardLista, expanded ? styles.cardListaOpen : ''].join(' ')} style={{ ['--subject-color' as string]: a.subjectColor }}>
       <button className={styles.cardListaRow} onClick={onToggle}>
 
-        <div className={styles.avatar} style={{ background: color + '1E', color }}>
-          {mascota ? <span className={styles.avatarEmoji}>{mascota.emoji}</span> : nombre[0]!.toUpperCase()}
+        <div className={styles.avatar}>
+          {mascota
+            ? <img src={mascota.img} alt={mascota.nombre} className={styles.avatarImg} />
+            : nombre[0]!.toUpperCase()
+          }
         </div>
 
         <div className={styles.info}>
@@ -450,13 +467,16 @@ function AlumnoCardGrid({ alumno: a, onAbrirFicha }: {
 
   return (
     <button className={styles.cardGrid} onClick={onAbrirFicha}>
-      <div className={styles.cardGridTop} style={{ background: `linear-gradient(135deg, ${a.subjectColor}20, ${a.subjectColor}06)` }}>
+      <div className={styles.cardGridTop}>
         <span className={styles.subjectChipGrid}>
           <span className={styles.chipDot} style={{ background: a.subjectColor }} />
           {a.subjectName}
         </span>
-        <div className={styles.avatarGrid} style={{ background: color + '1E', color, borderColor: color + '55' }}>
-          {mascota ? <span className={styles.avatarEmoji}>{mascota.emoji}</span> : nombre[0]!.toUpperCase()}
+        <div className={styles.avatarGrid}>
+          {mascota
+            ? <img src={mascota.img} alt={mascota.nombre} className={styles.avatarImg} />
+            : nombre[0]!.toUpperCase()
+          }
         </div>
       </div>
 

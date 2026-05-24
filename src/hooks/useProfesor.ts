@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { calcularRacha } from '../lib/helpers'
+import { calcAlumnoStats, calcStatsClase } from '../lib/statsHelpers'
 import { insertNotification } from '../lib/notifications'
 import { generateInviteCode } from '../lib/inviteCodes'
-import type { CurrentUser, AlumnoConStats, StatsClase, InviteCode, Session } from '../types'
+import type { CurrentUser, AlumnoConStats, StatsClase, InviteCode } from '../types'
 
 export function useProfesor(currentUser: CurrentUser | null) {
   const [alumnos,     setAlumnos]     = useState<AlumnoConStats[]>([])
@@ -102,19 +103,11 @@ export function useProfesor(currentUser: CurrentUser | null) {
         const fallos         = wrongsByUser[alumno.id] ?? []
         const pendientesHoy  = fallos.filter(w => w.next_review <= today)
 
-        const notaMedia = sesionesAlumno.length
-          ? Math.round(sesionesAlumno.reduce((s, x) => s + x.score, 0) / sesionesAlumno.length)
-          : null
+        const base = calcAlumnoStats(alumno, sesionesAlumno, leidos.length, now)
 
         const racha = calcularRacha(sesionesAlumno.map(s => s.played_at))
 
-        const ultimaSesion    = sesionesAlumno[0]?.created_at ?? null
-        const diasInactivo    = ultimaSesion ? Math.floor((now.getTime() - new Date(ultimaSesion).getTime()) / 86400000) : null
-        const diasDesdeRegistro = Math.floor((now.getTime() - new Date(alumno.created_at).getTime()) / 86400000)
-        const accessUntil     = alumno.access_until ? new Date(alumno.access_until) : null
-        const accesoExpirado  = accessUntil ? accessUntil < now : false
-        const diasParaExpirar = accessUntil ? Math.ceil((accessUntil.getTime() - now.getTime()) / 86400000) : null
-        const proximoAExpirar = diasParaExpirar !== null && diasParaExpirar > 0 && diasParaExpirar <= 14
+        const ultimaSesion = sesionesAlumno[0]?.created_at ?? null
 
         return {
           id:              alumno.id,
@@ -122,19 +115,19 @@ export function useProfesor(currentUser: CurrentUser | null) {
           fullName:        spMap[alumno.id]?.full_name ?? null,
           examDate:        spMap[alumno.id]?.exam_date ?? null,
           createdAt:       alumno.created_at,
-          sesiones:        sesionesAlumno.length,
-          notaMedia,
-          temasLeidos:     leidos.length,
+          sesiones:        base.sesiones,
+          notaMedia:       base.notaMedia,
+          temasLeidos:     base.temasLeidos,
           fallos:          fallos.length,
           pendientesHoy:   pendientesHoy.length,
           racha,
           ultimaSesion,
-          diasInactivo,
-          enRiesgo:        !accesoExpirado && (diasInactivo !== null ? diasInactivo >= 3 : diasDesdeRegistro >= 3),
+          diasInactivo:    base.diasInactivo,
+          enRiesgo:        base.enRiesgo,
           accessUntil:     alumno.access_until,
-          accesoExpirado,
-          diasParaExpirar,
-          proximoAExpirar,
+          accesoExpirado:  base.accesoExpirado,
+          diasParaExpirar: base.diasParaExpirar,
+          proximoAExpirar: base.proximoAExpirar,
         }
       })
 
@@ -267,19 +260,9 @@ export function useProfesor(currentUser: CurrentUser | null) {
     return true
   }, [isProfesor])
 
-  const statsClase: StatsClase | null = alumnos.length ? {
-    totalAlumnos:     alumnos.length,
-    alumnosActivos:   alumnos.filter(a => !a.accesoExpirado && a.diasInactivo !== null && a.diasInactivo < 7).length,
-    enRiesgo:         alumnos.filter(a => a.enRiesgo).length,
-    proximosAExpirar: alumnos.filter(a => a.proximoAExpirar).length,
-    accesoExpirado:   alumnos.filter(a => a.accesoExpirado).length,
-    notaMediaClase:   Math.round(
-      alumnos.filter(a => a.notaMedia !== null).reduce((s, a) => s + (a.notaMedia ?? 0), 0) /
-      (alumnos.filter(a => a.notaMedia !== null).length || 1)
-    ),
-    mediaTemasLeidos: Math.round(alumnos.reduce((s, a) => s + a.temasLeidos, 0) / alumnos.length),
-    sesiones30d:      allSessions.filter(s => s.played_at >= new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)).length,
-  } : null
+  const statsClase: StatsClase | null = alumnos.length
+    ? calcStatsClase(alumnos, allSessions.filter(s => s.played_at >= new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)).length)
+    : null
 
   return { alumnos, inviteCodes, statsClase, allSessions, loading, error, generarCodigo, renovarAcceso, revocarAcceso, recargar: loadCodes }
 }

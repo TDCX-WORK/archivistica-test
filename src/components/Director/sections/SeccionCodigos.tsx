@@ -1,29 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { Key, Plus, RefreshCw, Copy, Check } from 'lucide-react'
-import { supabase } from '../../../lib/supabase'
-import { generateInviteCode } from '../../../lib/inviteCodes'
 import { fmt } from '../../../lib/helpers'
+import { useInviteCodes } from '../../../hooks/useInviteCodes'
 import styles from '../GestionAcademia/GestionAcademia.module.css'
 
 interface Subject { id: string; name: string; color: string; slug: string }
-
-interface CodigoInvitacion {
-  id:            string
-  code:          string
-  subject_id:    string | null
-  access_months: number
-  used_by:       string | null
-  used_at:       string | null
-  expires_at:    string
-  created_at:    string | null
-  created_by:    string | null
-}
-
-interface UserMini {
-  id:        string
-  username:  string
-  full_name: string | null
-}
 
 export function SeccionCodigos({
   academyId,
@@ -34,78 +15,23 @@ export function SeccionCodigos({
   academyName: string | null | undefined
   subjects:    Subject[]
 }) {
-  const [codigos,   setCodigos]   = useState<CodigoInvitacion[]>([])
-  const [userMap,   setUserMap]   = useState<Record<string, UserMini>>({})
-  const [loading,   setLoading]   = useState(true)
+  const { codigos, userMap, loading, generarCodigo } = useInviteCodes(academyId, academyName)
+
   const [creando,   setCreando]   = useState(false)
   const [form,      setForm]      = useState({ subject_id: '', meses: '12' })
   const [copied,    setCopied]    = useState<string | null>(null)
   const [generando, setGenerando] = useState(false)
   const [filtro,    setFiltro]    = useState<'activos' | 'usados' | 'caducados' | 'todos'>('activos')
 
-  const load = useCallback(async () => {
-    if (!academyId) return
-    setLoading(true)
-    const { data } = await supabase
-      .from('invite_codes')
-      .select('id, code, subject_id, access_months, used_by, used_at, expires_at, created_at, created_by')
-      .eq('academy_id', academyId)
-      .order('created_at', { ascending: false })
-
-    const codigosData = (data ?? []) as CodigoInvitacion[]
-    setCodigos(codigosData)
-
-    // Resolver nombres de creadores / consumidores
-    const ids = new Set<string>()
-    for (const c of codigosData) {
-      if (c.created_by) ids.add(c.created_by)
-      if (c.used_by)    ids.add(c.used_by)
-    }
-    if (ids.size > 0) {
-      const idList = Array.from(ids)
-      const [{ data: profs }, { data: sps }, { data: sfps }] = await Promise.all([
-        supabase.from('profiles').select('id, username').in('id', idList),
-        supabase.from('student_profiles').select('id, full_name').in('id', idList),
-        supabase.from('staff_profiles').select('id, full_name').in('id', idList),
-      ])
-      const fullNameMap: Record<string, string | null> = {}
-      for (const sp  of (sps  ?? []) as { id: string; full_name: string | null }[]) fullNameMap[sp.id]  = sp.full_name
-      for (const sfp of (sfps ?? []) as { id: string; full_name: string | null }[]) fullNameMap[sfp.id] = sfp.full_name
-      const map: Record<string, UserMini> = {}
-      for (const p of (profs ?? []) as { id: string; username: string }[]) {
-        map[p.id] = { id: p.id, username: p.username, full_name: fullNameMap[p.id] ?? null }
-      }
-      setUserMap(map)
-    } else {
-      setUserMap({})
-    }
-
-    setLoading(false)
-  }, [academyId])
-
-  useEffect(() => { load() }, [load])
-
-  const generarCodigo = async () => {
+  const handleGenerarCodigo = async () => {
     if (!form.subject_id || !academyId) return
     setGenerando(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setGenerando(false); return }
-    const code    = generateInviteCode(academyName)
-    const expires = new Date(); expires.setDate(expires.getDate() + 30)
-    const { error } = await supabase.from('invite_codes').insert({
-      academy_id:    academyId,
-      subject_id:    form.subject_id,
-      created_by:    user.id,
-      code,
-      access_months: parseInt(form.meses),
-      expires_at:    expires.toISOString(),
-    })
-    if (!error) {
-      await load()
+    const result = await generarCodigo(form.subject_id, parseInt(form.meses))
+    if (result.error) {
+      alert(result.error)
+    } else {
       setCreando(false)
       setForm({ subject_id: '', meses: '12' })
-    } else {
-      alert('Error generando código: ' + error.message)
     }
     setGenerando(false)
   }
@@ -174,7 +100,7 @@ export function SeccionCodigos({
             <button className={styles.btnCancelar} onClick={() => setCreando(false)}>Cancelar</button>
             <button
               className={styles.btnGuardar}
-              onClick={generarCodigo}
+              onClick={handleGenerarCodigo}
               disabled={!form.subject_id || generando}
             >
               <Key size={13} /> {generando ? 'Generando…' : 'Generar código'}

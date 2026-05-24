@@ -80,7 +80,11 @@ function AppShell({ currentUser, logout, progress, studyProgress, updateDisplayN
     location.pathname.startsWith('/papelera')             ? 'papelera'             :
     location.pathname.startsWith('/billing')              ? 'billing'              :
     location.pathname.startsWith('/pipeline')             ? 'pipeline'             :
-    location.pathname.startsWith('/admin')                ? 'superadmin'           : 'inicio'
+    location.pathname.startsWith('/admin')                ? 'superadmin'           :
+    location.pathname.startsWith('/gestion')              ? 'gestion'              :
+    location.pathname.startsWith('/documentos')           ? 'documentos'           :
+    location.pathname.startsWith('/tareas-profesor')      ? 'tareas-profesor'      :
+    location.pathname.startsWith('/tareas')               ? 'tareas'               : 'inicio'
 
   const handleTabChange = (t: string) => {
     setOverlay(null)

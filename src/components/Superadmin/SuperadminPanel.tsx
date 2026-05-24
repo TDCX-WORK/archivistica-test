@@ -296,7 +296,7 @@ function ModalUsuario({ academia, onCrear, onClose }: { academia: any; onCrear: 
   const suffix      = role === 'alumno' ? 'alumno' : role === 'profesor' ? 'prof' : 'dir'
   const emailPreview = email.trim() || `${username || 'usuario'}.<generado>@${academia?.slug}.${suffix}`
   const handleCrear = async () => {
-    if (!username.trim() || password.length < 4)         { setError('Usuario requerido y contraseña mínimo 4 caracteres'); return }
+    if (!username.trim() || password.length < 6)         { setError('Usuario requerido y contraseña mínimo 6 caracteres'); return }
     if (role !== 'director' && !subjectId)               { setError('Selecciona una asignatura'); return }
     if ((role === 'profesor' || role === 'director') && !email.trim())   { setError('El email real es obligatorio para profesor/director'); return }
     if ((role === 'profesor' || role === 'director') && !emailValido)    { setError('El email no tiene un formato válido'); return }

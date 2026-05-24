@@ -29,34 +29,38 @@ export interface AccionesData {
   hilosSinStaff:    AccionesHiloStale[]         // hilos con 0 respuestas creados hace >48h
 }
 
-// ── localStorage helpers ──────────────────────────────────────────────────
-const SEEN_REPLIES_KEY      = (userId: string) => `acciones_seen_replies_${userId}`
+// ── localStorage helpers para hilos descartados ─────────────────────────────
+// Los hilos descartados son efímeros (desaparecen cuando alguien responde),
+// así que localStorage es aceptable. Se limpia automáticamente después de 30 días.
 const DISMISSED_THREADS_KEY = (userId: string) => `acciones_dismissed_threads_${userId}`
+const MAX_DISMISSED_AGE_MS  = 30 * 86400 * 1000 // 30 días
 
-export function getSeenReplies(userId: string): Set<string> {
-  try {
-    const raw = localStorage.getItem(SEEN_REPLIES_KEY(userId))
-    return new Set(raw ? JSON.parse(raw) as string[] : [])
-  } catch { return new Set() }
-}
+interface DismissedEntry { id: string; at: number }
 
-export function markReplySeen(userId: string, replyId: string) {
-  const seen = getSeenReplies(userId)
-  seen.add(replyId)
-  localStorage.setItem(SEEN_REPLIES_KEY(userId), JSON.stringify(Array.from(seen)))
-}
-
-export function getDismissedThreads(userId: string): Set<string> {
+function getDismissedThreads(userId: string): Set<string> {
   try {
     const raw = localStorage.getItem(DISMISSED_THREADS_KEY(userId))
-    return new Set(raw ? JSON.parse(raw) as string[] : [])
+    if (!raw) return new Set()
+    const entries = JSON.parse(raw) as DismissedEntry[]
+    const now = Date.now()
+    // Limpiar entradas antiguas
+    const valid = entries.filter(e => now - e.at < MAX_DISMISSED_AGE_MS)
+    if (valid.length !== entries.length) {
+      localStorage.setItem(DISMISSED_THREADS_KEY(userId), JSON.stringify(valid))
+    }
+    return new Set(valid.map(e => e.id))
   } catch { return new Set() }
 }
 
-export function dismissThread(userId: string, threadId: string) {
-  const s = getDismissedThreads(userId)
-  s.add(threadId)
-  localStorage.setItem(DISMISSED_THREADS_KEY(userId), JSON.stringify(Array.from(s)))
+function dismissThread(userId: string, threadId: string) {
+  try {
+    const raw = localStorage.getItem(DISMISSED_THREADS_KEY(userId))
+    const entries: DismissedEntry[] = raw ? JSON.parse(raw) : []
+    if (!entries.some(e => e.id === threadId)) {
+      entries.push({ id: threadId, at: Date.now() })
+    }
+    localStorage.setItem(DISMISSED_THREADS_KEY(userId), JSON.stringify(entries))
+  } catch {}
 }
 
 // ── Hook principal ────────────────────────────────────────────────────────
@@ -80,11 +84,12 @@ export function useAcciones(currentUser: CurrentUser | null) {
         { data: messages },
         { data: threads },
       ] = await Promise.all([
-        // direct_messages enviados por el director que recibieron respuesta
+        // direct_messages enviados por el director que recibieron respuesta y NO leídos
         supabase.from('direct_messages')
           .select('id, to_id, body, reply_body, reply_at, subject_id')
           .eq('from_id', userId)
           .eq('deleted_by_sender', false)
+          .eq('read', false)
           .not('reply_body', 'is', null)
           .order('reply_at', { ascending: false }),
 
@@ -129,9 +134,8 @@ export function useAcciones(currentUser: CurrentUser | null) {
           diasSinRespuesta: Math.floor((now.getTime() - new Date(t.created_at).getTime()) / 86400000),
         }))
 
-      const seen = getSeenReplies(userId)
+      // Replies: ya filtradas por read=false en la query, no necesitamos localStorage
       const replies: AccionesReplyRecibida[] = ((messages ?? []) as any[])
-        .filter(m => !seen.has(m.id))
         .map(m => ({
           id:          m.id,
           to_id:       m.to_id,
@@ -152,10 +156,11 @@ export function useAcciones(currentUser: CurrentUser | null) {
 
   useEffect(() => { load() }, [load])
 
-  // ── Mutaciones de estado local ──────────────────────────────────────────
-  const marcarReplyVista = useCallback((replyId: string) => {
+  // ── Mutaciones ──────────────────────────────────────────────────────────
+  const marcarReplyVista = useCallback(async (replyId: string) => {
     if (!userId) return
-    markReplySeen(userId, replyId)
+    // Marcar como read en BD — persiste entre dispositivos
+    await supabase.from('direct_messages').update({ read: true }).eq('id', replyId)
     setData(prev => ({ ...prev, replies: prev.replies.filter(r => r.id !== replyId) }))
   }, [userId])
 

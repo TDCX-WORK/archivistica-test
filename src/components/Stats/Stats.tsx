@@ -79,7 +79,7 @@ function ComparativaClaseCard({ avgScore, academyId, subjectId, userId }: {
       let q = supabase
         .from('sessions').select('score, user_id')
         .eq('academy_id', academyId).gte('played_at', hace30).neq('user_id', userId)
-      if (subjectId) q = q.or(`subject_id.eq.${subjectId},subject_id.is.null`)
+      if (subjectId) q = q.eq('subject_id', subjectId)
       const { data } = await q
       if (data && data.length > 0) {
         const porAlumno: Record<string, number[]> = {}

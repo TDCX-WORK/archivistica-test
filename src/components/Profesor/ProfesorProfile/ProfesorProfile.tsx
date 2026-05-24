@@ -9,7 +9,7 @@ import { supabase }        from '../../../lib/supabase'
 import { useSettings }     from '../../../hooks/useSettings'
 import { useStaffProfile } from '../../../hooks/useStudentProfile'
 import { usePlanSemanal }  from '../../../hooks/usePlanSemanal'
-import { useProfesor }     from '../../../hooks/useProfesor'
+import { useStatsClase }   from '../../../hooks/useStatsClase'
 import type { CurrentUser } from '../../../types'
 import styles from './ProfesorProfile.module.css'
 
@@ -79,7 +79,7 @@ function TabPerfil({ currentUser, profile, saving, onSave }: TabPerfilProps) {
 
   const handleChangePass = async () => {
     if (!passForm.nueva || passForm.nueva !== passForm.confirmar) { setPassMsg({ error: true, text: 'Las contraseñas no coinciden' }); return }
-    if (passForm.nueva.length < 8) { setPassMsg({ error: true, text: 'Mínimo 8 caracteres' }); return }
+    if (passForm.nueva.length < 6) { setPassMsg({ error: true, text: 'Mínimo 6 caracteres' }); return }
     setPassLoading(true)
     const { error } = await supabase.auth.updateUser({ password: passForm.nueva })
     setPassLoading(false)
@@ -181,7 +181,7 @@ function TabPerfil({ currentUser, profile, saving, onSave }: TabPerfilProps) {
   )
 }
 
-function TabPlan({ currentUser, statsClase }: { currentUser: CurrentUser | null; statsClase: ReturnType<typeof useProfesor>['statsClase'] }) {
+function TabPlan({ currentUser, statsClase }: { currentUser: CurrentUser | null; statsClase: ReturnType<typeof useStatsClase>['statsClase'] }) {
   const { planSemanal: plan, bloquesSemanal: bloques } = usePlanSemanal(currentUser?.academy_id, currentUser?.subject_id)
   const weekDays = getWeekDays()
   const todayStr = new Date().toDateString()
@@ -264,7 +264,7 @@ function TabAjustes({ onLogout }: { onLogout: () => void }) {
 export default function ProfesorProfile({ currentUser, onLogout }: { currentUser: CurrentUser | null; onLogout: () => void }) {
   const [tab, setTab]                     = useState('perfil')
   const { profile, saving, save }         = useStaffProfile(currentUser?.id)
-  const { statsClase }                    = useProfesor(currentUser)
+  const { statsClase }                    = useStatsClase(currentUser)
   const handleSave = async (fields: Partial<StaffProfile>) => { await save(fields) }
 
   const TABS = [

@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import {
   Upload, Link2, Trash2, Loader2, FileText,
   FileCheck, Video, Inbox, FolderOpen, Users, User,
   CheckCircle2, AlertCircle
 } from 'lucide-react'
-import { supabase } from '../../../lib/supabase'
 import { insertNotification, insertNotifications } from '../../../lib/notifications'
+import { useDocuments } from '../../../hooks/useDocuments'
 import type { CurrentUser, AlumnoConStats } from '../../../types'
 import styles from './SubirDocumentos.module.css'
 
@@ -39,6 +39,19 @@ function fmtFecha(iso: string): string {
 }
 
 export default function SubirDocumentos({ currentUser, alumnos }: Props) {
+  const { documents, loading: loadingDocs, uploadFiles, addVideoUrl, deleteDocument } = useDocuments(currentUser)
+
+  const docs = documents.map(d => ({
+    id:          d.id,
+    title:       d.title,
+    category:    d.category,
+    url:         d.url,
+    alumno_id:   d.alumno_id,
+    created_at:  d.created_at,
+    uploaded_by: d.uploaded_by,
+    file_size:   d.file_size,
+  })) as DocSubido[]
+
   const [categoria,   setCategoria]   = useState<Category>('material')
   const [destino,     setDestino]     = useState<string>('clase')
   const [archivos,    setArchivos]    = useState<File[]>([])
@@ -46,25 +59,9 @@ export default function SubirDocumentos({ currentUser, alumnos }: Props) {
   const [cargando,    setCargando]    = useState(false)
   const [progreso,    setProgreso]    = useState<string | null>(null)
   const [feedback,    setFeedback]    = useState<{ msg: string; ok: boolean } | null>(null)
-  const [docs,        setDocs]        = useState<DocSubido[]>([])
-  const [loadingDocs, setLoadingDocs] = useState(true)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const isDirector = currentUser?.role === 'director' || currentUser?.role === 'superadmin'
-
-  useEffect(() => {
-    const load = async () => {
-      if (!currentUser?.academy_id) return
-      const { data } = await supabase
-        .from('academy_documents')
-        .select('id, title, category, url, alumno_id, created_at, uploaded_by')
-        .eq('academy_id', currentUser.academy_id)
-        .order('created_at', { ascending: false })
-      setDocs((data ?? []) as DocSubido[])
-      setLoadingDocs(false)
-    }
-    load()
-  }, [currentUser?.academy_id])
 
   const mostrarFeedback = (msg: string, ok: boolean) => {
     setFeedback({ msg, ok })
@@ -82,24 +79,12 @@ export default function SubirDocumentos({ currentUser, alumnos }: Props) {
 
     // --- Vídeo: un solo insert con la URL ---
     if (categoria === 'video') {
-      const { data: inserted, error: dbErr } = await supabase
-        .from('academy_documents')
-        .insert({
-          academy_id:  currentUser.academy_id,
-          uploaded_by: currentUser.id,
-          alumno_id:   destino === 'clase' ? null : destino,
-          category:    'video',
-          title:       urlVideo.trim(),
-          url:         urlVideo.trim(),
-          file_size:   null,
-        })
-        .select()
-        .single()
+      const alumnoId = destino === 'clase' ? null : destino
+      const result = await addVideoUrl(urlVideo, alumnoId)
 
       setCargando(false)
       setProgreso(null)
-      if (dbErr) return mostrarFeedback('Error al guardar el vídeo', false)
-      setDocs(prev => [inserted as DocSubido, ...prev])
+      if (result.error) return mostrarFeedback(result.error, false)
       setUrlVideo('')
 
       // Notificar
@@ -131,63 +116,28 @@ export default function SubirDocumentos({ currentUser, alumnos }: Props) {
     }
 
     // --- Archivos: subida múltiple ---
-    const insertados: DocSubido[] = []
-    let errores = 0
-
-    for (let i = 0; i < archivos.length; i++) {
-      const archivo = archivos[i]!
-      setProgreso(`Subiendo ${i + 1} de ${archivos.length}…`)
-
-      const ext      = archivo.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const path     = `${currentUser.academy_id}/${fileName}`
-
-      const { error: uploadErr } = await supabase.storage
-        .from('academy-documents')
-        .upload(path, archivo)
-
-      if (uploadErr) { errores++; continue }
-
-      // Título = nombre del archivo sin extensión
-      const titulo = archivo.name.replace(/\.[^/.]+$/, '')
-
-      const { data: inserted, error: dbErr } = await supabase
-        .from('academy_documents')
-        .insert({
-          academy_id:  currentUser.academy_id,
-          uploaded_by: currentUser.id,
-          alumno_id:   destino === 'clase' ? null : destino,
-          category:    categoria,
-          title:       titulo,
-          url:         path,
-          file_size:   archivo.size,
-        })
-        .select()
-        .single()
-
-      if (dbErr) { errores++; continue }
-      insertados.push(inserted as DocSubido)
-    }
+    const alumnoId = destino === 'clase' ? null : destino
+    const result = await uploadFiles(archivos, categoria, setProgreso, alumnoId)
 
     setCargando(false)
     setProgreso(null)
+    const archivosCopy = [...archivos]
     setArchivos([])
-    setDocs(prev => [...insertados, ...prev])
 
-    if (errores === 0) {
+    if (result.errors === 0) {
       mostrarFeedback(
-        archivos.length === 1
+        archivosCopy.length === 1
           ? 'Archivo subido correctamente'
-          : `${archivos.length} archivos subidos correctamente`,
+          : `${archivosCopy.length} archivos subidos correctamente`,
         true
       )
 
       // Notificar
       try {
         const senderName = currentUser?.displayName ?? currentUser?.username ?? 'Tu profesor'
-        const titulo = archivos.length === 1
-          ? archivos[0]!.name.replace(/\.[^/.]+$/, '')
-          : `${archivos.length} documentos nuevos`
+        const titulo = archivosCopy.length === 1
+          ? archivosCopy[0]!.name.replace(/\.[^/.]+$/, '')
+          : `${archivosCopy.length} documentos nuevos`
 
         if (destino === 'clase') {
           const ids = alumnos.map(a => a.id)
@@ -195,7 +145,7 @@ export default function SubirDocumentos({ currentUser, alumnos }: Props) {
             await insertNotifications(ids.map(id => ({
               user_id: id,
               type:    'nuevo_documento',
-              title:   `${senderName} ha subido ${archivos.length === 1 ? 'un documento' : `${archivos.length} documentos`}`,
+              title:   `${senderName} ha subido ${archivosCopy.length === 1 ? 'un documento' : `${archivosCopy.length} documentos`}`,
               body:    titulo,
               link:    '/documentos',
             })))
@@ -204,32 +154,20 @@ export default function SubirDocumentos({ currentUser, alumnos }: Props) {
           await insertNotification({
             user_id: destino,
             type:    'nuevo_documento',
-            title:   `${senderName} te ha compartido ${archivos.length === 1 ? 'un documento' : `${archivos.length} documentos`}`,
+            title:   `${senderName} te ha compartido ${archivosCopy.length === 1 ? 'un documento' : `${archivosCopy.length} documentos`}`,
             body:    titulo,
             link:    '/documentos',
           })
         }
       } catch (_) {}
     } else {
-      mostrarFeedback(`${insertados.length} subidos, ${errores} con error`, false)
+      mostrarFeedback(`${result.uploaded} subidos, ${result.errors} con error`, false)
     }
   }
 
   const handleEliminar = async (doc: DocSubido) => {
-    // Profesor solo borra los suyos, director borra todo
     if (!isDirector && doc.uploaded_by !== currentUser?.id) return
-
-    // Borrar archivo del bucket (si no es vídeo/URL)
-    if (doc.category !== 'video' && doc.url && !doc.url.startsWith('http')) {
-      await supabase.storage.from('academy-documents').remove([doc.url])
-    }
-
-    const { error } = await supabase
-      .from('academy_documents')
-      .delete()
-      .eq('id', doc.id)
-
-    if (!error) setDocs(prev => prev.filter(d => d.id !== doc.id))
+    await deleteDocument(doc as any)
   }
 
   const puedeEliminar = (doc: DocSubido) =>

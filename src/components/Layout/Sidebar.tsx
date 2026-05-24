@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Home, BarChart2, BookOpen, LogOut, GraduationCap, User,
   Building2, ShieldCheck, Trash2, CreditCard, Settings2,
@@ -168,6 +169,14 @@ export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout 
                 onClick={() => handleNav(id)}
                 data-label={label}
               >
+                {isActive && (
+                  <motion.span
+                    className={styles.navPill}
+                    layoutId="sidebar-pill"
+                    style={{ background: '#18181B' }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.8 }}
+                  />
+                )}
                 <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} className={styles.navIcon} />
                 <span className={styles.navLabel}>{label}</span>
               </button>
@@ -183,6 +192,14 @@ export default function Sidebar({ activeTab, onTabChange, currentUser, onLogout 
               data-label="Perfil"
               style={{ marginBottom: '0.5rem' }}
             >
+              {activeTab === 'perfil' && (
+                <motion.span
+                  className={styles.navPill}
+                  layoutId="sidebar-pill"
+                  style={{ background: '#18181B' }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.8 }}
+                />
+              )}
               <User size={18} strokeWidth={activeTab === 'perfil' ? 2.2 : 1.8} className={styles.navIcon} />
               <span className={styles.navLabel}>Perfil</span>
             </button>

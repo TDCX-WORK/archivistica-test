@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { Bell, Check, CheckCheck, X, Zap, AlertTriangle,
          Users, Calendar, TrendingDown, Trophy, Flame,
-         Clock, MessageSquare, BookOpen, CreditCard, Trash2 } from 'lucide-react'
+         Clock, MessageSquare, BookOpen, CreditCard, Trash2,
+         FileText, Send, ClipboardCheck, RotateCcw } from 'lucide-react'
 import { useNotifications } from '../../hooks/useNotifications'
 import type { Notification } from '../../types'
 import type { CurrentUser } from '../../types'
@@ -10,25 +11,35 @@ import styles from './NotificationBell.module.css'
 // ── Icono segun tipo de notificacion ──────────────────────────────────────────
 function NotifIcon({ type }: { type: string }) {
   const map: Record<string, { icon: React.ElementType; color: string }> = {
-    plan_semanal:      { icon: Calendar,      color: '#0891B2' },
-    repaso_pendiente:  { icon: BookOpen,      color: '#D97706' },
-    mejor_nota:        { icon: Trophy,        color: '#059669' },
-    racha:             { icon: Flame,         color: '#DC2626' },
-    acceso_expira:     { icon: Clock,         color: '#D97706' },
-    mensaje_profesor:  { icon: MessageSquare, color: '#7C3AED' },
-    nuevo_alumno:      { icon: Users,         color: '#059669' },
-    alumno_inactivo:   { icon: AlertTriangle, color: '#D97706' },
-    codigo_caduca:     { icon: Zap,           color: '#D97706' },
-    alumno_supera:     { icon: Trophy,        color: '#059669' },
-    alumno_expira:     { icon: Clock,         color: '#DC2626' },
-    sin_plan:          { icon: Calendar,      color: '#D97706' },
-    nueva_academia:    { icon: Users,         color: '#059669' },
-    resumen_semanal:   { icon: TrendingDown,  color: '#0891B2' },
-    nota_baja:         { icon: AlertTriangle, color: '#DC2626' },
-    churn_risk:        { icon: AlertTriangle, color: '#DC2626' },
-    pago_vencido:      { icon: CreditCard,    color: '#DC2626' },
-    health_bajo:       { icon: TrendingDown,  color: '#DC2626' },
-    actividad_record:  { icon: Trophy,        color: '#059669' },
+    plan_semanal:      { icon: Calendar,       color: '#0891B2' },
+    repaso_pendiente:  { icon: BookOpen,        color: '#D97706' },
+    mejor_nota:        { icon: Trophy,          color: '#059669' },
+    racha:             { icon: Flame,           color: '#DC2626' },
+    acceso_expira:     { icon: Clock,           color: '#D97706' },
+    mensaje_profesor:  { icon: MessageSquare,   color: '#7C3AED' },
+    mensaje_directo:   { icon: MessageSquare,   color: '#7C3AED' },
+    mensaje_alumno:    { icon: MessageSquare,   color: '#0891B2' },
+    mensaje_director:  { icon: MessageSquare,   color: '#059669' },
+    respuesta_mensaje: { icon: Send,            color: '#7C3AED' },
+    nuevo_alumno:      { icon: Users,           color: '#059669' },
+    alumno_inactivo:   { icon: AlertTriangle,   color: '#D97706' },
+    codigo_caduca:     { icon: Zap,             color: '#D97706' },
+    alumno_supera:     { icon: Trophy,          color: '#059669' },
+    alumno_expira:     { icon: Clock,           color: '#DC2626' },
+    sin_plan:          { icon: Calendar,        color: '#D97706' },
+    nueva_academia:    { icon: Users,           color: '#059669' },
+    resumen_semanal:   { icon: TrendingDown,    color: '#0891B2' },
+    nota_baja:         { icon: AlertTriangle,   color: '#DC2626' },
+    churn_risk:        { icon: AlertTriangle,   color: '#DC2626' },
+    pago_vencido:      { icon: CreditCard,      color: '#DC2626' },
+    health_bajo:       { icon: TrendingDown,    color: '#DC2626' },
+    actividad_record:  { icon: Trophy,          color: '#059669' },
+    nuevo_documento:   { icon: FileText,        color: '#0891B2' },
+    nueva_tarea:       { icon: ClipboardCheck,  color: '#2563EB' },
+    entrega_tarea:     { icon: Send,            color: '#059669' },
+    reentrega_tarea:   { icon: RotateCcw,       color: '#D97706' },
+    tarea_corregida:   { icon: ClipboardCheck,  color: '#059669' },
+    tarea_revision:    { icon: AlertTriangle,    color: '#D97706' },
   }
   const cfg  = map[type] ?? { icon: Bell, color: '#6B7280' }
   const Icon = cfg.icon

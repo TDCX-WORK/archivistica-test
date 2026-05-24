@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Users, Search, Phone, Mail, Edit3, Download } from 'lucide-react'
-import { supabase } from '../../../lib/supabase'
-import { emit } from '../../../lib/eventBus'
 import { fmt, diasHastaExpiracion, accesoExpirado, proximoAExpirar } from '../../../lib/helpers'
+import { useAlumnoEdit } from '../../../hooks/useAlumnoEdit'
 import type { AlumnoConExtended } from '../../../types'
 import { EditAlumnoModal, type AlumnoForm } from './EditAlumnoModal'
 import styles from '../GestionAcademia/GestionAcademia.module.css'
@@ -23,6 +22,8 @@ export function SeccionAlumnos({
   const [busqueda,   setBusqueda]   = useState('')
   const [filtro,     setFiltro]     = useState<'todos' | 'ok' | 'pronto' | 'expirado'>('todos')
   const [editAlumno, setEditAlumno] = useState<AlumnoConExtended | null>(null)
+
+  const { guardarAlumno } = useAlumnoEdit(updateStudentProfile)
 
   const subMap: Record<string, Subject> = {}
   for (const s of subjects) subMap[s.id] = s
@@ -57,37 +58,11 @@ export function SeccionAlumnos({
   }, [studentProfiles])
 
   const handleSave = async (userId: string, form: AlumnoForm) => {
-    const { error: upsertErr } = await supabase.from('student_profiles').upsert({
-      id:             userId,
-      full_name:      form.full_name     || null,
-      phone:          form.phone         || null,
-      email_contact:  form.email_contact || null,
-      city:           form.city          || null,
-      exam_date:      form.exam_date     || null,
-      monthly_price:  form.monthly_price ? parseFloat(form.monthly_price) : null,
-      updated_at:     new Date().toISOString(),
-    }, { onConflict: 'id' })
-
-    if (upsertErr) {
-      console.error('Error guardando perfil:', upsertErr.message)
-      alert('Error al guardar: ' + upsertErr.message)
-      return
+    const result = await guardarAlumno(userId, form)
+    if (result.error) {
+      console.error(result.error)
+      alert(result.error)
     }
-
-    if (form.access_until) {
-      await supabase.from('profiles')
-        .update({ access_until: new Date(form.access_until + 'T23:59:59').toISOString() })
-        .eq('id', userId)
-    }
-    updateStudentProfile(userId, {
-      full_name:     form.full_name     || null,
-      phone:         form.phone         || null,
-      email_contact: form.email_contact || null,
-      city:          form.city          || null,
-      exam_date:     form.exam_date     || null,
-      monthly_price: form.monthly_price ? parseFloat(form.monthly_price) : null,
-    })
-    emit('director-data-changed')
   }
 
   // ── Export CSV (espejo del import) ─────────────────────────────────────────

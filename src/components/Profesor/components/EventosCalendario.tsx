@@ -11,12 +11,14 @@ interface Props {
   currentUser: CurrentUser | null
 }
 
-type EventType = 'clase' | 'hito' | 'evento'
+type EventType = 'clase' | 'hito' | 'evento' | 'examen' | 'tarea'
 
 const TYPE_META: Record<EventType, { label: string; color: string }> = {
   clase:  { label: 'Clase',  color: '#059669' },
   hito:   { label: 'Hito',   color: '#D97706' },
   evento: { label: 'Evento', color: '#7C3AED' },
+  examen: { label: 'Examen', color: '#DC2626' },
+  tarea:  { label: 'Tarea',  color: '#2563EB' },
 }
 
 function fmtFecha(ds: string): string {
@@ -34,11 +36,6 @@ export default function EventosCalendario({ currentUser }: Props) {
   const [desc,     setDesc]     = useState('')
   const [saving,   setSaving]   = useState(false)
   const [feedback, setFeedback] = useState<{ msg: string; ok: boolean } | null>(null)
-
-  // Solo mostrar eventos manuales (no los auto-generados de tareas/examen)
-  const manualEvents = events.filter(e =>
-    e.type === 'clase' || e.type === 'hito' || e.type === 'evento'
-  )
 
   const mostrarFeedback = (msg: string, ok: boolean) => {
     setFeedback({ msg, ok })
@@ -98,6 +95,8 @@ export default function EventosCalendario({ currentUser }: Props) {
               <option value="evento">Evento general</option>
               <option value="clase">Clase en directo</option>
               <option value="hito">Hito del temario</option>
+              <option value="examen">Examen</option>
+              <option value="tarea">Tarea</option>
             </select>
           </div>
         </div>
@@ -129,17 +128,17 @@ export default function EventosCalendario({ currentUser }: Props) {
       <div className={styles.listSection}>
         <div className={styles.listHeader}>
           <CalendarDays size={13} />
-          Eventos creados ({manualEvents.length})
+          Eventos creados ({events.length})
         </div>
 
-        {manualEvents.length === 0 ? (
+        {events.length === 0 ? (
           <div className={styles.empty}>
             <CalendarDays size={26} className={styles.emptyIcon} />
             <p className={styles.emptyText}>Aún no hay eventos</p>
           </div>
         ) : (
           <div className={styles.eventList}>
-            {manualEvents.map(ev => {
+            {events.map(ev => {
               const meta = TYPE_META[ev.type as EventType] ?? TYPE_META.evento
               return (
                 <div key={ev.id} className={styles.eventItem}>

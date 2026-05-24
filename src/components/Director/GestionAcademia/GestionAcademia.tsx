@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { RefreshCw, Users, GraduationCap, BookOpen, Key, Settings, Building2 } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { useAcademyProfiles } from '../../../hooks/useStudentProfile'
 import type { CurrentUser } from '../../../types'
@@ -91,7 +92,7 @@ export default function GestionAcademia({ currentUser }: { currentUser: CurrentU
       {/* Layout: contenido + feed lateral */}
       <div className={styles.layout}>
         <div className={styles.main}>
-          {/* Segmented tabs premium */}
+          {/* Segmented tabs premium — sliding pill */}
           <nav className={styles.tabs} role="tablist">
             {TABS.map(({ id, label, icon: Icon, count }) => (
               <button
@@ -101,9 +102,20 @@ export default function GestionAcademia({ currentUser }: { currentUser: CurrentU
                 className={[styles.tab, tab === id ? styles.tabActive : ''].join(' ')}
                 onClick={() => setTab(id)}
               >
-                <Icon size={13} strokeWidth={2.2} />
-                <span>{label}</span>
-                {count !== undefined && count > 0 && <span className={styles.tabCount}>{count}</span>}
+                {tab === id && (
+                  <motion.span
+                    className={styles.tabPill}
+                    layoutId="tab-pill"
+                    transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.8 }}
+                  />
+                )}
+                <span className={styles.tabContent}>
+                  <Icon size={13} strokeWidth={2.2} />
+                  <span>{label}</span>
+                  {count !== undefined && count > 0 && (
+                    <span className={styles.tabCount}>{count}</span>
+                  )}
+                </span>
               </button>
             ))}
           </nav>
@@ -129,6 +141,7 @@ export default function GestionAcademia({ currentUser }: { currentUser: CurrentU
                 subjects={subjects}
                 studentProfiles={studentProfiles}
                 staffProfiles={staffProfiles}
+                academyId={currentUser?.academy_id}
               />
             )}
             {tab === 'codigos' && (

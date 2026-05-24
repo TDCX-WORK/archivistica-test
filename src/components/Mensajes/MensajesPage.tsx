@@ -7,6 +7,7 @@ import {
 import { useProfesorMessages, useAlumnoMessages } from '../../hooks/useDirectMessages'
 import type { DirectMessage } from '../../hooks/useDirectMessages'
 import { supabase }    from '../../lib/supabase'
+import { insertNotification } from '../../lib/notifications'
 import type { CurrentUser } from '../../types'
 import styles from './MensajesPage.module.css'
 
@@ -231,7 +232,7 @@ function StaffMensajes({ currentUser }: Props) {
     setBody('')
     try {
       const senderName = currentUser?.displayName ?? currentUser?.username ?? 'Tu profesor'
-      await supabase.from('notifications').insert({
+      await insertNotification({
         user_id: selectedId,
         type:    'mensaje_directo',
         title:   `Mensaje de ${senderName}`,
@@ -558,7 +559,7 @@ function AlumnoMensajes({ currentUser }: Props) {
       setSentMessages((data ?? []) as DirectMessage[])
     }
     loadSent()
-  }, [currentUser?.id, messages]) // reload sent when messages change (after send)
+  }, [currentUser?.id])
 
   const [selectedId,   setSelectedId]   = useState<string | null>(null)
   const [body,         setBody]         = useState('')
@@ -671,19 +672,28 @@ function AlumnoMensajes({ currentUser }: Props) {
       setTimeout(() => setFeedback(null), 2500)
       return
     }
-    // Reload sent messages
-    const { data } = await supabase
-      .from('direct_messages')
-      .select('*')
-      .eq('from_id', currentUser.id!)
-      .eq('deleted_by_sender', false)
-      .order('created_at', { ascending: false })
-    setSentMessages((data ?? []) as DirectMessage[])
+    // Añadir al estado local sin recargar todo
+    const newMsg: DirectMessage = {
+      id:                 crypto.randomUUID(),
+      from_id:            currentUser.id!,
+      to_id:              selectedId,
+      academy_id:         currentUser.academy_id,
+      subject_id:         currentUser.subject_id ?? null,
+      body:               body.trim(),
+      read:               false,
+      created_at:         new Date().toISOString(),
+      from_role:          'alumno',
+      reply_body:         null,
+      reply_at:           null,
+      deleted_by_sender:  false,
+      deleted_by_receiver: false,
+    }
+    setSentMessages(prev => [newMsg, ...prev])
     setBody('')
     // Notify the recipient
     try {
       const senderName = currentUser.displayName ?? currentUser.username ?? 'Un alumno'
-      await supabase.from('notifications').insert({
+      await insertNotification({
         user_id: selectedId,
         type:    'mensaje_alumno',
         title:   `Mensaje de ${senderName}`,

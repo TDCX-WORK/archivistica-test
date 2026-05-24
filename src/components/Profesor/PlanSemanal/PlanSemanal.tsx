@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { CalendarDays, Calendar, Check, RefreshCw, Save, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
+import { insertNotifications } from '../../../lib/notifications'
 import type { CurrentUser } from '../../../types'
 import styles from './PlanSemanal.module.css'
 
@@ -170,7 +171,7 @@ export default function PlanSemanal({ currentUser }: PlanSemanalProps) {
           ? `${totalTemas} tema${totalTemas !== 1 ? 's' : ''} para estudiar${notes.trim() ? ` · "${notes.trim()}"` : ''}`
           : notes.trim() || null
 
-        await supabase.from('notifications').insert(
+        await insertNotifications(
           (alumnos as { id: string }[]).map(a => ({
             user_id: a.id, type: 'plan_semanal',
             title: `Tu profesor ha publicado el plan de ${modoTexto}`,

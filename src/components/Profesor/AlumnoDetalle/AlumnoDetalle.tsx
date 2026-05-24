@@ -6,7 +6,9 @@ import {
   MessageSquare, Send, Check, X, ChevronDown, ChevronUp,
   User, Clock, Flame
 } from 'lucide-react'
-import { supabase } from '../../../lib/supabase'
+import { useAlumnoDetalle } from '../../../hooks/useAlumnoDetalle'
+import type { AlumnoSesion, FalloConPregunta } from '../../../hooks/useAlumnoDetalle'
+import { insertNotification } from '../../../lib/notifications'
 import { scoreColor, scoreLabel, fmt } from '../../../lib/helpers'
 import type { AlumnoConStats } from '../../../types'
 import styles from './AlumnoDetalle.module.css'
@@ -42,12 +44,7 @@ function KpiCard({ icon: Icon, label, value, color }: { icon: React.ElementType;
   )
 }
 
-interface FalloConPregunta {
-  question_id: string
-  fail_count:  number
-  next_review: string | null
-  question:    { id: string; question: string; options: unknown; answer: number; explanation: string | null } | null
-}
+// FalloConPregunta importado de useAlumnoDetalle
 
 function FalloItem({ fallo, rank }: { fallo: FalloConPregunta; rank: number }) {
   const [open, setOpen] = useState(false)
@@ -118,9 +115,9 @@ function FalloItem({ fallo, rank }: { fallo: FalloConPregunta; rank: number }) {
   )
 }
 
-interface Sesion { score: number; played_at: string | null; created_at: string | null; total: number | null }
+// Sesion → AlumnoSesion importado de useAlumnoDetalle
 
-function BarChartComp({ sesiones }: { sesiones: Sesion[] }) {
+function BarChartComp({ sesiones }: { sesiones: AlumnoSesion[] }) {
   if (!sesiones.length) return <div className={styles.emptyChart}>Sin sesiones registradas todavía</div>
   const data = [...sesiones].reverse().slice(-12)
   return (
@@ -144,7 +141,7 @@ function BarChartComp({ sesiones }: { sesiones: Sesion[] }) {
 
 function generateInformePDF(
   alumno:      AlumnoConStats,
-  sesiones:    Sesion[],
+  sesiones:    AlumnoSesion[],
   temasLeidos: { topic_id: string }[],
   fallos:      FalloConPregunta[]
 ) {
@@ -207,46 +204,12 @@ interface AlumnoDetalleProps {
 }
 
 export default function AlumnoDetalle({ alumno, onBack, academyId }: AlumnoDetalleProps) {
-  const [sesiones,     setSesiones]     = useState<Sesion[]>([])
-  const [temasLeidos,  setTemas]        = useState<{ topic_id: string }[]>([])
-  const [fallos,       setFallos]       = useState<FalloConPregunta[]>([])
-  const [loading,      setLoading]      = useState(true)
+  const { sesiones, temasLeidos, fallos, loading } = useAlumnoDetalle(alumno?.id, academyId)
   const [exporting,    setExporting]    = useState(false)
   const [showMsgModal, setShowMsgModal] = useState(false)
   const [msgTexto,     setMsgTexto]     = useState('')
   const [msgSending,   setMsgSending]   = useState(false)
   const [msgSent,      setMsgSent]      = useState(false)
-
-  useEffect(() => {
-    if (!alumno?.id) return
-    const load = async () => {
-      setLoading(true)
-      const [{ data: sess }, { data: reads }, { data: wrongs }] = await Promise.all([
-        supabase.from('sessions').select('score, played_at, created_at, total')
-          .eq('user_id', alumno.id).order('created_at', { ascending: false }).limit(30),
-        supabase.from('study_read').select('topic_id')
-          .eq('user_id', alumno.id).eq('academy_id', academyId!),
-        supabase.from('wrong_answers').select('question_id, fail_count, next_review')
-          .eq('user_id', alumno.id).order('fail_count', { ascending: false }).limit(15),
-      ])
-      setSesiones((sess ?? []) as Sesion[])
-      setTemas((reads ?? []) as { topic_id: string }[])
-
-      if (wrongs?.length) {
-        const qIds = (wrongs as { question_id: string }[]).map(f => f.question_id).filter(Boolean)
-        const { data: pregs } = await supabase
-          .from('questions').select('id, question, options, answer, explanation').in('id', qIds)
-        const map: Record<string, FalloConPregunta['question']> = {}
-        for (const q of (pregs ?? []) as NonNullable<FalloConPregunta['question']>[]) map[q.id] = q
-        setFallos((wrongs as { question_id: string; fail_count: number; next_review: string | null }[])
-          .map(f => ({ ...f, question: map[f.question_id] ?? null })))
-      } else {
-        setFallos([])
-      }
-      setLoading(false)
-    }
-    load()
-  }, [alumno?.id, academyId])
 
   const handleExport = useCallback(() => {
     setExporting(true)
@@ -257,7 +220,7 @@ export default function AlumnoDetalle({ alumno, onBack, academyId }: AlumnoDetal
   const handleEnviarMensaje = useCallback(async () => {
     if (!msgTexto.trim()) return
     setMsgSending(true)
-    await supabase.from('notifications').insert({
+    await insertNotification({
       user_id: alumno.id, type: 'mensaje_profesor',
       title: 'Mensaje de tu profesor', body: msgTexto.trim(), link: '/mensajes',
     })

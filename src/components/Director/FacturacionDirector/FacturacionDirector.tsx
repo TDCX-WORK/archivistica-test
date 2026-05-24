@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { subscribe } from '../../../lib/eventBus'
 import {
@@ -153,7 +154,7 @@ export default function FacturacionDirector({ currentUser }: { currentUser: Curr
 
   const month = `${ano}-${String(mes+1).padStart(2,'0')}`
 
-  const { alumnos, loading: loadingCobros, saving, updateStatus, updateNotes, generarMes, exportarCSV } =
+  const { alumnos, loading: loadingCobros, saving, updateStatus, updateNotes, generarMes, exportarCSV, aplicarPrecioBase } =
     useCobros(academyId, month)
 
   const historico   = useHistoricoCobros(academyId)
@@ -179,16 +180,25 @@ export default function FacturacionDirector({ currentUser }: { currentUser: Curr
 
       {/* Tabs */}
       <div className={styles.tabs}>
-        <button
-          className={[styles.tab, activeTab==='cobros'?styles.tabActive:''].join(' ')}
-          onClick={() => setActiveTab('cobros')}>
-          <Euro size={15}/> Cobros academia
-        </button>
-        <button
-          className={[styles.tab, activeTab==='facturas'?styles.tabActive:''].join(' ')}
-          onClick={() => setActiveTab('facturas')}>
-          <FileText size={15}/> Facturas FrostFox
-        </button>
+        {([
+          { id: 'cobros',   label: 'Cobros academia',   icon: <Euro size={15} /> },
+          { id: 'facturas', label: 'Facturas FrostFox',  icon: <FileText size={15} /> },
+        ] as const).map(({ id, label, icon }) => (
+          <button
+            key={id}
+            className={[styles.tab, activeTab === id ? styles.tabActive : ''].join(' ')}
+            onClick={() => setActiveTab(id)}
+          >
+            {activeTab === id && (
+              <motion.span
+                className={styles.tabPill}
+                layoutId="facturacion-tab-pill"
+                transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.8 }}
+              />
+            )}
+            <span className={styles.tabContent}>{icon} {label}</span>
+          </button>
+        ))}
       </div>
 
       {/* Tab: Cobros */}
@@ -205,6 +215,7 @@ export default function FacturacionDirector({ currentUser }: { currentUser: Curr
           onNota={(id: string, nota: string) => updateNotes(id, nota)}
           onGenerar={generarMes}
           onExportar={exportarCSV}
+          onAplicarPrecioBase={aplicarPrecioBase}
           historico={historico}
         />
       )}

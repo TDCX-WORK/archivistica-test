@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import {
   Euro, TrendingUp, AlertTriangle, CheckCircle, Clock,
   Download, ChevronLeft, ChevronRight, FileText,
@@ -6,8 +7,6 @@ import {
   TrendingDown, Tag, Sparkles,
   Search, List, LayoutGrid
 } from 'lucide-react'
-import { supabase } from '../../../lib/supabase'
-import { emit } from '../../../lib/eventBus'
 import type { AlumnoCobro, AcademyPayment } from '../../../hooks/useCobros'
 import styles from './CobrosAcademia.module.css'
 
@@ -606,9 +605,9 @@ function ResumenAnual({ historico }: {
 // ── Finanzas en tiempo real ──────────────────────────────────────────────────
 // Tira compacta con los KPIs globales de la academia + aplicación de precio base.
 // Antes vivían en FinanzasPanel del Director; ahora viven aquí.
-function FinanzasRealtime({ alumnos, onAplicadoBase }: {
-  alumnos:        AlumnoCobro[]
-  onAplicadoBase: () => void
+function FinanzasRealtime({ alumnos, onAplicarPrecioBase }: {
+  alumnos:              AlumnoCobro[]
+  onAplicarPrecioBase:  (precio: number, alumnoIds: string[]) => Promise<{ error: string | null; count: number }>
 }) {
   const [precioBase,   setPrecioBase]   = useState('')
   const [aplicando,    setAplicando]    = useState(false)
@@ -635,23 +634,13 @@ function FinanzasRealtime({ alumnos, onAplicadoBase }: {
     if (!puedeAplicar || aplicando) return
     setAplicando(true); setFeedback(null)
     try {
-      const rows = sinPrecio.map(a => ({
-        id:             a.id,
-        monthly_price:  precioNum,
-        updated_at:     new Date().toISOString(),
-      }))
-      const { error } = await supabase
-        .from('student_profiles')
-        .upsert(rows, { onConflict: 'id' })
+      const ids = sinPrecio.map(a => a.id)
+      const { error, count } = await onAplicarPrecioBase(precioNum, ids)
       if (error) {
-        setFeedback(`Error: ${error.message}`)
+        setFeedback(`Error: ${error}`)
       } else {
-        setFeedback(`✓ Precio aplicado a ${sinPrecio.length} alumno${sinPrecio.length !== 1 ? 's' : ''}`)
+        setFeedback(`✓ Precio aplicado a ${count} alumno${count !== 1 ? 's' : ''}`)
         setPrecioBase('')
-        // Notificar al resto de paneles (Acciones, Finanzas, etc.)
-        emit('director-data-changed')
-        onAplicadoBase()
-        // Auto-limpiar feedback tras 3 segundos
         setTimeout(() => setFeedback(null), 3000)
       }
     } finally {
@@ -777,10 +766,11 @@ interface Props {
   onNota:     (id:string, n:string) => void
   onGenerar:  () => void
   onExportar: () => void
+  onAplicarPrecioBase: (precio: number, alumnoIds: string[]) => Promise<{ error: string | null; count: number }>
   historico:  {month:string;cobrado:number;pendiente:number;total:number;nPagados:number;nTotal:number}[]
 }
 
-export default function CobrosAcademia({ alumnos, loading, saving, mes, ano, onPrevMes, onNextMes, onStatus, onNota, onGenerar, onExportar, historico }: Props) {
+export default function CobrosAcademia({ alumnos, loading, saving, mes, ano, onPrevMes, onNextMes, onStatus, onNota, onGenerar, onExportar, onAplicarPrecioBase, historico }: Props) {
   const now = new Date()
   const isCurrentMes = mes===now.getMonth() && ano===now.getFullYear()
   const isFuture = ano>now.getFullYear() || (ano===now.getFullYear() && mes>now.getMonth())
@@ -840,7 +830,7 @@ export default function CobrosAcademia({ alumnos, loading, saving, mes, ano, onP
       </div>
 
       {/* Finanzas en tiempo real — tira global (antes en Director > Finanzas) */}
-      <FinanzasRealtime alumnos={alumnos} onAplicadoBase={() => { /* el bus ya recarga useCobros */ }} />
+      <FinanzasRealtime alumnos={alumnos} onAplicarPrecioBase={onAplicarPrecioBase} />
 
       {/* KPIs del mes — Pagados / Pendientes / Vencidos / Tasa */}
       <div className={styles.kpis}>
@@ -913,44 +903,55 @@ export default function CobrosAcademia({ alumnos, loading, saving, mes, ano, onP
             </div>
 
             <div className={styles.filtrosEstado}>
-              <button
-                className={[styles.filtroEstado, filtroEstado==='todos' ? styles.filtroEstadoActive : ''].join(' ')}
-                onClick={() => setFiltroEstado('todos')}>
-                Todos <span className={styles.filtroEstadoCount}>{alumnos.length}</span>
-              </button>
-              <button
-                className={[styles.filtroEstado, styles.filtroEstadoPaid, filtroEstado==='paid' ? styles.filtroEstadoPaidActive : ''].join(' ')}
-                onClick={() => setFiltroEstado('paid')}
-                disabled={pagados.length === 0}>
-                <CheckCircle size={11}/> Pagados <span className={styles.filtroEstadoCount}>{pagados.length}</span>
-              </button>
-              <button
-                className={[styles.filtroEstado, styles.filtroEstadoPending, filtroEstado==='pending' ? styles.filtroEstadoPendingActive : ''].join(' ')}
-                onClick={() => setFiltroEstado('pending')}
-                disabled={pendientes.length === 0}>
-                <Clock size={11}/> Pendientes <span className={styles.filtroEstadoCount}>{pendientes.length}</span>
-              </button>
-              <button
-                className={[styles.filtroEstado, styles.filtroEstadoOverdue, filtroEstado==='overdue' ? styles.filtroEstadoOverdueActive : ''].join(' ')}
-                onClick={() => setFiltroEstado('overdue')}
-                disabled={vencidos.length === 0}>
-                <AlertTriangle size={11}/> Vencidos <span className={styles.filtroEstadoCount}>{vencidos.length}</span>
-              </button>
+              {([
+                { id: 'todos',   label: 'Todos',      icon: null,                         count: alumnos.length,    pillColor: 'var(--ink)',     disabled: false },
+                { id: 'paid',    label: 'Pagados',    icon: <CheckCircle size={11}/>,     count: pagados.length,    pillColor: '#059669',        disabled: pagados.length === 0 },
+                { id: 'pending', label: 'Pendientes', icon: <Clock size={11}/>,           count: pendientes.length, pillColor: '#D97706',        disabled: pendientes.length === 0 },
+                { id: 'overdue', label: 'Vencidos',   icon: <AlertTriangle size={11}/>,   count: vencidos.length,   pillColor: '#DC2626',        disabled: vencidos.length === 0 },
+              ] as const).map(({ id, label, icon, count, pillColor, disabled }) => (
+                <button
+                  key={id}
+                  className={[styles.segBtn, filtroEstado === id ? styles.segBtnActive : ''].join(' ')}
+                  onClick={() => setFiltroEstado(id)}
+                  disabled={disabled}
+                >
+                  {filtroEstado === id && (
+                    <motion.span
+                      className={styles.segPill}
+                      layoutId="cobros-filter-pill"
+                      style={{ background: pillColor }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.8 }}
+                    />
+                  )}
+                  <span className={styles.segBtnContent}>
+                    {icon}{label}
+                    <span className={styles.segCount}>{count}</span>
+                  </span>
+                </button>
+              ))}
             </div>
 
             <div className={styles.vistaToggle}>
-              <button
-                className={[styles.vistaBtn, vista==='grid' ? styles.vistaBtnActive : ''].join(' ')}
-                onClick={() => setVista('grid')}
-                aria-label="Vista en tarjetas">
-                <LayoutGrid size={13}/> Tarjetas
-              </button>
-              <button
-                className={[styles.vistaBtn, vista==='lista' ? styles.vistaBtnActive : ''].join(' ')}
-                onClick={() => setVista('lista')}
-                aria-label="Vista en lista">
-                <List size={13}/> Lista
-              </button>
+              {([
+                { id: 'grid',  label: 'Tarjetas', icon: <LayoutGrid size={13}/> },
+                { id: 'lista', label: 'Lista',    icon: <List size={13}/> },
+              ] as const).map(({ id, label, icon }) => (
+                <button
+                  key={id}
+                  className={[styles.segBtn, styles.segBtnSm, vista === id ? styles.segBtnActive : ''].join(' ')}
+                  onClick={() => setVista(id)}
+                >
+                  {vista === id && (
+                    <motion.span
+                      className={styles.segPill}
+                      layoutId="cobros-vista-pill"
+                      style={{ background: 'var(--ink)' }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 38, mass: 0.8 }}
+                    />
+                  )}
+                  <span className={styles.segBtnContent}>{icon}{label}</span>
+                </button>
+              ))}
             </div>
           </div>
 

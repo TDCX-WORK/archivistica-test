@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, FileText, Video, FileCheck, Loader2, Download,
@@ -6,7 +6,6 @@ import {
   FolderOpen, Users, User, CheckCircle2, AlertCircle, Filter, Inbox,
   Search, UserCircle, ArrowRight
 } from 'lucide-react'
-import { supabase } from '../../lib/supabase'
 import GlassFolder, { type FolderColor } from './GlassFolder'
 import { useDocuments, type AcademyDocument } from '../../hooks/useDocuments'
 import type { CurrentUser } from '../../types'
@@ -121,10 +120,11 @@ function StorageDonut({ usedBytes, limitBytes, color, icon }: {
 }
 
 // ── FileItem ─────────────────────────────────────────────────────────────
-function FileItem({ doc, canDelete, onDelete }: {
+function FileItem({ doc, canDelete, onDelete, onDownload }: {
   doc: AcademyDocument
   canDelete: boolean
   onDelete?: () => void
+  onDownload: (docId: string) => Promise<Blob | null>
 }) {
   const [downloading, setDownloading] = useState(false)
   const isVideo = doc.category === 'video'
@@ -136,21 +136,8 @@ function FileItem({ doc, canDelete, onDelete }: {
     }
     setDownloading(true)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/descargar-documento`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token}`,
-            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-          },
-          body: JSON.stringify({ document_id: doc.id }),
-        }
-      )
-      if (!res.ok) throw new Error('Error al descargar')
-      const blob = await res.blob()
+      const blob = await onDownload(doc.id)
+      if (!blob) throw new Error('Error al descargar')
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -196,11 +183,13 @@ function FileItem({ doc, canDelete, onDelete }: {
 }
 
 // ── Upload section (for staff and alumnos) ───────────────────────────────
-function UploadSection({ currentUser, onUploaded, storageLimitBytes, currentUsageBytes }: {
+function UploadSection({ currentUser, onUploaded, storageLimitBytes, currentUsageBytes, uploadFiles, addVideoUrl }: {
   currentUser: CurrentUser
   onUploaded: () => void
   storageLimitBytes: number
   currentUsageBytes: number
+  uploadFiles: (archivos: File[], cat: 'contrato' | 'material' | 'video', onProgress?: (msg: string) => void) => Promise<{ uploaded: number; errors: number }>
+  addVideoUrl: (url: string) => Promise<{ error: string | null }>
 }) {
   const [categoria, setCategoria] = useState<'contrato' | 'material' | 'video'>('material')
   const [archivos, setArchivos] = useState<File[]>([])
@@ -241,65 +230,25 @@ function UploadSection({ currentUser, onUploaded, storageLimitBytes, currentUsag
     setCargando(true)
 
     if (categoria === 'video') {
-      const { error: dbErr } = await supabase
-        .from('academy_documents')
-        .insert({
-          academy_id: currentUser.academy_id,
-          uploaded_by: currentUser.id,
-          alumno_id: isStaff ? null : currentUser.id,
-          category: 'video',
-          title: urlVideo.trim(),
-          url: urlVideo.trim(),
-          file_size: null,
-        })
+      const result = await addVideoUrl(urlVideo)
       setCargando(false)
-      if (dbErr) return mostrarFeedback('Error al guardar el video', false)
+      if (result.error) return mostrarFeedback(result.error, false)
       setUrlVideo('')
       mostrarFeedback('Video anadido', true)
       onUploaded()
       return
     }
 
-    let errores = 0
-    for (let i = 0; i < archivos.length; i++) {
-      const archivo = archivos[i]!
-      setProgreso(`Subiendo ${i + 1} de ${archivos.length}...`)
-
-      const ext = archivo.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const path = `${currentUser.academy_id}/${fileName}`
-
-      const { error: uploadErr } = await supabase.storage
-        .from('academy-documents')
-        .upload(path, archivo)
-
-      if (uploadErr) { errores++; continue }
-
-      const titulo = archivo.name.replace(/\.[^/.]+$/, '')
-
-      const { error: dbErr } = await supabase
-        .from('academy_documents')
-        .insert({
-          academy_id: currentUser.academy_id,
-          uploaded_by: currentUser.id,
-          alumno_id: isStaff ? null : currentUser.id,
-          category: categoria,
-          title: titulo,
-          url: path,
-          file_size: archivo.size,
-        })
-
-      if (dbErr) errores++
-    }
+    const result = await uploadFiles(archivos, categoria, setProgreso)
 
     setCargando(false)
     setProgreso(null)
     setArchivos([])
 
-    if (errores === 0) {
+    if (result.errors === 0) {
       mostrarFeedback(archivos.length === 1 ? 'Archivo subido' : `${archivos.length} archivos subidos`, true)
     } else {
-      mostrarFeedback(`${archivos.length - errores} subidos, ${errores} con error`, false)
+      mostrarFeedback(`${result.uploaded} subidos, ${result.errors} con error`, false)
     }
     onUploaded()
   }
@@ -376,9 +325,8 @@ function UploadSection({ currentUser, onUploaded, storageLimitBytes, currentUsag
 // ── Main page ────────────────────────────────────────────────────────────
 export default function DocumentosPage({ currentUser }: Props) {
   const navigate = useNavigate()
-  const { documents, byCategory, loading, error, storageStats, uploaders, reload } = useDocuments(currentUser)
+  const { documents, byCategory, loading, error, storageStats, storageLimitGb, uploaders, reload, uploadFiles, addVideoUrl, deleteDocument, downloadDocument } = useDocuments(currentUser)
   const [openFolder, setOpenFolder] = useState<FolderId | null>(null)
-  const [storageLimitGb, setStorageLimitGb] = useState<number>(STORAGE_LIMIT_DEFAULT)
   const [alumnoSearch, setAlumnoSearch] = useState('')
   const [selectedAlumno, setSelectedAlumno] = useState<string | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -434,19 +382,6 @@ export default function DocumentosPage({ currentUser }: Props) {
     return byCategory(id as 'contrato' | 'material' | 'video').length
   } // convertir GB a bytes
 
-  // Cargar el límite de almacenamiento de la academia
-  useEffect(() => {
-    if (!currentUser?.academy_id) return
-    supabase
-      .from('academies')
-      .select('storage_limit_gb')
-      .eq('id', currentUser.academy_id)
-      .single()
-      .then(({ data }) => {
-        if (data?.storage_limit_gb) setStorageLimitGb(data.storage_limit_gb)
-      })
-  }, [currentUser?.academy_id])
-
   const handleFolder = (id: FolderId) => {
     const isOpening = openFolder !== id
     setOpenFolder(prev => prev === id ? null : id)
@@ -460,8 +395,7 @@ export default function DocumentosPage({ currentUser }: Props) {
   const handleDelete = async (doc: AcademyDocument) => {
     const canDelete = currentUser?.role === 'director' || currentUser?.role === 'superadmin' || doc.uploaded_by === currentUser?.id
     if (!canDelete) return
-    const { error: err } = await supabase.from('academy_documents').delete().eq('id', doc.id)
-    if (!err) reload()
+    await deleteDocument(doc)
   }
 
   const canDeleteDoc = (doc: AcademyDocument) =>
@@ -592,6 +526,8 @@ export default function DocumentosPage({ currentUser }: Props) {
           onUploaded={reload}
           storageLimitBytes={STORAGE_LIMIT}
           currentUsageBytes={storageStats.totalBytes}
+          uploadFiles={uploadFiles}
+          addVideoUrl={addVideoUrl}
         />
       )}
 
@@ -640,6 +576,7 @@ export default function DocumentosPage({ currentUser }: Props) {
                   doc={doc}
                   canDelete={canDeleteDoc(doc)}
                   onDelete={() => handleDelete(doc)}
+                  onDownload={downloadDocument}
                 />
               ))}
             </div>
@@ -675,6 +612,7 @@ export default function DocumentosPage({ currentUser }: Props) {
                   doc={doc}
                   canDelete={canDeleteDoc(doc)}
                   onDelete={() => handleDelete(doc)}
+                  onDownload={downloadDocument}
                 />
               ))}
             </div>
@@ -749,6 +687,7 @@ export default function DocumentosPage({ currentUser }: Props) {
                     doc={doc}
                     canDelete={canDeleteDoc(doc)}
                     onDelete={() => handleDelete(doc)}
+                    onDownload={downloadDocument}
                   />
                 ))}
               </div>

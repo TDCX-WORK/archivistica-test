@@ -4,36 +4,52 @@
 
 /* ── Tabs ────────────────────────────────────────────────────────── */
 .tabs {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
+  display: inline-flex;
+  padding: 0.25rem;
+  gap: 0.1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-xs);
   margin-bottom: 1rem;
 }
 
 .tab {
-  display: flex;
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.85rem;
-  border: 1.5px solid var(--line);
-  border-radius: var(--r-full);
-  background: var(--surface);
-  font-size: var(--fs-6);
+  padding: 0.42rem 0.85rem;
+  border-radius: calc(var(--r-lg) - 4px);
+  border: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: var(--fs-5);
   font-weight: 600;
   color: var(--ink-muted);
-  font-family: var(--font-body);
   cursor: pointer;
-  transition: all 0.15s var(--ease);
   white-space: nowrap;
+  transition: color 0.18s var(--ease);
+  isolation: isolate;
 }
-.tab:hover {
-  border-color: #2563EB;
-  color: #2563EB;
+.tab:hover { color: var(--ink) }
+.tabActive  { color: var(--surface) }
+[data-theme="oscuro"] .tabActive { color: var(--bg) }
+.tabActive:hover { color: var(--surface) }
+
+.tabPill {
+  position: absolute;
+  inset: 0;
+  border-radius: calc(var(--r-lg) - 4px);
+  background: var(--ink);
+  box-shadow: var(--shadow-sm);
+  z-index: -1;
 }
-.tabActive {
-  border-color: #2563EB;
-  background: #EFF6FF;
-  color: #2563EB;
+.tabContent {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 /* ── Barra superior ──────────────────────────────────────────────── */

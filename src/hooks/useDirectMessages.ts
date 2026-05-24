@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
+import { insertNotification } from '../lib/notifications'
 
 export interface DirectMessage {
   id:                  string
@@ -46,7 +47,8 @@ export function useAlumnoMessages(userId: string | null | undefined) {
     }
 
     setMessages(msgs)
-    setUnread(msgs.filter(m => !m.read).length)
+    // Mensajes respondidos (reply_body) usan `read` para el director, no para el alumno
+    setUnread(msgs.filter(m => !m.read && !m.reply_body).length)
     setLoading(false)
   }, [userId])
 
@@ -57,12 +59,14 @@ export function useAlumnoMessages(userId: string | null | undefined) {
 
   useEffect(() => {
     if (!userId) return
+    let cancelled = false
     const channel = supabase
       .channel(`dm_alumno_${userId}`)
       .on('postgres_changes', {
         event: 'INSERT', schema: 'public', table: 'direct_messages',
         filter: `to_id=eq.${userId}`,
       }, async (payload) => {
+        if (cancelled) return
         const nuevo = payload.new as DirectMessage
 
         // Intentar resolver from_role desde cache
@@ -76,41 +80,51 @@ export function useAlumnoMessages(userId: string | null | undefined) {
           nuevo.from_role = role
         }
 
-        setMessages(prev => [nuevo, ...prev])
-        setUnread(prev => prev + 1)
+        if (!cancelled) {
+          setMessages(prev => [nuevo, ...prev])
+          setUnread(prev => prev + 1)
+        }
       })
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    return () => { cancelled = true; channel.unsubscribe() }
   }, [userId])
 
   const markRead = useCallback(async (id: string) => {
+    // No tocar `read` en mensajes respondidos: read=false señala al director que hay reply pendiente
+    const msg = messages.find(m => m.id === id)
+    if (msg?.reply_body) return
     await supabase.from('direct_messages').update({ read: true }).eq('id', id)
     setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m))
     setUnread(prev => Math.max(0, prev - 1))
-  }, [])
+  }, [messages])
 
   const markAllRead = useCallback(async () => {
     if (!userId) return
-    await supabase.from('direct_messages').update({ read: true }).eq('to_id', userId).eq('read', false)
-    setMessages(prev => prev.map(m => ({ ...m, read: true })))
+    // No marcar como leídos los mensajes con reply: read=false es la señal para el director
+    await supabase.from('direct_messages').update({ read: true }).eq('to_id', userId).eq('read', false).is('reply_body', null)
+    setMessages(prev => prev.map(m => m.reply_body ? m : { ...m, read: true }))
     setUnread(0)
   }, [userId])
 
   const replyToMessage = useCallback(async (id: string, replyBody: string): Promise<boolean> => {
     const msg = messages.find(m => m.id === id)
     if (!msg) return false
+    // read=false señala al director que hay una reply pendiente de ver
+    // (useAcciones filtra por read=false AND reply_body IS NOT NULL)
+    const wasUnread = !msg.read && !msg.reply_body
     const { error } = await supabase
       .from('direct_messages')
-      .update({ reply_body: replyBody.trim(), reply_at: new Date().toISOString(), read: true })
+      .update({ reply_body: replyBody.trim(), reply_at: new Date().toISOString(), read: false })
       .eq('id', id)
     if (error) return false
     setMessages(prev => prev.map(m =>
-      m.id === id ? { ...m, reply_body: replyBody.trim(), reply_at: new Date().toISOString(), read: true } : m
+      m.id === id ? { ...m, reply_body: replyBody.trim(), reply_at: new Date().toISOString(), read: false } : m
     ))
-    setUnread(prev => Math.max(0, prev - 1))
+    // Solo decrementar si el mensaje estaba en el conteo de no leídos del alumno
+    if (wasUnread) setUnread(prev => Math.max(0, prev - 1))
     try {
       const { data: me } = await supabase.from('profiles').select('username').eq('id', userId).maybeSingle()
-      await supabase.from('notifications').insert({
+      await insertNotification({
         user_id: msg.from_id,
         type:    'respuesta_mensaje',
         title:   `${(me as {username:string}|null)?.username ?? 'Un alumno'} ha respondido a tu mensaje`,
@@ -195,12 +209,14 @@ export function useProfesorMessages(
   // Realtime: listen for UPDATEs on my sent messages (replies) AND INSERTs where to_id = me
   useEffect(() => {
     if (!userId) return
+    let cancelled = false
     const channel = supabase
       .channel(`dm_profe_${userId}`)
       .on('postgres_changes', {
         event: 'UPDATE', schema: 'public', table: 'direct_messages',
         filter: `from_id=eq.${userId}`,
       }, (payload) => {
+        if (cancelled) return
         const updated = payload.new as DirectMessage
         setSent(prev => prev.map(m => m.id === updated.id ? updated : m))
       })
@@ -208,6 +224,7 @@ export function useProfesorMessages(
         event: 'INSERT', schema: 'public', table: 'direct_messages',
         filter: `to_id=eq.${userId}`,
       }, (payload) => {
+        if (cancelled) return
         const nuevo = payload.new as DirectMessage
         setReceived(prev => {
           if (prev.some(m => m.id === nuevo.id)) return prev
@@ -215,7 +232,7 @@ export function useProfesorMessages(
         })
       })
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    return () => { cancelled = true; channel.unsubscribe() }
   }, [userId])
 
   const sendMessage = useCallback(async (toId: string, body: string): Promise<boolean> => {

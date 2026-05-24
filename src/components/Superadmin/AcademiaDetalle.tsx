@@ -9,6 +9,8 @@ import {
   Edit3, Check, X, Shield, Phone, MapPin, Target, Euro, User,
   Key, Copy, CheckCircle2
 } from 'lucide-react'
+import { useAcademiaDetalle } from '../../hooks/useAcademiaDetalle'
+import type { AcademiaProfile, AcademiaSesion } from '../../hooks/useAcademiaDetalle'
 import styles from './AcademiaDetalle.module.css'
 import { scoreColor, fmt } from '../../lib/helpers'
 import type { InviteCode } from '../../types'
@@ -98,20 +100,11 @@ async function callGestionarUsuario(action: string, userId: string, params: Reco
 }
 
 // ── UsuarioRow ─────────────────────────────────────────────────────────────
-interface Profile {
-  id:           string
-  username:     string
-  role:         string
-  subject_id:   string | null
-  created_at:   string | null
-  access_until: string | null
-  banned?:      boolean
-}
-interface Sesion { id: string; user_id: string; subject_id: string | null; score: number; played_at: string }
+// Profile → AcademiaProfile y Sesion → AcademiaSesion importados de useAcademiaDetalle
 
 function UsuarioRow({ user, sesiones, emails, extended, expanded, onToggle, onReload }: {
-  user:      Profile
-  sesiones:  Sesion[]
+  user:      AcademiaProfile
+  sesiones:  AcademiaSesion[]
   emails:    Record<string, string>
   extended:  Record<string, any> | null
   expanded:  boolean
@@ -336,8 +329,8 @@ interface Subject { id: string; name: string; color: string }
 
 function SubjectSection({ subject, profiles, sesiones, emails, extendedProfiles, onReload }: {
   subject:          Subject
-  profiles:         Profile[]
-  sesiones:         Sesion[]
+  profiles:         AcademiaProfile[]
+  sesiones:         AcademiaSesion[]
   emails:           Record<string, string>
   extendedProfiles: Record<string, any>
   onReload:         () => void
@@ -396,47 +389,8 @@ function SubjectSection({ subject, profiles, sesiones, emails, extendedProfiles,
 
 // ── Main export ────────────────────────────────────────────────────────────
 export default function AcademiaDetalle({ academia, onBack }: { academia: any; onBack: () => void }) {
-  const [profiles,         setProfiles]         = useState<Profile[]>([])
-  const [sesiones,         setSesiones]         = useState<Sesion[]>([])
-  const [emails,           setEmails]           = useState<Record<string, string>>({})
-  const [extendedProfiles, setExtendedProfiles] = useState<Record<string, any>>({})
-  const [codes,            setCodes]            = useState<InviteCode[]>([])
-  const [loading,          setLoading]          = useState(true)
-  const [expandedDir,      setExpandedDir]      = useState<string | null>(null)
-
-  const load = async () => {
-    if (!academia?.id) return
-    setLoading(true)
-    const [{ data: profs }, { data: sess }, { data: emailData }, { data: codesData }] = await Promise.all([
-      supabase.from('profiles').select('id, username, role, subject_id, created_at, access_until').eq('academy_id', academia.id),
-      supabase.from('sessions').select('id, user_id, subject_id, score, played_at').eq('academy_id', academia.id).order('played_at', { ascending: false }),
-      supabase.rpc('get_academy_user_emails', { p_academy_id: academia.id }),
-      supabase.from('invite_codes').select('*').eq('academy_id', academia.id).order('created_at', { ascending: false }),
-    ])
-    setProfiles((profs ?? []) as Profile[])
-    setSesiones((sess  ?? []) as Sesion[])
-    setCodes((codesData ?? []) as InviteCode[])
-    const emailMap: Record<string, string> = {}
-    for (const row of (emailData ?? []) as any[]) emailMap[row.user_id] = row.email
-    setEmails(emailMap)
-
-    const profsArr = (profs ?? []) as Profile[]
-    if (profsArr.length) {
-      const alumnoIds = profsArr.filter(p => p.role === 'alumno').map(p => p.id)
-      const staffIds  = profsArr.filter(p => ['profesor','director'].includes(p.role)).map(p => p.id)
-      const [{ data: sps }, { data: sfps }] = await Promise.all([
-        alumnoIds.length ? supabase.from('student_profiles').select('*').in('id', alumnoIds) : Promise.resolve({ data: [] }),
-        staffIds.length  ? supabase.from('staff_profiles').select('*').in('id', staffIds)    : Promise.resolve({ data: [] }),
-      ])
-      const extMap: Record<string, any> = {}
-      for (const sp of (sps  ?? []) as any[]) extMap[sp.id] = sp
-      for (const sf of (sfps ?? []) as any[]) extMap[sf.id] = sf
-      setExtendedProfiles(extMap)
-    }
-    setLoading(false)
-  }
-
-  useEffect(() => { load() }, [academia?.id])
+  const { profiles, sesiones, emails, extendedProfiles, codes, loading, reload } = useAcademiaDetalle(academia?.id)
+  const [expandedDir, setExpandedDir] = useState<string | null>(null)
 
   const directores   = profiles.filter(p => p.role === 'director')
   const totalAlumnos = profiles.filter(p => p.role === 'alumno').length
@@ -544,7 +498,7 @@ export default function AcademiaDetalle({ academia, onBack }: { academia: any; o
               <motion.div className={styles.section2} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
                 <div className={styles.sectionHeader2}><Building2 size={14} /><h2 className={styles.sectionTitle2}>Dirección</h2></div>
                 <div className={styles.userList2}>
-                  {directores.map(d => <UsuarioRow key={d.id} user={d} sesiones={sesiones} emails={emails} extended={extendedProfiles[d.id] ?? null} expanded={expandedDir === d.id} onReload={load} onToggle={() => setExpandedDir(v => v === d.id ? null : d.id)} />)}
+                  {directores.map(d => <UsuarioRow key={d.id} user={d} sesiones={sesiones} emails={emails} extended={extendedProfiles[d.id] ?? null} expanded={expandedDir === d.id} onReload={reload} onToggle={() => setExpandedDir(v => v === d.id ? null : d.id)} />)}
                 </div>
               </motion.div>
             )}
@@ -556,7 +510,7 @@ export default function AcademiaDetalle({ academia, onBack }: { academia: any; o
               ) : (
                 <div className={styles.subjectList2}>
                   {academia.subjects.map((sub: Subject) => (
-                    <SubjectSection key={sub.id} subject={sub} profiles={profiles} sesiones={sesiones} emails={emails} extendedProfiles={extendedProfiles} onReload={load} />
+                    <SubjectSection key={sub.id} subject={sub} profiles={profiles} sesiones={sesiones} emails={emails} extendedProfiles={extendedProfiles} onReload={reload} />
                   ))}
                 </div>
               )}

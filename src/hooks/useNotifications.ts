@@ -30,6 +30,8 @@ export function useNotifications(userId: string | null | undefined) {
   useEffect(() => {
     if (!userId) return
 
+    let cancelled = false
+
     const channel = supabase
       .channel(`notifications_${userId}`)
       .on('postgres_changes', {
@@ -38,13 +40,17 @@ export function useNotifications(userId: string | null | undefined) {
         table:  'notifications',
         filter: `user_id=eq.${userId}`,
       }, (payload) => {
+        if (cancelled) return
         const nueva = payload.new as Notification
         setNotifications(prev => [nueva, ...prev])
         setUnreadCount(prev => prev + 1)
       })
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
+    return () => {
+      cancelled = true
+      channel.unsubscribe()
+    }
   }, [userId])
 
   const markRead = useCallback(async (id: string) => {

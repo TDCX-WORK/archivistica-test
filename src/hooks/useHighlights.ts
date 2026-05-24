@@ -20,12 +20,13 @@ export function useHighlights(
         .eq('user_id', userId)
         .order('created_at', { ascending: true })
       if (academyId) q = q.eq('academy_id', academyId)
+      if (subjectId) q = q.eq('subject_id', subjectId)
       const { data } = await q
       setHighlights((data ?? []) as StudyHighlight[])
       setLoading(false)
     }
     load()
-  }, [userId, academyId])
+  }, [userId, academyId, subjectId])
 
   const addHighlight = useCallback(async ({
     topicId,
